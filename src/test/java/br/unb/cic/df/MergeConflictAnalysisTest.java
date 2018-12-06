@@ -4,6 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import br.unb.cic.df.analysis.model.Pair;
+import br.unb.cic.df.analysis.model.Statement;
+import br.unb.cic.df.analysis.reachability.ReachabilityAnalysis;
+import org.jgrapht.GraphPath;
+import org.jgrapht.graph.DefaultEdge;
+import org.junit.Assert;
 import org.junit.Test;
 
 import soot.PackManager;
@@ -43,8 +49,40 @@ public class MergeConflictAnalysisTest {
 //		
 //		soot.Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-process-dir", "/Users/rbonifacio/Documents/workspace-java/SootAnalysisTestCase/target/classes/"});
 //	}
-	
+
 	@Test
+	public void testReachability() {
+		ReachabilityAnalysis analysis =  new ReachabilityAnalysis() {
+			@Override
+			protected List<Pair<String, List<Integer>>> sourceDefinitions() {
+				List<Pair<String, List<Integer>>> res = new ArrayList<>();
+				List<Integer> lines = new ArrayList<>();
+				lines.add(8);
+				res.add(new Pair("br.unb.cic.InterproceduralTestCase", lines));
+				return res;
+			}
+			@Override
+			protected List<Pair<String, List<Integer>>> sinkDefinitions() {
+				List<Pair<String, List<Integer>>> res = new ArrayList<>();
+				List<Integer> lines = new ArrayList<>();
+				lines.add(20);
+				res.add(new Pair("br.unb.cic.InterproceduralTestCase", lines));
+				return res;
+			}
+		};
+
+		PackManager.v().getPack("wjtp").add(new Transform("wjtp.reachability", analysis));
+		soot.Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-process-dir", "/Users/rbonifacio/Documents/workspace-java/SootAnalysisTestCase/target/classes/"});
+
+		Assert.assertNotNull(analysis.getPaths());
+		Assert.assertEquals(1, analysis.getPaths().size());
+
+		for(GraphPath<Statement, DefaultEdge> path: analysis.getPaths()) {
+			System.out.println(path);
+		}
+	}
+	
+	//@Test
 	public void testInterProcedural() {
 		PackManager.v().getPack("wjtp").add(
 			    new Transform("wjtp.myTransform", new SceneTransformer() {					
@@ -70,7 +108,7 @@ public class MergeConflictAnalysisTest {
 							}
 						}
 					}
-					
+
 			    }));
 		soot.Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-process-dir", "/Users/rbonifacio/Documents/workspace-java/SootAnalysisTestCase/target/classes/"});
 	}

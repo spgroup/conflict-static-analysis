@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import br.unb.cic.df.analysis.model.Pair;
 import br.unb.cic.df.analysis.model.Statement;
@@ -36,8 +35,8 @@ public abstract class ReachabilityAnalysis extends SceneTransformer {
 	protected List<Statement> sourceStatements;
 	protected List<Statement> sinkStatements;
 	private int maxDepth;
-	private Graph<Unit, DefaultEdge> flowGraph;
-	List<GraphPath<Unit, DefaultEdge>> paths;
+	private Graph<Statement, DefaultEdge> flowGraph;
+	List<GraphPath<Statement, DefaultEdge>> paths;
 
 	/**
 	 * Default constuctor using the max indirection
@@ -56,6 +55,7 @@ public abstract class ReachabilityAnalysis extends SceneTransformer {
 		sourceStatements = new ArrayList<>();
 		sinkStatements = new ArrayList<>();
 		flowGraph = new DefaultDirectedGraph<>(DefaultEdge.class);
+		paths = new ArrayList<>();
 	}
 
 	/**
@@ -71,13 +71,13 @@ public abstract class ReachabilityAnalysis extends SceneTransformer {
 		loadSinkStatements();
 		buildInterproceduralFlowGraph();
 
-		DijkstraShortestPath<Unit, DefaultEdge> dijkstra = new DijkstraShortestPath<>(flowGraph);
+		DijkstraShortestPath<Statement, DefaultEdge> dijkstra = new DijkstraShortestPath<>(flowGraph);
 
-		for(Unit source : sourceStatements.stream().map(s -> s.getUnit()).collect(Collectors.toList())) {
-			for(Unit sink : sinkStatements.stream().map(s -> s.getUnit()).collect(Collectors.toList())) {
-				ShortestPathAlgorithm.SingleSourcePaths<Unit, DefaultEdge> unitPath = dijkstra.getPaths(source);
+		for(Statement source : sourceStatements) {
+			for(Statement sink : sinkStatements) {
+				ShortestPathAlgorithm.SingleSourcePaths<Statement, DefaultEdge> unitPath = dijkstra.getPaths(source);
 
-				GraphPath<Unit, DefaultEdge> path = unitPath.getPath(sink);
+				GraphPath<Statement, DefaultEdge> path = unitPath.getPath(sink);
 				if(path != null) {
 					this.paths.add(path);
 				}
@@ -89,7 +89,7 @@ public abstract class ReachabilityAnalysis extends SceneTransformer {
 	 * Returns the list of paths from sources to sinks.
 	 * @return paths from source statements to sink statements.
 	 */
-	public List<GraphPath<Unit, DefaultEdge>> getPaths() {
+	public List<GraphPath<Statement, DefaultEdge>> getPaths() {
 		return paths;
 	}
 
@@ -102,9 +102,7 @@ public abstract class ReachabilityAnalysis extends SceneTransformer {
 		for(Statement s: sourceStatements) {
 			cfg.initializeUnitToOwner(s.getSootMethod());
 
-			flowGraph.addVertex(s.getUnit());
-
-			buildInterproceduralFlowGraph(cfg, s.getUnit(), 0);
+			buildInterproceduralFlowGraph(cfg, s, 0);
 		}
 	}
 
@@ -119,32 +117,36 @@ public abstract class ReachabilityAnalysis extends SceneTransformer {
 	 * @param currentLevel the current indirection level (related to invoke statements). we
 	 * don't want to go deeper than maxDepth.
 	 */
-	private void buildInterproceduralFlowGraph(final JimpleBasedInterproceduralCFG cfg, Unit u, int currentLevel) {
-		if(currentLevel > maxDepth || flowGraph.vertexSet().contains(u)) {
+	private void buildInterproceduralFlowGraph(final JimpleBasedInterproceduralCFG cfg, Statement s, int currentLevel) {
+		if(currentLevel > maxDepth) {// || flowGraph.vertexSet().contains(s)) {
 			return;
 		}
-
-		if(u instanceof InvokeStmt) {
-			Collection<SootMethod> methods = cfg.getCalleesOfCallAt(u);
-
-			methods.forEach(targetMethod -> {
-				cfg.initializeUnitToOwner(targetMethod);
-				Unit firstStatementOfTargetMethod = targetMethod.getActiveBody().getUnits().getFirst();
-				flowGraph.addVertex(firstStatementOfTargetMethod);
-				flowGraph.addEdge(u, firstStatementOfTargetMethod);
+		flowGraph.addVertex(s);
+		if(s.getUnit() instanceof InvokeStmt) {
+			InvokeStmt invokeStmt = (InvokeStmt)s.getUnit();
+			SootMethod targetMethod = invokeStmt.getInvokeExpr().getMethod();
+			cfg.initializeUnitToOwner(targetMethod);
+			if(targetMethod.hasActiveBody()) {
+				Unit firstUnitOfTargetMethod = targetMethod.getActiveBody().getUnits().getFirst();
+				Statement firstStatementOfTargetMethod = createNextStatement(targetMethod.getDeclaringClass(), targetMethod, firstUnitOfTargetMethod);
 				buildInterproceduralFlowGraph(cfg, firstStatementOfTargetMethod, currentLevel + 1);
-			});
+				flowGraph.addEdge(s, firstStatementOfTargetMethod);
+			}
 		}
 
-		List<Unit> nextUnities = cfg.getSuccsOf(u);
+		List<Unit> nextUnities = cfg.getSuccsOf(s.getUnit());
 
-		nextUnities.forEach(next -> {
-			flowGraph.addVertex(next);
-			flowGraph.addEdge(u, next);
-			buildInterproceduralFlowGraph(cfg, next, currentLevel);
-		});
+		for(Unit next : nextUnities) {
+			Statement nextStatement = createNextStatement(s.getSootClass(), s.getSootMethod(), next);
+			buildInterproceduralFlowGraph(cfg, nextStatement, currentLevel);
+			flowGraph.addEdge(s, nextStatement);
+		};
 	}
 
+	private Statement createNextStatement(SootClass c, SootMethod m, Unit u) {
+		Statement s = Statement.builder().setClass(c).setMethod(m).setUnit(u).build();
+		return getExistingSinkNode(s);
+	}
 	/**
 	 * This method should return a list of pairs, where the
 	 * first element is the full qualified name of
@@ -164,16 +166,14 @@ public abstract class ReachabilityAnalysis extends SceneTransformer {
 	protected abstract List<Pair<String, List<Integer>>> sinkDefinitions();
 
 	/*
-	 * load the source statements using a template method
-	 * approach.
+	 * load the source statements using a template method.
 	 */
 	private void loadSourceStatements() {
 		loadStatements(sourceDefinitions(), sourceStatements, Type.SOURCE);
 	}
 
 	/*
-	 * load the sink statements using a template method
-	 * statements.
+	 * load the sink statements using a template method.
 	 */
 	private void loadSinkStatements() {
 		loadStatements(sinkDefinitions(), sinkStatements, Type.SINK);
@@ -193,11 +193,20 @@ public abstract class ReachabilityAnalysis extends SceneTransformer {
 			for(SootMethod m: c.getMethods()) {
 				for(Unit u: m.getActiveBody().getUnits()) {
 					if(pair.getSecond().contains(u.getJavaSourceStartLineNumber())) {
-						Statement stmt = new Statement(c, m, u, type);
+						Statement stmt = Statement.builder().setClass(c).setMethod(m).setUnit(u).setType(type).build();
 						statements.add(stmt);
 					}
 				}
 			}
 		}
+	}
+
+	private Statement getExistingSinkNode(Statement s) {
+		for(Statement sink: sinkStatements) {
+			if(sink.getUnit().equals(s.getUnit())) {
+				return sink;
+			}
+		}
+		return s;
 	}
 }
