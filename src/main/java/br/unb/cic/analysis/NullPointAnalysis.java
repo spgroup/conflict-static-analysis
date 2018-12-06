@@ -1,4 +1,4 @@
-package br.unb.cic.df.analysis;
+package br.unb.cic.analysis;
 
 import soot.Unit;
 import soot.ValueBox;

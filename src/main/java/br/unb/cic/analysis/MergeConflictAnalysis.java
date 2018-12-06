@@ -1,4 +1,4 @@
-package br.unb.cic.df.analysis;
+package br.unb.cic.analysis;
 
 import java.util.ArrayList;
 import java.util.List;

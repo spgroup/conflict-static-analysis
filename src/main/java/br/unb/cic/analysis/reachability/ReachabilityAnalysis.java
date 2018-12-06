@@ -1,13 +1,12 @@
-package br.unb.cic.df.analysis.reachability;
+package br.unb.cic.analysis.reachability;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import br.unb.cic.df.analysis.model.Pair;
-import br.unb.cic.df.analysis.model.Statement;
-import br.unb.cic.df.analysis.model.Statement.Type;
+import br.unb.cic.analysis.model.Pair;
+import br.unb.cic.analysis.model.Statement;
+import br.unb.cic.analysis.model.Statement.Type;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;

@@ -1,9 +1,7 @@
-package br.unb.cic.df;
+package br.unb.cic.analysis;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
-
-import br.unb.cic.df.analysis.ImmutableFlowSet;
 
 public class ImmutableListTest {
 

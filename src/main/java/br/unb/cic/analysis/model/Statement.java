@@ -1,4 +1,4 @@
-package br.unb.cic.df.analysis.model;
+package br.unb.cic.analysis.model;
 
 import soot.SootClass;
 import soot.SootMethod;
