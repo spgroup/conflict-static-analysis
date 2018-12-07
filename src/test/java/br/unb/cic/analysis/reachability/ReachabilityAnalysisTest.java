@@ -7,14 +7,16 @@ import java.util.List;
 import br.unb.cic.analysis.model.Pair;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import soot.PackManager;
 import soot.Transform;
+import soot.options.Options;
 
 public class ReachabilityAnalysisTest {
 	
-	private ReachabilityAnalysis analysis;
+	private ReachabilityAnalysis interproceduralSameClass;
 	private ReachabilityAnalysis interproceduralDifferentClasses;
 	private ReachabilityAnalysis intraprocedural;
 
@@ -39,7 +41,7 @@ public class ReachabilityAnalysisTest {
 
 	@Before
 	public void configure() {
-		analysis = new ReachabilityAnalysis() {
+		interproceduralSameClass = new ReachabilityAnalysis() {
 			@Override
 			protected List<Pair<String, List<Integer>>> sourceDefinitions() {
 				List<Pair<String, List<Integer>>> res = new ArrayList<>();
@@ -95,22 +97,22 @@ public class ReachabilityAnalysisTest {
 				return res;
 			}
 		};
-		PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
+		PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", interproceduralSameClass));
 		PackManager.v().getPack("wjtp").add(new Transform("wjtp.interproceduralDifferentClasses", interproceduralDifferentClasses));
 		PackManager.v().getPack("wjtp").add(new Transform("wjtp.intraprocedural", intraprocedural));
+		Options.v().setPhaseOption("cg.spark", "on");
+		Options.v().setPhaseOption("cg.spark", "verbose:true");
 		soot.Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-process-dir", "target/test-classes/"});
 	}
 
 	@Test
 	public void testReachability() {
-		Assert.assertNotNull(analysis.getPaths());
-		Assert.assertEquals(2, analysis.getPaths().size());
+		Assert.assertNotNull(interproceduralSameClass.getPaths());
+		Assert.assertEquals(2, interproceduralSameClass.getPaths().size());
 		Assert.assertNotNull(intraprocedural.getPaths());
 		Assert.assertEquals(1, intraprocedural.getPaths().size());
 		Assert.assertNotNull(interproceduralDifferentClasses.getPaths());
 		Assert.assertEquals(1, interproceduralDifferentClasses.getPaths().size());
 	}
-	
-
 
 }
