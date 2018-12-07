@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Pair;
 import org.junit.Assert;
 import org.junit.Before;
@@ -41,7 +42,7 @@ public class ReachabilityAnalysisTest {
 
 	@Before
 	public void configure() {
-		interproceduralSameClass = new ReachabilityAnalysis() {
+		interproceduralSameClass = new ReachabilityAnalysis(new AbstractMergeConflictDefinition() {
 			@Override
 			protected List<Pair<String, List<Integer>>> sourceDefinitions() {
 				List<Pair<String, List<Integer>>> res = new ArrayList<>();
@@ -60,8 +61,9 @@ public class ReachabilityAnalysisTest {
 				res.add(new Pair("br.unb.cic.analysis.samples.InterproceduralTestCaseSameClass", lines));
 				return res;
 			}
-		};
-		interproceduralDifferentClasses = new ReachabilityAnalysis() {
+		});
+
+		interproceduralDifferentClasses = new ReachabilityAnalysis(new AbstractMergeConflictDefinition() {
 			@Override
 			protected List<Pair<String, List<Integer>>> sourceDefinitions() {
 				List<Pair<String, List<Integer>>> res = new ArrayList<>();
@@ -79,8 +81,9 @@ public class ReachabilityAnalysisTest {
 				res.add(new Pair("br.unb.cic.analysis.samples.NotRelevant", lines));
 				return res;
 			}
-		};
-		intraprocedural = new ReachabilityAnalysis() {
+		});
+
+		intraprocedural = new ReachabilityAnalysis(new AbstractMergeConflictDefinition() {
 			@Override
 			protected List<Pair<String, List<Integer>>> sourceDefinitions() {
 				List<Pair<String, List<Integer>>> res = new ArrayList<>();
@@ -96,7 +99,7 @@ public class ReachabilityAnalysisTest {
 				res.add(new Pair("br.unb.cic.analysis.samples.BillingSystem", lines));
 				return res;
 			}
-		};
+		});
 		PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", interproceduralSameClass));
 		PackManager.v().getPack("wjtp").add(new Transform("wjtp.interproceduralDifferentClasses", interproceduralDifferentClasses));
 		PackManager.v().getPack("wjtp").add(new Transform("wjtp.intraprocedural", intraprocedural));
