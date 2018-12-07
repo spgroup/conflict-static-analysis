@@ -1,8 +1,6 @@
 package br.unb.cic.analysis.reachability;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import br.unb.cic.analysis.model.Pair;
 import br.unb.cic.analysis.model.Statement;
@@ -117,7 +115,7 @@ public abstract class ReachabilityAnalysis extends SceneTransformer {
 	 * don't want to go deeper than maxDepth.
 	 */
 	private void buildInterproceduralFlowGraph(final JimpleBasedInterproceduralCFG cfg, Statement s, int currentLevel) {
-		if(currentLevel > maxDepth) {// || flowGraph.vertexSet().contains(s)) {
+		if(currentLevel > maxDepth || flowGraph.vertexSet().contains(s)) {
 			return;
 		}
 		flowGraph.addVertex(s);
@@ -186,14 +184,16 @@ public abstract class ReachabilityAnalysis extends SceneTransformer {
 	 * loadSourceStatements and loadSinkStatements.
 	 */
 	private void loadStatements(List<Pair<String, List<Integer>>> definitions,  List<Statement> statements, Type type) {
+		Set<Integer> setOfStatementLines = new HashSet<>();
 		for(Pair<String, List<Integer>> pair: definitions) {
 			SootClass c = Scene.v().getSootClass(pair.getFirst());
 			if(c == null) continue; 	
 			for(SootMethod m: c.getMethods()) {
 				for(Unit u: m.getActiveBody().getUnits()) {
-					if(pair.getSecond().contains(u.getJavaSourceStartLineNumber())) {
+					if(pair.getSecond().contains(u.getJavaSourceStartLineNumber()) && !setOfStatementLines.contains(u.getJavaSourceStartLineNumber())) {
 						Statement stmt = Statement.builder().setClass(c).setMethod(m).setUnit(u).setType(type).build();
 						statements.add(stmt);
+						setOfStatementLines.add(u.getJavaSourceStartLineNumber());
 					}
 				}
 			}
