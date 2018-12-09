@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import soot.G;
 import soot.PackManager;
 import soot.Transform;
 import soot.options.Options;
@@ -22,26 +23,10 @@ public class ReachabilityAnalysisTest {
 	private ReachabilityAnalysis intraprocedural;
 
 
-//	//@Test
-//	public void testIntraProcedural() {
-//		PackManager.v().getPack("jtp").add(
-//			    new Transform("jtp.myTransform", new BodyTransformer() {
-//					@Override
-//					protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-//						Set<Integer> source = new HashSet<>();
-//						Set<Integer> sink = new HashSet<>();
-//						
-//						source.add(6);
-//						sink.add(12);
-//						new MergeConflictAnalysis(new ExceptionalUnitGraph(body), source, sink);
-//					}
-//			    }));
-//		
-//		soot.Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-process-dir", "/Users/rbonifacio/Documents/workspace-java/SootAnalysisTestCase/target/classes/"});
-//	}
 
 	@Before
 	public void configure() {
+		G.reset();
 		interproceduralSameClass = new ReachabilityAnalysis(new AbstractMergeConflictDefinition() {
 			@Override
 			protected List<Pair<String, List<Integer>>> sourceDefinitions() {
