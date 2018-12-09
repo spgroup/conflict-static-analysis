@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+import br.unb.cic.analysis.model.Statement;
+import soot.Local;
 import soot.Unit;
 import soot.ValueBox;
 import soot.tagkit.Tag;
@@ -20,7 +22,7 @@ import soot.toolkits.scalar.ForwardFlowAnalysis;
  * usage scenarios. Therefore, we reduce this problem
  * to a def-use analysis.
  */
-public class DataFlowAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<String>>{
+public class DataFlowAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<Local>>{
 
 	private AbstractMergeConflictDefinition definition;
 	
@@ -34,55 +36,67 @@ public class DataFlowAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<String>>
 	
 	
 	@Override
-	protected void flowThrough(FlowSet<String> in, Unit d, FlowSet<String> out) {
+	protected void flowThrough(FlowSet<Local> in, Unit d, FlowSet<Local> out) {
 		detectConflict(in, d);
-		FlowSet<String> temp = new ArraySparseSet<>();
+		FlowSet<Local> temp = new ArraySparseSet<>();
 		
 		in.difference(kill(d), temp); 
 		temp.union(gen(d), out);
 	}
 	
-	private FlowSet<String> kill(Unit d) { 
-		FlowSet<String> res = new ArraySparseSet<>();
+	private FlowSet<Local> kill(Unit d) {
+		FlowSet<Local> res = new ArraySparseSet<>();
 		
-		if(!definition.getSourceStatements().stream().map(s -> s.getUnit()).collect(Collectors.toList()).contains(d)) {
+		if(!isSourceStatement(d)) {
 			for(ValueBox v : d.getDefBoxes()) {
-				res.add(v.getValue().toString());
+				if(v.getValue() instanceof  Local)
+					res.add((Local)v.getValue());
 			}
 		}
 		return res; 
 	} 
 
-	private FlowSet<String> gen(Unit d) { 
-		FlowSet<String> res = new ArraySparseSet<>();
-		if(definition.getSourceStatements().stream().map(s -> s.getUnit()).collect(Collectors.toList()).contains(d)) {
+	private FlowSet<Local> gen(Unit d) {
+		FlowSet<Local> res = new ArraySparseSet<>();
+		if(isSourceStatement(d)) {
 			for(ValueBox v : d.getDefBoxes()) {
-				res.add(v.getValue().toString());
+				if(v.getValue() instanceof Local)
+					res.add((Local)v.getValue());
 			}
 		}
 		return res;
 	} 
 
-	private void detectConflict(FlowSet<String> in, Unit d) {
-		if(definition.getSinkStatements().stream().map(s -> s.getUnit()).collect(Collectors.toList()).contains(d)) {
-			d.getUseBoxes().stream()
-			               .filter(box -> in.contains(box.getValue().toString()))
-			               .forEach(box -> Collector.instance().addConflict(d + " uses of " +  box.getValue().toString() + " is tainted"));
+	protected void detectConflict(FlowSet<Local> in, Unit d) {
+		if(isSinkStatement(d)) {
+			for(ValueBox box: d.getUseBoxes()) {
+				if(box.getValue() instanceof Local && in.contains((Local)box.getValue())) {
+					Collector.instance().addConflict(d + " uses of " +  box.getValue().toString() + " is tainted");
+				}
+			}
 		}
 	}
-	
+
+	protected boolean isSourceStatement(Unit d) {
+		return definition.getSourceStatements().stream().map(s -> s.getUnit()).collect(Collectors.toList()).contains(d);
+	}
+
+	protected boolean isSinkStatement(Unit d) {
+		return definition.getSinkStatements().stream().map(s -> s.getUnit()).collect(Collectors.toList()).contains(d);
+	}
+
 	@Override
-	protected FlowSet<String> newInitialFlow() {
+	protected FlowSet<Local> newInitialFlow() {
 		return new ArraySparseSet<>();
 	}
 
 	@Override
-	protected void merge(FlowSet<String> in1, FlowSet<String> in2, FlowSet<String> out) {
+	protected void merge(FlowSet<Local> in1, FlowSet<Local> in2, FlowSet<Local> out) {
 		in1.union(in2, out);
 	}
 
 	@Override
-	protected void copy(FlowSet<String> source, FlowSet<String> dest) {
+	protected void copy(FlowSet<Local> source, FlowSet<Local> dest) {
 		source.copy(dest);
 	}
 
