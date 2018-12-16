@@ -1,0 +1,174 @@
+\documentclass{beamer}
+
+\usepackage{amssymb}
+\usepackage{pifont}
+\usepackage{lstcustom}
+
+\newcommand{\xmark}{\ding{55}}%
+
+\newcommand{\bug}{%
+  \begingroup\normalfont
+  \includegraphics[height=\fontcharht\font`\B]{images/bug.pdf}%
+  \endgroup
+}
+
+\title{Design Decisions on Semantic Conflicts through Static Analysis}
+
+\author{Rodrigo Bonif\'{a}cio}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}
+  \begin{block}{Algorithms}
+    \begin{itemize}
+     \item intra-procedural def-use (\checkmark)
+     \item reachability using sources and sinks (\checkmark)  
+     \item interprocedural def-use points-to (\bug)
+     \item interprocedural def-use (\xmark)
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \Huge{Uniform interface for sources and sinks}
+\end{frame}
+
+\begin{frame}[fragile]
+  \begin{lstlisting}
+public abstract class AbstractMergeConflictDefinition {
+
+  /**
+   * This method should return a list of pairs, where the
+   * first element is the full qualified name of
+   * a class and the second element is a list of integers
+   * stating the lines of code where does exist a "source"
+   * statement.
+   */
+  protected abstract List<Pair<String, Set<Integer>>> sourceDefinitions();
+
+  /**
+   * This method should return a list of pairs, where the
+   * first element is the full qualified name of
+   * a class and the second element is a list of integers
+   * stating the lines of code where does exist a "sink"
+   * statement.
+   */
+   protected abstract List<Pair<String, Set<Integer>>> sinkDefinitions();
+
+   //conrete method definitions here. 
+}
+  \end{lstlisting}
+
+\end{frame}
+
+\begin{frame}
+  \huge{Def-Use Test Cases}
+\end{frame}
+\begin{frame}[fragile]
+  \begin{block}{one conflict}
+  \begin{lstlisting}
+public void foo() {
+  int x = random();           //source
+  int y = x * 10;
+
+  System.out.println(y);
+  
+  blah(x);                    //sink
+}
+  \end{lstlisting}
+  \end{block}
+\pause
+    \begin{block}{no conflict}
+      \begin{lstlisting}
+private void blah(int z) {
+  int x = random();           //source
+  int y = z * x;
+  
+  System.out.println(y);
+
+  x = random();              
+  
+  System.out.println(x);      //sink
+}
+  \end{lstlisting}
+ \end{block}
+\end{frame}
+
+
+\begin{frame}
+  \huge{Reachability Test Cases}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{block}{one conflict}     
+  \begin{lstlisting}
+public Pair<Double, Double> generateBill(List<Item> items) {
+  double total = 0;
+  double meanPrice = 0;
+
+  for(Item item: items) {
+    total += item.getPrice();
+    
+    if(item.getPrice() > 100) {            //source
+      total -= item.getPrice() * 0.1;      //source
+    }                                      //source
+  }
+  meanPrice = items.size() > 0 ? total / items.size() : 0; //sink
+
+  return new Pair(total, meanPrice);
+}
+\end{lstlisting}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{block}{one conflict (interprocedural)}
+\begin{lstlisting}
+public class InterproceduralTestCaseDifferentClasses {
+  public void foo() {
+    int x = 0;
+
+    x = random();           //source
+
+    NotRelevant.blah(x);
+  }
+
+  private int random() {
+    return 10;
+  }
+}
+
+class NotRelevant {
+  public static void blah(int val) {
+    int y = val + 1;
+    
+    y = y + 1;                //sink
+                
+    System.out.println(y);
+  }
+}
+\end{lstlisting}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\huge{Next Steps} 
+\end{frame}
+
+\begin{frame}
+  \begin{itemize}
+   \item implement the interprocedural def-use analysis 
+   \item fix the implementation of {\color{blue}} points-to analysis
+   \item improve the unit test infrastructure
+   \item conduct an empirical study
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+\titlepage
+\end{frame}
+\end{document}
