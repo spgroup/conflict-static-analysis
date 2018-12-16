@@ -1,16 +1,12 @@
 package br.unb.cic.analysis.df;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
-import br.unb.cic.analysis.model.Statement;
 import soot.Local;
 import soot.Unit;
 import soot.ValueBox;
-import soot.tagkit.Tag;
 import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
@@ -39,20 +35,20 @@ public class DataFlowAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<Local>>{
 	protected void flowThrough(FlowSet<Local> in, Unit d, FlowSet<Local> out) {
 		detectConflict(in, d);
 		FlowSet<Local> temp = new ArraySparseSet<>();
-		
-		in.difference(kill(d), temp); 
+
+		in.difference(kill(d), temp);
 		temp.union(gen(d), out);
 	}
 	
 	private FlowSet<Local> kill(Unit d) {
 		FlowSet<Local> res = new ArraySparseSet<>();
 		
-		if(!isSourceStatement(d)) {
+		//if(!isSourceStatement(d)) {
 			for(ValueBox v : d.getDefBoxes()) {
 				if(v.getValue() instanceof  Local)
 					res.add((Local)v.getValue());
 			}
-		}
+		//}
 		return res; 
 	} 
 

@@ -26,4 +26,8 @@ public class Collector {
     public List<String> getConflicts() {
         return conflicts;
     }
+
+    public void clear() {
+        conflicts = new ArrayList<>();
+    }
 }

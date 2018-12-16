@@ -3,16 +3,13 @@ package br.unb.cic.analysis.reachability;
 import java.util.*;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
-import br.unb.cic.analysis.model.Pair;
 import br.unb.cic.analysis.model.Statement;
-import br.unb.cic.analysis.model.Statement.Type;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import soot.Scene;
 import soot.SceneTransformer;
 import soot.SootClass;
 import soot.SootMethod;
@@ -136,7 +133,7 @@ public class ReachabilityAnalysis extends SceneTransformer {
 			Statement nextStatement = createNextStatement(s.getSootClass(), s.getSootMethod(), next);
 			buildInterproceduralFlowGraph(cfg, nextStatement, currentLevel);
 			flowGraph.addEdge(s, nextStatement);
-		};
+		}
 	}
 
 	private Statement createNextStatement(SootClass c, SootMethod m, Unit u) {
