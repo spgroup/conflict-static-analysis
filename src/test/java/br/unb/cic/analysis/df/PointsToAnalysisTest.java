@@ -18,6 +18,7 @@ public class PointsToAnalysisTest {
     @Before
     public void configure() {
         G.reset();
+        Collector.instance().clear();
         AbstractMergeConflictDefinition definition = new AbstractMergeConflictDefinition() {
             @Override
             protected List<Pair<String, List<Integer>>> sourceDefinitions() {
