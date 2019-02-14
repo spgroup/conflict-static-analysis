@@ -2,20 +2,17 @@ package br.unb.cic.analysis.reachability;
 
 import java.util.*;
 
-import br.unb.cic.analysis.AbstractMergeConflictDefinition;
-import br.unb.cic.analysis.model.Statement;
 import org.jgrapht.Graph;
-import org.jgrapht.GraphPath;
-import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
-import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
+import org.jgrapht.alg.connectivity.ConnectivityInspector;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import soot.SceneTransformer;
-import soot.SootClass;
-import soot.SootMethod;
-import soot.Unit;
+
+import soot.*;
 import soot.jimple.InvokeStmt;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
+
+import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+import br.unb.cic.analysis.model.Statement;
 
 
 /**
@@ -27,10 +24,10 @@ import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
  * @author rbonifacio
  */
 public class ReachabilityAnalysis extends SceneTransformer {
-	private AbstractMergeConflictDefinition definition;
 	private int maxDepth;
+	private AbstractMergeConflictDefinition definition;
 	private Graph<Statement, DefaultEdge> flowGraph;
-	List<GraphPath<Statement, DefaultEdge>> paths;
+	private List<String> conflicts;
 
 	/**
 	 * Default constuctor using the max indirection
@@ -47,8 +44,8 @@ public class ReachabilityAnalysis extends SceneTransformer {
 	public ReachabilityAnalysis(int maxDepth, AbstractMergeConflictDefinition definition) {
 		this.definition = definition;
 		this.maxDepth = maxDepth;
-		flowGraph = new DefaultDirectedGraph<>(DefaultEdge.class);
-		paths = new ArrayList<>();
+		this.flowGraph = new DefaultDirectedGraph<>(DefaultEdge.class);
+		this.conflicts = new ArrayList<>();
 	}
 
 	/**
@@ -60,30 +57,29 @@ public class ReachabilityAnalysis extends SceneTransformer {
 	 */
 	@Override
 	protected void internalTransform(String phaseName, Map<String, String> options) {
-		definition.loadSourceStatements();
-		definition.loadSinkStatements();
+		this.definition.loadSourceStatements();
+		this.definition.loadSinkStatements();
+
 		buildInterproceduralFlowGraph();
 
-		DijkstraShortestPath<Statement, DefaultEdge> dijkstra = new DijkstraShortestPath<>(flowGraph);
+		ConnectivityInspector<Statement, DefaultEdge> inspector = new ConnectivityInspector<>(flowGraph);
 
 		for(Statement source : definition.getSourceStatements()) {
-			for(Statement sink : definition.getSinkStatements()) {
-				ShortestPathAlgorithm.SingleSourcePaths<Statement, DefaultEdge> unitPath = dijkstra.getPaths(source);
-
-				GraphPath<Statement, DefaultEdge> path = unitPath.getPath(sink);
-				if(path != null) {
-					this.paths.add(path);
+			for (Statement sink : definition.getSinkStatements()) {
+				if(inspector.pathExists(source, sink)) {
+					conflicts.add("conflict between statement " + source + " and " + sink);
 				}
 			}
 		}
+
 	}
 
 	/**
-	 * Returns the list of paths from sources to sinks.
+	 * Returns the list of conflicts from sources to sinks.
 	 * @return paths from source statements to sink statements.
 	 */
-	public List<GraphPath<Statement, DefaultEdge>> getPaths() {
-		return paths;
+	public List<String> getConflicts() {
+		return conflicts;
 	}
 
 	/*
@@ -100,7 +96,7 @@ public class ReachabilityAnalysis extends SceneTransformer {
 	}
 
 	/*
-	 * this is the "brain" method of the inter-procedural reach-ability
+	 * this is the "core" method of the inter-procedural reachability
 	 * analysis algorithm. It populates a graph based on the statements
 	 * that might be reached from a given unit u (considering
 	 * method calls).
@@ -108,7 +104,7 @@ public class ReachabilityAnalysis extends SceneTransformer {
 	 * @param cfg the Soot control flow graph
 	 * @param u the current unit
 	 * @param currentLevel the current indirection level (related to invoke statements). we
-	 * don't want to go deeper than maxDepth.
+	 * don't want to go deeper than maxDepth. We also want to avoid infinite loops.
 	 */
 	private void buildInterproceduralFlowGraph(final JimpleBasedInterproceduralCFG cfg, Statement s, int currentLevel) {
 		if(currentLevel > maxDepth || flowGraph.vertexSet().contains(s)) {

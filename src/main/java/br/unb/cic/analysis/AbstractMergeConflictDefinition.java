@@ -12,6 +12,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * This abstract class works as a contract. Whenever we
+ * want to use a specific merge conflict analysis, we must
+ * instantiate a concrete subclass, implementing the methods
+ * source and sink definitions.
+ */
 public abstract class AbstractMergeConflictDefinition {
     protected List<Statement> sourceStatements;
     protected List<Statement> sinkStatements;
@@ -41,7 +47,7 @@ public abstract class AbstractMergeConflictDefinition {
      * This method should return a list of pairs, where the
      * first element is the full qualified name of
      * a class and the second element is a list of integers
-     * stating the lines of code where does exist a "source"
+     * stating the lines of code where exists a "source"
      * statement.
      */
     protected abstract List<Pair<String, List<Integer>>> sourceDefinitions();
@@ -65,16 +71,14 @@ public abstract class AbstractMergeConflictDefinition {
      */
     private List<Statement> loadStatements(List<Pair<String, List<Integer>>> definitions, Statement.Type type) {
         List<Statement> statements = new ArrayList<>();
-        Set<Integer> setOfStatementLines = new HashSet<>();
         for(Pair<String, List<Integer>> pair: definitions) {
             SootClass c = Scene.v().getSootClass(pair.getFirst());
             if(c == null) continue;
             for(SootMethod m: c.getMethods()) {
                 for(Unit u: m.getActiveBody().getUnits()) {
-                    if(pair.getSecond().contains(u.getJavaSourceStartLineNumber()) && !setOfStatementLines.contains(u.getJavaSourceStartLineNumber())) {
+                    if(pair.getSecond().contains(u.getJavaSourceStartLineNumber())) {
                         Statement stmt = Statement.builder().setClass(c).setMethod(m).setUnit(u).setType(type).build();
                         statements.add(stmt);
-                        setOfStatementLines.add(u.getJavaSourceStartLineNumber());
                     }
                 }
             }
@@ -89,5 +93,9 @@ public abstract class AbstractMergeConflictDefinition {
             }
         }
         return s;
+    }
+
+    public boolean isSourceStatement(Unit u) {
+        return sourceStatements.stream().anyMatch(s -> s.getUnit().equals(u));
     }
 }

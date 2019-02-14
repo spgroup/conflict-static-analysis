@@ -48,25 +48,25 @@ public class ReachabilityAnalysisTest {
 			}
 		});
 
-		interproceduralDifferentClasses = new ReachabilityAnalysis(new AbstractMergeConflictDefinition() {
-			@Override
-			protected List<Pair<String, List<Integer>>> sourceDefinitions() {
-				List<Pair<String, List<Integer>>> res = new ArrayList<>();
-				List<Integer> lines = new ArrayList<>();
-				lines.add(9);
-				res.add(new Pair("br.unb.cic.analysis.samples.InterproceduralTestCaseDifferentClasses", lines));
-				return res;
-			}
-			@Override
-			protected List<Pair<String, List<Integer>>> sinkDefinitions() {
-				List<Pair<String, List<Integer>>> res = new ArrayList<>();
-				List<Integer> lines = new ArrayList<>();
-				lines.add(26);
-
-				res.add(new Pair("br.unb.cic.analysis.samples.NotRelevant", lines));
-				return res;
-			}
-		});
+//		interproceduralDifferentClasses = new ReachabilityAnalysis(new AbstractMergeConflictDefinition() {
+//			@Override
+//			protected List<Pair<String, List<Integer>>> sourceDefinitions() {
+//				List<Pair<String, List<Integer>>> res = new ArrayList<>();
+//				List<Integer> lines = new ArrayList<>();
+//				lines.add(9);
+//				res.add(new Pair("br.unb.cic.analysis.samples.InterproceduralTestCaseDifferentClasses", lines));
+//				return res;
+//			}
+//			@Override
+//			protected List<Pair<String, List<Integer>>> sinkDefinitions() {
+//				List<Pair<String, List<Integer>>> res = new ArrayList<>();
+//				List<Integer> lines = new ArrayList<>();
+//				lines.add(26);
+//
+//				res.add(new Pair("br.unb.cic.analysis.samples.NotRelevant", lines));
+//				return res;
+//			}
+//		});
 
 		intraprocedural = new ReachabilityAnalysis(new AbstractMergeConflictDefinition() {
 			@Override
@@ -86,21 +86,22 @@ public class ReachabilityAnalysisTest {
 			}
 		});
 		PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", interproceduralSameClass));
-		PackManager.v().getPack("wjtp").add(new Transform("wjtp.interproceduralDifferentClasses", interproceduralDifferentClasses));
+		//PackManager.v().getPack("wjtp").add(new Transform("wjtp.interproceduralDifferentClasses", interproceduralDifferentClasses));
 		PackManager.v().getPack("wjtp").add(new Transform("wjtp.intraprocedural", intraprocedural));
 		Options.v().setPhaseOption("cg.spark", "on");
 		Options.v().setPhaseOption("cg.spark", "verbose:true");
-		soot.Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-process-dir", "target/test-classes/"});
+		String testClasses = "/Users/rbonifacio/tmp/test-classes/";
+		soot.Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-process-dir", testClasses});
 	}
 
 	@Test
 	public void testReachability() {
-		Assert.assertNotNull(interproceduralSameClass.getPaths());
-		Assert.assertEquals(2, interproceduralSameClass.getPaths().size());
-		Assert.assertNotNull(intraprocedural.getPaths());
-		Assert.assertEquals(1, intraprocedural.getPaths().size());
-		Assert.assertNotNull(interproceduralDifferentClasses.getPaths());
-		Assert.assertEquals(1, interproceduralDifferentClasses.getPaths().size());
+		Assert.assertNotNull(interproceduralSameClass.getConflicts());
+		Assert.assertEquals(2, interproceduralSameClass.getConflicts().size());
+		Assert.assertNotNull(intraprocedural.getConflicts());
+		Assert.assertEquals(1, intraprocedural.getConflicts().size());
+//		Assert.assertNotNull(interproceduralDifferentClasses.getPaths());
+//		Assert.assertEquals(1, interproceduralDifferentClasses.getPaths().size());
 	}
 
 }

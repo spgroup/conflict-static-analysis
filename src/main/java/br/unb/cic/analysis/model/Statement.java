@@ -8,7 +8,7 @@ import java.util.Objects;
 
 /**
  * A class that represents either a "source" or a "sink" statement 
- * in control-flow reachability analysis. 
+ * in a semantic merge conflict analysis.
  * 
  * @author rbonifacio
  */
@@ -20,7 +20,6 @@ public class Statement {
 	}
 
 	private static StatementBuilder builder;
-
 
 	public static StatementBuilder builder() {
 		if(builder == null) {

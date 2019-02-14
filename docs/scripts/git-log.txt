@@ -1,0 +1,19 @@
+# list the merge operations
+
+> git log --merges --format="%h %p"
+
+c4499993 614dc609 7cc456a7
+ ...
+
+# common ancestor:
+> git merge-base 614dc609 7cc456a7
+
+06c028e874ca503a331b2fa1ca186986dbe85cf1
+
+
+git reset --hard Ancestor
+git merge Parent1 (Vai dar fast forward)
+git merge Parent2 (pode dar conflito agora)
+
+
+

@@ -3,7 +3,6 @@ package br.unb.cic.analysis.df;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import soot.Local;
 import soot.Unit;
 import soot.ValueBox;
@@ -12,10 +11,12 @@ import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
 import soot.toolkits.scalar.ForwardFlowAnalysis;
 
+import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+
 /**
  * Intraprocedural dataflow analysis for identifying
- * merge conflicts from source defitions to sink
- * usage scenarios. Therefore, we reduce this problem
+ * merge conflicts from source definitions to sink
+ * usage scenarios. In this case we reduce this problem
  * to a def-use analysis.
  */
 public class DataFlowAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<Local>>{
@@ -43,13 +44,11 @@ public class DataFlowAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<Local>>{
 	private FlowSet<Local> kill(Unit d) {
 		FlowSet<Local> res = new ArraySparseSet<>();
 		
-		//if(!isSourceStatement(d)) {
-			for(ValueBox v : d.getDefBoxes()) {
-				if(v.getValue() instanceof  Local)
-					res.add((Local)v.getValue());
-			}
-		//}
-		return res; 
+		for(ValueBox v : d.getDefBoxes()) {
+			if(v.getValue() instanceof  Local)
+				res.add((Local)v.getValue());
+		}
+		return res;
 	} 
 
 	private FlowSet<Local> gen(Unit d) {
