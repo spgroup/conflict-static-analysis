@@ -27,7 +27,7 @@ public class ReachabilityAnalysis extends SceneTransformer {
 	private int maxDepth;
 	private AbstractMergeConflictDefinition definition;
 	private Graph<Statement, DefaultEdge> flowGraph;
-	private List<String> conflicts;
+	private Set<String> conflicts;
 
 	/**
 	 * Default constuctor using the max indirection
@@ -45,7 +45,7 @@ public class ReachabilityAnalysis extends SceneTransformer {
 		this.definition = definition;
 		this.maxDepth = maxDepth;
 		this.flowGraph = new DefaultDirectedGraph<>(DefaultEdge.class);
-		this.conflicts = new ArrayList<>();
+		this.conflicts = new HashSet<>();
 	}
 
 	/**
@@ -67,7 +67,8 @@ public class ReachabilityAnalysis extends SceneTransformer {
 		for(Statement source : definition.getSourceStatements()) {
 			for (Statement sink : definition.getSinkStatements()) {
 				if(inspector.pathExists(source, sink)) {
-					conflicts.add("conflict between statement " + source + " and " + sink);
+					conflicts.add(String.format("conflict from %s line(%d) to %s line(%d)", source.getSootClass().getName(),
+						source.getSourceCodeLineNumber(),  sink.getSootClass().getName(), sink.getSourceCodeLineNumber()));
 				}
 			}
 		}
@@ -78,7 +79,7 @@ public class ReachabilityAnalysis extends SceneTransformer {
 	 * Returns the list of conflicts from sources to sinks.
 	 * @return paths from source statements to sink statements.
 	 */
-	public List<String> getConflicts() {
+	public Set<String> getConflicts() {
 		return conflicts;
 	}
 

@@ -9,6 +9,7 @@ public class StatementBuilder {
     private SootMethod sootMethod;
     private Unit unit;
     private Statement.Type type = Statement.Type.IN_BETWEEN;
+    private Integer sourceCodeLineNumber;
 
     public StatementBuilder setClass(SootClass c) {
         sootClass = c;
@@ -30,8 +31,13 @@ public class StatementBuilder {
         return this;
     }
 
+    public StatementBuilder setSourceCodeLineNumber(Integer lineNumber) {
+        sourceCodeLineNumber = lineNumber;
+        return this;
+    }
+
     public Statement build() {
-        Statement s = new Statement(sootClass, sootMethod, unit, type);
+        Statement s = new Statement(sootClass, sootMethod, unit, type, sourceCodeLineNumber);
 
         sootClass = null;
         sootMethod = null;

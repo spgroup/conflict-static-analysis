@@ -32,12 +32,14 @@ public class Statement {
 	private SootMethod sootMethod; 
 	private Unit unit; 
 	private Type type;
+	private Integer sourceCodeLineNumber;
 	
-	Statement(SootClass sootClass, SootMethod sootMethod, Unit unit, Type type) {
+	Statement(SootClass sootClass, SootMethod sootMethod, Unit unit, Type type, Integer sourceCodeLineNumber) {
 		this.sootClass = sootClass;
 		this.sootMethod = sootMethod;
 		this.unit = unit;
 		this.type = type;
+		this.sourceCodeLineNumber = sourceCodeLineNumber;
 	}
 
 	public SootClass getSootClass() {
@@ -54,6 +56,10 @@ public class Statement {
 
 	public Type getType() {
 		return type;
+	}
+
+	public Integer getSourceCodeLineNumber() {
+		return sourceCodeLineNumber;
 	}
 
 	@Override

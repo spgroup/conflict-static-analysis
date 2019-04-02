@@ -96,8 +96,8 @@ public class ReachabilityAnalysisTest {
 	public void testReachability() {
 		Assert.assertNotNull(interproceduralSameClass.getConflicts());
 		Assert.assertEquals(2, interproceduralSameClass.getConflicts().size());
-//		Assert.assertNotNull(intraprocedural.getConflicts());
-//		Assert.assertEquals(1, intraprocedural.getConflicts().size());
+		Assert.assertNotNull(intraprocedural.getConflicts());
+		Assert.assertEquals(1, intraprocedural.getConflicts().size());
 //		Assert.assertNotNull(interproceduralDifferentClasses.getPaths());
 //		Assert.assertEquals(1, interproceduralDifferentClasses.getPaths().size());
 	}

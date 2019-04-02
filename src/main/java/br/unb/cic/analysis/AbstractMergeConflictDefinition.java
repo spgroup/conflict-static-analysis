@@ -73,7 +73,9 @@ public abstract class AbstractMergeConflictDefinition {
             for(SootMethod m: c.getMethods()) {
                 for(Unit u: m.getActiveBody().getUnits()) {
                     if(definitions.get(className).contains(u.getJavaSourceStartLineNumber())) {
-                        Statement stmt = Statement.builder().setClass(c).setMethod(m).setUnit(u).setType(type).build();
+                        Statement stmt = Statement.builder().setClass(c).setMethod(m)
+                                .setUnit(u).setType(type).setSourceCodeLineNumber(u.getJavaSourceStartLineNumber())
+                                .build();
                         statements.add(stmt);
                     }
                 }
