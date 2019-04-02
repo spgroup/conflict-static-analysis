@@ -23,16 +23,16 @@ public class PointsToAnalysisTest {
     public void configure() {
         definition = new AbstractMergeConflictDefinition() {
             @Override
-            protected List<Pair<String, List<Integer>>> sourceDefinitions() {
-                List<Pair<String, List<Integer>>> res = new ArrayList<>();
-                res.add(new Pair("br.unb.cic.analysis.samples.InterproceduralPointsTo", Arrays.asList(new Integer[]{6})));
+            protected Map<String, List<Integer>> sourceDefinitions() {
+                Map<String, List<Integer>> res = new HashMap<>();
+                res.put("br.unb.cic.analysis.samples.InterproceduralPointsTo", Arrays.asList(new Integer[]{6}));
                 return res;
             }
 
             @Override
-            protected List<Pair<String, List<Integer>>> sinkDefinitions() {
-                List<Pair<String, List<Integer>>> res = new ArrayList<>();
-                res.add(new Pair("br.unb.cic.analysis.samples.InterproceduralPointsTo", Arrays.asList(new Integer[]{21})));
+            protected Map<String, List<Integer>> sinkDefinitions() {
+                Map<String, List<Integer>> res = new HashMap<>();
+                res.put("br.unb.cic.analysis.samples.InterproceduralPointsTo", Arrays.asList(new Integer[]{21}));
                 return res;
             }
         };

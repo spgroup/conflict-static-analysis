@@ -9,6 +9,7 @@ import soot.*;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,20 +24,20 @@ public class DataFlowAnalysisOneConflictTest {
 
         AbstractMergeConflictDefinition definition = new AbstractMergeConflictDefinition() {
             @Override
-            protected List<Pair<String, List<Integer>>> sourceDefinitions() {
-                List<Pair<String, List<Integer>>> res = new ArrayList<>();
+            protected Map<String, List<Integer>> sourceDefinitions() {
+                Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
                 lines.add(6);
-                res.add(new Pair("br.unb.cic.analysis.samples.IntraproceduralDataFlow", lines));
+                res.put("br.unb.cic.analysis.samples.IntraproceduralDataFlow", lines);
                 return res;
             }
 
             @Override
-            protected List<Pair<String, List<Integer>>> sinkDefinitions() {
-                List<Pair<String, List<Integer>>> res = new ArrayList<>();
+            protected Map<String, List<Integer>> sinkDefinitions() {
+                Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
                 lines.add(11);
-                res.add(new Pair("br.unb.cic.analysis.samples.IntraproceduralDataFlow", lines));
+                res.put("br.unb.cic.analysis.samples.IntraproceduralDataFlow", lines);
                 return res;
             }
         };

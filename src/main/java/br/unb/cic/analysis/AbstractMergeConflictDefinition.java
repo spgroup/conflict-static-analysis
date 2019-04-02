@@ -1,16 +1,12 @@
 package br.unb.cic.analysis;
 
-import br.unb.cic.analysis.model.Pair;
 import br.unb.cic.analysis.model.Statement;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This abstract class works as a contract. Whenever we
@@ -50,7 +46,7 @@ public abstract class AbstractMergeConflictDefinition {
      * stating the lines of code where exists a "source"
      * statement.
      */
-    protected abstract List<Pair<String, List<Integer>>> sourceDefinitions();
+    protected abstract Map<String, List<Integer>> sourceDefinitions();
 
     /**
      * This method should return a list of pairs, where the
@@ -59,7 +55,7 @@ public abstract class AbstractMergeConflictDefinition {
      * stating the lines of code where does exist a "sink"
      * statement.
      */
-    protected abstract List<Pair<String, List<Integer>>> sinkDefinitions();
+    protected abstract Map<String, List<Integer>> sinkDefinitions();
 
 
     /*
@@ -69,14 +65,14 @@ public abstract class AbstractMergeConflictDefinition {
      * avoids some duplicated code that might arise on
      * loadSourceStatements and loadSinkStatements.
      */
-    private List<Statement> loadStatements(List<Pair<String, List<Integer>>> definitions, Statement.Type type) {
+    private List<Statement> loadStatements(Map<String, List<Integer>> definitions, Statement.Type type) {
         List<Statement> statements = new ArrayList<>();
-        for(Pair<String, List<Integer>> pair: definitions) {
-            SootClass c = Scene.v().getSootClass(pair.getFirst());
+        for(String className: definitions.keySet()) {
+            SootClass c = Scene.v().getSootClass(className);
             if(c == null) continue;
             for(SootMethod m: c.getMethods()) {
                 for(Unit u: m.getActiveBody().getUnits()) {
-                    if(pair.getSecond().contains(u.getJavaSourceStartLineNumber())) {
+                    if(definitions.get(className).contains(u.getJavaSourceStartLineNumber())) {
                         Statement stmt = Statement.builder().setClass(c).setMethod(m).setUnit(u).setType(type).build();
                         statements.add(stmt);
                     }
