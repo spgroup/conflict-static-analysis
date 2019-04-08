@@ -48,11 +48,11 @@ public class DataFlowAnalysisOneConflictTest {
 				protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
 					analysisExpectingOneConflict = new DataFlowAnalysis(new ExceptionalUnitGraph(body), definition);
 				}
-		    }));
-
+            		    }));
         String cp = "target/test-classes";
         String targetClass = "br.unb.cic.analysis.samples.IntraproceduralDataFlow";
-		soot.Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-cp", cp, targetClass});
+
+        soot.Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-cp", cp, targetClass});
     }
 
     @Test

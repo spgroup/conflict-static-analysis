@@ -1,8 +1,13 @@
 package br.unb.cic.analysis.df;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import br.unb.cic.analysis.model.Conflict;
+import br.unb.cic.analysis.model.ConflictReport;
+import br.unb.cic.analysis.model.Statement;
 import soot.Local;
 import soot.Unit;
 import soot.ValueBox;
@@ -19,10 +24,10 @@ import br.unb.cic.analysis.AbstractMergeConflictDefinition;
  * usage scenarios. In this case we reduce this problem
  * to a def-use analysis.
  */
-public class DataFlowAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<Local>>{
+public class DataFlowAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<DataFlowAbstraction>>{
 
 	private AbstractMergeConflictDefinition definition;
-	
+
 	public DataFlowAnalysis(DirectedGraph<Unit> graph, AbstractMergeConflictDefinition definition) {
 		super(graph);
 		this.definition = definition;
@@ -33,11 +38,18 @@ public class DataFlowAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<Local>>{
 	
 	
 	@Override
-	protected void flowThrough(FlowSet<Local> in, Unit d, FlowSet<Local> out) {
+	protected void flowThrough(FlowSet<DataFlowAbstraction> in, Unit d, FlowSet<DataFlowAbstraction> out) {
 		detectConflict(in, d);
-		FlowSet<Local> temp = new ArraySparseSet<>();
+		FlowSet<DataFlowAbstraction> temp = new ArraySparseSet<>();
 
-		in.difference(kill(d), temp);
+		FlowSet<DataFlowAbstraction> killSet = new ArraySparseSet<>();
+		FlowSet<Local> mustKill = kill(d);
+		for(DataFlowAbstraction item : in) {
+			if(mustKill.contains(item.getLocal())) {
+				killSet.add(item);
+			}
+		}
+  		in.difference(killSet, temp);
 		temp.union(gen(d), out);
 	}
 	
@@ -51,25 +63,40 @@ public class DataFlowAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<Local>>{
 		return res;
 	} 
 
-	private FlowSet<Local> gen(Unit d) {
-		FlowSet<Local> res = new ArraySparseSet<>();
+	private FlowSet<DataFlowAbstraction> gen(Unit d) {
+		FlowSet<DataFlowAbstraction> res = new ArraySparseSet<>();
 		if(isSourceStatement(d)) {
 			for(ValueBox v : d.getDefBoxes()) {
 				if(v.getValue() instanceof Local)
-					res.add((Local)v.getValue());
+					res.add(new DataFlowAbstraction((Local)v.getValue(), findSourceStatement(d)));
 			}
 		}
 		return res;
 	} 
 
-	protected void detectConflict(FlowSet<Local> in, Unit d) {
+	protected void detectConflict(FlowSet<DataFlowAbstraction> in, Unit d) {
 		if(isSinkStatement(d)) {
 			for(ValueBox box: d.getUseBoxes()) {
-				if(box.getValue() instanceof Local && in.contains((Local)box.getValue())) {
-					Collector.instance().addConflict(d + " uses of " +  box.getValue().toString() + " is tainted");
+				if(box.getValue() instanceof Local) {
+					for(DataFlowAbstraction item: in) {
+						if(item.getLocal().equals((Local)box.getValue())) {
+							Conflict c = new Conflict(item.getStmt(), findSinkStatement(d));
+							Collector.instance().addConflict(c.toString());
+						}
+					}
 				}
 			}
 		}
+	}
+
+	protected Statement findSourceStatement(Unit d) {
+		return definition.getSourceStatements().stream().filter(s -> s.getUnit().equals(d)).
+				findFirst().get();
+	}
+
+	protected Statement findSinkStatement(Unit d) {
+		return definition.getSinkStatements().stream().filter(s -> s.getUnit().equals(d)).
+				findFirst().get();
 	}
 
 	protected boolean isSourceStatement(Unit d) {
@@ -81,21 +108,22 @@ public class DataFlowAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<Local>>{
 	}
 
 	@Override
-	protected FlowSet<Local> newInitialFlow() {
+	protected FlowSet<DataFlowAbstraction> newInitialFlow() {
 		return new ArraySparseSet<>();
 	}
 
 	@Override
-	protected void merge(FlowSet<Local> in1, FlowSet<Local> in2, FlowSet<Local> out) {
+	protected void merge(FlowSet<DataFlowAbstraction> in1, FlowSet<DataFlowAbstraction> in2, FlowSet<DataFlowAbstraction> out) {
 		in1.union(in2, out);
 	}
 
 	@Override
-	protected void copy(FlowSet<Local> source, FlowSet<Local> dest) {
+	protected void copy(FlowSet<DataFlowAbstraction> source, FlowSet<DataFlowAbstraction> dest) {
 		source.copy(dest);
 	}
 
-	public List<String> getConflicts() {
+	public Set<String> getConflicts() {
 		return Collector.instance().getConflicts();
 	}
+
 }

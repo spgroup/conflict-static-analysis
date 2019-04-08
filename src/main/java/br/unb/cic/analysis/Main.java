@@ -1,10 +1,10 @@
 package br.unb.cic.analysis;
 
-import br.unb.cic.analysis.df.Collector;
 import br.unb.cic.analysis.df.DataFlowAnalysis;
 import br.unb.cic.analysis.io.DefaultReader;
 import br.unb.cic.analysis.io.MergeConflictReader;
 import br.unb.cic.analysis.model.Statement;
+import org.apache.commons.cli.*;
 import soot.Body;
 import soot.BodyTransformer;
 import soot.PackManager;
@@ -16,37 +16,68 @@ import java.util.stream.Collectors;
 
 public class Main {
 
-    DataFlowAnalysis analysis;
+    private Options options;
     private AbstractMergeConflictDefinition definition;
     private Set<String> targetClasses;
+    private List<String> conflicts = new ArrayList<>();
+    DataFlowAnalysis analysis;
 
     public static void main(String args[]) {
+        Main m = new Main();
         try {
-            if (args.length != 2) {
-                System.out.println("expecting a class path argument and a file with a list of changes");
-                System.exit(1);
+            m.createOptions();
+
+            CommandLineParser parser = new DefaultParser();
+            CommandLine cmd = parser.parse(m.options, args);
+
+            if (cmd.hasOption("mode")) {
+                // TODO: we should work with different modes!
             }
 
-            Main m = new Main();
-            m.loadDefinition(args[1]);
-            m.runAnalysis(args[0]);
-            Collector.instance().getConflicts().stream().forEach(c -> System.out.println(c));
+            m.loadDefinition(cmd.getOptionValue("csv"));
+            m.runAnalysis(cmd.getOptionValue("cp"), m.conflicts);
+            m.conflicts.stream().forEach(c -> System.out.println(c));
+        }
+        catch(ParseException e) {
+            System.out.println("Error: " + e.getMessage());
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp( "java Main", m.options );
         }
         catch(Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void runAnalysis(String classPath) {
+    private void createOptions() {
+        options = new Options();
+        Option classPathOption = Option.builder("cp").argName("class-path")
+                .required().hasArg().desc("the classpath used in the analysis")
+                .build();
+
+        Option inputFileOption = Option.builder("csv").argName("csv")
+                .required().hasArg().desc("the input csv files with the list of changes")
+                .build();
+
+        Option analysisOption = Option.builder("mode").argName("mode")
+                .hasArg().desc("analysis mode [dataflow, reachability]")
+                .build();
+
+        options.addOption(classPathOption);
+        options.addOption(inputFileOption);
+        options.addOption(analysisOption);
+    }
+    private void runAnalysis(String classPath, List<String> conflicts) {
+
       PackManager.v().getPack("jtp").add(
         new Transform("jtp.df", new BodyTransformer() {
-                    @Override
-                    protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-          analysis = new DataFlowAnalysis(new ExceptionalUnitGraph(body), definition);
-         }
+           @Override
+            protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
+                analysis = new DataFlowAnalysis(new ExceptionalUnitGraph(body), definition);
+            }
          }));
         soot.Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-cp"
                 , classPath, targetClasses.stream().collect(Collectors.joining(" "))});
+        conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
     }
 
 

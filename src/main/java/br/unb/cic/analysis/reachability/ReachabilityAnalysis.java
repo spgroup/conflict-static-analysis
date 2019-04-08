@@ -2,6 +2,7 @@ package br.unb.cic.analysis.reachability;
 
 import java.util.*;
 
+import br.unb.cic.analysis.model.Conflict;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.connectivity.ConnectivityInspector;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -27,7 +28,7 @@ public class ReachabilityAnalysis extends SceneTransformer {
 	private int maxDepth;
 	private AbstractMergeConflictDefinition definition;
 	private Graph<Statement, DefaultEdge> flowGraph;
-	private Set<String> conflicts;
+	private Set<Conflict> conflicts;
 
 	/**
 	 * Default constuctor using the max indirection
@@ -67,8 +68,7 @@ public class ReachabilityAnalysis extends SceneTransformer {
 		for(Statement source : definition.getSourceStatements()) {
 			for (Statement sink : definition.getSinkStatements()) {
 				if(inspector.pathExists(source, sink)) {
-					conflicts.add(String.format("conflict from %s line(%d) to %s line(%d)", source.getSootClass().getName(),
-						source.getSourceCodeLineNumber(),  sink.getSootClass().getName(), sink.getSourceCodeLineNumber()));
+					conflicts.add(new Conflict(source, sink));
 				}
 			}
 		}
@@ -79,7 +79,7 @@ public class ReachabilityAnalysis extends SceneTransformer {
 	 * Returns the list of conflicts from sources to sinks.
 	 * @return paths from source statements to sink statements.
 	 */
-	public Set<String> getConflicts() {
+	public Set<Conflict> getConflicts() {
 		return conflicts;
 	}
 

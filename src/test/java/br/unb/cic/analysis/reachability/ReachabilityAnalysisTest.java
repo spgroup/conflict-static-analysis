@@ -3,6 +3,7 @@ package br.unb.cic.analysis.reachability;
 import java.util.*;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+import br.unb.cic.analysis.df.Collector;
 import br.unb.cic.analysis.model.Pair;
 import org.junit.Assert;
 import org.junit.Before;
@@ -20,11 +21,10 @@ public class ReachabilityAnalysisTest {
 	private ReachabilityAnalysis interproceduralDifferentClasses;
 	private ReachabilityAnalysis intraprocedural;
 
-
-
 	@Before
 	public void configure() {
 		G.reset();
+		Collector.instance().clear();
 		interproceduralSameClass = new ReachabilityAnalysis(new AbstractMergeConflictDefinition() {
 			@Override
 			protected Map<String, List<Integer>> sourceDefinitions() {

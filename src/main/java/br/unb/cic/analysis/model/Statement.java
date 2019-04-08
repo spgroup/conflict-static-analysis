@@ -70,12 +70,13 @@ public class Statement {
 		return Objects.equals(sootClass, statement.sootClass) &&
 				Objects.equals(sootMethod, statement.sootMethod) &&
 				Objects.equals(unit, statement.unit) &&
-				type == statement.type;
+				type == statement.type &&
+				Objects.equals(sourceCodeLineNumber, statement.sourceCodeLineNumber);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(sootClass, sootMethod, unit, type);
+		return Objects.hash(sootClass, sootMethod, unit, type, sourceCodeLineNumber);
 	}
 
 	public String toString() {
