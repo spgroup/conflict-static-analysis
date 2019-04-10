@@ -1,13 +1,13 @@
 package br.unb.cic.analysis.df;
 
-import java.util.ArrayList;
+import br.unb.cic.analysis.model.Conflict;
+
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-public class Collector {
+class Collector {
 
-    private Set<String> conflicts;
+    private Set<Conflict> conflicts;
     private static Collector instance;
 
     public Collector() {
@@ -21,11 +21,11 @@ public class Collector {
     }
 
 
-    public void addConflict(String conflict) {
+    public void addConflict(Conflict conflict) {
         conflicts.add(conflict);
     }
 
-    public Set<String> getConflicts() {
+    public Set<Conflict> getConflicts() {
         return conflicts;
     }
 

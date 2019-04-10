@@ -1,21 +1,27 @@
 package br.unb.cic.analysis.pt;
 
-import br.unb.cic.analysis.df.Collector;
+import br.unb.cic.analysis.AbstractAnalysis;
+import br.unb.cic.analysis.model.Conflict;
 import soot.*;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Statement;
+import soot.jimple.parser.analysis.Analysis;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-public class PointsToAnalysis  {
+public class PointsToAnalysis implements AbstractAnalysis {
 
-    AbstractMergeConflictDefinition definition;
+    private AbstractMergeConflictDefinition definition;
+    private Set<Conflict> conflicts;
     private soot.PointsToAnalysis pa;
 
     public PointsToAnalysis(AbstractMergeConflictDefinition definition) {
         this.definition = definition;
+        this.conflicts = new HashSet<>();
         this.pa = Scene.v().getPointsToAnalysis();
     }
 
@@ -29,7 +35,7 @@ public class PointsToAnalysis  {
                 PointsToSet sinkSet = pa.reachingObjects(sink);
 
                 if(sourceSet.hasNonEmptyIntersection(sinkSet)) {
-                    Collector.instance().addConflict("Conflict: " + source + "might points to " + sink);
+                    throw new RuntimeException("Not implemented yet");
                 }
             }
         }
@@ -49,5 +55,15 @@ public class PointsToAnalysis  {
                 .filter(vb -> vb.getValue() instanceof  Local)
                 .map(vb -> (Local)vb.getValue())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void clear() {
+        conflicts.clear();
+    }
+
+    @Override
+    public Set<Conflict> getConflicts() {
+        return conflicts;
     }
 }

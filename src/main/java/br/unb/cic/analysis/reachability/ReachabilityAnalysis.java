@@ -2,6 +2,7 @@ package br.unb.cic.analysis.reachability;
 
 import java.util.*;
 
+import br.unb.cic.analysis.AbstractAnalysis;
 import br.unb.cic.analysis.model.Conflict;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.connectivity.ConnectivityInspector;
@@ -24,7 +25,7 @@ import br.unb.cic.analysis.model.Statement;
  *
  * @author rbonifacio
  */
-public class ReachabilityAnalysis extends SceneTransformer {
+public class ReachabilityAnalysis extends SceneTransformer implements AbstractAnalysis {
 	private int maxDepth;
 	private AbstractMergeConflictDefinition definition;
 	private Graph<Statement, DefaultEdge> flowGraph;
@@ -75,13 +76,16 @@ public class ReachabilityAnalysis extends SceneTransformer {
 
 	}
 
-	/**
-	 * Returns the list of conflicts from sources to sinks.
-	 * @return paths from source statements to sink statements.
-	 */
+	@Override
+	public void clear() {
+		conflicts.clear();
+	}
+
+	@Override
 	public Set<Conflict> getConflicts() {
 		return conflicts;
 	}
+
 
 	/*
 	 * This is just the "entry point" of our inter-procedural
