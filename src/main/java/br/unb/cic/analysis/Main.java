@@ -30,12 +30,12 @@ public class Main {
             CommandLineParser parser = new DefaultParser();
             CommandLine cmd = parser.parse(m.options, args);
 
+            String mode = "data-flow";
             if (cmd.hasOption("mode")) {
-                // TODO: we should work with different modes!
+                mode = cmd.getOptionValue("mode");
             }
-
             m.loadDefinition(cmd.getOptionValue("csv"));
-            m.runAnalysis(cmd.getOptionValue("cp"), m.conflicts);
+            m.runAnalysis(cmd.getOptionValue("cp"), mode);
             m.conflicts.stream().forEach(c -> System.out.println(c));
         }
         catch(ParseException e) {
@@ -47,6 +47,28 @@ public class Main {
             e.printStackTrace();
         }
     }
+
+    private void runAnalysis(String classPath, String mode) {
+        switch (mode) {
+            case "data-flow": {
+                PackManager.v().getPack("jtp").add(
+                        new Transform("jtp.df", new BodyTransformer() {
+                            @Override
+                            protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
+                                analysis = new DataFlowAnalysis(new ExceptionalUnitGraph(body), definition);
+                            }
+                        }));
+                soot.Main.main(new String[]{"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-cp"
+                        , classPath, targetClasses.stream().collect(Collectors.joining(" "))});
+                conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
+                break;
+            }
+            case "reachability" : {
+                throw new RuntimeException("not implemented yet");
+            }
+        }
+    }
+
 
     private void createOptions() {
         options = new Options();
@@ -66,20 +88,6 @@ public class Main {
         options.addOption(inputFileOption);
         options.addOption(analysisOption);
     }
-    private void runAnalysis(String classPath, List<String> conflicts) {
-
-      PackManager.v().getPack("jtp").add(
-        new Transform("jtp.df", new BodyTransformer() {
-           @Override
-            protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-                analysis = new DataFlowAnalysis(new ExceptionalUnitGraph(body), definition);
-            }
-         }));
-        soot.Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-cp"
-                , classPath, targetClasses.stream().collect(Collectors.joining(" "))});
-        conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
-    }
-
 
     private void loadDefinition(String filePath) throws Exception {
         MergeConflictReader reader = new DefaultReader(filePath);
