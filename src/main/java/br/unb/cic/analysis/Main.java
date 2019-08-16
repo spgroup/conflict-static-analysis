@@ -4,6 +4,7 @@ import br.unb.cic.analysis.df.DataFlowAnalysis;
 import br.unb.cic.analysis.io.DefaultReader;
 import br.unb.cic.analysis.io.MergeConflictReader;
 import br.unb.cic.analysis.model.Statement;
+import br.unb.cic.diffclass.DiffClass;
 import org.apache.commons.cli.*;
 import soot.Body;
 import soot.BodyTransformer;
@@ -13,6 +14,8 @@ import soot.toolkits.graph.ExceptionalUnitGraph;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Map.Entry;
 
 public class Main {
 
@@ -33,8 +36,14 @@ public class Main {
             if (cmd.hasOption("mode")) {
                 // TODO: we should work with different modes!
             }
-
-            m.loadDefinition(cmd.getOptionValue("csv"));
+            if (cmd.hasOption("repo") && cmd.hasOption("commit")) {
+                DiffClass module = new DiffClass();
+                module.getGitRepository(cmd.getOptionValue("repo"));
+                module.diffAnalysis(cmd.getOptionValue("commit"));
+                m.loadDefinitionFromDiffAnalysis(module);
+            } else {
+                m.loadDefinition(cmd.getOptionValue("csv"));
+            }
             m.runAnalysis(cmd.getOptionValue("cp"), m.conflicts);
             m.conflicts.stream().forEach(c -> System.out.println(c));
         }
@@ -55,16 +64,26 @@ public class Main {
                 .build();
 
         Option inputFileOption = Option.builder("csv").argName("csv")
-                .required().hasArg().desc("the input csv files with the list of changes")
+                .hasArg().desc("the input csv files with the list of changes")
                 .build();
 
         Option analysisOption = Option.builder("mode").argName("mode")
                 .hasArg().desc("analysis mode [dataflow, reachability]")
                 .build();
 
+        Option repoOption = Option.builder("repo").argName("repo")
+                .hasArg().desc("the path or url of git repository")
+                .build();
+
+        Option commitOption = Option.builder("commit").argName("commit")
+                .hasArg().desc("the commit merge to analysis")
+                .build();
+
         options.addOption(classPathOption);
         options.addOption(inputFileOption);
         options.addOption(analysisOption);
+        options.addOption(repoOption);
+        options.addOption(commitOption);
     }
     private void runAnalysis(String classPath, List<String> conflicts) {
 
@@ -117,6 +136,45 @@ public class Main {
             List<Integer> lines = new ArrayList<>();
             lines.add(change.getLineNumber());
             map.put(change.getClassName(), lines);
+        }
+    }
+
+    private void loadDefinitionFromDiffAnalysis(DiffClass module) throws Exception {
+        ArrayList<Entry<String, Integer>> sourceClasses = module.getSourceModifiedClasses();
+        ArrayList<Entry<String, Integer>> sinkClasses = module.getSinkModifiedClasses();
+        Map<String, List<Integer>> sourceDefs = new HashMap<>();
+        Map<String, List<Integer>> sinkDefs = new HashMap<>();
+        targetClasses = new HashSet<>();
+        for (Entry<String, Integer> change : sourceClasses) {
+            addChangeFromDiffAnalysis(sourceDefs, change);
+            targetClasses.add(change.getKey());
+        }
+        for (Entry<String, Integer> change : sinkClasses) {
+            addChangeFromDiffAnalysis(sinkDefs, change);
+            targetClasses.add(change.getKey());
+        }
+
+        definition = new AbstractMergeConflictDefinition() {
+            @Override
+            protected Map<String, List<Integer>> sourceDefinitions() {
+                return sourceDefs;
+            }
+
+            @Override
+            protected Map<String, List<Integer>> sinkDefinitions() {
+                return sinkDefs;
+            }
+        };
+    }
+
+    private void addChangeFromDiffAnalysis(Map<String, List<Integer>> map, Entry<String, Integer> change) {
+        if(map.containsKey(change.getKey())) {
+            map.get(change.getKey()).add(change.getValue());
+        }
+        else {
+            List<Integer> lines = new ArrayList<>();
+            lines.add(change.getValue());
+            map.put(change.getKey(), lines);
         }
     }
 }
