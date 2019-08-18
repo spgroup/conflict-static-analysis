@@ -24,7 +24,7 @@ Current supported algorithms:
 
 ### Build
 
-To build the project, you will need of Maven and Java 8 or higher. Run the command below:
+To build the project, you will need Maven and Java 8 (or higher). Run the command below:
 
 ```SHELL
 mvn clean install -DskipTests
@@ -32,35 +32,35 @@ mvn clean install -DskipTests
 
 ### Execute
 
-To execute, you will need of a Java project to analyze and the set of lines changed in this project.
-This set could be in a .csv file, but if the project utilize Git, you can use the DiffClass Analyzer,
-for this you will need of will need of hash of merge commit to get the set of modified lines. See the CLI parameters below:
+To execute, you need a Java project to analyze and a set of lines changed in this project.
+This set could be in a .csv file, but if the project uses Git, you can use the DiffClass Analyzer project.
+In this case, tyou need the hash of a merge commit to get the set of modified lines. See the CLI parameters below:
 
 
 #### -cp
 The path of the folder containing the .class files of the project to be analyzed.
-Remember, you need to compile the project to be analyzed. This parameters is required.
+Remember, you need to compile the project under analysis. This parameters is required.
 
 #### -csv
-The input csv files with the list of changes. This parameter or -commit must be provide.
+The input csv files with the list of changes. You must provider either this parameter or the ```-commit``` parameter.
 
 #### -commit
-the merge commit hash. This parameter or -csv must be provide.
+the merge commit hash. See the comment above regarding the -csv parameter.
 
 #### -mode
 Analysis mode: dataflow or reachability.
 
 #### -repo
-The folder path or URL of git project to be analyzed.
+The folder path or URL of the git project under analysis.
 
-Usage example a Java project, with a .csv file.
+Usage example of a Java project, with a .csv file.
 
 ```SHELL
 mvn exec:java -Dexec.mainClass="br.unb.cic.analysis.Main" \
 -Dexec.args="-csv /path/of/csv/file.csv -cp /path/of/class/files/folder"
 ```
 
-Usage example with a local Java git project, without a .csv file.
+Usage example with of a local Java git project, without a .csv file.
 
 ```SHELL
 mvn exec:java -Dexec.mainClass="br.unb.cic.analysis.Main" \
