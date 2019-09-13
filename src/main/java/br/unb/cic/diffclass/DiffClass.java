@@ -72,9 +72,9 @@ public class DiffClass {
 
   public void getGitRepository(String pathOrUrl) {
       if (pathOrUrl.startsWith("http")) {
-          this getRemoteGitRepository(pathOrUrl);
+          getRemoteGitRepository(pathOrUrl);
       } else {
-          this getLocalGitRepository(pathOrUrl);
+          getLocalGitRepository(pathOrUrl);
       }
   }
 
