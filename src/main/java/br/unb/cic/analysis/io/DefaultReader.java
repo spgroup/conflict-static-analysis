@@ -2,7 +2,6 @@ package br.unb.cic.analysis.io;
 
 import br.unb.cic.analysis.ClassChangeDefinition;
 import br.unb.cic.analysis.model.Statement;
-import com.sun.scenario.effect.Merge;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
