@@ -30,6 +30,11 @@ To build the project, you will need Maven and Java 8 (or higher). Run the comman
 mvn clean install -DskipTests
 ```
 
+You can also create an executable jar file using: 
+
+```SHELL
+mvn compile assemly:single
+```
 ### Execute
 
 To execute, you need a Java project to analyze and a set of lines changed in this project.
