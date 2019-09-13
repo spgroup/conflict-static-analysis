@@ -4,6 +4,7 @@ import br.unb.cic.analysis.df.DataFlowAnalysis;
 import br.unb.cic.analysis.io.DefaultReader;
 import br.unb.cic.analysis.io.MergeConflictReader;
 import br.unb.cic.analysis.model.Statement;
+import br.unb.cic.analysis.reachability.ReachabilityAnalysis;
 import br.unb.cic.diffclass.DiffClass;
 import org.apache.commons.cli.*;
 import soot.Body;
@@ -32,9 +33,11 @@ public class Main {
 
             CommandLineParser parser = new DefaultParser();
             CommandLine cmd = parser.parse(m.options, args);
-
+            
+            String mode = "dataflow"; 
+            
             if (cmd.hasOption("mode")) {
-                // TODO: we should work with different modes!
+                mode = cmd.getOptionValue("mode");
             }
             if (cmd.hasOption("repo") && cmd.hasOption("commit")) {
                 DiffClass module = new DiffClass();
@@ -44,7 +47,7 @@ public class Main {
             } else {
                 m.loadDefinition(cmd.getOptionValue("csv"));
             }
-            m.runAnalysis(cmd.getOptionValue("cp"), m.conflicts);
+            m.runAnalysis(mode, cmd.getOptionValue("cp"), m.conflicts);
             m.conflicts.stream().forEach(c -> System.out.println(c));
         }
         catch(ParseException e) {
@@ -85,8 +88,20 @@ public class Main {
         options.addOption(repoOption);
         options.addOption(commitOption);
     }
-    private void runAnalysis(String classPath, List<String> conflicts) {
-
+    
+    private void runAnalysis(String mode, String classpath, List<String> conflicts) {
+    	switch(mode) {
+    	  case "dataflow": runDataFlowAnalysis(classpath, conflicts); 
+    	  case "reachability": runReachabilityAnalysis(classpath, conflicts);
+    	  default: {
+    		  System.out.println("Error: " + "invalid mode " + mode);
+              HelpFormatter formatter = new HelpFormatter();
+              formatter.printHelp( "java Main", options );
+    	  }
+    	}
+    }
+    
+    private void runDataFlowAnalysis(String classpath, List<String> conflicts) {
       PackManager.v().getPack("jtp").add(
         new Transform("jtp.df", new BodyTransformer() {
            @Override
@@ -95,8 +110,25 @@ public class Main {
             }
          }));
         soot.Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-cp"
-                , classPath, targetClasses.stream().collect(Collectors.joining(" "))});
+                , classpath, targetClasses.stream().collect(Collectors.joining(" "))});
         conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
+    }
+    
+    /*
+     * TODO: run some test cases regarding the reachability 
+     * mode. 
+     */
+    private void runReachabilityAnalysis(String classpath, List<String> conflicts) {
+    	ReachabilityAnalysis analysis = new ReachabilityAnalysis(definition);
+    	
+    	PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
+        soot.options.Options.v().setPhaseOption("cg.spark", "on");
+        soot.options.Options.v().setPhaseOption("cg.spark", "verbose:true");
+        soot.Main.main(new String[]{"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-cp",
+                classpath, targetClasses.stream().collect(Collectors.joining(" "))});
+        
+        conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
+    	
     }
 
 
