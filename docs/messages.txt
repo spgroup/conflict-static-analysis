@@ -1,0 +1,40 @@
+Oi Rodrigo,
+
+Rafael evoluiu bastante com a implementação da infra-estrutura para construção do dataset para o estudo de conflitos semânticos.
+
+Dá, por favor, uma olhada em 
+
+ https://github.com/rafaelmotaalves/partial-results
+
+Em particular, verifica se 
+
+ https://github.com/rafaelmotaalves/partial-results/blob/master/data/results-with-builds.csv
+
+está no formato que a sua ferramenta espera.
+
+Nesta área
+
+ https://github.com/rafaelmotaalves/partial-results/tree/master/files
+
+temos os merge cenários (base, left, right e merge commits) e a build associada. Olha, por exemplo, este cenário:
+
+ https://github.com/rafaelmotaalves/partial-results/tree/master/files/quickml/1bb20ae483ff392bd68c4b9592b7a96440d8f805
+
+E verifica se aí tem o suficiente para rodar a análise.
+
+Qualquer ajuste, é só falar que Rafael desenrola rápido.
+
+Alguns cenários não têm a build porque houve problema de compilação (conflito de build), ou é um projeto maior dividido em subprojetos. Rafael vai ajustar a infra para filtrar esses casos.
+
+Abraços,
+Paulo
+
+----- Rafael (29/08)
+
+Oi Rodrigo/Paulo,
+
+A planilha que eu tenho, só tem 4 casos de conflito, mas apenas um passa pelo filtros da aplicação:
+
+resty-gwt;867b917c43c32acbdcac55767e7f04334006c866;org.fusesource.restygwt.rebind.DirectRestServiceInterfaceClassCreator;getMethodCallback(JMethod);[83, 84, 85];[];[83, 84, 85, 90, 91, 92];[]
+A outra planilha eu não estou conseguindo verificar por causa da forma que os cenários estão sendo identificados. 
+
