@@ -1,5 +1,6 @@
 package br.unb.cic.analysis;
 
+import java.io.FileWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
@@ -50,7 +51,9 @@ public class Main {
                 m.loadDefinition(cmd.getOptionValue("csv"));
             }
             m.runAnalysis(mode, cmd.getOptionValue("cp"), m.conflicts);
-            m.conflicts.stream().forEach(c -> System.out.println(c));
+            
+            m.exportResults();
+            
         }
         catch(ParseException e) {
             System.out.println("Error: " + e.getMessage());
@@ -62,6 +65,32 @@ public class Main {
         }
     }
 
+    private void exportResults() throws Exception {
+    	System.out.println(" Analysis results");
+        System.out.println("----------------------------");
+        
+        if(conflicts.size() == 0) {
+        	System.out.println(" No conflicts detected");
+        	System.out.println("----------------------------");
+        	return;
+        }
+    
+        System.out.println(" Number of conflicts: " + conflicts.size());
+        final String out = "out.txt"; 
+        final FileWriter fw = new FileWriter(out);
+        conflicts.stream().forEach(c -> {
+    		try { 
+    			fw.write(c + "\n");
+    		}
+    		catch(Exception e) {
+    			System.out.println("error exporting the results " + e.getMessage());
+    		}
+    	});
+        fw.close();
+        System.out.println(" Results exported to " + out);
+        System.out.println("----------------------------");
+    }
+    
     private void createOptions() {
         options = new Options();
         Option classPathOption = Option.builder("cp").argName("class-path")
@@ -94,8 +123,8 @@ public class Main {
     
     private void runAnalysis(String mode, String classpath, List<String> conflicts) {
     	switch(mode) {
-    	  case "dataflow": runDataFlowAnalysis(classpath, conflicts); 
-    	  case "reachability": runReachabilityAnalysis(classpath, conflicts);
+    	  case "dataflow": runDataFlowAnalysis(classpath, conflicts); break;
+    	  case "reachability": runReachabilityAnalysis(classpath, conflicts); break;
     	  default: {
     		  System.out.println("Error: " + "invalid mode " + mode);
               HelpFormatter formatter = new HelpFormatter();
@@ -106,7 +135,7 @@ public class Main {
     }
     
     private void runDataFlowAnalysis(String classpath, List<String> conflicts) {
-      PackManager.v().getPack("jtp").add(
+      PackManager.v().getPack("jtp").add(	
         new Transform("jtp.df", new BodyTransformer() {
            @Override
             protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
