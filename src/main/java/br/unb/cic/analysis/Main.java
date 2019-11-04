@@ -1,5 +1,6 @@
 package br.unb.cic.analysis;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -50,7 +51,7 @@ public class Main {
             } else {
                 m.loadDefinition(cmd.getOptionValue("csv"));
             }
-            m.runAnalysis(mode, cmd.getOptionValue("cp"), m.conflicts);
+            m.runAnalysis(mode, m.parseClassPath(cmd.getOptionValue("cp")), m.conflicts);
             
             m.exportResults();
             
@@ -63,6 +64,20 @@ public class Main {
         catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private String parseClassPath(String cp) {
+        File f = new File(cp);
+        String res = cp;
+        if(f.exists() && f.isDirectory()) {
+            for(File file : f.listFiles()) {
+                if(file.getName().endsWith(".jar")) {
+                    res += ":";
+                    res += file.getAbsolutePath();
+                }
+            }
+        }
+        return res;
     }
 
     private void exportResults() throws Exception {
