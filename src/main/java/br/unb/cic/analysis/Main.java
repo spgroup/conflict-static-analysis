@@ -137,14 +137,17 @@ public class Main {
     private void runDataFlowAnalysis(String classpath, List<String> conflicts) {
       PackManager.v().getPack("jtp").add(	
         new Transform("jtp.df", new BodyTransformer() {
-           @Override
+            @Override
             protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-                analysis = new DataFlowAnalysis(new ExceptionalUnitGraph(body), definition);
+               analysis = new DataFlowAnalysis(new ExceptionalUnitGraph(body), definition);
             }
          }));
-        soot.Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-cp"
+        soot.Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-v", "-keep-line-number", "-cp"
                 , classpath, targetClasses.stream().collect(Collectors.joining(" "))});
-        conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
+
+        if(analysis != null) {
+            conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
+        }
     }
     
     /*
@@ -157,7 +160,7 @@ public class Main {
     	PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
         soot.options.Options.v().setPhaseOption("cg.spark", "on");
         soot.options.Options.v().setPhaseOption("cg.spark", "verbose:true");
-        soot.Main.main(new String[]{"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-cp",
+        soot.Main.main(new String[]{"-w", "-allow-phantom-refs", "-f", "J", "-v", "-keep-line-number", "-cp",
                 classpath, targetClasses.stream().collect(Collectors.joining(" "))});
         
         conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
