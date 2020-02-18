@@ -66,7 +66,7 @@ public class InterproceduralSameClassReachabilityAnalysisTest {
 		//PackManager.v().getPack("wjtp").add(new Transform("wjtp.interproceduralDifferentClasses", interproceduralDifferentClasses));
 		Options.v().setPhaseOption("cg.spark", "on");
 		Options.v().setPhaseOption("cg.spark", "verbose:true");
-		String testClasses = "/Users/rbonifacio/tmp/test-classes/";
+		String testClasses = "target/test-classes/";
 		soot.Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-process-dir", testClasses});
 	}
 

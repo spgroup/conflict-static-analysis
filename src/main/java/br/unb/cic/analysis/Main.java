@@ -128,11 +128,14 @@ public class Main {
                 .hasArg().desc("the commit merge to analysis")
                 .build();
 
+        Option verbose = Option.builder("verbose").argName("verbose").desc("run in the verbose mode").build();
+
         options.addOption(classPathOption);
         options.addOption(inputFileOption);
         options.addOption(analysisOption);
         options.addOption(repoOption);
         options.addOption(commitOption);
+        options.addOption(verbose);
     }
 
     
