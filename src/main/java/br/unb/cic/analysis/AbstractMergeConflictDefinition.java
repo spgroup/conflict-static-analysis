@@ -69,9 +69,9 @@ public abstract class AbstractMergeConflictDefinition {
         List<Statement> statements = new ArrayList<>();
         for(String className: definitions.keySet()) {
             SootClass c = Scene.v().getSootClass(className);
-            if(c == null) continue;
+            if(c == null || c.resolvingLevel() != SootClass.BODIES) continue;
             for(SootMethod m: c.getMethods()) {
-                for(Unit u: m.getActiveBody().getUnits()) {
+                for(Unit u: m.retrieveActiveBody().getUnits()) {
                     if(definitions.get(className).contains(u.getJavaSourceStartLineNumber())) {
                         Statement stmt = Statement.builder().setClass(c).setMethod(m)
                                 .setUnit(u).setType(type).setSourceCodeLineNumber(u.getJavaSourceStartLineNumber())
