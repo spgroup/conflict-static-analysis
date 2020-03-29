@@ -1,20 +1,20 @@
-# Semantic Merge Conflicts Soot Library
+# Static Analyses Algorithms for Detecting Semantic Conflicts
 
 This project aims to implement a library of soot analysis to detect semantic merge conflicts.
 Current supported algorithms:
 
    * Intraprocedural def-use conflicts: This algorithm identifies conflicts
-    that occur when a contribution from "left" defines a variable
-    that a contribution from "right" uses. Its implementation is mostly based on
-    intraprocedural dataflow analysis, and is quite similar to the 
-    reach definition analysis. 
+       that occur when a contribution from "left" defines a variable
+           that a contribution from "right" uses. Its implementation is mostly based on
+	       intraprocedural dataflow analysis, and is quite similar to the
+	           reach definition analysis.
 
    * Reachability conflicts: This algorithm identifies conflicts that occur
-   when there is a interprocedural flow from a left statement contribution from
-   to a right statement contribution
+      when there is a interprocedural flow from a left statement contribution from
+         to a right statement contribution
 
    * SVFA: This algorithm identifies data flows from source and sink statements
-   using a interpreocedura sparse value flow graph. It is too exeperimental yet.
+      using a interpreocedura sparse value flow graph. It is too exeperimental yet.
 
 ## Usage
 
@@ -22,7 +22,7 @@ Current supported algorithms:
 
 To build the project, you will need Maven and Java 8 (or higher).
 
-First, build and install the [svfa-scala](https://github.com/rbonifacio/svfa-scala) library. 
+First, build and install the [svfa-scala](https://github.com/rbonifacio/svfa-scala) library.
 
 After that, run the following commands:
 
@@ -30,7 +30,7 @@ After that, run the following commands:
 mvn clean install -DskipTests
 ```
 
-You can also create an executable jar file using: 
+You can also create an executable jar file using:
 
 ```SHELL
 mvn compile assemly:single
