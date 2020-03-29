@@ -22,7 +22,7 @@ Current supported algorithms:
 
 To build the project, you will need Maven and Java 8 (or higher).
 
-First, build and install the [svfa-soot](https://github.com/rbonifacio/svfa-scala) implementation. 
+First, build and install the [svfa-scala](https://github.com/rbonifacio/svfa-scala) library. 
 
 After that, run the following commands:
 
