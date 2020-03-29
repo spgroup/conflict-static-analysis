@@ -1,6 +1,8 @@
 package br.unb.cic.analysis.svfa;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+import br.unb.cic.soot.graph.Graph;
+import br.unb.cic.soot.graph.Node;
 import org.junit.Before;
 import org.junit.Test;
 import scalax.collection.GraphBase;
@@ -43,7 +45,7 @@ public class SVFATest {
     public void testSVFAnalysisExpectingOneConflict() {
         analysis.buildSparseValueFlowGraph();
 
-        scalax.collection.mutable.Graph g = analysis.svg();
+        Graph<Node> g = analysis.svg();
 
         System.out.println(g.nodes().size());
     }

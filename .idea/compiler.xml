@@ -6,8 +6,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="soot-analysis (1)" />
-        <module name="soot-analysis (2)" />
+        <module name="soot-analysis" />
       </profile>
     </annotationProcessing>
   </component>

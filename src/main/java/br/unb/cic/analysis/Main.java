@@ -7,8 +7,13 @@ import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
+import br.unb.cic.analysis.svfa.SVFAAnalysis;
+import br.unb.cic.soot.graph.Node;
 import org.apache.commons.cli.*;
 
+import scala.collection.JavaConverters;
+import scalax.collection.GraphEdge;
+import scalax.collection.mutable.Graph;
 import soot.Body;
 import soot.BodyTransformer;
 import soot.PackManager;
@@ -141,8 +146,9 @@ public class Main {
     
     private void runAnalysis(String mode, String classpath, List<String> conflicts) {
     	switch(mode) {
-    	  case "dataflow": runDataFlowAnalysis(classpath, conflicts); break;
-    	  case "reachability": runReachabilityAnalysis(classpath, conflicts); break;
+    	  case "dataflow": runDataFlowAnalysis(classpath); break;
+    	  case "reachability": runReachabilityAnalysis(classpath); break;
+            case "svfa": runSparseValueFlowAnalysis(classpath); break;
     	  default: {
     		  System.out.println("Error: " + "invalid mode " + mode);
               HelpFormatter formatter = new HelpFormatter();
@@ -152,7 +158,7 @@ public class Main {
     	}
     }
     
-    private void runDataFlowAnalysis(String classpath, List<String> conflicts) {
+    private void runDataFlowAnalysis(String classpath) {
       PackManager.v().getPack("jtp").add(	
         new Transform("jtp.df", new BodyTransformer() {
             @Override
@@ -169,10 +175,12 @@ public class Main {
     }
     
     /*
-     * TODO: run some test cases regarding the reachability 
-     * mode. 
+     * After discussing this algorithm with the researchers at
+     * UFPE, we decided that we should not support this analysis
+     * any more. It might lead to a huge number of false-positives.
      */
-    private void runReachabilityAnalysis(String classpath, List<String> conflicts) {
+    @Deprecated
+    private void runReachabilityAnalysis(String classpath) {
     	ReachabilityAnalysis analysis = new ReachabilityAnalysis(definition);
     	
     	PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
@@ -185,6 +193,15 @@ public class Main {
     	
     }
 
+    private void runSparseValueFlowAnalysis(String classpath) {
+        SVFAAnalysis analysis = new SVFAAnalysis(classpath, definition);
+        analysis.buildSparseValueFlowGraph();
+        System.out.println(analysis.svgToDotModel());
+        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflicts())
+                .stream()
+                .map(p -> p.toString())
+                .collect(Collectors.toList()));
+    }
 
     private void loadDefinition(String filePath) throws Exception {
         MergeConflictReader reader = new DefaultReader(filePath);

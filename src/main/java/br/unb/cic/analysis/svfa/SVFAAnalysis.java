@@ -1,10 +1,11 @@
 package br.unb.cic.analysis.svfa;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+
 import br.unb.cic.soot.graph.NodeType;
-import br.unb.cic.soot.graph.SimpleNode;
-import br.unb.cic.soot.graph.SinkNode;
 import br.unb.cic.soot.graph.SourceNode;
+import br.unb.cic.soot.graph.SinkNode;
+import br.unb.cic.soot.graph.SimpleNode;
 import br.unb.cic.soot.svfa.jimple.JSVFA;
 import scala.collection.JavaConverters;
 import scala.collection.immutable.List;
@@ -49,12 +50,12 @@ public class SVFAAnalysis extends JSVFA {
     @Override
     public NodeType analyze(Unit unit) {
         if(isSource(unit)) {
-            return new SourceNode();
+            return SourceNode.instance();
         }
         else if(isSink(unit)) {
-            return new SinkNode();
+            return SinkNode.instance();
         }
-        return new SimpleNode();
+        return SimpleNode.instance();
     }
 
     private boolean isSource(Unit unit) {
