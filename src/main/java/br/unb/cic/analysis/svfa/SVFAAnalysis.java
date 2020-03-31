@@ -15,7 +15,7 @@ import soot.Unit;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public class SVFAAnalysis extends JSVFA {
+public class SVFAAnalysis extends JSVFA  {
 
     private String cp;
     private AbstractMergeConflictDefinition definition;
@@ -70,5 +70,10 @@ public class SVFAAnalysis extends JSVFA {
                 .stream()
                 .map(stmt -> stmt.getUnit())
                 .anyMatch(u -> u.equals(unit));
+    }
+
+    @Override
+    public boolean isFieldSensitiveAnalysis() {
+        return true;
     }
 }
