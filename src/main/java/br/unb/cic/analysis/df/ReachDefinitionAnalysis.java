@@ -7,10 +7,12 @@ import java.util.stream.Collectors;
 import br.unb.cic.analysis.AbstractAnalysis;
 import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
+import soot.Body;
 import soot.Local;
 import soot.Unit;
 import soot.ValueBox;
 import soot.toolkits.graph.DirectedGraph;
+import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
 import soot.toolkits.scalar.ForwardFlowAnalysis;
@@ -23,8 +25,9 @@ import br.unb.cic.analysis.AbstractMergeConflictDefinition;
  * usage scenarios. In this case we reduce this problem
  * to a def-use analysis.
  */
-public class DataFlowAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<DataFlowAbstraction>> implements AbstractAnalysis  {
+public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<DataFlowAbstraction>> implements AbstractAnalysis  {
 
+	protected Body methodBody;
 	private AbstractMergeConflictDefinition definition;
 	private Set<Conflict> conflicts;
 
@@ -35,12 +38,10 @@ public class DataFlowAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<DataFlow
 	 * flow analysis must receive as an argument a graph, set up
 	 * essential information and call the doAnalysis method of the
 	 * super class.
-	 *
-	 * @param graph the flow graph (possible from a method)
-	 * @param definition a set of conflict definitions.
 	 */
-	public DataFlowAnalysis(DirectedGraph<Unit> graph, AbstractMergeConflictDefinition definition) {
-		super(graph);
+	public ReachDefinitionAnalysis(Body methodBody, AbstractMergeConflictDefinition definition) {
+		super(new ExceptionalUnitGraph(methodBody));
+		this.methodBody = methodBody;
 		this.definition = definition;
 		this.conflicts = new HashSet<>();
 		definition.loadSourceStatements();
@@ -69,7 +70,7 @@ public class DataFlowAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<DataFlow
 			}
 		}
   		in.difference(killSet, temp);
-		temp.union(gen(u), out);
+		temp.union(gen(u, in), out);
 	}
 
 	/*
@@ -91,7 +92,7 @@ public class DataFlowAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<DataFlow
 	 * what elements should be generated, when considering the
 	 * statement u.
 	 */
-	private FlowSet<DataFlowAbstraction> gen(Unit u) {
+	protected FlowSet<DataFlowAbstraction> gen(Unit u, FlowSet<DataFlowAbstraction> in) {
 		FlowSet<DataFlowAbstraction> res = new ArraySparseSet<>();
 		if(isSourceStatement(u)) {
 			for(ValueBox v : u.getDefBoxes()) {
@@ -149,6 +150,15 @@ public class DataFlowAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<DataFlow
 	protected Statement findSinkStatement(Unit d) {
 		return definition.getSinkStatements().stream().filter(s -> s.getUnit().equals(d)).
 				findFirst().get();
+	}
+
+	protected Statement findStatement(Unit d) {
+		return Statement.builder()
+				.setClass(methodBody.getMethod().getDeclaringClass())
+				.setMethod(methodBody.getMethod())
+				.setType(Statement.Type.SOURCE)
+				.setUnit(d)
+				.setSourceCodeLineNumber(d.getJavaSourceStartLineNumber()).build();
 	}
 
 	protected boolean isSourceStatement(Unit d) {

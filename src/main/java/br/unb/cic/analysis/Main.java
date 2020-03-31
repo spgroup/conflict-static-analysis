@@ -7,20 +7,17 @@ import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
+import br.unb.cic.analysis.df.ReachDefinitionAnalysis;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
-import br.unb.cic.soot.graph.Node;
 import org.apache.commons.cli.*;
 
 import scala.collection.JavaConverters;
-import scalax.collection.GraphEdge;
-import scalax.collection.mutable.Graph;
 import soot.Body;
 import soot.BodyTransformer;
 import soot.PackManager;
 import soot.Transform;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 
-import br.unb.cic.analysis.df.DataFlowAnalysis;
 import br.unb.cic.analysis.io.DefaultReader;
 import br.unb.cic.analysis.io.MergeConflictReader;
 import br.unb.cic.analysis.model.Statement;
@@ -33,7 +30,7 @@ public class Main {
     private AbstractMergeConflictDefinition definition;
     private Set<String> targetClasses;
     private List<String> conflicts = new ArrayList<>();
-    DataFlowAnalysis analysis;
+    ReachDefinitionAnalysis analysis;
 
     public static void main(String args[]) {
         Main m = new Main();
@@ -148,7 +145,7 @@ public class Main {
     	switch(mode) {
     	  case "dataflow": runDataFlowAnalysis(classpath); break;
     	  case "reachability": runReachabilityAnalysis(classpath); break;
-            case "svfa": runSparseValueFlowAnalysis(classpath); break;
+    	  case "svfa": runSparseValueFlowAnalysis(classpath); break;
     	  default: {
     		  System.out.println("Error: " + "invalid mode " + mode);
               HelpFormatter formatter = new HelpFormatter();
@@ -163,7 +160,7 @@ public class Main {
         new Transform("jtp.df", new BodyTransformer() {
             @Override
             protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-               analysis = new DataFlowAnalysis(new ExceptionalUnitGraph(body), definition);
+               analysis = new ReachDefinitionAnalysis(body, definition);
             }
          }));
         soot.Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-v", "-keep-line-number", "-cp"

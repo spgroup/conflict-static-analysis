@@ -5,16 +5,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import soot.*;
-import soot.toolkits.graph.ExceptionalUnitGraph;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DataFlowAnalysisIndirectOneConflictTest {
+public class TaintedAnalysisOneConflictTest {
 
-    private DataFlowAnalysis analysis;
+    private TaintedAnalysis analysis;
 
     @Before
     public void configure() {
@@ -45,7 +44,7 @@ public class DataFlowAnalysisIndirectOneConflictTest {
 		    new Transform("jtp.oneConflict", new BodyTransformer() {
 				@Override
 				protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-					analysis = new DataFlowAnalysis(new ExceptionalUnitGraph(body), definition);
+					analysis = new TaintedAnalysis(body, definition);
 				}
             		    }));
         String cp = "target/test-classes";
@@ -56,8 +55,6 @@ public class DataFlowAnalysisIndirectOneConflictTest {
 
     @Test
     public void testDataFlowAnalysisExpectingOneConflict() {
-       // Assert.assertNotNull(analysis);
-       // Assert.assertNotNull(analysis.getConflicts());
-        Assert.assertEquals(0, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 }

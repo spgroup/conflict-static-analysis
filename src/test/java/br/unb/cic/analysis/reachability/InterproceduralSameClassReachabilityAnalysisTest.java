@@ -5,6 +5,7 @@ import java.util.*;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import soot.G;
@@ -12,6 +13,7 @@ import soot.PackManager;
 import soot.Transform;
 import soot.options.Options;
 
+@Ignore
 public class InterproceduralSameClassReachabilityAnalysisTest {
 	
 	private ReachabilityAnalysis interproceduralSameClass;
