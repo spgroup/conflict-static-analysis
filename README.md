@@ -7,7 +7,9 @@ Current supported algorithms:
        that occur when a contribution from "left" defines a variable
            that a contribution from "right" uses. Its implementation is mostly based on
 	       intraprocedural dataflow analysis, and is quite similar to the
-	           reach definition analysis.
+	           reach definition analysis
+		   
+   * Tainted analysis conflicts: This algorithm is similar to the intraprocedural def-use algorithm, but also supports "transitive" conflicts, that occur when a contribution from "left" defines a variable that is used to define another variable that is used by a contribution from "right" 
 
    * Reachability conflicts: This algorithm identifies conflicts that occur
       when there is a interprocedural flow from a left statement contribution from
@@ -53,7 +55,7 @@ The input csv files with the list of changes. You must provider either this para
 the merge commit hash. See the comment above regarding the -csv parameter.
 
 #### -mode
-Analysis mode: dataflow or reachability.
+Analysis mode: dataflow, reachability, svfa or tainted.
 
 #### -repo
 The folder path or URL of the git project under analysis.

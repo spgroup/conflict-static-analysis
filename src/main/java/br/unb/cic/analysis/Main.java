@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Map.Entry;
 
 import br.unb.cic.analysis.df.ReachDefinitionAnalysis;
+import br.unb.cic.analysis.df.TaintedAnalysis;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
 import org.apache.commons.cli.*;
 
@@ -119,7 +120,7 @@ public class Main {
                 .build();
 
         Option analysisOption = Option.builder("mode").argName("mode")
-                .hasArg().desc("analysis mode [data-flow, reachability]")
+                .hasArg().desc("analysis mode [data-flow, reachability, tainted]")
                 .build();
 
         Option repoOption = Option.builder("repo").argName("repo")
@@ -146,6 +147,7 @@ public class Main {
     	  case "dataflow": runDataFlowAnalysis(classpath); break;
     	  case "reachability": runReachabilityAnalysis(classpath); break;
     	  case "svfa": runSparseValueFlowAnalysis(classpath); break;
+    	  case "tainted": runTaintedAnalysis(classpath); break;
     	  default: {
     		  System.out.println("Error: " + "invalid mode " + mode);
               HelpFormatter formatter = new HelpFormatter();
@@ -154,7 +156,24 @@ public class Main {
     	  }
     	}
     }
-    
+
+
+    private void runTaintedAnalysis(String classpath) {
+        PackManager.v().getPack("jtp").add(
+                new Transform("jtp.tainted", new BodyTransformer() {
+                    @Override
+                    protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
+                        analysis = new TaintedAnalysis(body, definition);
+                    }
+                }));
+        soot.Main.main(new String[]{"-w", "-allow-phantom-refs", "-f", "J", "-v", "-keep-line-number", "-cp"
+                , classpath, targetClasses.stream().collect(Collectors.joining(" "))});
+
+        if (analysis != null) {
+            conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
+        }
+    }
+
     private void runDataFlowAnalysis(String classpath) {
       PackManager.v().getPack("jtp").add(	
         new Transform("jtp.df", new BodyTransformer() {
