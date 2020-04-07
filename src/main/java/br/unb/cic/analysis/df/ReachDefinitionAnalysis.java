@@ -1,6 +1,7 @@
 package br.unb.cic.analysis.df;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -177,4 +178,19 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 		return Collector.instance().getConflicts();
 	}
 
+	protected List<Local> getUseVariables(Unit u) {
+		return u.getUseBoxes().stream()
+				.map(box -> box.getValue())
+				.filter(v -> v instanceof Local)
+				.map(v -> (Local)v)
+				.collect(Collectors.toList());
+	}
+
+	protected List<Local> getDefVariables(Unit u) {
+		return u.getDefBoxes().stream()
+				.map(box -> box.getValue())
+				.filter(v -> v instanceof Local)
+				.map(v -> (Local)v)
+				.collect(Collectors.toList());
+	}
 }

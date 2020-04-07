@@ -11,9 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TaintedAnalysisDoubleSourceZeroConflictTest {
+public class SourceSinkConfluenceAnalysisOneConflictTest {
 
-    private TaintedAnalysis analysis;
+    private SourceSinkConfluenceAnalysis analysis;
 
     @Before
     public void configure() {
@@ -44,7 +44,7 @@ public class TaintedAnalysisDoubleSourceZeroConflictTest {
 		    new Transform("jtp.zeroConflict", new BodyTransformer() {
 				@Override
 				protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-					analysis = new TaintedAnalysis(body, definition);
+					analysis = new SourceSinkConfluenceAnalysis(body, definition);
 				}
             		    }));
         String cp = "target/test-classes";
@@ -55,6 +55,6 @@ public class TaintedAnalysisDoubleSourceZeroConflictTest {
 
     @Test
     public void testDataFlowAnalysisExpectingOneConflict() {
-        Assert.assertEquals(0, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 }

@@ -4,13 +4,9 @@ import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.DoubleSourceConflict;
 import br.unb.cic.analysis.model.Statement;
-import br.unb.cic.soot.graph.SourceNode;
-import fj.P;
-import jdk.nashorn.internal.runtime.regexp.joni.constants.NodeType;
 import soot.Body;
 import soot.Local;
 import soot.Unit;
-import soot.ValueBox;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
 
@@ -18,9 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DoubleSourceAnalysis extends ReachDefinitionAnalysis {
+public class SourceSinkConfluenceAnalysis extends ReachDefinitionAnalysis {
 
-    public DoubleSourceAnalysis(Body methodBody, AbstractMergeConflictDefinition definition) {
+    public SourceSinkConfluenceAnalysis(Body methodBody, AbstractMergeConflictDefinition definition) {
         super(methodBody, definition);
     }
 
@@ -36,6 +32,7 @@ public class DoubleSourceAnalysis extends ReachDefinitionAnalysis {
         return res;
     }
 
+    @Override
     protected void detectConflict(FlowSet<DataFlowAbstraction> in, Unit u) {
         if(isSourceStatement(u) || isSinkStatement(u)) {
             return;
@@ -64,23 +61,5 @@ public class DoubleSourceAnalysis extends ReachDefinitionAnalysis {
             }
         }
     }
-
-    private List<Local> getUseVariables(Unit u) {
-        return u.getUseBoxes().stream()
-                .map(box -> box.getValue())
-                .filter(v -> v instanceof Local)
-                .map(v -> (Local)v)
-                .collect(Collectors.toList());
-    }
-
-    private List<Local> getDefVariables(Unit u) {
-        return u.getDefBoxes().stream()
-                .map(box -> box.getValue())
-                .filter(v -> v instanceof Local)
-                .map(v -> (Local)v)
-                .collect(Collectors.toList());
-    }
-
-
 
 }
