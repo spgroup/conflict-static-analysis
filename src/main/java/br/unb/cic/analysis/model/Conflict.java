@@ -8,12 +8,12 @@ import java.util.Objects;
  * of the source / sink.
  */
 public class Conflict {
-    private String sourceClassName;
-    private String sourceMethodName;
-    private Integer sourceLineNumber;
-    private String sinkClassName;
-    private String sinkMethodName;
-    private Integer sinkLineNumber;
+    protected String sourceClassName;
+    protected String sourceMethodName;
+    protected Integer sourceLineNumber;
+    protected String sinkClassName;
+    protected String sinkMethodName;
+    protected Integer sinkLineNumber;
 
     public Conflict(Statement source, Statement sink) {
         this.sourceClassName = source.getSootClass().getName();

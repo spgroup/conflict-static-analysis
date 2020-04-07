@@ -69,7 +69,7 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 				killSet.add(item);
 			}
 		}
-  		in.difference(killSet, temp);
+		in.difference(killSet, temp);
 		temp.union(gen(u, in), out);
 	}
 
