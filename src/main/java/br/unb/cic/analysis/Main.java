@@ -31,7 +31,7 @@ public class Main {
     private AbstractMergeConflictDefinition definition;
     private Set<String> targetClasses;
     private List<String> conflicts = new ArrayList<>();
-    ReachDefinitionAnalysis analysis;
+    private ReachDefinitionAnalysis analysis;
 
     public static void main(String args[]) {
         Main m = new Main();
@@ -96,7 +96,7 @@ public class Main {
         System.out.println(" Number of conflicts: " + conflicts.size());
         final String out = "out.txt"; 
         final FileWriter fw = new FileWriter(out);
-        conflicts.stream().forEach(c -> {
+        conflicts.forEach(c -> {
     		try { 
     			fw.write(c + "\n");
     		}
@@ -144,26 +144,26 @@ public class Main {
     
     private void runAnalysis(String mode, String classpath) {
     	switch(mode) {
-    	  case "dataflow": runDataFlowAnalysis(classpath); break;
-          case "tainted": runTaintedAnalysis(classpath); break;
-          case "reachability": runReachabilityAnalysis(classpath); break;
-    	  case "svfa": runSparseValueFlowAnalysis(classpath); break;
-    	  case "confluence": runSourceSinkConfluenceAnalysis(classpath); break;
-    	  default: {
-    		  System.out.println("Error: " + "invalid mode " + mode);
-              HelpFormatter formatter = new HelpFormatter();
-              formatter.printHelp( "java Main", options );
-              System.exit(-1);
-    	  }
+            case "svfa"         : runSparseValueFlowAnalysis(classpath); break;
+            case "reachability" : runReachabilityAnalysis(classpath); break;
+            default             : runDataFlowAnalysis(classpath, mode);
     	}
     }
 
-    private void runSourceSinkConfluenceAnalysis(String classpath) {
+    private void runDataFlowAnalysis(String classpath, String mode) {
         PackManager.v().getPack("jtp").add(
-                new Transform("jtp.confluence", new BodyTransformer() {
+                new Transform("jtp.analysis", new BodyTransformer() {
                     @Override
                     protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-                        analysis = new SourceSinkConfluenceAnalysis(body, definition);
+                        switch(mode) {
+                            case "dataflow"   : analysis = new ReachDefinitionAnalysis(body, definition); break;
+                            case "tainted"    : analysis = new TaintedAnalysis(body, definition);
+                            case "confluence" : analysis = new SourceSinkConfluenceAnalysis(body, definition); break;
+                            default: {
+                                System.out.println("Error: " + "invalid mode " + mode);
+                                System.exit(-1);
+                            }
+                        }
                     }
                 }));
         soot.Main.main(new String[]{"-w", "-allow-phantom-refs", "-f", "J", "-v", "-keep-line-number", "-cp"
@@ -174,38 +174,6 @@ public class Main {
         }
     }
 
-    private void runTaintedAnalysis(String classpath) {
-        PackManager.v().getPack("jtp").add(
-                new Transform("jtp.tainted", new BodyTransformer() {
-                    @Override
-                    protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-                        analysis = new TaintedAnalysis(body, definition);
-                    }
-                }));
-        soot.Main.main(new String[]{"-w", "-allow-phantom-refs", "-f", "J", "-v", "-keep-line-number", "-cp"
-                , classpath, targetClasses.stream().collect(Collectors.joining(" "))});
-
-        if (analysis != null) {
-            conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
-        }
-    }
-
-    private void runDataFlowAnalysis(String classpath) {
-      PackManager.v().getPack("jtp").add(	
-        new Transform("jtp.df", new BodyTransformer() {
-            @Override
-            protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-               analysis = new ReachDefinitionAnalysis(body, definition);
-            }
-         }));
-        soot.Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-v", "-keep-line-number", "-cp"
-                , classpath, targetClasses.stream().collect(Collectors.joining(" "))});
-
-        if(analysis != null) {
-            conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
-        }
-    }
-    
     /*
      * After discussing this algorithm with the researchers at
      * UFPE, we decided that we should not support this analysis
@@ -222,7 +190,6 @@ public class Main {
                 classpath, targetClasses.stream().collect(Collectors.joining(" "))});
         
         conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
-    	
     }
 
     private void runSparseValueFlowAnalysis(String classpath) {
@@ -274,7 +241,7 @@ public class Main {
         }
     }
 
-    private void loadDefinitionFromDiffAnalysis(DiffClass module) throws Exception {
+    private void loadDefinitionFromDiffAnalysis(DiffClass module) {
         ArrayList<Entry<String, Integer>> sourceClasses = module.getSourceModifiedClasses();
         ArrayList<Entry<String, Integer>> sinkClasses = module.getSinkModifiedClasses();
         Map<String, List<Integer>> sourceDefs = new HashMap<>();
