@@ -11,6 +11,9 @@ Current supported algorithms:
 		   
    * Tainted analysis conflicts: This algorithm is similar to the intraprocedural def-use algorithm, but also supports "transitive" conflicts, that occur when a contribution from "left" defines a variable that is used to define another variable that is used by a contribution from "right" 
 
+   * Source Sink Confluence conflicts: This algorithm is similar to the intraprocedural def-use algorithm, but it indicates a conflicts if it identifies data-flow from 
+    source and sink definition to a common non annotated use
+
    * Reachability conflicts: This algorithm identifies conflicts that occur
       when there is a interprocedural flow from a left statement contribution from
          to a right statement contribution
