@@ -120,7 +120,7 @@ public class Main {
                 .build();
 
         Option analysisOption = Option.builder("mode").argName("mode")
-                .hasArg().desc("analysis mode [data-flow, reachability, tainted]")
+                .hasArg().desc("analysis mode [data-flow, tainted, reachability, svfa]")
                 .build();
 
         Option repoOption = Option.builder("repo").argName("repo")
@@ -145,9 +145,9 @@ public class Main {
     private void runAnalysis(String mode, String classpath, List<String> conflicts) {
     	switch(mode) {
     	  case "dataflow": runDataFlowAnalysis(classpath); break;
-    	  case "reachability": runReachabilityAnalysis(classpath); break;
+          case "tainted": runTaintedAnalysis(classpath); break;
+          case "reachability": runReachabilityAnalysis(classpath); break;
     	  case "svfa": runSparseValueFlowAnalysis(classpath); break;
-    	  case "tainted": runTaintedAnalysis(classpath); break;
     	  default: {
     		  System.out.println("Error: " + "invalid mode " + mode);
               HelpFormatter formatter = new HelpFormatter();
