@@ -120,7 +120,7 @@ public class Main {
                 .build();
 
         Option analysisOption = Option.builder("mode").argName("mode")
-                .hasArg().desc("analysis mode [data-flow, tainted, reachability, svfa]")
+                .hasArg().desc("analysis mode [data-flow, tainted, reachability, svfa, confluence]")
                 .build();
 
         Option repoOption = Option.builder("repo").argName("repo")
