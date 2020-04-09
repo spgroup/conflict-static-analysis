@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Map.Entry;
 
 import br.unb.cic.analysis.df.ReachDefinitionAnalysis;
+import br.unb.cic.analysis.df.SourceSinkConfluenceAnalysis;
 import br.unb.cic.analysis.df.TaintedAnalysis;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
 import org.apache.commons.cli.*;
@@ -17,7 +18,6 @@ import soot.Body;
 import soot.BodyTransformer;
 import soot.PackManager;
 import soot.Transform;
-import soot.toolkits.graph.ExceptionalUnitGraph;
 
 import br.unb.cic.analysis.io.DefaultReader;
 import br.unb.cic.analysis.io.MergeConflictReader;
@@ -54,7 +54,7 @@ public class Main {
             } else {
                 m.loadDefinition(cmd.getOptionValue("csv"));
             }
-            m.runAnalysis(mode, m.parseClassPath(cmd.getOptionValue("cp")), m.conflicts);
+            m.runAnalysis(mode, m.parseClassPath(cmd.getOptionValue("cp")));
             
             m.exportResults();
             
@@ -120,7 +120,7 @@ public class Main {
                 .build();
 
         Option analysisOption = Option.builder("mode").argName("mode")
-                .hasArg().desc("analysis mode [data-flow, tainted, reachability, svfa]")
+                .hasArg().desc("analysis mode [data-flow, tainted, reachability, svfa, confluence]")
                 .build();
 
         Option repoOption = Option.builder("repo").argName("repo")
@@ -142,12 +142,13 @@ public class Main {
     }
 
     
-    private void runAnalysis(String mode, String classpath, List<String> conflicts) {
+    private void runAnalysis(String mode, String classpath) {
     	switch(mode) {
     	  case "dataflow": runDataFlowAnalysis(classpath); break;
           case "tainted": runTaintedAnalysis(classpath); break;
           case "reachability": runReachabilityAnalysis(classpath); break;
     	  case "svfa": runSparseValueFlowAnalysis(classpath); break;
+    	  case "confluence": runSourceSinkConfluenceAnalysis(classpath); break;
     	  default: {
     		  System.out.println("Error: " + "invalid mode " + mode);
               HelpFormatter formatter = new HelpFormatter();
@@ -157,6 +158,21 @@ public class Main {
     	}
     }
 
+    private void runSourceSinkConfluenceAnalysis(String classpath) {
+        PackManager.v().getPack("jtp").add(
+                new Transform("jtp.confluence", new BodyTransformer() {
+                    @Override
+                    protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
+                        analysis = new SourceSinkConfluenceAnalysis(body, definition);
+                    }
+                }));
+        soot.Main.main(new String[]{"-w", "-allow-phantom-refs", "-f", "J", "-v", "-keep-line-number", "-cp"
+                , classpath, targetClasses.stream().collect(Collectors.joining(" "))});
+
+        if (analysis != null) {
+            conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
+        }
+    }
 
     private void runTaintedAnalysis(String classpath) {
         PackManager.v().getPack("jtp").add(
