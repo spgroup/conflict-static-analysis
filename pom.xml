@@ -4,12 +4,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>br.unb.cic</groupId>
 	<artifactId>soot-analysis</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<dependencies>
 		<dependency>
 			<groupId>br.unb.cic</groupId>
 			<artifactId>svfa-scala_2.12</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>0.0.4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jgrapht</groupId>
@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>ca.mcgill.sable</groupId>
 			<artifactId>soot</artifactId>
-			<version>3.3.0</version>
+			<version>3.3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jgit</groupId>
