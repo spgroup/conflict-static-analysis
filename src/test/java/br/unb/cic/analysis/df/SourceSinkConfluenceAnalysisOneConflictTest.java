@@ -1,6 +1,7 @@
 package br.unb.cic.analysis.df;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+import br.unb.cic.analysis.SootWrapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +51,7 @@ public class SourceSinkConfluenceAnalysisOneConflictTest {
         String cp = "target/test-classes";
         String targetClass = "br.unb.cic.analysis.samples.DoubleSourceSample";
 
-        Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-cp", cp, targetClass});
+        SootWrapper.builder().withClassPath(cp).addClass(targetClass).build().execute();
     }
 
     @Test

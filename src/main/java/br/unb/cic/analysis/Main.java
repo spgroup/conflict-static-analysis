@@ -166,9 +166,11 @@ public class Main {
                         }
                     }
                 }));
-        soot.Main.main(new String[]{"-w", "-allow-phantom-refs", "-f", "J", "-v", "-keep-line-number", "-cp"
-                , classpath, targetClasses.stream().collect(Collectors.joining(" "))});
-
+        SootWrapper.builder()
+                   .withClassPath(classpath)
+                   .addClass(targetClasses.stream().collect(Collectors.joining(" ")))
+                   .build()
+                   .execute();
         if (analysis != null) {
             conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
         }
@@ -186,8 +188,12 @@ public class Main {
     	PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
         soot.options.Options.v().setPhaseOption("cg.spark", "on");
         soot.options.Options.v().setPhaseOption("cg.spark", "verbose:true");
-        soot.Main.main(new String[]{"-w", "-allow-phantom-refs", "-f", "J", "-v", "-keep-line-number", "-cp",
-                classpath, targetClasses.stream().collect(Collectors.joining(" "))});
+
+        SootWrapper.builder()
+                .withClassPath(classpath)
+                .addClass(targetClasses.stream().collect(Collectors.joining(" ")))
+                .build()
+                .execute();
         
         conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
     }
