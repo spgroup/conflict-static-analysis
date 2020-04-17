@@ -24,7 +24,7 @@ public class SootWrapper {
                                     , "-allow-phantom-refs"        // allow phantom types
                                     , "-f", "J"                    // Jimple format
                                     , "-keep-line-number"          // keep line numbers
-                                    //, "-p", "jb", "optimize:false" // disable the optimizer
+                                    , "-p", "jb", "optimize:false" // disable the optimizer
                                     , "-cp", classPath             // soot class path
                                     , classes});                   // set of classes
     }
