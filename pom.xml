@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>br.unb.cic</groupId>
 	<artifactId>soot-analysis</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.2</version>
 	<dependencies>
 		<dependency>
 			<groupId>br.unb.cic</groupId>
@@ -59,6 +59,25 @@
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.amashchenko.maven.plugin</groupId>
+				<artifactId>gitflow-maven-plugin</artifactId>
+				<version>1.14.0</version>
+				<configuration>
+					<installProject>false</installProject>
+					<verbose>true</verbose>
+					<gitFlowConfig>
+						<productionBranch>master</productionBranch>
+						<developmentBranch>develop</developmentBranch>
+						<featureBranchPrefix>feature/</featureBranchPrefix>
+						<releaseBranchPrefix>release/</releaseBranchPrefix>
+						<hotfixBranchPrefix>hotfix/</hotfixBranchPrefix>
+						<supportBranchPrefix>support/</supportBranchPrefix>
+						<versionTagPrefix></versionTagPrefix>
+						<origin>origin</origin>
+					</gitFlowConfig>
 				</configuration>
 			</plugin>
 		</plugins>
