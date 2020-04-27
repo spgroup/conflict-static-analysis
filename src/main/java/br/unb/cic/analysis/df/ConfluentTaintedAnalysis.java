@@ -2,7 +2,7 @@ package br.unb.cic.analysis.df;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Conflict;
-import br.unb.cic.analysis.model.DoubleSourceConflict;
+import br.unb.cic.analysis.model.ConfluenceConflictReport;
 import br.unb.cic.analysis.model.Statement;
 import soot.Body;
 import soot.Local;
@@ -30,10 +30,13 @@ public class ConfluentTaintedAnalysis extends ReachDefinitionAnalysis {
             }
         }
         else if (u.getDefBoxes().size() > 0) {
-            u.getUseBoxes().forEach(v -> {
+            u.getUseBoxes().stream().filter(v -> v.getValue() instanceof Local).forEach(v -> {
+                Local local = (Local) v.getValue();
                 in.forEach(sourceDefs -> {
-                    if(sourceDefs.getLocal() == v.getValue()){ //if variable in the analyzed stmt is present in IN
-                         u.getDefBoxes().forEach(def -> {
+                    if(sourceDefs.getLocal().equals(local)){ //if variable in the analyzed stmt is present in IN
+                         u.getDefBoxes().stream()
+                                 .filter(def -> def.getValue() instanceof  Local)
+                                 .forEach(def -> {
                              res.add(new DataFlowAbstraction((Local)def.getValue(), findStatement(u))); //add variable assigned as the stmt to IN
                          });
                     }
@@ -64,7 +67,7 @@ public class ConfluentTaintedAnalysis extends ReachDefinitionAnalysis {
 
         for(Statement source: sources){
             for(Statement sink: sinks){
-                Conflict c = new DoubleSourceConflict(source, sink, findStatement(u));
+                Conflict c = new ConfluenceConflictReport(source, sink, findStatement(u));
                 Collector.instance().addConflict(c);
             }
         }

@@ -2,7 +2,7 @@ package br.unb.cic.analysis.df;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Conflict;
-import br.unb.cic.analysis.model.DoubleSourceConflict;
+import br.unb.cic.analysis.model.ConfluenceConflictReport;
 import br.unb.cic.analysis.model.Statement;
 import soot.Body;
 import soot.Local;
@@ -56,7 +56,7 @@ public class SourceSinkConfluenceAnalysis extends ReachDefinitionAnalysis {
         //report the conflicts
         for(Statement source: sources) {
             for(Statement sink: sinks) {
-                Conflict c = new DoubleSourceConflict(source, sink, findStatement(u));
+                Conflict c = new ConfluenceConflictReport(source, sink, findStatement(u));
                 Collector.instance().addConflict(c);
             }
         }
