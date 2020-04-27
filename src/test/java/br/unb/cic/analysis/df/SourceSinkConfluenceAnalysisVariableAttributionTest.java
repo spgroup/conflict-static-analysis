@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class SourceSinkConfluenceAnalysisVariableAttributionTest {
 
-    private SourceSinkConfluenceAnalysis analysis2;
+    private ConfluentAnalysis analysis2;
 
     @Before
     public void configure() {
@@ -45,7 +45,7 @@ public class SourceSinkConfluenceAnalysisVariableAttributionTest {
             new Transform("jtp.zeroConflict", new BodyTransformer() {
             @Override
             protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-                    analysis2 = new SourceSinkConfluenceAnalysis(body, definition);
+                    analysis2 = new ConfluentAnalysis(body, definition);
                     }
                 }));
         String cp = "target/test-classes";

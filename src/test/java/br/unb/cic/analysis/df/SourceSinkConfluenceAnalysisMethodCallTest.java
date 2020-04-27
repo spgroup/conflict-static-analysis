@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class SourceSinkConfluenceAnalysisMethodCallTest {
 
-    private SourceSinkConfluenceAnalysis analysis;
+    private ConfluentAnalysis analysis;
 
     @Before
     public void configure() {
@@ -44,7 +44,7 @@ public class SourceSinkConfluenceAnalysisMethodCallTest {
                 new Transform("jtp.zeroConflict", new BodyTransformer() {
                     @Override
                     protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-                        analysis = new SourceSinkConfluenceAnalysis(body, definition);
+                        analysis = new ConfluentAnalysis(body, definition);
                     }
                 }));
         String cp = "target/test-classes";

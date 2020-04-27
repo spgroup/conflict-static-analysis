@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Map.Entry;
 
 import br.unb.cic.analysis.df.ReachDefinitionAnalysis;
-import br.unb.cic.analysis.df.SourceSinkConfluenceAnalysis;
+import br.unb.cic.analysis.df.ConfluentAnalysis;
 import br.unb.cic.analysis.df.TaintedAnalysis;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
 import org.apache.commons.cli.*;
@@ -158,7 +158,7 @@ public class Main {
                         switch(mode) {
                             case "dataflow"   : analysis = new ReachDefinitionAnalysis(body, definition); break;
                             case "tainted"    : analysis = new TaintedAnalysis(body, definition);
-                            case "confluence" : analysis = new SourceSinkConfluenceAnalysis(body, definition); break;
+                            case "confluence" : analysis = new ConfluentAnalysis(body, definition); break;
                             default: {
                                 System.out.println("Error: " + "invalid mode " + mode);
                                 System.exit(-1);

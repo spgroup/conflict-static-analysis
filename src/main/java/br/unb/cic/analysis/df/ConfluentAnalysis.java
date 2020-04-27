@@ -14,9 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SourceSinkConfluenceAnalysis extends ReachDefinitionAnalysis {
+public class ConfluentAnalysis extends ReachDefinitionAnalysis {
 
-    public SourceSinkConfluenceAnalysis(Body methodBody, AbstractMergeConflictDefinition definition) {
+    public ConfluentAnalysis(Body methodBody, AbstractMergeConflictDefinition definition) {
         super(methodBody, definition);
     }
 
