@@ -42,20 +42,4 @@ public class br.unb.cic.analysis.samples.ConfluenceWithTransitivitySample extend
 
         return;
     }
-
-    private int addThese(int, int)
-    {
-        br.unb.cic.analysis.samples.ConfluenceWithTransitivitySample this;
-        int a1, a2, $stack3;
-
-        this := @this: br.unb.cic.analysis.samples.ConfluenceWithTransitivitySample;
-
-        a1 := @parameter0: int;
-
-        a2 := @parameter1: int;
-
-        $stack3 = a1 + a2;
-
-        return $stack3;
-    }
 }
