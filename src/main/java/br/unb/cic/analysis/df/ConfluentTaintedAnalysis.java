@@ -14,9 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SourceSinkConfluenceAnalysis extends ReachDefinitionAnalysis {
+public class ConfluentTaintedAnalysis extends ReachDefinitionAnalysis {
 
-    public SourceSinkConfluenceAnalysis(Body methodBody, AbstractMergeConflictDefinition definition) {
+    public ConfluentTaintedAnalysis(Body methodBody, AbstractMergeConflictDefinition definition) {
         super(methodBody, definition);
     }
 
@@ -29,37 +29,47 @@ public class SourceSinkConfluenceAnalysis extends ReachDefinitionAnalysis {
                 res.add(new DataFlowAbstraction(local, stmt));
             }
         }
+        else if (u.getDefBoxes().size() > 0) {
+            u.getUseBoxes().stream().filter(v -> v.getValue() instanceof Local).forEach(v -> {
+                Local local = (Local) v.getValue();
+                in.forEach(sourceDefs -> {
+                    if(sourceDefs.getLocal().equals(local)){ //if variable in the analyzed stmt is present in IN
+                         u.getDefBoxes().stream()
+                                 .filter(def -> def.getValue() instanceof  Local)
+                                 .forEach(def -> {
+                             res.add(new DataFlowAbstraction((Local)def.getValue(), findStatement(u))); //add variable assigned as the stmt to IN
+                         });
+                    }
+                });
+            });
+        }
         return res;
     }
 
     @Override
-    protected void detectConflict(FlowSet<DataFlowAbstraction> in, Unit u) {
-        if(isSourceStatement(u) || isSinkStatement(u)) {
+    protected void detectConflict(FlowSet<DataFlowAbstraction> in, Unit u){
+        if(isSourceStatement(u) || isSinkStatement(u)){
             return;
         }
-        List<Statement> sources = new ArrayList<>(); // a list of source "vars" used in the unit
-        List<Statement> sinks = new ArrayList<>();   // a list of sink "vars" used in the unit
+        List<Statement> sources = new ArrayList<>();
+        List<Statement> sinks = new ArrayList<>();
 
-        // iterate over the "used" variables
-        for(Local local: getUseVariables(u)) {
+        for(Local local: getUseVariables(u)){
             sources.addAll(in.toList().stream()
                     .filter(element -> element.getStmt().getType().equals(Statement.Type.SOURCE)
                             && element.getLocal().equals(local))
-                    .map(element -> element.getStmt()).collect(Collectors.toList()));
-
+                    .map(item -> item.getStmt()).collect(Collectors.toList()));
             sinks.addAll(in.toList().stream()
                     .filter(element -> element.getStmt().getType().equals(Statement.Type.SINK)
                             && element.getLocal().equals(local))
                     .map(item -> item.getStmt()).collect(Collectors.toList()));
         }
 
-        //report the conflicts
-        for(Statement source: sources) {
-            for(Statement sink: sinks) {
+        for(Statement source: sources){
+            for(Statement sink: sinks){
                 Conflict c = new ConfluenceConflictReport(source, sink, findStatement(u));
                 Collector.instance().addConflict(c);
             }
         }
     }
-
 }

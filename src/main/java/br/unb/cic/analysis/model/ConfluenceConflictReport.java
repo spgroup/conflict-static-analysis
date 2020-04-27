@@ -2,13 +2,13 @@ package br.unb.cic.analysis.model;
 
 import java.util.Objects;
 
-public class DoubleSourceConflict extends Conflict {
+public class ConfluenceConflictReport extends Conflict {
 
     protected String targetClassName;
     protected String targetMethodName;
     protected Integer targetLineNumber;
 
-    public DoubleSourceConflict(Statement source, Statement sink, Statement target) {
+    public ConfluenceConflictReport(Statement source, Statement sink, Statement target) {
         super(source, sink);
         targetClassName = target.getSootClass().getName();
         targetMethodName = target.getSootMethod().getName();
@@ -20,7 +20,7 @@ public class DoubleSourceConflict extends Conflict {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-        DoubleSourceConflict that = (DoubleSourceConflict) o;
+        ConfluenceConflictReport that = (ConfluenceConflictReport) o;
         return Objects.equals(targetClassName, that.targetClassName) &&
                 Objects.equals(targetMethodName, that.targetMethodName) &&
                 Objects.equals(targetLineNumber, that.targetLineNumber);
