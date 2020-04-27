@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>br.unb.cic</groupId>
 	<artifactId>soot-analysis</artifactId>
-	<version>0.0.3-SNAPSHOT</version>
+	<version>0.0.4</version>
 	<dependencies>
 		<dependency>
 			<groupId>br.unb.cic</groupId>
