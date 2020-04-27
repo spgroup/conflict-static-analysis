@@ -1,0 +1,49 @@
+public class br.unb.cic.analysis.samples.IntraproceduralIndirectSource extends java.lang.Object
+{
+
+    public void <init>()
+    {
+        br.unb.cic.analysis.samples.IntraproceduralIndirectSource r0;
+
+        r0 := @this: br.unb.cic.analysis.samples.IntraproceduralIndirectSource;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public void m()
+    {
+        br.unb.cic.analysis.samples.IntraproceduralIndirectSource r0;
+        int i0, i2;
+        java.io.PrintStream $r1, $r2;
+        short s1;
+
+        r0 := @this: br.unb.cic.analysis.samples.IntraproceduralIndirectSource;
+
+        s1 = 1000;
+
+        i2 = specialinvoke r0.<br.unb.cic.analysis.samples.IntraproceduralIndirectSource: int random()>();
+
+        $r1 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(int)>(i2);
+
+        i0 = i2 + 1;
+
+        $r2 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $r2.<java.io.PrintStream: void print(int)>(i0);
+
+        return;
+    }
+
+    private int random()
+    {
+        br.unb.cic.analysis.samples.IntraproceduralIndirectSource r0;
+
+        r0 := @this: br.unb.cic.analysis.samples.IntraproceduralIndirectSource;
+
+        return 0;
+    }
+}

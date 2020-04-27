@@ -6,15 +6,16 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import soot.*;
+import soot.options.Options;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TaintedAnalysisConfluentTest {
+public class ConfluenceWithTransitivityTest {
 
-    private TaintedAnalysis analysis;
+    private ConfluentTaintedAnalysis analysis;
 
     @Before
     public void configure() {
@@ -26,8 +27,8 @@ public class TaintedAnalysisConfluentTest {
             protected Map<String, List<Integer>> sourceDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(8);
-                res.put("br.unb.cic.analysis.samples.DoubleSourceSample", lines);
+                lines.add(9);
+                res.put("br.unb.cic.analysis.samples.ConfluenceWithTransitivitySample", lines);
                 return res;
             }
 
@@ -35,8 +36,8 @@ public class TaintedAnalysisConfluentTest {
             protected Map<String, List<Integer>> sinkDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(12);
-                res.put("br.unb.cic.analysis.samples.DoubleSourceSample", lines);
+                lines.add(13);
+                res.put("br.unb.cic.analysis.samples.ConfluenceWithTransitivitySample", lines);
                 return res;
             }
         };
@@ -45,17 +46,19 @@ public class TaintedAnalysisConfluentTest {
 		    new Transform("jtp.zeroConflict", new BodyTransformer() {
 				@Override
 				protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-					analysis = new TaintedAnalysis(body, definition);
+					analysis = new ConfluentTaintedAnalysis(body, definition);
 				}
             		    }));
         String cp = "target/test-classes";
-        String targetClass = "br.unb.cic.analysis.samples.DoubleSourceSample";
+        String targetClass = "br.unb.cic.analysis.samples.ConfluenceWithTransitivitySample";
+
+        PhaseOptions.v().setPhaseOption("jb", "use-original-names:true");
 
         SootWrapper.builder().withClassPath(cp).addClass(targetClass).build().execute();
     }
 
     @Test
     public void testDataFlowAnalysisExpectingOneConflict() {
-        Assert.assertEquals(0, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 }
