@@ -38,7 +38,7 @@ mvn clean install -DskipTests
 You can also create an executable jar file using:
 
 ```SHELL
-mvn compile assemly:single
+mvn compile assembly:single
 ```
 ### Execute
 
