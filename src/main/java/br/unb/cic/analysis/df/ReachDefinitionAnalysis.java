@@ -96,9 +96,8 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 	protected FlowSet<DataFlowAbstraction> gen(Unit u, FlowSet<DataFlowAbstraction> in) {
 		FlowSet<DataFlowAbstraction> res = new ArraySparseSet<>();
 		if(isSourceStatement(u)) {
-			for(ValueBox v : u.getDefBoxes()) {
-				if(v.getValue() instanceof Local)
-					res.add(new DataFlowAbstraction((Local)v.getValue(), findSourceStatement(u)));
+			for(Local local: getDefVariables(u)) {
+					res.add(new DataFlowAbstraction(local, findSourceStatement(u)));
 			}
 		}
 		return res;
