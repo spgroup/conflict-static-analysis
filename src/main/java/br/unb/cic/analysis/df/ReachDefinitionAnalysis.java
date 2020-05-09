@@ -81,11 +81,11 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 	 */
 	private FlowSet<Local> kill(Unit u) {
 		FlowSet<Local> res = new ArraySparseSet<>();
-		
-		for(ValueBox v : u.getDefBoxes()) {
-			if(v.getValue() instanceof  Local)
-				res.add((Local)v.getValue());
+
+		for(Local local: getDefVariables(u)) {
+			res.add(local);
 		}
+
 		return res;
 	}
 
