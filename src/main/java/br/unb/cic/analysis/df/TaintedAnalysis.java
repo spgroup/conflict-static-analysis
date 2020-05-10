@@ -26,9 +26,8 @@ public class TaintedAnalysis extends ReachDefinitionAnalysis {
     protected FlowSet<DataFlowAbstraction> gen(Unit u, FlowSet<DataFlowAbstraction> in) {
         FlowSet<DataFlowAbstraction> res = new ArraySparseSet<>();
         if (isSourceStatement(u)) {
-            for (ValueBox v : u.getDefBoxes()) {
-                if (v.getValue() instanceof Local)
-                    res.add(new DataFlowAbstraction((Local) v.getValue(), findSourceStatement(u)));
+            for(Local local: getDefVariables(u)) {
+                res.add(new DataFlowAbstraction(local, findSourceStatement(u)));
             }
         } else if (u.getDefBoxes().size() > 0) {
             u.getUseBoxes().stream().filter(v -> v.getValue() instanceof Local).forEach(v -> {
