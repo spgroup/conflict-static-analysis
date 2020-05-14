@@ -26,8 +26,8 @@ public class ArrayTaintedAnalysisOneConflictTest {
             protected Map<String, List<Integer>> sourceDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(12);
-                //lines.add(14);
+                //lines.add(12);      //source 1
+                lines.add(14);    //source 2
                 res.put("br.unb.cic.analysis.samples.ArrayDataFlowSample", lines);
                 return res;
             }
@@ -36,8 +36,8 @@ public class ArrayTaintedAnalysisOneConflictTest {
             protected Map<String, List<Integer>> sinkDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(19);
-                //lines.add(16);
+                lines.add(19);      //sink 1
+                lines.add(16);    //sink 2
                 res.put("br.unb.cic.analysis.samples.ArrayDataFlowSample", lines);
                 return res;
             }
@@ -53,11 +53,12 @@ public class ArrayTaintedAnalysisOneConflictTest {
         String cp = "target/test-classes";
         String targetClass = "br.unb.cic.analysis.samples.ArrayDataFlowSample";
 
+        PhaseOptions.v().setPhaseOption("jb", "use-original-names:true");
         SootWrapper.builder().withClassPath(cp).addClass(targetClass).build().execute();
     }
 
     @Test
     public void testDataFlowAnalysisExpectingOneConflict() {
-        Assert.assertEquals(1, analysis.getConflicts().size());
+        Assert.assertEquals(2, analysis.getConflicts().size());
     }
 }
