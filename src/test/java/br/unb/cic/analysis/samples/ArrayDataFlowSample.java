@@ -11,7 +11,7 @@ public class ArrayDataFlowSample {
 
         arr = populate(arr.length); //source 1
 
-        arr[4] = 10;    //source 2
+        arr[4] = 10;        //source 2
 
         int b = arr[4];     //sink 2
 
