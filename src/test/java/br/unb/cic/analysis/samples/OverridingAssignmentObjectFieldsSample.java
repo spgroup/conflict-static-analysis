@@ -1,17 +1,17 @@
 package br.unb.cic.analysis.samples;
 
 public class OverridingAssignmentObjectFieldsSample {
-    public int a;
-    public int b;
+    public OverridingAssignmentInstance a;
+    public OverridingAssignmentInstance b;
 
     public static void main(String[] args) {
         OverridingAssignmentObjectFieldsSample instanceLocal = new OverridingAssignmentObjectFieldsSample();
 
-        instanceLocal.a = 3; // left
+        instanceLocal.a.a = 3; // left
 
-        instanceLocal.b =  3;
+//        instanceLocal.a =  3;
 
-        instanceLocal.a = 4; //right
+        instanceLocal.a.b = 4; //right
 
     }
 
