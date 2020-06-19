@@ -182,7 +182,9 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
                     if (!(isSinkStatement(u) || isSourceStatement(u))){
                         return false;
                     }
-                    statementName = ((field.getValue()) instanceof JArrayRef) ? (((JArrayRef) field.getValue()).getBaseBox().getValue()).toString() : "";
+                    statementName = ((field.getValue()) instanceof JArrayRef)
+                            ? (((JArrayRef) field.getValue()).getBaseBox().getValue()).toString()
+                            : field.getValue().toString();
                     localName = (((JArrayRef) local.getValue()).getBaseBox().getValue()).toString();
                 }
             }
