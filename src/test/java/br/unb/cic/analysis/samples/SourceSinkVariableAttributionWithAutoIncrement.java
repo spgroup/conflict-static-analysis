@@ -1,6 +1,6 @@
 package br.unb.cic.analysis.samples;
 
-public class SourceSinkVariableAttributionSampleError {
+public class SourceSinkVariableAttributionWithAutoIncrement {
     public void foo() {
         int x = 0;
         int y = 0;
