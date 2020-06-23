@@ -1,6 +1,7 @@
 package br.unb.cic.analysis.df;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+import br.unb.cic.analysis.SootWrapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,7 +14,7 @@ import java.util.Map;
 
 public class SourceSinkConfluenceAnalysisOneConflictTest {
 
-    private SourceSinkConfluenceAnalysis analysis;
+    private ConfluentAnalysis analysis;
 
     @Before
     public void configure() {
@@ -44,13 +45,13 @@ public class SourceSinkConfluenceAnalysisOneConflictTest {
 		    new Transform("jtp.zeroConflict", new BodyTransformer() {
 				@Override
 				protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-					analysis = new SourceSinkConfluenceAnalysis(body, definition);
+					analysis = new ConfluentAnalysis(body, definition);
 				}
             		    }));
         String cp = "target/test-classes";
         String targetClass = "br.unb.cic.analysis.samples.DoubleSourceSample";
 
-        Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-cp", cp, targetClass});
+        SootWrapper.builder().withClassPath(cp).addClass(targetClass).build().execute();
     }
 
     @Test

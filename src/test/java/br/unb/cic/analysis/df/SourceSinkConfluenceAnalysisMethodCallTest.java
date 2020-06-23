@@ -1,7 +1,6 @@
 package br.unb.cic.analysis.df;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
-import br.unb.cic.analysis.SootWrapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,9 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TaintedAnalysisOneConflictTest {
+public class SourceSinkConfluenceAnalysisMethodCallTest {
 
-    private TaintedAnalysis analysis;
+    private ConfluentAnalysis analysis;
 
     @Before
     public void configure() {
@@ -26,8 +25,8 @@ public class TaintedAnalysisOneConflictTest {
             protected Map<String, List<Integer>> sourceDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(7);
-                res.put("br.unb.cic.analysis.samples.IntraproceduralIndirectSource", lines);
+                lines.add(8);
+                res.put("br.unb.cic.analysis.samples.SourceSinkMethodCallSample", lines);
                 return res;
             }
 
@@ -35,23 +34,23 @@ public class TaintedAnalysisOneConflictTest {
             protected Map<String, List<Integer>> sinkDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(12);
-                res.put("br.unb.cic.analysis.samples.IntraproceduralIndirectSource", lines);
+                lines.add(10);
+                res.put("br.unb.cic.analysis.samples.SourceSinkMethodCallSample", lines);
                 return res;
             }
         };
 
         PackManager.v().getPack("jtp").add(
-		    new Transform("jtp.oneConflict", new BodyTransformer() {
-				@Override
-				protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-					analysis = new TaintedAnalysis(body, definition);
-				}
-            		    }));
+                new Transform("jtp.zeroConflict", new BodyTransformer() {
+                    @Override
+                    protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
+                        analysis = new ConfluentAnalysis(body, definition);
+                    }
+                }));
         String cp = "target/test-classes";
-        String targetClass = "br.unb.cic.analysis.samples.IntraproceduralIndirectSource";
+        String targetClass = "br.unb.cic.analysis.samples.SourceSinkMethodCallSample";
 
-        SootWrapper.builder().withClassPath(cp).addClass(targetClass).build().execute();
+        Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-cp", cp, targetClass});
     }
 
     @Test

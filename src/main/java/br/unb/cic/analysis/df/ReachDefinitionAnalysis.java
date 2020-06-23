@@ -1,5 +1,6 @@
 package br.unb.cic.analysis.df;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,6 +13,7 @@ import soot.Body;
 import soot.Local;
 import soot.Unit;
 import soot.ValueBox;
+import soot.jimple.internal.JArrayRef;
 import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.scalar.ArraySparseSet;
@@ -81,11 +83,11 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 	 */
 	private FlowSet<Local> kill(Unit u) {
 		FlowSet<Local> res = new ArraySparseSet<>();
-		
-		for(ValueBox v : u.getDefBoxes()) {
-			if(v.getValue() instanceof  Local)
-				res.add((Local)v.getValue());
+
+		for(Local local: getDefVariables(u)) {
+			res.add(local);
 		}
+
 		return res;
 	}
 
@@ -96,9 +98,8 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 	protected FlowSet<DataFlowAbstraction> gen(Unit u, FlowSet<DataFlowAbstraction> in) {
 		FlowSet<DataFlowAbstraction> res = new ArraySparseSet<>();
 		if(isSourceStatement(u)) {
-			for(ValueBox v : u.getDefBoxes()) {
-				if(v.getValue() instanceof Local)
-					res.add(new DataFlowAbstraction((Local)v.getValue(), findSourceStatement(u)));
+			for(Local local: getDefVariables(u)) {
+				res.add(new DataFlowAbstraction(local, findSourceStatement(u)));
 			}
 		}
 		return res;
@@ -187,10 +188,15 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 	}
 
 	protected List<Local> getDefVariables(Unit u) {
-		return u.getDefBoxes().stream()
-				.map(box -> box.getValue())
-				.filter(v -> v instanceof Local)
-				.map(v -> (Local)v)
-				.collect(Collectors.toList());
+		List<Local> localDefs = new ArrayList<>();
+		for (ValueBox v : u.getDefBoxes()) {
+			if (v.getValue() instanceof Local) {
+				localDefs.add((Local) v.getValue());
+			} else if (v.getValue() instanceof JArrayRef) {
+				JArrayRef ref = (JArrayRef) v.getValue();
+				localDefs.add((Local) ref.getBaseBox().getValue());
+			}
+		}
+		return localDefs;
 	}
 }

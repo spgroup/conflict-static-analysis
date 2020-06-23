@@ -7,8 +7,9 @@ import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
+import br.unb.cic.analysis.df.ConfluentTaintedAnalysis;
 import br.unb.cic.analysis.df.ReachDefinitionAnalysis;
-import br.unb.cic.analysis.df.SourceSinkConfluenceAnalysis;
+import br.unb.cic.analysis.df.ConfluentAnalysis;
 import br.unb.cic.analysis.df.TaintedAnalysis;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
 import org.apache.commons.cli.*;
@@ -31,7 +32,7 @@ public class Main {
     private AbstractMergeConflictDefinition definition;
     private Set<String> targetClasses;
     private List<String> conflicts = new ArrayList<>();
-    ReachDefinitionAnalysis analysis;
+    private ReachDefinitionAnalysis analysis;
 
     public static void main(String args[]) {
         Main m = new Main();
@@ -96,7 +97,7 @@ public class Main {
         System.out.println(" Number of conflicts: " + conflicts.size());
         final String out = "out.txt"; 
         final FileWriter fw = new FileWriter(out);
-        conflicts.stream().forEach(c -> {
+        conflicts.forEach(c -> {
     		try { 
     			fw.write(c + "\n");
     		}
@@ -144,68 +145,39 @@ public class Main {
     
     private void runAnalysis(String mode, String classpath) {
     	switch(mode) {
-    	  case "dataflow": runDataFlowAnalysis(classpath); break;
-          case "tainted": runTaintedAnalysis(classpath); break;
-          case "reachability": runReachabilityAnalysis(classpath); break;
-    	  case "svfa": runSparseValueFlowAnalysis(classpath); break;
-    	  case "confluence": runSourceSinkConfluenceAnalysis(classpath); break;
-    	  default: {
-    		  System.out.println("Error: " + "invalid mode " + mode);
-              HelpFormatter formatter = new HelpFormatter();
-              formatter.printHelp( "java Main", options );
-              System.exit(-1);
-    	  }
+            case "svfa"         : runSparseValueFlowAnalysis(classpath); break;
+            case "reachability" : runReachabilityAnalysis(classpath); break;
+            default             : runDataFlowAnalysis(classpath, mode);
     	}
     }
 
-    private void runSourceSinkConfluenceAnalysis(String classpath) {
+    private void runDataFlowAnalysis(String classpath, String mode) {
         PackManager.v().getPack("jtp").add(
-                new Transform("jtp.confluence", new BodyTransformer() {
+                new Transform("jtp.analysis", new BodyTransformer() {
                     @Override
                     protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-                        analysis = new SourceSinkConfluenceAnalysis(body, definition);
+                        switch(mode) {
+                            case "dataflow"   : analysis = new ReachDefinitionAnalysis(body, definition); break;
+                            case "tainted"    : analysis = new TaintedAnalysis(body, definition);
+                            case "confluence" : analysis = new ConfluentAnalysis(body, definition); break;
+                            case "confluence-tainted": analysis = new ConfluentTaintedAnalysis(body, definition); break;
+                            default: {
+                                System.out.println("Error: " + "invalid mode " + mode);
+                                System.exit(-1);
+                            }
+                        }
                     }
                 }));
-        soot.Main.main(new String[]{"-w", "-allow-phantom-refs", "-f", "J", "-v", "-keep-line-number", "-cp"
-                , classpath, targetClasses.stream().collect(Collectors.joining(" "))});
-
+        SootWrapper.builder()
+                   .withClassPath(classpath)
+                   .addClass(targetClasses.stream().collect(Collectors.joining(" ")))
+                   .build()
+                   .execute();
         if (analysis != null) {
             conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
         }
     }
 
-    private void runTaintedAnalysis(String classpath) {
-        PackManager.v().getPack("jtp").add(
-                new Transform("jtp.tainted", new BodyTransformer() {
-                    @Override
-                    protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-                        analysis = new TaintedAnalysis(body, definition);
-                    }
-                }));
-        soot.Main.main(new String[]{"-w", "-allow-phantom-refs", "-f", "J", "-v", "-keep-line-number", "-cp"
-                , classpath, targetClasses.stream().collect(Collectors.joining(" "))});
-
-        if (analysis != null) {
-            conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
-        }
-    }
-
-    private void runDataFlowAnalysis(String classpath) {
-      PackManager.v().getPack("jtp").add(	
-        new Transform("jtp.df", new BodyTransformer() {
-            @Override
-            protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-               analysis = new ReachDefinitionAnalysis(body, definition);
-            }
-         }));
-        soot.Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-v", "-keep-line-number", "-cp"
-                , classpath, targetClasses.stream().collect(Collectors.joining(" "))});
-
-        if(analysis != null) {
-            conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
-        }
-    }
-    
     /*
      * After discussing this algorithm with the researchers at
      * UFPE, we decided that we should not support this analysis
@@ -218,11 +190,14 @@ public class Main {
     	PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
         soot.options.Options.v().setPhaseOption("cg.spark", "on");
         soot.options.Options.v().setPhaseOption("cg.spark", "verbose:true");
-        soot.Main.main(new String[]{"-w", "-allow-phantom-refs", "-f", "J", "-v", "-keep-line-number", "-cp",
-                classpath, targetClasses.stream().collect(Collectors.joining(" "))});
+
+        SootWrapper.builder()
+                .withClassPath(classpath)
+                .addClass(targetClasses.stream().collect(Collectors.joining(" ")))
+                .build()
+                .execute();
         
         conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
-    	
     }
 
     private void runSparseValueFlowAnalysis(String classpath) {
@@ -274,7 +249,7 @@ public class Main {
         }
     }
 
-    private void loadDefinitionFromDiffAnalysis(DiffClass module) throws Exception {
+    private void loadDefinitionFromDiffAnalysis(DiffClass module) {
         ArrayList<Entry<String, Integer>> sourceClasses = module.getSourceModifiedClasses();
         ArrayList<Entry<String, Integer>> sinkClasses = module.getSinkModifiedClasses();
         Map<String, List<Integer>> sourceDefs = new HashMap<>();
