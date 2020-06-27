@@ -165,6 +165,15 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 				.setSourceCodeLineNumber(d.getJavaSourceStartLineNumber()).build();
 	}
 
+	protected Statement getStatementBase(Unit d) {
+		return Statement.builder()
+				.setClass(methodBody.getMethod().getDeclaringClass())
+				.setMethod(methodBody.getMethod())
+				.setType(Statement.Type.IN_BETWEEN)
+				.setUnit(d)
+				.setSourceCodeLineNumber(d.getJavaSourceStartLineNumber()).build();
+	}
+
 	protected boolean isSourceStatement(Unit d) {
 		return definition.getSourceStatements().stream().map(s -> s.getUnit()).collect(Collectors.toList()).contains(d);
 	}

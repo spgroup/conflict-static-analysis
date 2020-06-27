@@ -12,9 +12,7 @@ import soot.jimple.internal.JInstanceFieldRef;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
 
-import javax.xml.crypto.Data;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
@@ -51,18 +49,10 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
 
                     for (Local useBox: getUseVariables(u)){
                         String useBoxName = getLocalName(useBox);
-                        if (defInName.equals(useBoxName) && defInName.equals(localName)){
+                        if (!defInName.equals(useBoxName) && defInName.equals(localName)){
                             res.add(new DataFlowAbstraction(defsIn.getLocal(), defsIn.getStmt())); //update an element in IN
                             break; //Do not necessary check others elements
                         }
-                    }
-                }
-            });
-
-            u.getUseBoxes().stream().filter(v -> v.getValue() instanceof JInstanceFieldRef).forEach(v -> {
-                for (DataFlowAbstraction defsIn: in){
-                    if (doubleFieldStatementEquals(defsIn.getStmt(), u)){
-                        res.add(new DataFlowAbstraction(defsIn.getLocal(), defsIn.getStmt())); //update an element in IN
                     }
                 }
             });
@@ -101,7 +91,7 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
 
     protected void checkConflicts(Unit u, List<DataFlowAbstraction> statements){
         for (DataFlowAbstraction statement : statements) {
-            if (doubleFieldStatementEquals(statement.getStmt(), u) || statementEquals(statement, u)) {
+            if (statementEquals(statement, u)) {
                 Conflict c = new Conflict(statement.getStmt(), findStatement(u));
                 Collector.instance().addConflict(c);
             }
@@ -115,58 +105,16 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
 
         FlowSet<DataFlowAbstraction> killSet = new ArraySparseSet<>();
         for(DataFlowAbstraction item : in) {
-            if (statementEquals(item, u) || doubleFieldStatementEquals(item.getStmt(), u)){
+            if (statementEquals(item, u)){
                 killSet.add(item);
             }
         }
-        temp = difference(in, killSet);
-//        in.difference(killSet, temp);
+        in.difference(killSet, temp);
         temp.union(gen(u, in), out);
-    }
-
-//  this.difference(FlowSet other, FlowSet dest) // dest <- this - other
-
-    private FlowSet<DataFlowAbstraction> difference(FlowSet<DataFlowAbstraction> in, FlowSet<DataFlowAbstraction> out){
-        FlowSet<DataFlowAbstraction> aux = new ArraySparseSet<>();
-
-        for (DataFlowAbstraction dataIn: in){
-            boolean notEquals = true;
-            for (DataFlowAbstraction dataOut: out){
-                if (dataIn.getLocal().getName().equals(dataOut.getLocal().getName())){
-                    notEquals = false;
-                }
-                int x = dataIn.getStmt().getSourceCodeLineNumber();
-                int y = dataOut.getStmt().getSourceCodeLineNumber();
-                if (x == y){
-                    notEquals = false;
-                }
-            }
-            if (notEquals){
-                aux.add(dataIn);
-            }
-        }
-        return aux;
     }
 
     private String getLocalName(Local local){
         return local.getName().split("#")[0];
-    }
-
-    private boolean doubleFieldStatementEquals(Statement statement, Unit u) {
-        for (ValueBox local : u.getUseBoxes()) {
-            String statementName = "";
-            String localName = "";
-            for (ValueBox field : statement.getUnit().getUseBoxes()) {
-                if (local.getValue() instanceof JInstanceFieldRef) {
-                    statementName = field.getValue().toString();
-                    localName = local.getValue().toString();
-                    if (statementName.contains(localName)){
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
     }
 
     private boolean statementEquals(DataFlowAbstraction statement, Unit u){
@@ -188,7 +136,7 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
                     localName = (((JArrayRef) local.getValue()).getBaseBox().getValue()).toString();
                 }
             }
-            if (localName.equals("")) {
+            if (localName.equals("") && local.getValue() instanceof Local) {
                 localName = getLocalName((Local) local.getValue());
             }
             return statementName.contains(localName);
