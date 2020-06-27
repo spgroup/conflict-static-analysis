@@ -12,9 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ArrayIndirectTaintedAnalysisOneConflictTest {
+public class OverridingAssignmentAnalysisArraysCompleteOverlayConflictTest {
 
-    private TaintedAnalysis analysis;
+    private OverridingAssignmentAnalysis analysis;
 
     @Before
     public void configure() {
@@ -26,8 +26,8 @@ public class ArrayIndirectTaintedAnalysisOneConflictTest {
             protected Map<String, List<Integer>> sourceDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(8);    //source 1
-                res.put("br.unb.cic.analysis.samples.ArrayIndirectDataFlowSample", lines);
+                lines.add(10);    //left
+                res.put("br.unb.cic.analysis.samples.OverridingAssignmentArraysCompleteOverlaySample", lines);
                 return res;
             }
 
@@ -35,9 +35,9 @@ public class ArrayIndirectTaintedAnalysisOneConflictTest {
             protected Map<String, List<Integer>> sinkDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(10);      //sink 1
-                lines.add(12);    //sink 2
-                res.put("br.unb.cic.analysis.samples.ArrayIndirectDataFlowSample", lines);
+                lines.add(7);    //right
+                lines.add(13);    //right
+                res.put("br.unb.cic.analysis.samples.OverridingAssignmentArraysCompleteOverlaySample", lines);
                 return res;
             }
         };
@@ -46,18 +46,19 @@ public class ArrayIndirectTaintedAnalysisOneConflictTest {
                 new Transform("jtp.oneConflict", new BodyTransformer() {
                     @Override
                     protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-                        analysis = new TaintedAnalysis(body, definition);
+                        analysis = new OverridingAssignmentAnalysis(body, definition);
                     }
                 }));
         String cp = "target/test-classes";
-        String targetClass = "br.unb.cic.analysis.samples.ArrayIndirectDataFlowSample";
-
+        String targetClass = "br.unb.cic.analysis.samples.OverridingAssignmentArraysCompleteOverlaySample";
         PhaseOptions.v().setPhaseOption("jb", "use-original-names:true");
+
         SootWrapper.builder().withClassPath(cp).addClass(targetClass).build().execute();
     }
 
     @Test
     public void testDataFlowAnalysisExpectingOneConflict() {
-        Assert.assertEquals(2, analysis.getConflicts().size());
+        System.out.println(analysis.getConflicts());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 }
