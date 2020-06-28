@@ -2,7 +2,6 @@ package br.unb.cic.analysis.df;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Conflict;
-import br.unb.cic.analysis.model.KeyAndFlowElements;
 import br.unb.cic.analysis.model.KeyAndFlowHash;
 import br.unb.cic.analysis.model.Statement;
 import soot.Body;
@@ -93,8 +92,8 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
             inicialKeyRight = getKey(u);
         }
 
-        List<KeyAndFlowElements> generatedLeftList = new ArrayList<>();
-        List<KeyAndFlowElements> generatedRightList = new ArrayList<>();
+        List<KeyAndFlowHash> generatedLeftList = new ArrayList<>();
+        List<KeyAndFlowHash> generatedRightList = new ArrayList<>();
 
         if (!inicialKeyLeft.isEmpty()){
             for (String key: inicialKeyLeft){
@@ -121,10 +120,10 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
         return inicialKey;
     }
 
-    private void checkConflicts(List<KeyAndFlowElements> generatedLeftList, List<KeyAndFlowElements> generatedRightList, Unit u) {
-        for (KeyAndFlowElements left: generatedLeftList){
-            for (KeyAndFlowElements right: generatedRightList){
-                if(left.getKey().equals(right.getKey())){
+    private void checkConflicts(List<KeyAndFlowHash> generatedLeftList, List<KeyAndFlowHash> generatedRightList, Unit u) {
+        for (KeyAndFlowHash left: generatedLeftList){
+            for (KeyAndFlowHash right: generatedRightList){
+                if(left.getUniqueKey().equals(right.getUniqueKey())){
                     Statement stmt = null;
                     if (isSourceStatement(u)){
                         stmt = getStatement(right);
@@ -139,7 +138,7 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
         }
     }
 
-    private Statement getStatement(KeyAndFlowElements statement){
+    private Statement getStatement(KeyAndFlowHash statement){
         Iterator<DataFlowAbstraction> data = statement.getFlow().iterator();
         while (data.hasNext()){
              return data.next().getStmt();
@@ -148,11 +147,11 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
     }
 
     //Returns the final key and elements of a hash with its flow list
-    private KeyAndFlowElements getKeyAndElementsOfHashAndFlowList(String nextKey, Set<HashMap <String, JInstanceFieldRef>> hashValues, FlowSet<DataFlowAbstraction> flow){
+    private KeyAndFlowHash getKeyAndElementsOfHashAndFlowList(String nextKey, Set<HashMap <String, JInstanceFieldRef>> hashValues, FlowSet<DataFlowAbstraction> flow){
         List<HashMap<String, JInstanceFieldRef>> auxValuesHasMap = new ArrayList<>();
         List<HashMap<String, JInstanceFieldRef>> listFlowRemoved = new ArrayList<>();
         auxValuesHasMap.addAll(hashValues);
-        KeyAndFlowElements elements = new KeyAndFlowElements(nextKey, flow);
+        KeyAndFlowHash elements = new KeyAndFlowHash(nextKey, flow);
 
         //If nextKey not contain $stack is because simple key
         if (!nextKey.contains("$stack")){
@@ -200,7 +199,7 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
         }
 
         //Update key and flow
-        elements.setKey(aux);
+        elements.setUniqueKey(aux);
         if (!flow.isEmpty()) {
             //Remove all the elements equals in listFlowRemoved and flow
             elements.setFlow(removeFlowSet(listFlowRemoved, flow));
@@ -281,11 +280,11 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
         FlowSet<DataFlowAbstraction> inicialFlow = newInitialFlow();
         String generatedBase = "";
         if (inicialKeyBase != "") {
-            generatedBase = (getKeyAndElementsOfHashAndFlowList(inicialKeyBase, hashBase, inicialFlow)).getKey();
+            generatedBase = (getKeyAndElementsOfHashAndFlowList(inicialKeyBase, hashBase, inicialFlow)).getUniqueKey();
         }
 
         for (String key : inicialKeyLeft) {
-            String left = (getKeyAndElementsOfHashAndFlowList(key, hashLeft, inicialFlow)).getKey();
+            String left = (getKeyAndElementsOfHashAndFlowList(key, hashLeft, inicialFlow)).getUniqueKey();
             if (left.equals(generatedBase)) {
                 for (DataFlowAbstraction flow : getKeyAndElementsOfHashAndFlowList(inicialKeyBase, hashBase, baseFlow).getFlow()) {
                     flowSetReturn.add(flow);

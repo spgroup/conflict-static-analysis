@@ -10,11 +10,18 @@ import java.util.Set;
 
 public class KeyAndFlowHash {
 
+    private String uniqueKey;
     private List<String> keys;
     private FlowSet<DataFlowAbstraction> flow;
     private Set<HashMap<String, JInstanceFieldRef>> hash;
 
     public KeyAndFlowHash(){
+    }
+
+
+    public KeyAndFlowHash(String uniqueKey, FlowSet<DataFlowAbstraction> flow){
+        this.uniqueKey = uniqueKey;
+        this.flow = flow;
     }
 
     public KeyAndFlowHash(List<String> keys, FlowSet<DataFlowAbstraction> flow, Set<HashMap<String, JInstanceFieldRef>> hash){
@@ -24,6 +31,14 @@ public class KeyAndFlowHash {
     }
     public List<String> getKeys(){
         return this.keys;
+    }
+
+    public String getUniqueKey(){
+        return this.uniqueKey;
+    }
+
+    public void setUniqueKey(String uniqueKey){
+        this.uniqueKey = uniqueKey;
     }
 
     public FlowSet<DataFlowAbstraction> getFlow(){
