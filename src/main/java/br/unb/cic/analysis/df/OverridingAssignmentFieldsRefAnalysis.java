@@ -194,7 +194,7 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
             }
         }
         //If auxValuesHasMap is equal to zero and nextKey does not contain a "$stack", then it is the starting field of the object
-        if (!nextKey.contains("$stack") && (isNextKey)){
+        if (!(actualField==null) && (isNextKey)){
             actualUniqueKey = nextKey + (actualUniqueKey.equals("") ? "" : ".") + actualUniqueKey;
         }
 

@@ -5,12 +5,12 @@ public class OverridingAssignmentObjectTwoFieldsTwoConflictsSample {
     public OverridingAssignmentInstance b;
 
     public static void main(String[] args) {
-        OverridingAssignmentObjectTwoFieldsTwoConflictsSample instanceLocal = new OverridingAssignmentObjectTwoFieldsTwoConflictsSample();
+        OverridingAssignmentObjectTwoFieldsTwoConflictsSample $stack = new OverridingAssignmentObjectTwoFieldsTwoConflictsSample();
 
-        instanceLocal.b.a = instanceLocal.b.a + 3; // left
-        instanceLocal.b.b = 3; // right
+        $stack.b.a = $stack.b.a + 3; // left
+        $stack.b.b = 3; // right
 //        instanceLocal.b.b = instanceLocal.b.a+3; // base
-        instanceLocal.b.b = 4; //left
-        instanceLocal.b.a = 4; //right
+        $stack.b.b = 4; //left
+        $stack.b.a = 4; //right
     }
 }
