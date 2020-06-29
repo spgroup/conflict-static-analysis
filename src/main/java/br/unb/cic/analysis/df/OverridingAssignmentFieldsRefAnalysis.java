@@ -78,30 +78,31 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
         }
 
         //Create the objects with your statement type
-        KeyAndFlowHash leftObject = getKeyAndFlowsOfIn(in, Statement.Type.SOURCE);
-        KeyAndFlowHash rightObject = getKeyAndFlowsOfIn(in, Statement.Type.SINK);
+        KeyAndFlowHash leftObject = getKeyAndFlows(in, Statement.Type.SOURCE);
+        KeyAndFlowHash rightObject = getKeyAndFlows(in, Statement.Type.SINK);
 
-        List<String> inicialKeyLeft = leftObject.getKeys();
-        List<String> inicialKeyRight = rightObject.getKeys();
+        List<String> initialKeyLeft = leftObject.getKeys();
+        List<String> initialKeyRight = rightObject.getKeys();
 
         if (isSourceStatement(u)){
-            inicialKeyLeft = getKey(u);
+            initialKeyLeft = getKey(u);
         }
 
         if (isSinkStatement(u)){
-            inicialKeyRight = getKey(u);
+            initialKeyRight = getKey(u);
         }
 
         List<KeyAndFlowHash> generatedLeftList = new ArrayList<>();
         List<KeyAndFlowHash> generatedRightList = new ArrayList<>();
 
-        if (!inicialKeyLeft.isEmpty()){
-            for (String key: inicialKeyLeft){
+        //If the initial key is not empty, then, there is a possible conflict
+        if (!initialKeyLeft.isEmpty()){
+            for (String key: initialKeyLeft){
                 generatedLeftList.add((getKeyAndElementsOfHashAndFlowList(key, leftObject.getHash(), leftObject.getFlow())));
             }
         }
-        if (!inicialKeyRight.isEmpty()){
-            for (String key: inicialKeyRight){
+        if (!initialKeyRight.isEmpty()){
+            for (String key: initialKeyRight){
                 generatedRightList.add((getKeyAndElementsOfHashAndFlowList(key, rightObject.getHash(), rightObject.getFlow())));
             }
         }
@@ -111,13 +112,13 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
 
     //Return a list with the keys of a Unit
     private List<String> getKey(Unit u){
-        List<String> inicialKey = new ArrayList<>();
+        List<String> initialKey = new ArrayList<>();
         for (ValueBox v: u.getDefBoxes()){
             if (v.getValue() instanceof JInstanceFieldRef){
-                inicialKey.add(v.getValue().toString());
+                initialKey.add(v.getValue().toString());
             }
         }
-        return inicialKey;
+        return initialKey;
     }
 
     private void checkConflicts(List<KeyAndFlowHash> generatedLeftList, List<KeyAndFlowHash> generatedRightList, Unit u) {
@@ -125,10 +126,10 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
             for (KeyAndFlowHash right: generatedRightList){
                 if(left.getUniqueKey().equals(right.getUniqueKey())){
                     Statement stmt = null;
+                    //Get the statement of the left or right flow
                     if (isSourceStatement(u)){
                         stmt = getStatement(right);
-                    }
-                    if (isSinkStatement(u)){
+                    }else if (isSinkStatement(u)){
                         stmt = getStatement(left);
                     }
                     Conflict c = new Conflict(stmt, findStatement(u));
@@ -138,6 +139,7 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
         }
     }
 
+    //Return the statement of a data flow abstraction
     private Statement getStatement(KeyAndFlowHash statement){
         Iterator<DataFlowAbstraction> data = statement.getFlow().iterator();
         while (data.hasNext()){
@@ -158,10 +160,10 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
             return elements;
         }
 
-        JInstanceFieldRef actualField = null;
+        JInstanceFieldRef currentField = null;
 
         //The second position is the field called
-        String actualUniqueKey = "<"+nextKey.split(".<")[1];
+        String currentUniqueKey = "<"+nextKey.split(".<")[1];
 
         //The first key comes before ".<" if you have a stack as a substring
         nextKey = nextKey.split(".<")[0];
@@ -172,7 +174,7 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
                 for (HashMap<String, JInstanceFieldRef> auxMap : hash) {
                     for (String mapKey : auxMap.keySet()) {
                         if (mapKey.equals(nextKey)) {
-                            actualField = auxMap.get(mapKey);
+                            currentField = auxMap.get(mapKey);
                             listFlowRemoved.add(auxMap);
                             isNextKey = true;
                             auxValuesHashMap.remove(auxMap);
@@ -185,21 +187,21 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
             }else{
                 isNextKey = false;
             }
-            boolean fieldIsNull = actualField==null;
+            boolean fieldIsNull = currentField==null;
             if ((!fieldIsNull) && (!isNextKey)) {
-                actualUniqueKey = nextKey + (actualUniqueKey.equals("") ? "" : ".") + actualUniqueKey;
+                currentUniqueKey = nextKey + (currentUniqueKey.equals("") ? "" : ".") + currentUniqueKey;
             } else if (!fieldIsNull){
-                actualUniqueKey = actualField.getFieldRef().toString() + (actualUniqueKey.equals("") ? "" : ".") + actualUniqueKey;
-                nextKey = actualField.getBase().toString(); //Update the nextKey and repeat until the condition
+                currentUniqueKey = currentField.getFieldRef().toString() + (currentUniqueKey.equals("") ? "" : ".") + currentUniqueKey;
+                nextKey = currentField.getBase().toString(); //Update the nextKey and repeat until the condition
             }
         }
-        //If auxValuesHasMap is equal to zero, there is a nextKey next key and actualField is not null, then it is the starting field of the object
-        if (!(actualField==null) && (isNextKey)){
-            actualUniqueKey = nextKey + (actualUniqueKey.equals("") ? "" : ".") + actualUniqueKey;
+        //If auxValuesHasMap is equal to zero, there is a next key and currentField is not null, then it is the starting field of the object
+        if (!(currentField==null) && (isNextKey)){
+            currentUniqueKey = nextKey + (currentUniqueKey.equals("") ? "" : ".") + currentUniqueKey;
         }
 
         //Update key and flow
-        elements.setUniqueKey(actualUniqueKey);
+        elements.setUniqueKey(currentUniqueKey);
         if (!flow.isEmpty()) {
             //Remove all the elements equals in listFlowRemoved and flow
             elements.setFlow(removeFlowSet(listFlowRemoved, flow));
@@ -241,29 +243,29 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
             return new ArraySparseSet<>();
         }
 
-        KeyAndFlowHash leftObject = getKeyAndFlowsOfIn(in, Statement.Type.SOURCE);
-        KeyAndFlowHash rightObject = getKeyAndFlowsOfIn(in, Statement.Type.SINK);
-        KeyAndFlowHash baseObject = getKeyAndFlowsOfIn(in, Statement.Type.IN_BETWEEN);
+        KeyAndFlowHash leftObject = getKeyAndFlows(in, Statement.Type.SOURCE);
+        KeyAndFlowHash rightObject = getKeyAndFlows(in, Statement.Type.SINK);
+        KeyAndFlowHash baseObject = getKeyAndFlows(in, Statement.Type.IN_BETWEEN);
 
-        List<String> inicialKeyLeft = leftObject.getKeys();
-        List<String> inicialKeyRight = rightObject.getKeys();
+        List<String> initialKeyLeft = leftObject.getKeys();
+        List<String> initialKeyRight = rightObject.getKeys();
 
-        String inicialKeyBase = "";
+        String initialKeyBase = "";
 
         if (u.getDefBoxes().size() > 0) {
             for (ValueBox v : u.getDefBoxes()) {
                 if (v.getValue() instanceof JInstanceFieldRef) {
-                    inicialKeyBase = v.getValue().toString();
+                    initialKeyBase = v.getValue().toString();
                 }
             }
         }
         FlowSet<DataFlowAbstraction> flowSetReturn = new ArraySparseSet<>();
 
-        if (!inicialKeyRight.isEmpty()) {
-            flowSetReturn = returnedFlow(inicialKeyBase, baseObject.getHash(), baseObject.getFlow(), inicialKeyRight, rightObject.getHash(), rightObject.getFlow());
+        if (!initialKeyRight.isEmpty()) {
+            flowSetReturn = returnedFlow(initialKeyBase, baseObject.getHash(), baseObject.getFlow(), initialKeyRight, rightObject.getHash(), rightObject.getFlow());
         }
-        if (!inicialKeyLeft.isEmpty()){
-            for (DataFlowAbstraction flow : returnedFlow(inicialKeyBase, baseObject.getHash(), baseObject.getFlow(), inicialKeyLeft, leftObject.getHash(), leftObject.getFlow())){
+        if (!initialKeyLeft.isEmpty()){
+            for (DataFlowAbstraction flow : returnedFlow(initialKeyBase, baseObject.getHash(), baseObject.getFlow(), initialKeyLeft, leftObject.getHash(), leftObject.getFlow())){
                 flowSetReturn.add(flow);
             }
             return flowSetReturn;
@@ -273,20 +275,20 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
     }
 
     //Returns the flows from two equals getKeyAndElementsOfHashAndFlowList, left ou right with base statement
-    private FlowSet<DataFlowAbstraction> returnedFlow(String inicialKeyBase, Set<HashMap<String, JInstanceFieldRef>> hashBase, FlowSet<DataFlowAbstraction> baseFlow,
-                                                      List<String> comparedInicialKey, Set<HashMap<String, JInstanceFieldRef>> comparedHashMap, FlowSet<DataFlowAbstraction> comparedFlow){
+    private FlowSet<DataFlowAbstraction> returnedFlow(String initialKeyBase, Set<HashMap<String, JInstanceFieldRef>> hashBase, FlowSet<DataFlowAbstraction> baseFlow,
+                                                      List<String> comparedInitialKey, Set<HashMap<String, JInstanceFieldRef>> comparedHashMap, FlowSet<DataFlowAbstraction> comparedFlow){
 
         FlowSet<DataFlowAbstraction> flowSetReturn = new ArraySparseSet<>();
-        FlowSet<DataFlowAbstraction> inicialFlow = newInitialFlow();
+        FlowSet<DataFlowAbstraction> initialFlow = newInitialFlow();
         String generatedBase = "";
-        if (inicialKeyBase != "") {
-            generatedBase = (getKeyAndElementsOfHashAndFlowList(inicialKeyBase, hashBase, inicialFlow)).getUniqueKey();
+        if (initialKeyBase != "") {
+            generatedBase = (getKeyAndElementsOfHashAndFlowList(initialKeyBase, hashBase, initialFlow)).getUniqueKey();
         }
 
-        for (String key : comparedInicialKey) {
-            String left = (getKeyAndElementsOfHashAndFlowList(key, comparedHashMap, inicialFlow)).getUniqueKey();
+        for (String key : comparedInitialKey) {
+            String left = (getKeyAndElementsOfHashAndFlowList(key, comparedHashMap, initialFlow)).getUniqueKey();
             if (left.equals(generatedBase)) {
-                for (DataFlowAbstraction flow : getKeyAndElementsOfHashAndFlowList(inicialKeyBase, hashBase, baseFlow).getFlow()) {
+                for (DataFlowAbstraction flow : getKeyAndElementsOfHashAndFlowList(initialKeyBase, hashBase, baseFlow).getFlow()) {
                     flowSetReturn.add(flow);
                 }
 
@@ -301,9 +303,9 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
     }
 
     //Returns the final key and the flow of the IN elements
-    private KeyAndFlowHash getKeyAndFlowsOfIn(FlowSet<DataFlowAbstraction> in, Statement.Type statementType){
+    private KeyAndFlowHash getKeyAndFlows(FlowSet<DataFlowAbstraction> in, Statement.Type statementType){
 
-        List <String> inicialKey = new ArrayList<>();
+        List <String> initialKey = new ArrayList<>();
         FlowSet<DataFlowAbstraction> flow = new ArraySparseSet<>();
         Set<HashMap<String, JInstanceFieldRef>> returnedHashMap = new HashSet<>();
 
@@ -313,21 +315,21 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
             for (ValueBox valueBoxKey : filterIn.getStmt().getUnit().getDefBoxes()) {
                 strKey.append(valueBoxKey.getValue().toString());
             }
-            JInstanceFieldRef actualFieldRef = null;
+            JInstanceFieldRef currentFieldRef = null;
             for (ValueBox catchRef : filterIn.getStmt().getUnit().getUseBoxes()) {
                 if (catchRef.getValue() instanceof JInstanceFieldRef) {
-                    actualFieldRef = (JInstanceFieldRef) catchRef.getValue();
-                    auxHashMap.put(strKey.toString(), actualFieldRef);
+                    currentFieldRef = (JInstanceFieldRef) catchRef.getValue();
+                    auxHashMap.put(strKey.toString(), currentFieldRef);
                 }
             }
             if (filterIn.getStmt().getType().equals(statementType)) {
                 if (auxHashMap.size() != 0) returnedHashMap.add(auxHashMap);
                 flow.add(filterIn);
-                if (isJInstanceFieldRef(actualFieldRef)) {
-                    inicialKey.add(strKey.toString());
+                if (isJInstanceFieldRef(currentFieldRef)) {
+                    initialKey.add(strKey.toString());
                 }
             }
         }
-        return new KeyAndFlowHash(inicialKey, flow, returnedHashMap);
+        return new KeyAndFlowHash(initialKey, flow, returnedHashMap);
     }
 }
