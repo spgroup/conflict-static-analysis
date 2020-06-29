@@ -46,13 +46,10 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
 
                 for (DataFlowAbstraction defsIn: in){
                     String defInName = getLocalName(defsIn.getLocal());
-
-                    for (Local useBox: getUseVariables(u)){
-                        String useBoxName = getLocalName(useBox);
-                        if (!defInName.equals(useBoxName) && defInName.equals(localName)){
-                            res.add(new DataFlowAbstraction(defsIn.getLocal(), defsIn.getStmt())); //update an element in IN
-                            break; //Do not necessary check others elements
-                        }
+                    //if u not in IN, then add it
+                    if (!defInName.equals(localName)){
+                        res.add(new DataFlowAbstraction(defsIn.getLocal(), defsIn.getStmt())); //update an element in IN
+                        break; //Do not necessary check others elements
                     }
                 }
             });
