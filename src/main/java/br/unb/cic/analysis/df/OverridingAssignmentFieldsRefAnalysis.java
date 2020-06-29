@@ -55,7 +55,7 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
 
     //Make the difference between two FLOWSETs in relation to Statements
     private FlowSet<DataFlowAbstraction> difference(FlowSet<DataFlowAbstraction> in, FlowSet<DataFlowAbstraction> out){
-        FlowSet<DataFlowAbstraction> aux = new ArraySparseSet<>();
+        FlowSet<DataFlowAbstraction> returnedFlowSet = new ArraySparseSet<>();
         for (DataFlowAbstraction dataIn: in){
             boolean notEquals = true;
             for (DataFlowAbstraction dataOut: out){
@@ -65,10 +65,10 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
             }
             //Add the elements that not are in OUT
             if (notEquals){
-                aux.add(dataIn);
+                returnedFlowSet.add(dataIn);
             }
         }
-        return aux;
+        return returnedFlowSet;
     }
 
     @Override
@@ -147,10 +147,10 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
     }
 
     //Returns the final key and elements of a hash with its flow list
-    private KeyAndFlowHash getKeyAndElementsOfHashAndFlowList(String nextKey, Set<HashMap <String, JInstanceFieldRef>> hashValues, FlowSet<DataFlowAbstraction> flow){
-        List<HashMap<String, JInstanceFieldRef>> auxValuesHasMap = new ArrayList<>();
+    private KeyAndFlowHash getKeyAndElementsOfHashAndFlowList(String nextKey, Set<HashMap <String, JInstanceFieldRef>> hash, FlowSet<DataFlowAbstraction> flow){
+        List<HashMap<String, JInstanceFieldRef>> auxValuesHashMap = new ArrayList<>();
         List<HashMap<String, JInstanceFieldRef>> listFlowRemoved = new ArrayList<>();
-        auxValuesHasMap.addAll(hashValues);
+        auxValuesHashMap.addAll(hash);
         KeyAndFlowHash elements = new KeyAndFlowHash(nextKey, flow);
 
         //If nextKey not contain $stack is because simple key
@@ -158,24 +158,24 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
             return elements;
         }
 
-        JInstanceFieldRef auxField = null;
+        JInstanceFieldRef actualField = null;
 
         //The second position is the field called
-        String aux = "<"+nextKey.split(".<")[1];
+        String actualUniqueKey = "<"+nextKey.split(".<")[1];
 
-        //The first key comes before. <If you have a stack as a substring
+        //The first key comes before ".<" if you have a stack as a substring
         nextKey = nextKey.split(".<")[0];
         boolean isNextKey = true;
-        while(auxValuesHasMap.size()>0 && isNextKey) {
+        while(auxValuesHashMap.size()>0 && isNextKey) {
             if (nextKey.contains("$stack")) {
                 isNextKey = false;
-                for (HashMap<String, JInstanceFieldRef> auxMap : hashValues) {
+                for (HashMap<String, JInstanceFieldRef> auxMap : hash) {
                     for (String mapKey : auxMap.keySet()) {
                         if (mapKey.equals(nextKey)) {
-                            auxField = auxMap.get(mapKey);
+                            actualField = auxMap.get(mapKey);
                             listFlowRemoved.add(auxMap);
                             isNextKey = true;
-                            auxValuesHasMap.remove(auxMap);
+                            auxValuesHashMap.remove(auxMap);
                         }
                     }
                     if (isNextKey) {
@@ -185,21 +185,21 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
             }else{
                 isNextKey = false;
             }
-            boolean auxF = auxField==null;
-            if ((!auxF) && (!isNextKey)) {
-                aux = nextKey + (aux.equals("") ? "" : ".") + aux;
-            } else if (!auxF){
-                aux = auxField.getFieldRef().toString() + (aux.equals("") ? "" : ".") + aux;
-                nextKey = auxField.getBase().toString(); //Update the nextKey and repeat until the condition
+            boolean fieldIsNull = actualField==null;
+            if ((!fieldIsNull) && (!isNextKey)) {
+                actualUniqueKey = nextKey + (actualUniqueKey.equals("") ? "" : ".") + actualUniqueKey;
+            } else if (!fieldIsNull){
+                actualUniqueKey = actualField.getFieldRef().toString() + (actualUniqueKey.equals("") ? "" : ".") + actualUniqueKey;
+                nextKey = actualField.getBase().toString(); //Update the nextKey and repeat until the condition
             }
         }
         //If auxValuesHasMap is equal to zero and nextKey does not contain a "$stack", then it is the starting field of the object
         if (!nextKey.contains("$stack") && (isNextKey)){
-            aux = nextKey + (aux.equals("") ? "" : ".") + aux;
+            actualUniqueKey = nextKey + (actualUniqueKey.equals("") ? "" : ".") + actualUniqueKey;
         }
 
         //Update key and flow
-        elements.setUniqueKey(aux);
+        elements.setUniqueKey(actualUniqueKey);
         if (!flow.isEmpty()) {
             //Remove all the elements equals in listFlowRemoved and flow
             elements.setFlow(removeFlowSet(listFlowRemoved, flow));
@@ -211,10 +211,10 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
     private FlowSet<DataFlowAbstraction> removeFlowSet(List<HashMap<String, JInstanceFieldRef>> listFLowRemoved, FlowSet<DataFlowAbstraction> flow){
         FlowSet<DataFlowAbstraction> flowSetReturn = new ArraySparseSet<>();
 
-        for (HashMap<String, JInstanceFieldRef> auxMap : listFLowRemoved){
-            for (String mapKey : auxMap.keySet()) {
+        for (HashMap<String, JInstanceFieldRef> map : listFLowRemoved){
+            for (String mapKey : map.keySet()) {
                 for(DataFlowAbstraction data: flow) {
-                    if (auxMap.get(mapKey).toString().equals(data.getJInstanceFieldRef().toString())) {
+                    if (map.get(mapKey).toString().equals(data.getJInstanceFieldRef().toString())) {
                         String def = "";
                         for (ValueBox i: data.getStmt().getUnit().getDefBoxes()){
                             def = i.getValue().toString();
@@ -260,10 +260,10 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
         FlowSet<DataFlowAbstraction> flowSetReturn = new ArraySparseSet<>();
 
         if (!inicialKeyRight.isEmpty()) {
-            flowSetReturn = flowReturned(inicialKeyBase, baseObject.getHash(), baseObject.getFlow(), inicialKeyRight, rightObject.getHash(), rightObject.getFlow());
+            flowSetReturn = returnedFlow(inicialKeyBase, baseObject.getHash(), baseObject.getFlow(), inicialKeyRight, rightObject.getHash(), rightObject.getFlow());
         }
         if (!inicialKeyLeft.isEmpty()){
-            for (DataFlowAbstraction flow : flowReturned(inicialKeyBase, baseObject.getHash(), baseObject.getFlow(), inicialKeyLeft, leftObject.getHash(), leftObject.getFlow())){
+            for (DataFlowAbstraction flow : returnedFlow(inicialKeyBase, baseObject.getHash(), baseObject.getFlow(), inicialKeyLeft, leftObject.getHash(), leftObject.getFlow())){
                 flowSetReturn.add(flow);
             }
             return flowSetReturn;
@@ -273,8 +273,8 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
     }
 
     //Returns the flows from two equals getKeyAndElementsOfHashAndFlowList, left ou right with base statement
-    private FlowSet<DataFlowAbstraction> flowReturned(String inicialKeyBase, Set<HashMap<String, JInstanceFieldRef>> hashBase, FlowSet<DataFlowAbstraction> baseFlow,
-                                                        List<String> inicialKeyLeft, Set<HashMap<String, JInstanceFieldRef>> hashLeft, FlowSet<DataFlowAbstraction> leftFlow){
+    private FlowSet<DataFlowAbstraction> returnedFlow(String inicialKeyBase, Set<HashMap<String, JInstanceFieldRef>> hashBase, FlowSet<DataFlowAbstraction> baseFlow,
+                                                      List<String> comparedInicialKey, Set<HashMap<String, JInstanceFieldRef>> comparedHashMap, FlowSet<DataFlowAbstraction> comparedFlow){
 
         FlowSet<DataFlowAbstraction> flowSetReturn = new ArraySparseSet<>();
         FlowSet<DataFlowAbstraction> inicialFlow = newInitialFlow();
@@ -283,14 +283,14 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
             generatedBase = (getKeyAndElementsOfHashAndFlowList(inicialKeyBase, hashBase, inicialFlow)).getUniqueKey();
         }
 
-        for (String key : inicialKeyLeft) {
-            String left = (getKeyAndElementsOfHashAndFlowList(key, hashLeft, inicialFlow)).getUniqueKey();
+        for (String key : comparedInicialKey) {
+            String left = (getKeyAndElementsOfHashAndFlowList(key, comparedHashMap, inicialFlow)).getUniqueKey();
             if (left.equals(generatedBase)) {
                 for (DataFlowAbstraction flow : getKeyAndElementsOfHashAndFlowList(inicialKeyBase, hashBase, baseFlow).getFlow()) {
                     flowSetReturn.add(flow);
                 }
 
-                for (DataFlowAbstraction flow : getKeyAndElementsOfHashAndFlowList(key, hashLeft, leftFlow).getFlow()) {
+                for (DataFlowAbstraction flow : getKeyAndElementsOfHashAndFlowList(key, comparedHashMap, comparedFlow).getFlow()) {
                     flowSetReturn.add(flow);
                 }
                 return flowSetReturn;
@@ -301,33 +301,33 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
     }
 
     //Returns the final key and the flow of the IN elements
-    private KeyAndFlowHash getKeyAndFlowsOfIn(FlowSet<DataFlowAbstraction> in, Statement.Type type){
+    private KeyAndFlowHash getKeyAndFlowsOfIn(FlowSet<DataFlowAbstraction> in, Statement.Type statementType){
 
         List <String> inicialKey = new ArrayList<>();
         FlowSet<DataFlowAbstraction> flow = new ArraySparseSet<>();
-        Set<HashMap<String, JInstanceFieldRef>> auxHash = new HashSet<>();
+        Set<HashMap<String, JInstanceFieldRef>> returnedHashMap = new HashSet<>();
 
         for (DataFlowAbstraction filterIn : in) {
-            HashMap<String, JInstanceFieldRef> aux = new HashMap<>();
-            String strKey = "";
+            HashMap<String, JInstanceFieldRef> auxHashMap = new HashMap<>();
+            StringBuilder strKey = new StringBuilder();
             for (ValueBox valueBoxKey : filterIn.getStmt().getUnit().getDefBoxes()) {
-                strKey += valueBoxKey.getValue().toString();
+                strKey.append(valueBoxKey.getValue().toString());
             }
-            JInstanceFieldRef auxRef = null;
+            JInstanceFieldRef actualFieldRef = null;
             for (ValueBox catchRef : filterIn.getStmt().getUnit().getUseBoxes()) {
                 if (catchRef.getValue() instanceof JInstanceFieldRef) {
-                    auxRef = (JInstanceFieldRef) catchRef.getValue();
-                    aux.put(strKey, auxRef);
+                    actualFieldRef = (JInstanceFieldRef) catchRef.getValue();
+                    auxHashMap.put(strKey.toString(), actualFieldRef);
                 }
             }
-            if (filterIn.getStmt().getType().equals(type)) {
-                if (aux.size() != 0) auxHash.add(aux);
+            if (filterIn.getStmt().getType().equals(statementType)) {
+                if (auxHashMap.size() != 0) returnedHashMap.add(auxHashMap);
                 flow.add(filterIn);
-                if (isJInstanceFieldRef(auxRef)) {
-                    inicialKey.add(strKey);
+                if (isJInstanceFieldRef(actualFieldRef)) {
+                    inicialKey.add(strKey.toString());
                 }
             }
         }
-        return new KeyAndFlowHash(inicialKey, flow, auxHash);
+        return new KeyAndFlowHash(inicialKey, flow, returnedHashMap);
     }
 }
