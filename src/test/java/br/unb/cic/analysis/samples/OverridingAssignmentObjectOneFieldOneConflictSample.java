@@ -5,12 +5,12 @@ public class OverridingAssignmentObjectOneFieldOneConflictSample {
     public int b;
 
     public static void main(String[] args) {
-        OverridingAssignmentObjectOneFieldOneConflictSample instanceLocal = new OverridingAssignmentObjectOneFieldOneConflictSample();
+        OverridingAssignmentObjectOneFieldOneConflictSample instance = new OverridingAssignmentObjectOneFieldOneConflictSample();
 
-        instanceLocal.b = instanceLocal.b + 3; // left
-        instanceLocal.a = 3; // right
-        instanceLocal.a = instanceLocal.b+3; // base
-        instanceLocal.a = 4; //left
-        instanceLocal.b = 4; //right
+        instance.b = instance.b + 3; // left
+        instance.a = 3; // right
+        instance.a = instance.b+3; // base
+        instance.a = 4; //left
+        instance.b = 4; //right
     }
 }

@@ -58,7 +58,6 @@ public class OverridingAssignmentAnalysisArraysCompleteOverlayConflictTest {
 
     @Test
     public void testDataFlowAnalysisExpectingOneConflict() {
-        System.out.println(analysis.getConflicts());
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
 }

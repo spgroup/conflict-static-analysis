@@ -59,7 +59,6 @@ public class OverridingAssignmentAnalysisObjectOneFieldTwoConflictsTest {
 
     @Test
     public void testDataFlowAnalysisExpectingOneConflict() {
-        System.out.println(analysis.getConflicts());
         Assert.assertEquals(2, analysis.getConflicts().size());
     }
 }

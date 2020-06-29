@@ -10,6 +10,7 @@ import soot.ValueBox;
 import soot.jimple.internal.JInstanceFieldRef;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
+
 import java.util.*;
 
 public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalysis {
@@ -143,7 +144,7 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
     private Statement getStatement(KeyAndFlowHash statement){
         Iterator<DataFlowAbstraction> data = statement.getFlow().iterator();
         while (data.hasNext()){
-             return data.next().getStmt();
+            return data.next().getStmt();
         }
         return null;
     }
@@ -156,7 +157,7 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
         KeyAndFlowHash elements = new KeyAndFlowHash(nextKey, flow);
 
         //If nextKey not contain $stack is because simple key
-        if (!nextKey.contains("$stack")){
+        if (!(nextKey.contains("$stack"))){
             return elements;
         }
 
@@ -169,28 +170,24 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
         nextKey = nextKey.split(".<")[0];
         boolean isNextKey = true;
         while(auxValuesHashMap.size()>0 && isNextKey) {
-            if (nextKey.contains("$stack")) {
-                isNextKey = false;
-                for (HashMap<String, JInstanceFieldRef> auxMap : hash) {
-                    for (String mapKey : auxMap.keySet()) {
-                        if (mapKey.equals(nextKey)) {
-                            currentField = auxMap.get(mapKey);
-                            listFlowRemoved.add(auxMap);
-                            isNextKey = true;
-                            auxValuesHashMap.remove(auxMap);
-                        }
-                    }
-                    if (isNextKey) {
-                        break;
+            isNextKey = false;
+            for (HashMap<String, JInstanceFieldRef> auxMap : hash) {
+                for (String mapKey : auxMap.keySet()) {
+                    if (mapKey.equals(nextKey)) {
+                        currentField = auxMap.get(mapKey);
+                        listFlowRemoved.add(auxMap);
+                        isNextKey = true;
+                        auxValuesHashMap.remove(auxMap);
                     }
                 }
-            }else{
-                isNextKey = false;
+                if (isNextKey) {
+                    break;
+                }
             }
-            boolean fieldIsNull = currentField==null;
-            if ((!fieldIsNull) && (!isNextKey)) {
+
+            if (!isNextKey) {
                 currentUniqueKey = nextKey + (currentUniqueKey.equals("") ? "" : ".") + currentUniqueKey;
-            } else if (!fieldIsNull){
+            } else{
                 currentUniqueKey = currentField.getFieldRef().toString() + (currentUniqueKey.equals("") ? "" : ".") + currentUniqueKey;
                 nextKey = currentField.getBase().toString(); //Update the nextKey and repeat until the condition
             }
