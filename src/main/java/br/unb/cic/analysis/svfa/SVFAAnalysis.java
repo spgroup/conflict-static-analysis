@@ -32,6 +32,12 @@ public class SVFAAnalysis extends JSVFA  {
     }
 
     @Override
+    public List<String> getIncludeList() {
+        String[] array = new String[0];
+        return JavaConverters.asScalaBuffer(Arrays.asList(array)).toList();
+    }
+
+    @Override
     public List<String> applicationClassPath() {
         String[] array = cp.split(":");
         return JavaConverters.asScalaBuffer(Arrays.asList(array)).toList();
