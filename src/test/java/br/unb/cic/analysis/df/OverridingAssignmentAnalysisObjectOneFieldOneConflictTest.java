@@ -12,9 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OverridingAssignmentAnalysisArraysCompleteOverlayConflictTest {
+public class OverridingAssignmentAnalysisObjectOneFieldOneConflictTest {
 
-    private OverridingAssignmentAnalysis analysis;
+    private OverridingAssignmentFieldsRefAnalysis analysis;
 
     @Before
     public void configure() {
@@ -27,7 +27,8 @@ public class OverridingAssignmentAnalysisArraysCompleteOverlayConflictTest {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
                 lines.add(10);    //left
-                res.put("br.unb.cic.analysis.samples.OverridingAssignmentArraysCompleteOverlaySample", lines);
+                lines.add(13);    //left
+                res.put("br.unb.cic.analysis.samples.OverridingAssignmentObjectOneFieldOneConflictSample", lines);
                 return res;
             }
 
@@ -35,9 +36,9 @@ public class OverridingAssignmentAnalysisArraysCompleteOverlayConflictTest {
             protected Map<String, List<Integer>> sinkDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(7);    //right
-                lines.add(13);    //right
-                res.put("br.unb.cic.analysis.samples.OverridingAssignmentArraysCompleteOverlaySample", lines);
+                lines.add(11);    //right
+                lines.add(14);    //right
+                res.put("br.unb.cic.analysis.samples.OverridingAssignmentObjectOneFieldOneConflictSample", lines);
                 return res;
             }
         };
@@ -46,11 +47,11 @@ public class OverridingAssignmentAnalysisArraysCompleteOverlayConflictTest {
                 new Transform("jtp.oneConflict", new BodyTransformer() {
                     @Override
                     protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-                        analysis = new OverridingAssignmentAnalysis(body, definition);
+                        analysis = new OverridingAssignmentFieldsRefAnalysis(body, definition);
                     }
                 }));
         String cp = "target/test-classes";
-        String targetClass = "br.unb.cic.analysis.samples.OverridingAssignmentArraysCompleteOverlaySample";
+        String targetClass = "br.unb.cic.analysis.samples.OverridingAssignmentObjectOneFieldOneConflictSample";
         PhaseOptions.v().setPhaseOption("jb", "use-original-names:true");
 
         SootWrapper.builder().withClassPath(cp).addClass(targetClass).build().execute();

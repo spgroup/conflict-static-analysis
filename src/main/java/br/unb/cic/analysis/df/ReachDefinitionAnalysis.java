@@ -14,9 +14,7 @@ import soot.Local;
 import soot.Unit;
 import soot.ValueBox;
 import soot.jimple.internal.JArrayRef;
-import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JInstanceFieldRef;
-import soot.toolkits.graph.DirectedGraph;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
@@ -161,6 +159,15 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 				.setClass(methodBody.getMethod().getDeclaringClass())
 				.setMethod(methodBody.getMethod())
 				.setType(Statement.Type.SOURCE)
+				.setUnit(d)
+				.setSourceCodeLineNumber(d.getJavaSourceStartLineNumber()).build();
+	}
+
+	protected Statement getStatementBase(Unit d) {
+		return Statement.builder()
+				.setClass(methodBody.getMethod().getDeclaringClass())
+				.setMethod(methodBody.getMethod())
+				.setType(Statement.Type.IN_BETWEEN)
 				.setUnit(d)
 				.setSourceCodeLineNumber(d.getJavaSourceStartLineNumber()).build();
 	}
