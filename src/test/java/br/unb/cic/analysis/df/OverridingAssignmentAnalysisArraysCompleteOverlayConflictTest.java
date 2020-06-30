@@ -26,7 +26,7 @@ public class OverridingAssignmentAnalysisArraysCompleteOverlayConflictTest {
             protected Map<String, List<Integer>> sourceDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(10);    //left
+                lines.add(11);    //left
                 res.put("br.unb.cic.analysis.samples.OverridingAssignmentArraysCompleteOverlaySample", lines);
                 return res;
             }
@@ -36,7 +36,7 @@ public class OverridingAssignmentAnalysisArraysCompleteOverlayConflictTest {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
                 lines.add(7);    //right
-                lines.add(13);    //right
+                lines.add(13);     //right
                 res.put("br.unb.cic.analysis.samples.OverridingAssignmentArraysCompleteOverlaySample", lines);
                 return res;
             }

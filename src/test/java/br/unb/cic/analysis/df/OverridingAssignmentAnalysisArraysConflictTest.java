@@ -35,7 +35,7 @@ public class OverridingAssignmentAnalysisArraysConflictTest {
             protected Map<String, List<Integer>> sinkDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(10);    //right
+                lines.add(9);    //right
                 res.put("br.unb.cic.analysis.samples.OverridingAssignmentArraysSample", lines);
                 return res;
             }

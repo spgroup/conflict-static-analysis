@@ -7,8 +7,8 @@ public class OverridingAssignmentArraysCompleteOverlaySample {
         int[] aux = {1, 2, 3, 4, 5}; //right
         int[] arr = {0,0,0,0,0};
 
-        arr[4] = 10; //left
-        arr[5] = 10;
+        arr[4] = 10;
+        arr[5] = 10; //left
 
         arr = aux; //right
 
