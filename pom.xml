@@ -4,7 +4,21 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>br.unb.cic</groupId>
 	<artifactId>soot-analysis</artifactId>
-	<version>0.0.6-SNAPSHOT</version>
+	<version>0.0.6</version>
+
+	<repositories>
+	  <repository>
+	    <id>spgroup</id>
+	    <name>SPG Maven Repository (fork of the soot project)</name>
+	    <url>https://maven.pkg.github.com/spgroup/soot/</url>
+	  </repository>
+	  <repository>
+	    <id>rbonifacio</id>
+	    <name>Temporary repository for the SVFA library</name>
+	    <url>https://maven.pkg.github.com/rbonifacio/svfa-scala/</url>
+	  </repository>
+	</repositories>
+	
 	<dependencies>
 		<dependency>
 			<groupId>br.unb.cic</groupId>
