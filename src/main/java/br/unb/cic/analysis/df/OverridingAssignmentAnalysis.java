@@ -62,12 +62,12 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
 
     @Override
     protected void detectConflict(FlowSet<DataFlowAbstraction> in, Unit u) {
-        List<DataFlowAbstraction> left = new ArrayList<>();
-        List<DataFlowAbstraction> right = new ArrayList<>();
-
         if (!(isSinkStatement(u) || isSourceStatement(u))) {
             return;
         }
+
+        List<DataFlowAbstraction> left = new ArrayList<>();
+        List<DataFlowAbstraction> right = new ArrayList<>();
 
         u.getUseAndDefBoxes().stream().filter(v -> v.getValue() instanceof Local).forEach(v -> {
             String localName = getLocalName((Local) v.getValue());
