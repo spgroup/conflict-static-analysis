@@ -14,7 +14,7 @@ import soot.Local;
 import soot.Unit;
 import soot.ValueBox;
 import soot.jimple.internal.JArrayRef;
-import soot.toolkits.graph.DirectedGraph;
+import soot.jimple.internal.JInstanceFieldRef;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
@@ -81,7 +81,7 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 	 * should be killed, when considering the statement
 	 * u.
 	 */
-	private FlowSet<Local> kill(Unit u) {
+	protected FlowSet<Local> kill(Unit u) {
 		FlowSet<Local> res = new ArraySparseSet<>();
 
 		for(Local local: getDefVariables(u)) {
@@ -163,6 +163,15 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 				.setSourceCodeLineNumber(d.getJavaSourceStartLineNumber()).build();
 	}
 
+	protected Statement getStatementBase(Unit d) {
+		return Statement.builder()
+				.setClass(methodBody.getMethod().getDeclaringClass())
+				.setMethod(methodBody.getMethod())
+				.setType(Statement.Type.IN_BETWEEN)
+				.setUnit(d)
+				.setSourceCodeLineNumber(d.getJavaSourceStartLineNumber()).build();
+	}
+
 	protected boolean isSourceStatement(Unit d) {
 		return definition.getSourceStatements().stream().map(s -> s.getUnit()).collect(Collectors.toList()).contains(d);
 	}
@@ -194,6 +203,10 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 				localDefs.add((Local) v.getValue());
 			} else if (v.getValue() instanceof JArrayRef) {
 				JArrayRef ref = (JArrayRef) v.getValue();
+				localDefs.add((Local) ref.getBaseBox().getValue());
+			}
+			else if (v.getValue() instanceof JInstanceFieldRef) {
+				JInstanceFieldRef ref = (JInstanceFieldRef) v.getValue();
 				localDefs.add((Local) ref.getBaseBox().getValue());
 			}
 		}

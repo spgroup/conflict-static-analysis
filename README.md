@@ -27,9 +27,7 @@ Current supported algorithms:
 
 To build the project, you will need Maven and Java 8 (or higher).
 
-First, build and install the [svfa-scala](https://github.com/rbonifacio/svfa-scala) library.
-
-After that, run the following commands:
+Clone the repository and than run the following commmand. 
 
 ```SHELL
 mvn clean install -DskipTests
