@@ -3,6 +3,7 @@ package br.unb.cic.analysis.svfa;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.soot.graph.Graph;
 import br.unb.cic.soot.graph.Node;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import scalax.collection.GraphBase;
@@ -44,9 +45,9 @@ public class SVFATest {
     @Test
     public void testSVFAnalysisExpectingOneConflict() {
         analysis.buildSparseValueFlowGraph();
-
         Graph<Node> g = analysis.svg();
-
-        System.out.println(g.nodes().size());
+        Assert.assertEquals(9, g.nodes().size());
+        Assert.assertEquals(1, analysis.reportConflicts().size());
+        Assert.assertEquals(1, analysis.findSourceSinkPaths().size());
     }
 }
