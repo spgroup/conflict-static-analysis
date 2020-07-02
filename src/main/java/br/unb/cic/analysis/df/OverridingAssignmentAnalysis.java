@@ -3,10 +3,7 @@ package br.unb.cic.analysis.df;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
-import soot.Body;
-import soot.Local;
-import soot.Unit;
-import soot.ValueBox;
+import soot.*;
 import soot.jimple.internal.JArrayRef;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
@@ -50,11 +47,17 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
     protected FlowSet<DataFlowAbstraction> gen(Unit u, FlowSet<DataFlowAbstraction> in) {
         FlowSet<DataFlowAbstraction> res = new ArraySparseSet<>();
         if (isSourceStatement(u) || isSinkStatement(u)) {
-            u.getUseAndDefBoxes().stream().filter(v -> v.getValue() instanceof Local).forEach(v -> {
+            u.getDefBoxes().stream().filter(v -> v.getValue() instanceof Local).forEach(v -> {
                 Statement stmt = isSourceStatement(u)
                         ? findSourceStatement(u)
                         : findSinkStatement(u);
                 res.add(new DataFlowAbstraction((Local) v.getValue(), stmt));
+            });
+            u.getDefBoxes().stream().filter(v -> v.getValue() instanceof JArrayRef).forEach(v -> {
+                Statement stmt = isSourceStatement(u)
+                        ? findSourceStatement(u)
+                        : findSinkStatement(u);
+                res.add(new DataFlowAbstraction((Local) getBaseBoxName(v), stmt));
             });
         }
         return res;
@@ -69,23 +72,37 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
         List<DataFlowAbstraction> left = new ArrayList<>();
         List<DataFlowAbstraction> right = new ArrayList<>();
 
-        u.getUseAndDefBoxes().stream().filter(v -> v.getValue() instanceof Local).forEach(v -> {
+        u.getDefBoxes().stream().filter(v -> v.getValue() instanceof Local).forEach(v -> {
             String localName = getLocalName((Local) v.getValue());
-            for (DataFlowAbstraction filterIn : in) {
-                String inName = getLocalName(filterIn.getLocal());
+            FillRightAndLeftLists(in, left, right, localName);
+        });
 
-                if (filterIn.getStmt().getType().equals(Statement.Type.SOURCE) && inName.equals(localName)) {
-                    left.add(filterIn);
-                } else if (filterIn.getStmt().getType().equals(Statement.Type.SINK) && inName.equals(localName)) {
-                    right.add(filterIn);
-                }
-            }
+        u.getDefBoxes().stream().filter(v -> v.getValue() instanceof JArrayRef).forEach(v -> {
+            String localName = getBaseBoxName(v).toString();;
+            FillRightAndLeftLists(in, left, right, localName);
         });
 
         if (isSinkStatement(u)) {
             checkConflicts(u, left);
         } else if (isSourceStatement(u)) {
             checkConflicts(u, right);
+        }
+    }
+
+    /*
+     * Checks the type of all items within
+     * the abstraction and adds lists of
+     * abstractions for Left and Right.
+     */
+    private void FillRightAndLeftLists(FlowSet<DataFlowAbstraction> in, List<DataFlowAbstraction> left, List<DataFlowAbstraction> right, String localName) {
+        for (DataFlowAbstraction filterIn : in) {
+            String inName = getLocalName(filterIn.getLocal());
+
+            if (filterIn.getStmt().getType().equals(Statement.Type.SOURCE) && inName.equals(localName)) {
+                left.add(filterIn);
+            } else if (filterIn.getStmt().getType().equals(Statement.Type.SINK) && inName.equals(localName)) {
+                right.add(filterIn);
+            }
         }
     }
 
@@ -113,7 +130,7 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
             String localName = "";
 
             if (local.getValue() instanceof JArrayRef) {
-                localName = getBaseBoxName(local);
+                localName = getBaseBoxName(local).toString();
             }
 
             if (local.getValue() instanceof Local) {
@@ -135,11 +152,11 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
     }
 
     /*
-     * Returns a string containing the name
+     * Returns a Value containing the name
      * of the variable used to assign an array;
      * e.g:  int[] arr = {0, 1}; --> "arr"
      */
-    private String getBaseBoxName(ValueBox valueBox) {
-        return (((JArrayRef) valueBox.getValue()).getBaseBox().getValue()).toString();
+    private Value getBaseBoxName(ValueBox valueBox) {
+        return (((JArrayRef) valueBox.getValue()).getBaseBox().getValue());
     }
 }
