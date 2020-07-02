@@ -1,16 +1,15 @@
 package br.unb.cic.analysis.svfa;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.soot.graph.Graph;
 import br.unb.cic.soot.graph.Node;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import scalax.collection.GraphBase;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SVFAConfluentAnalysisTest {
 
@@ -42,7 +41,14 @@ public class SVFAConfluentAnalysisTest {
     }
 
     @Test
-    public void testSVFAnalysisExpectingOneConflict() {
+    public void testSVFAConfluentAnalysisExpectingOneConflict() {
         analysis.execute();
+        Set<ConfluenceConflict> conflicts = analysis.getConfluentConflicts();
+        Assert.assertEquals(conflicts.size(), 1);
+        ConfluenceConflict conflict = conflicts.iterator().next();
+
+        Assert.assertEquals(conflict.toString(),
+                "SOURCE=>BASE: (br.unb.cic.analysis.samples.DoubleSourceSample,<br.unb.cic.analysis.samples.DoubleSourceSample: void main(java.lang.String[])>,8) => (br.unb.cic.analysis.samples.DoubleSourceSample,<br.unb.cic.analysis.samples.DoubleSourceSample: void main(java.lang.String[])>,14)\n" +
+                        "SINK=>BASE: (br.unb.cic.analysis.samples.DoubleSourceSample,<br.unb.cic.analysis.samples.DoubleSourceSample: void main(java.lang.String[])>,12) => (br.unb.cic.analysis.samples.DoubleSourceSample,<br.unb.cic.analysis.samples.DoubleSourceSample: void main(java.lang.String[])>,14)");
     }
 }
