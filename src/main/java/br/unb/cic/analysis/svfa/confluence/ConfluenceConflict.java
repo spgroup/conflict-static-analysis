@@ -1,4 +1,4 @@
-package br.unb.cic.analysis.svfa;
+package br.unb.cic.analysis.svfa.confluence;
 
 import br.unb.cic.soot.graph.Node;
 

@@ -1,19 +1,15 @@
-package br.unb.cic.analysis.svfa;
+package br.unb.cic.analysis.svfa.confluence;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
-import br.unb.cic.analysis.model.Conflict;
-import br.unb.cic.soot.graph.Graph;
-import br.unb.cic.soot.graph.Node;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import scalax.collection.GraphBase;
 
 import java.util.*;
 
-public class SVFAConfluentAnalysisTest {
+public class SVFAConfluenceAnalysisTest {
 
-    private SVFAConfluentAnalysis analysis;
+    private SVFAConfluenceAnalysis analysis;
     @Before
     public void configure() {
         AbstractMergeConflictDefinition definition = new AbstractMergeConflictDefinition() {
@@ -37,7 +33,7 @@ public class SVFAConfluentAnalysisTest {
         };
 
         String cp = "target/test-classes";
-        analysis = new SVFAConfluentAnalysis(cp, definition);
+        analysis = new SVFAConfluenceAnalysis(cp, definition);
     }
 
     @Test

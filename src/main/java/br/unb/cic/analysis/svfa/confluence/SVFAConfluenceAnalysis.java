@@ -1,19 +1,20 @@
-package br.unb.cic.analysis.svfa;
+package br.unb.cic.analysis.svfa.confluence;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
-import br.unb.cic.analysis.model.Pair;
 import br.unb.cic.analysis.model.Statement;
+import br.unb.cic.analysis.svfa.SVFAAnalysis;
+import br.unb.cic.analysis.svfa.confluence.ConfluenceConflict;
 import br.unb.cic.soot.graph.Node;
 
 import java.util.*;
 
-public class SVFAConfluentAnalysis {
+public class SVFAConfluenceAnalysis {
 
     private String cp;
     private AbstractMergeConflictDefinition definition;
     private Set<ConfluenceConflict> confluentFlows = new HashSet<>();
 
-    SVFAConfluentAnalysis(String classPath, AbstractMergeConflictDefinition definition) {
+    SVFAConfluenceAnalysis(String classPath, AbstractMergeConflictDefinition definition) {
         this.cp = classPath;
         this.definition = definition;
     }
