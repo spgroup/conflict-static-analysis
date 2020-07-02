@@ -47,17 +47,16 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
     protected FlowSet<DataFlowAbstraction> gen(Unit u, FlowSet<DataFlowAbstraction> in) {
         FlowSet<DataFlowAbstraction> res = new ArraySparseSet<>();
         if (isSourceStatement(u) || isSinkStatement(u)) {
-            u.getDefBoxes().stream().filter(v -> v.getValue() instanceof Local).forEach(v -> {
+            u.getDefBoxes().stream().filter(v -> v.getValue() instanceof Local || v.getValue() instanceof JArrayRef).forEach(v -> {
                 Statement stmt = isSourceStatement(u)
                         ? findSourceStatement(u)
                         : findSinkStatement(u);
-                res.add(new DataFlowAbstraction((Local) v.getValue(), stmt));
-            });
-            u.getDefBoxes().stream().filter(v -> v.getValue() instanceof JArrayRef).forEach(v -> {
-                Statement stmt = isSourceStatement(u)
-                        ? findSourceStatement(u)
-                        : findSinkStatement(u);
-                res.add(new DataFlowAbstraction((Local) getBaseBoxName(v), stmt));
+
+                Local local = v.getValue() instanceof Local
+                        ? (Local) v.getValue()
+                        : (Local) getJArrayRefName(v);
+
+                res.add(new DataFlowAbstraction(local, stmt));
             });
         }
         return res;
@@ -72,13 +71,11 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
         List<DataFlowAbstraction> left = new ArrayList<>();
         List<DataFlowAbstraction> right = new ArrayList<>();
 
-        u.getDefBoxes().stream().filter(v -> v.getValue() instanceof Local).forEach(v -> {
-            String localName = getLocalName((Local) v.getValue());
-            FillRightAndLeftLists(in, left, right, localName);
-        });
+        u.getDefBoxes().stream().filter(v -> v.getValue() instanceof Local || v.getValue() instanceof JArrayRef).forEach(v -> {
+            String localName = v.getValue() instanceof Local
+                    ? getLocalName((Local) v.getValue())
+                    : getJArrayRefName(v).toString();
 
-        u.getDefBoxes().stream().filter(v -> v.getValue() instanceof JArrayRef).forEach(v -> {
-            String localName = getBaseBoxName(v).toString();;
             FillRightAndLeftLists(in, left, right, localName);
         });
 
@@ -130,7 +127,7 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
             String localName = "";
 
             if (local.getValue() instanceof JArrayRef) {
-                localName = getBaseBoxName(local).toString();
+                localName = getJArrayRefName(local).toString();
             }
 
             if (local.getValue() instanceof Local) {
@@ -156,7 +153,7 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
      * of the variable used to assign an array;
      * e.g:  int[] arr = {0, 1}; --> "arr"
      */
-    private Value getBaseBoxName(ValueBox valueBox) {
+    private Value getJArrayRefName(ValueBox valueBox) {
         return (((JArrayRef) valueBox.getValue()).getBaseBox().getValue());
     }
 }
