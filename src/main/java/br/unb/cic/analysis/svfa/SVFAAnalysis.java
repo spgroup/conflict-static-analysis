@@ -72,7 +72,6 @@ public class SVFAAnalysis extends JSVFA  {
     public final scala.collection.immutable.List<SootMethod> getEntryPoints() {
         definition.loadSourceStatements();
         definition.loadSinkStatements();
-        definition.loadInBetweenStatements();
         return JavaConverters.asScalaBuffer(getSourceStatements()
                 .stream()
                 .map(stmt -> stmt.getSootMethod())
@@ -90,14 +89,14 @@ public class SVFAAnalysis extends JSVFA  {
         return SimpleNode.instance();
     }
 
-    private boolean isSource(Unit unit) {
+    protected boolean isSource(Unit unit) {
         return getSourceStatements()
                 .stream()
                 .map(stmt -> stmt.getUnit())
                 .anyMatch(u -> u.equals(unit));
     }
 
-    private boolean isSink(Unit unit) {
+    protected boolean isSink(Unit unit) {
         return getSinkStatements()
                 .stream()
                 .map(stmt -> stmt.getUnit())

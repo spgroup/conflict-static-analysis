@@ -50,20 +50,6 @@ public abstract class AbstractMergeConflictDefinition {
         }).collect(Collectors.toList());
     }
 
-    public void loadInBetweenStatements() {
-        Map<String, List<Integer>> sourceAndSinkDefinitions = sourceAndSinkDefinitions();
-
-        List<Statement> statements = loadStatements(sourceAndSinkDefinitions.keySet(), Statement.Type.IN_BETWEEN);
-
-        inBetweenStatements = statements.stream().filter(statement -> {
-            String className = statement.getSootClass().getName();
-            Integer lineNumber = statement.getSourceCodeLineNumber();
-
-            return !sourceAndSinkDefinitions.containsKey(className)
-                    || !sourceAndSinkDefinitions.get(className).contains(lineNumber);
-        }).collect(Collectors.toList());
-    }
-
     public List<Statement> getSourceStatements() {
         return sourceStatements;
     }
@@ -72,29 +58,6 @@ public abstract class AbstractMergeConflictDefinition {
         return sinkStatements;
     }
 
-    public List<Statement> getInBetweenStatements() { return inBetweenStatements; }
-
-    public Map<String, List<Integer>> sourceAndSinkDefinitions() {
-        Map<String, List<Integer>> sourceAndSyncDefinitions = new HashMap<>();
-        Map<String, List<Integer>> sourceDefinitions = sourceDefinitions();
-        Map<String, List<Integer>> sinkDefinitions = sinkDefinitions();
-
-        for (String className : sourceDefinitions.keySet()) {
-            List<Integer> lineList = sourceDefinitions.get(className);
-            if (sinkDefinitions.containsKey(className)) {
-                lineList.addAll(sinkDefinitions.get(className));
-            }
-            sourceAndSyncDefinitions.put(className, lineList);
-        }
-
-        for(String className : sinkDefinitions.keySet()) {
-            if (!sourceAndSyncDefinitions.containsKey(className)) {
-                sourceAndSyncDefinitions.put(className, sinkDefinitions.get(className));
-            }
-        }
-
-        return sourceAndSyncDefinitions;
-    }
 
     /**
      * This method should return a list of pairs, where the

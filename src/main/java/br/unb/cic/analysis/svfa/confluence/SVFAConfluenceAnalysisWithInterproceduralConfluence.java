@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import java.util.*;
 
-public class SVFAConfluenceAnalysisTest {
+public class SVFAConfluenceAnalysisWithInterproceduralConfluence {
 
     private SVFAConfluenceAnalysis analysis;
     @Before
@@ -17,8 +17,8 @@ public class SVFAConfluenceAnalysisTest {
             protected Map<String, List<Integer>> sourceDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(8);
-                res.put("br.unb.cic.analysis.samples.DoubleSourceSample", lines);
+                lines.add(10);
+                res.put("br.unb.cic.analysis.samples.InterproceduralConfluenceSample", lines);
                 return res;
             }
 
@@ -27,7 +27,7 @@ public class SVFAConfluenceAnalysisTest {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
                 lines.add(12);
-                res.put("br.unb.cic.analysis.samples.DoubleSourceSample", lines);
+                res.put("br.unb.cic.analysis.samples.InterproceduralConfluenceSample", lines);
                 return res;
             }
         };
@@ -40,12 +40,6 @@ public class SVFAConfluenceAnalysisTest {
     public void testSVFAConfluentAnalysisExpectingOneConflict() {
         analysis.execute();
         Set<ConfluenceConflict> conflicts = analysis.getConfluentConflicts();
-        Assert.assertEquals(1, conflicts.size());
-        ConfluenceConflict conflict = conflicts.iterator().next();
-
-        Assert.assertEquals(
-                "SOURCE=>BASE: (br.unb.cic.analysis.samples.DoubleSourceSample,<br.unb.cic.analysis.samples.DoubleSourceSample: void main(java.lang.String[])>,8) => (br.unb.cic.analysis.samples.DoubleSourceSample,<br.unb.cic.analysis.samples.DoubleSourceSample: void main(java.lang.String[])>,14)\n" +
-                        "SINK=>BASE: (br.unb.cic.analysis.samples.DoubleSourceSample,<br.unb.cic.analysis.samples.DoubleSourceSample: void main(java.lang.String[])>,12) => (br.unb.cic.analysis.samples.DoubleSourceSample,<br.unb.cic.analysis.samples.DoubleSourceSample: void main(java.lang.String[])>,14)",
-                conflict.toString());
+        Assert.assertEquals(conflicts.size(), 1);
     }
 }

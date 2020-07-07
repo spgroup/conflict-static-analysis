@@ -3,8 +3,8 @@ package br.unb.cic.analysis.svfa.confluence;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
-import br.unb.cic.analysis.svfa.confluence.ConfluenceConflict;
 import br.unb.cic.soot.graph.Node;
+import soot.Unit;
 
 import java.util.*;
 
@@ -91,8 +91,10 @@ public class SVFAConfluenceAnalysis {
             }
 
             @Override
-            protected List<Statement> getSinkStatements() {
-                return definition.getInBetweenStatements();
+            protected boolean isSink(Unit unit) {
+                return !isSource(unit) &&
+                        unit.getJavaSourceStartLineNumber() > 0 && // this is for ignoring lines that are not in any methods body
+                        definition.getSinkStatements().stream().map(stmt -> stmt.getUnit()).noneMatch(u -> u.equals(unit));
             }
         };
     }
@@ -108,8 +110,10 @@ public class SVFAConfluenceAnalysis {
             }
 
             @Override
-            protected List<Statement> getSinkStatements() {
-                return definition.getInBetweenStatements();
+            protected boolean isSink(Unit unit) {
+                return !isSource(unit) &&
+                        unit.getJavaSourceStartLineNumber() > 0 && // this is for ignoring lines that are not in any methods body
+                        definition.getSourceStatements().stream().map(stmt -> stmt.getUnit()).noneMatch(u -> u.equals(unit));
             }
         };
     }
