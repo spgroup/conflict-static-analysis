@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OverridingAssignmentAnalysisLocalVariablesConflictTest2 {
+public class OverridingAssignmentAnalysisLocalVariablesParameterConflictTest {
 
     private OverridingAssignmentAnalysis analysis;
 
@@ -26,9 +26,8 @@ public class OverridingAssignmentAnalysisLocalVariablesConflictTest2 {
             protected Map<String, List<Integer>> sourceDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(8);    //left
-                lines.add(11);    //left
-                res.put("br.unb.cic.analysis.samples.OverridingAssignmentLocalVariablesSample2", lines);
+                lines.add(9);    //left
+                res.put("br.unb.cic.analysis.samples.OverridingAssignmentLocalVariablesParameterSample", lines);
                 return res;
             }
 
@@ -36,9 +35,9 @@ public class OverridingAssignmentAnalysisLocalVariablesConflictTest2 {
             protected Map<String, List<Integer>> sinkDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(9);    //right
-                lines.add(12);    //right
-                res.put("br.unb.cic.analysis.samples.OverridingAssignmentLocalVariablesSample2", lines);
+               // lines.add(9);    //right
+                lines.add(11);    //right
+                res.put("br.unb.cic.analysis.samples.OverridingAssignmentLocalVariablesParameterSample", lines);
                 return res;
             }
         };
@@ -51,7 +50,7 @@ public class OverridingAssignmentAnalysisLocalVariablesConflictTest2 {
                     }
                 }));
         String cp = "target/test-classes";
-        String targetClass = "br.unb.cic.analysis.samples.OverridingAssignmentLocalVariablesSample2";
+        String targetClass = "br.unb.cic.analysis.samples.OverridingAssignmentLocalVariablesParameterSample";
         PhaseOptions.v().setPhaseOption("jb", "use-original-names:true");
 
         SootWrapper.builder().withClassPath(cp).addClass(targetClass).build().execute();
