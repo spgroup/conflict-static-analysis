@@ -1,4 +1,4 @@
-package br.unb.cic.analysis;
+package br.unb.cic.analysis.ifds;
 
 import java.util.Map;
 import java.util.Set;
@@ -17,6 +17,9 @@ import soot.toolkits.scalar.Pair;
 
 // Subclass of SceneTransformer to run Heros IFDS solver in Soot's "wjtp" pack
 public class IFDSDataFlowTransformer extends SceneTransformer {
+
+    private IFDSSolver<Unit, Pair<Value, Set<DefinitionStmt>>,
+            SootMethod, InterproceduralCFG<Unit, SootMethod>> solver;
     @Override
     protected void internalTransform(String phaseName, Map<String, String> options) {
         JimpleBasedInterproceduralCFG icfg= new JimpleBasedInterproceduralCFG();
@@ -24,13 +27,15 @@ public class IFDSDataFlowTransformer extends SceneTransformer {
                 Set<DefinitionStmt>>, SootMethod,
                 InterproceduralCFG<Unit, SootMethod>> problem = new IFDSReachingDefinitions(icfg);
 
-        IFDSSolver<Unit, Pair<Value, Set<DefinitionStmt>>,
-                SootMethod, InterproceduralCFG<Unit, SootMethod>> solver =
-                new IFDSSolver<Unit, Pair<Value, Set<DefinitionStmt>>, SootMethod,
+        solver = new IFDSSolver<Unit, Pair<Value, Set<DefinitionStmt>>, SootMethod,
                         InterproceduralCFG<Unit, SootMethod>>(problem);
 
         System.out.println("Starting solver");
         solver.solve();
         System.out.println("Done");
+    }
+
+    public IFDSSolver<Unit, Pair<Value, Set<DefinitionStmt>>, SootMethod, InterproceduralCFG<Unit, SootMethod>> getSolver() {
+        return solver;
     }
 }

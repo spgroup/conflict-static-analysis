@@ -33,7 +33,6 @@ public class SootWrapper {
         private String classPath;
         private String classes;
 
-
         public Builder() {
             classPath = "";
             classes = "";

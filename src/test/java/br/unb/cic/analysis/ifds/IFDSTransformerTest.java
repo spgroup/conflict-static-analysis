@@ -1,30 +1,27 @@
-package br.unb.cic.analysis.reachability;
+package br.unb.cic.analysis.ifds;
 
-import br.unb.cic.analysis.AbstractMergeConflictDefinition;
-import br.unb.cic.analysis.IFDSDataFlowTransformer;
-import br.unb.cic.analysis.SootWrapper;
-import br.unb.cic.analysis.df.ReachDefinitionAnalysis;
+import br.unb.cic.analysis.ifds.IFDSDataFlowTransformer;
 import org.junit.Before;
 import org.junit.Test;
 import soot.*;
 import soot.options.Options;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class IFDSTransformerTest {
 
-    private ReachabilityAnalysis interproceduralSameClass;
+    private IFDSDataFlowTransformer transformer;
 
     @Before
     public void configure() {
         G.reset();
 
+        transformer = new IFDSDataFlowTransformer();
+
         // Set Soot's internal classpath
         String classpath = "target/test-classes";
-        String mainClass = "br.unb.cic.analysis.samples.IntraproceduralDataFlow";
+        String mainClass = "br.unb.cic.analysis.samples.IntraproceduralDataFlowMain";
 
         Options.v().set_soot_classpath(classpath);
 
@@ -51,27 +48,27 @@ public class IFDSTransformerTest {
         c.setApplicationClass();
 
         // Load the "main" method of the main class and set it as a Soot entry point
-        SootMethod entryPoint = c.getMethodByName("foo");
-        List<SootMethod> entryPoints = new ArrayList<SootMethod>();
+        SootMethod entryPoint = c.getMethodByName("main");
+        List<SootMethod> entryPoints = new ArrayList<>();
         entryPoints.add(entryPoint);
         Scene.v().setEntryPoints(entryPoints);
 
         PackManager.v().getPack("wjtp").add(
                 new Transform("wjtp.herosifds",
-                new IFDSDataFlowTransformer()));
+                transformer));
 
-        //PackManager.v().allPacks().stream().forEach(p -> p.apply());
-
-        String[] a = {};
+        String[] a = {"-w"                          // whole program mode
+                , "-allow-phantom-refs"        // allow phantom types
+                , "-f", "J"                    // Jimple format
+                , "-keep-line-number"          // keep line numbers
+                , "-p", "jb", "optimize:false" // disable the optimizer
+                , mainClass};
 
         soot.Main.main(a);
-        //FIXME: This solved it, but why?
-        //SootWrapper.builder().withClassPath(classpath).addClass(mainClass).build().execute();
-
-        //TODO: Plot CFG(?)
     }
+
     @Test
     public void testIFDSTransformerability() {
-
+        // transformer ...
     }
 }
