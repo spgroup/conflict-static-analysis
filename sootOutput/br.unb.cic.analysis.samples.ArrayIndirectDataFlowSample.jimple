@@ -1,0 +1,48 @@
+public class br.unb.cic.analysis.samples.ArrayIndirectDataFlowSample extends java.lang.Object
+{
+
+    public void <init>()
+    {
+        br.unb.cic.analysis.samples.ArrayIndirectDataFlowSample this;
+
+        this := @this: br.unb.cic.analysis.samples.ArrayIndirectDataFlowSample;
+
+        specialinvoke this.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+
+    public static void main(java.lang.String[])
+    {
+        java.lang.String[] args;
+        int[] arr, $stack3;
+        int b;
+        java.io.PrintStream $stack4;
+
+        args := @parameter0: java.lang.String[];
+
+        $stack3 = newarray (int)[5];
+
+        $stack3[0] = 0;
+
+        $stack3[1] = 0;
+
+        $stack3[2] = 0;
+
+        $stack3[3] = 0;
+
+        $stack3[4] = 0;
+
+        arr = $stack3;
+
+        arr[4] = 10;
+
+        b = arr[3];
+
+        $stack4 = <java.lang.System: java.io.PrintStream out>;
+
+        virtualinvoke $stack4.<java.io.PrintStream: void println(int)>(b);
+
+        return;
+    }
+}

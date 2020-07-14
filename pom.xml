@@ -17,6 +17,13 @@
 	    <name>Temporary repository for the SVFA library</name>
 	    <url>https://maven.pkg.github.com/rbonifacio/svfa-scala/</url>
 	  </repository>
+		<repository>
+			<id>sonatype-snapshots</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+		</repository>
 	</repositories>
 	
 	<dependencies>
@@ -49,6 +56,11 @@
 			<groupId>org.eclipse.jgit</groupId>
 			<artifactId>org.eclipse.jgit</artifactId>
 			<version>4.8.0.201706111038-r</version>
+		</dependency>
+		<dependency>
+			<groupId>de.upb.cs.swt</groupId>
+			<artifactId>heros</artifactId>
+			<version>1.2.2-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>
