@@ -38,8 +38,10 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
      * If there is an assignment coming from the base for the same variable that had
      * been assigned by left or right then the variable is removed from the abstraction.
      *
-     * In the case of arrays, the variable is added to the abstraction completely even
-     * though values ​​have been assigned only to some index.
+     * In the case of arrays, the variable is added to the abstraction no matter if the
+     * assignment is just for one of its components, as in array[1] = 2.
+     *
+     * Conflicts are reported when the same variable is used by developer left and developer Right.
      *
      * @param in a set of abstractions that arrive at the statement d
      * @param u a specific statement
@@ -53,7 +55,7 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
         FlowSet<DataFlowAbstraction> killSet = new ArraySparseSet<>();
 
         for (DataFlowAbstraction item : in) {
-            if (checkEqualVariablesName(item, u)) {
+            if (abstractionVariableIsInIUnitDefBoxes(item, u)) {
                 killSet.add(item);
             }
         }
@@ -68,22 +70,16 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
     protected FlowSet<DataFlowAbstraction> gen(Unit u, FlowSet<DataFlowAbstraction> in) {
         FlowSet<DataFlowAbstraction> res = new ArraySparseSet<>();
         if (isLeftStatement(u) || isRightStatement(u)) {
-            getStatementAssociatedWithUnit(u).forEach(valueBox -> {
-                Statement stmt = assignStatement(u);
-
-                if (valueBox.getValue() instanceof Local) {
-                    Local local = (Local) valueBox.getValue();
-                    res.add(new DataFlowAbstraction(local, stmt));
-                } else if (valueBox.getValue() instanceof StaticFieldRef) {
-                    StaticFieldRef staticFieldRef = (StaticFieldRef) valueBox.getValue();
-                    res.add(new DataFlowAbstraction(staticFieldRef, stmt));
-                } else if (valueBox.getValue() instanceof JArrayRef) {
-                    JArrayRef jArrayRef = (JArrayRef) valueBox.getValue();
-                    res.add(new DataFlowAbstraction(jArrayRef, stmt));
-                }
+            Statement stmt = getStatementAssociatedWithUnit(u);
+            filterDefBoxesInUnit(u).forEach(valueBox -> {
+                res.add(createDataFlowAbstraction(valueBox.getValue(), stmt));
             });
         }
         return res;
+    }
+
+    private DataFlowAbstraction createDataFlowAbstraction(Value value, Statement stmt) {
+        return new DataFlowAbstraction(value, stmt);
     }
 
     /*
@@ -103,15 +99,15 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
         List<DataFlowAbstraction> left = new ArrayList<>();
         List<DataFlowAbstraction> right = new ArrayList<>();
 
-        getStatementAssociatedWithUnit(u).forEach(valueBox -> {
-            String localName = getLocalValueBoxName(valueBox);
+        filterDefBoxesInUnit(u).forEach(valueBox -> {
+            String valueBoxVarName = getVarNameFromValueBox(valueBox);
 
             for (DataFlowAbstraction filterIn : in) {
-                String inName = getLocalDataFlowAbstraction(filterIn);
+                String inName = getVarNameInAbstraction(filterIn);
 
-                if (filterIn.getStmt().getType().equals(Statement.Type.SOURCE) && inName.equals(localName)) {
+                if (filterIn.containsLeftStatement() && inName.equals(valueBoxVarName)) {
                     left.add(filterIn);
-                } else if (filterIn.getStmt().getType().equals(Statement.Type.SINK) && inName.equals(localName)) {
+                } else if (filterIn.containsRightStatement() && inName.equals(valueBoxVarName)) {
                     right.add(filterIn);
                 }
             }
@@ -129,7 +125,7 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
      */
     private void checkConflicts(Unit u, List<DataFlowAbstraction> dataFlowAbstractionList) {
         for (DataFlowAbstraction dataFlowAbstraction : dataFlowAbstractionList) {
-            if (checkEqualVariablesName(dataFlowAbstraction, u)) {
+            if (abstractionVariableIsInIUnitDefBoxes(dataFlowAbstraction, u)) {
                 Conflict c = new Conflict(dataFlowAbstraction.getStmt(), findStatement(u));
                 Collector.instance().addConflict(c);
             }
@@ -139,9 +135,9 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
      * Checks the equality of variable names between an
      * item in the abstraction list and all the UnitBox's ValueBox.
      */
-    private boolean checkEqualVariablesName(DataFlowAbstraction dataFlowAbstraction, Unit u) {
+    private boolean abstractionVariableIsInIUnitDefBoxes(DataFlowAbstraction dataFlowAbstraction, Unit u) {
         for (ValueBox valueBox : u.getDefBoxes()) {
-            return getLocalDataFlowAbstraction(dataFlowAbstraction).equals(getLocalValueBoxName(valueBox));
+            return getVarNameInAbstraction(dataFlowAbstraction).equals(getVarNameFromValueBox(valueBox));
         }
         return false;
     }
@@ -149,35 +145,35 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
     /*
      * Returns a String containing the name of the variable given a DataFlowAbstraction
      */
-    private String getLocalDataFlowAbstraction(DataFlowAbstraction dataFlowAbstraction) {
-        String localDataFlowAbstraction = "";
+    private String getVarNameInAbstraction(DataFlowAbstraction dataFlowAbstraction) {
+        String varNameDataFlowAbstraction = "";
         if (dataFlowAbstraction.getLocal() != null) {
-            localDataFlowAbstraction = getLocalName(dataFlowAbstraction.getLocal());
+            varNameDataFlowAbstraction = getLocalName(dataFlowAbstraction.getLocal());
         } else if (dataFlowAbstraction.getLocalStaticFieldRef() != null) {
-            localDataFlowAbstraction = getStaticFieldRefName(dataFlowAbstraction.getLocalStaticFieldRef());
+            varNameDataFlowAbstraction = getStaticFieldRefName(dataFlowAbstraction.getLocalStaticFieldRef());
         } else if (dataFlowAbstraction.getLocalJArrayRef() != null) {
-            localDataFlowAbstraction = getJArrayRefName(dataFlowAbstraction.getLocalJArrayRef());
+            varNameDataFlowAbstraction = getJArrayRefName(dataFlowAbstraction.getLocalJArrayRef());
         }
 
-        return localDataFlowAbstraction;
+        return varNameDataFlowAbstraction;
     }
 
     /*
      * Returns a String containing the name of the variable given a ValueBox
      */
-    private String getLocalValueBoxName(ValueBox valueBox) {
-        String localValueBoxName = "";
+    private String getVarNameFromValueBox(ValueBox valueBox) {
+        String varNameValueBox = "";
         if (valueBox.getValue() instanceof Local) {
-            localValueBoxName = getLocalName((Local) valueBox.getValue());
+            varNameValueBox = getLocalName((Local) valueBox.getValue());
         } else if (valueBox.getValue() instanceof StaticFieldRef) {
-            localValueBoxName = getStaticFieldRefName((StaticFieldRef) valueBox.getValue());
+            varNameValueBox = getStaticFieldRefName((StaticFieldRef) valueBox.getValue());
         } else if (valueBox.getValue() instanceof JArrayRef) {
-            localValueBoxName = getJArrayRefName((JArrayRef) valueBox.getValue());
+            varNameValueBox = getJArrayRefName((JArrayRef) valueBox.getValue());
         }
-        return localValueBoxName;
+        return varNameValueBox;
     }
 
-    private Statement assignStatement(Unit u) {
+    private Statement getStatementAssociatedWithUnit(Unit u) {
         if (isLeftStatement(u)) {
             return findLeftStatement(u);
         }
@@ -215,7 +211,7 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
      * Returns a list of Boxes containing Values ​​defined
      * in this Unit for the types selected in the filter.
      */
-    private Stream<ValueBox> getStatementAssociatedWithUnit(Unit u) {
+    private Stream<ValueBox> filterDefBoxesInUnit(Unit u) {
         return u.getDefBoxes()
                 .stream()
                 .filter(valueBox -> valueBox.getValue() instanceof Local

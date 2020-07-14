@@ -2,6 +2,8 @@ package br.unb.cic.analysis.df;
 
 import br.unb.cic.analysis.model.Statement;
 import soot.Local;
+import soot.Value;
+import soot.ValueBox;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JInstanceFieldRef;
@@ -19,6 +21,19 @@ public class DataFlowAbstraction {
     private JArrayRef localJArrayRef;
     private StaticFieldRef localStaticFieldRef;
     private Statement stmt;
+
+    public DataFlowAbstraction(Value value, Statement stmt) {
+        if (value instanceof Local) {
+            this.local = (Local) value;
+            this.stmt = stmt;
+        } else if (value instanceof StaticFieldRef) {
+            this.localStaticFieldRef = (StaticFieldRef) value;
+            this.stmt = stmt;
+        } else if (value instanceof JArrayRef) {
+            this.localJArrayRef = (JArrayRef) value;
+            this.stmt = stmt;
+        }
+    }
 
     public DataFlowAbstraction(Local local, Statement stmt) {
         this.local = local;
@@ -58,6 +73,14 @@ public class DataFlowAbstraction {
 
     public Statement getStmt() {
         return stmt;
+    }
+
+    public Boolean containsLeftStatement(){
+       return getStmt().getType().equals(Statement.Type.SOURCE);
+    }
+
+    public Boolean containsRightStatement(){
+        return getStmt().getType().equals(Statement.Type.SINK);
     }
 
     @Override

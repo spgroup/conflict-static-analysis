@@ -7,6 +7,5 @@ public class OverridingAssignmentArraysClassFieldSample {
         y[0] = 3; //left
         int x = y[1] + 1; //base
         y[3] = 4; //right
-
     }
 }
