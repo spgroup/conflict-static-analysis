@@ -11,7 +11,7 @@ import soot.toolkits.scalar.FlowSet;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
 
@@ -32,23 +32,24 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
     /**
      * Runs the algorithm analysis at a given statement (Unit d). Here we
      * manipulate and compute an out set from the income set in (foward analysis).
-     *
+     * <p>
      * When left or right assign a variable it is added to the abstraction.
-     *
+     * <p>
      * If there is an assignment coming from the base for the same variable that had
      * been assigned by left or right then the variable is removed from the abstraction.
-     *
+     * <p>
      * In the case of arrays, the variable is added to the abstraction no matter if the
      * assignment is just for one of its components, as in array[1] = 2.
-     *
+     * <p>
      * Conflicts are reported when the same variable is used by developer left and developer Right.
      *
      * @param in a set of abstractions that arrive at the statement d
-     * @param u a specific statement
+     * @param u  a specific statement
      * @out the result of applying the analysis considering the income abstraction and the statement d
      */
     @Override
     protected void flowThrough(FlowSet<DataFlowAbstraction> in, Unit u, FlowSet<DataFlowAbstraction> out) {
+
         detectConflict(in, u);
         FlowSet<DataFlowAbstraction> temp = new ArraySparseSet<>();
 
@@ -71,24 +72,26 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
         FlowSet<DataFlowAbstraction> res = new ArraySparseSet<>();
         if (isLeftStatement(u) || isRightStatement(u)) {
             Statement stmt = getStatementAssociatedWithUnit(u);
-            filterDefBoxesInUnit(u).forEach(valueBox -> {
-                res.add(createDataFlowAbstraction(valueBox.getValue(), stmt));
+            u.getDefBoxes().forEach(valueBox -> {
+                if(valueBox.getValue() instanceof Local){
+                    res.add(new DataFlowAbstraction((Local) valueBox.getValue(), stmt));
+                }else if(valueBox.getValue() instanceof JArrayRef){
+                    res.add(new DataFlowAbstraction((Local) getJArrayRefName((JArrayRef) valueBox.getValue()), stmt));
+                }else if(valueBox.getValue() instanceof  StaticFieldRef) {
+                    res.add(new DataFlowAbstraction((StaticFieldRef) valueBox.getValue(), stmt));
+                }
             });
         }
         return res;
     }
 
-    private DataFlowAbstraction createDataFlowAbstraction(Value value, Statement stmt) {
-        return new DataFlowAbstraction(value, stmt);
-    }
-
     /*
-     * Here we divide the content of "in" into two lists
-     * left and right based on the type of your statement.
+     * To detect conflicts in verified if "u" is owned by LEFT or RIGHT
+     * and we fill in the "potentialConflictingAssignments" list with the changes from the other developer.
      *
-     * To check if there is a possible conflict we compare
-     * the unit of right with the list of left
-     * or the unit of left with the list of Right
+     * We pass "u" and "potentialConflictingAssignments" to the checkConflits method
+     * to see if Left assignments interfere with Right changes or
+     * Right assignments interfere with Left changes.
      */
     @Override
     protected void detectConflict(FlowSet<DataFlowAbstraction> in, Unit u) {
@@ -96,41 +99,30 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
             return;
         }
 
-        List<DataFlowAbstraction> left = new ArrayList<>();
-        List<DataFlowAbstraction> right = new ArrayList<>();
-
-        filterDefBoxesInUnit(u).forEach(valueBox -> {
-            String valueBoxVarName = getVarNameFromValueBox(valueBox);
-
-            for (DataFlowAbstraction filterIn : in) {
-                String inName = getVarNameInAbstraction(filterIn);
-
-                if (filterIn.containsLeftStatement() && inName.equals(valueBoxVarName)) {
-                    left.add(filterIn);
-                } else if (filterIn.containsRightStatement() && inName.equals(valueBoxVarName)) {
-                    right.add(filterIn);
-                }
-            }
-        });
+        List<DataFlowAbstraction> potentialConflictingAssignments = new ArrayList<>();
 
         if (isRightStatement(u)) {
-            checkConflicts(u, left);
+            potentialConflictingAssignments = in.toList().stream().filter(DataFlowAbstraction::containsLeftStatement).collect(Collectors.toList());
         } else if (isLeftStatement(u)) {
-            checkConflicts(u, right);
+            potentialConflictingAssignments = in.toList().stream().filter(DataFlowAbstraction::containsRightStatement).collect(Collectors.toList());
         }
+
+        checkConflicts(u, potentialConflictingAssignments);
+
     }
 
     /*
      * Checks if there is a conflict and if so adds it to the conflict list.
      */
-    private void checkConflicts(Unit u, List<DataFlowAbstraction> dataFlowAbstractionList) {
-        for (DataFlowAbstraction dataFlowAbstraction : dataFlowAbstractionList) {
+    private void checkConflicts(Unit u, List<DataFlowAbstraction> potentialConflictingAssignments) {
+        for (DataFlowAbstraction dataFlowAbstraction : potentialConflictingAssignments) {
             if (abstractionVariableIsInIUnitDefBoxes(dataFlowAbstraction, u)) {
                 Conflict c = new Conflict(dataFlowAbstraction.getStmt(), findStatement(u));
                 Collector.instance().addConflict(c);
             }
         }
     }
+
     /*
      * Checks the equality of variable names between an
      * item in the abstraction list and all the UnitBox's ValueBox.
@@ -151,8 +143,6 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
             varNameDataFlowAbstraction = getLocalName(dataFlowAbstraction.getLocal());
         } else if (dataFlowAbstraction.getLocalStaticFieldRef() != null) {
             varNameDataFlowAbstraction = getStaticFieldRefName(dataFlowAbstraction.getLocalStaticFieldRef());
-        } else if (dataFlowAbstraction.getLocalJArrayRef() != null) {
-            varNameDataFlowAbstraction = getJArrayRefName(dataFlowAbstraction.getLocalJArrayRef());
         }
 
         return varNameDataFlowAbstraction;
@@ -168,7 +158,7 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
         } else if (valueBox.getValue() instanceof StaticFieldRef) {
             varNameValueBox = getStaticFieldRefName((StaticFieldRef) valueBox.getValue());
         } else if (valueBox.getValue() instanceof JArrayRef) {
-            varNameValueBox = getJArrayRefName((JArrayRef) valueBox.getValue());
+            varNameValueBox = getJArrayRefName((JArrayRef) valueBox.getValue()).toString();
         }
         return varNameValueBox;
     }
@@ -194,8 +184,8 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
      * of the variable used to assign an array;
      * e.g:  int[] arr = {0, 1}; --> "arr"
      */
-    private String getJArrayRefName(JArrayRef jArrayRef) {
-        return jArrayRef.getBaseBox().getValue().toString();
+    private Value getJArrayRefName(JArrayRef jArrayRef) {
+        return jArrayRef.getBaseBox().getValue();
     }
 
     /*
@@ -207,32 +197,4 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
         return staticFieldRef.getField().getName();
     }
 
-    /*
-     * Returns a list of Boxes containing Values ​​defined
-     * in this Unit for the types selected in the filter.
-     */
-    private Stream<ValueBox> filterDefBoxesInUnit(Unit u) {
-        return u.getDefBoxes()
-                .stream()
-                .filter(valueBox -> valueBox.getValue() instanceof Local
-                        || valueBox.getValue() instanceof JArrayRef
-                        || valueBox.getValue() instanceof StaticFieldRef
-                );
-    }
-
-    private boolean isLeftStatement(Unit u) {
-        return isSourceStatement(u);
-    }
-
-    private boolean isRightStatement(Unit u) {
-        return isSinkStatement(u);
-    }
-
-    private Statement findRightStatement(Unit u) {
-        return findSinkStatement(u);
-    }
-
-    private Statement findLeftStatement(Unit u) {
-        return findSourceStatement(u);
-    }
 }
