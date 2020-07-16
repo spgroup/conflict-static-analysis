@@ -18,22 +18,8 @@ public class DataFlowAbstraction {
 
     private Local local;
     private JInstanceFieldRef localInstanceField;
-    private JArrayRef localJArrayRef;
     private StaticFieldRef localStaticFieldRef;
     private Statement stmt;
-
-    public DataFlowAbstraction(Value value, Statement stmt) {
-        if (value instanceof Local) {
-            this.local = (Local) value;
-            this.stmt = stmt;
-        } else if (value instanceof StaticFieldRef) {
-            this.localStaticFieldRef = (StaticFieldRef) value;
-            this.stmt = stmt;
-        } else if (value instanceof JArrayRef) {
-            this.localJArrayRef = (JArrayRef) value;
-            this.stmt = stmt;
-        }
-    }
 
     public DataFlowAbstraction(Local local, Statement stmt) {
         this.local = local;
@@ -45,11 +31,6 @@ public class DataFlowAbstraction {
         this.stmt = stmt;
     }
 
-    public DataFlowAbstraction(JArrayRef localJArrayRef, Statement stmt) {
-        this.localJArrayRef = localJArrayRef;
-        this.stmt = stmt;
-    }
-
     public DataFlowAbstraction(StaticFieldRef localStaticFieldRef, Statement stmt) {
         this.localStaticFieldRef = localStaticFieldRef;
         this.stmt = stmt;
@@ -57,10 +38,6 @@ public class DataFlowAbstraction {
 
     public Local getLocal() {
         return local;
-    }
-
-    public JArrayRef getLocalJArrayRef() {
-        return localJArrayRef;
     }
 
     public StaticFieldRef getLocalStaticFieldRef() {
