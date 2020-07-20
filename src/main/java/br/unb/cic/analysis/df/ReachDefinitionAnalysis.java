@@ -212,4 +212,20 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 		}
 		return localDefs;
 	}
+
+	protected boolean isLeftStatement(Unit u) {
+		return isSourceStatement(u);
+	}
+
+	protected boolean isRightStatement(Unit u) {
+		return isSinkStatement(u);
+	}
+
+	protected Statement findRightStatement(Unit u) {
+		return findSinkStatement(u);
+	}
+
+	protected Statement findLeftStatement(Unit u) {
+		return findSourceStatement(u);
+	}
 }

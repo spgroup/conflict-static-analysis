@@ -1,6 +1,6 @@
 package br.unb.cic.analysis.samples;
 
-public class OverridingAssignmentObjectArraysSample {
+public class OverridingAssignmentArraysOfObjectsSample {
 
     public static void main(String[] args) {
         Employee employee0 =  new Employee("Name", 0);

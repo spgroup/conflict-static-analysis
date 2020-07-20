@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OverridingAssignmentAnalysisArraysCompleteOverlayConflictTest {
+public class OverridingAssignmentAnalysisArraysParameterConflictTest {
 
     private OverridingAssignmentAnalysis analysis;
 
@@ -26,8 +26,8 @@ public class OverridingAssignmentAnalysisArraysCompleteOverlayConflictTest {
             protected Map<String, List<Integer>> sourceDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(11);    //left
-                res.put("br.unb.cic.analysis.samples.OverridingAssignmentArraysCompleteOverlaySample", lines);
+                lines.add(6);    //left
+                res.put("br.unb.cic.analysis.samples.OverridingAssignmentArraysParameterSample", lines);
                 return res;
             }
 
@@ -35,9 +35,9 @@ public class OverridingAssignmentAnalysisArraysCompleteOverlayConflictTest {
             protected Map<String, List<Integer>> sinkDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(7);    //right
-                lines.add(13);     //right
-                res.put("br.unb.cic.analysis.samples.OverridingAssignmentArraysCompleteOverlaySample", lines);
+               // lines.add(9);    //right
+                lines.add(8);    //right
+                res.put("br.unb.cic.analysis.samples.OverridingAssignmentArraysParameterSample", lines);
                 return res;
             }
         };
@@ -50,7 +50,7 @@ public class OverridingAssignmentAnalysisArraysCompleteOverlayConflictTest {
                     }
                 }));
         String cp = "target/test-classes";
-        String targetClass = "br.unb.cic.analysis.samples.OverridingAssignmentArraysCompleteOverlaySample";
+        String targetClass = "br.unb.cic.analysis.samples.OverridingAssignmentArraysParameterSample";
         PhaseOptions.v().setPhaseOption("jb", "use-original-names:true");
 
         SootWrapper.builder().withClassPath(cp).addClass(targetClass).build().execute();
