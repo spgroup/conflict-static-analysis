@@ -1,10 +1,7 @@
 package br.unb.cic.analysis;
 
 import br.unb.cic.analysis.model.Statement;
-import soot.Scene;
-import soot.SootClass;
-import soot.SootMethod;
-import soot.Unit;
+import soot.*;
 
 import java.util.*;
 
@@ -67,13 +64,17 @@ public abstract class AbstractMergeConflictDefinition {
      */
     private List<Statement> loadStatements(Map<String, List<Integer>> definitions, Statement.Type type) {
         List<Statement> statements = new ArrayList<>();
-        for(String className: definitions.keySet()) {
-            SootClass c = Scene.v().getSootClass(className);
-            if(c == null || c.resolvingLevel() != SootClass.BODIES) continue;
-            for(SootMethod m: c.getMethods()) {
-                for(Unit u: m.retrieveActiveBody().getUnits()) {
+        List<SootClass> classes = listSootClasses();
+        for(SootClass aClass: classes) {
+            if(aClass.resolvingLevel() != SootClass.BODIES || aClass.isPhantomClass()) continue;
+            String className = retriveClassNameInDefinitions(aClass, definitions);
+            if(className == null) continue;
+            for(SootMethod m: aClass.getMethods()) {
+                Body body = retrieveActiveBodySafely(m);
+                if(body == null) continue;
+                for(Unit u: body.getUnits()) {
                     if(definitions.get(className).contains(u.getJavaSourceStartLineNumber())) {
-                        Statement stmt = Statement.builder().setClass(c).setMethod(m)
+                        Statement stmt = Statement.builder().setClass(aClass).setMethod(m)
                                 .setUnit(u).setType(type).setSourceCodeLineNumber(u.getJavaSourceStartLineNumber())
                                 .build();
                         statements.add(stmt);
@@ -82,6 +83,64 @@ public abstract class AbstractMergeConflictDefinition {
             }
         }
         return statements;
+    }
+
+    /*
+     * It returns a class name in the definitions set or
+     * return null. It also searches in the outer class of
+     * aClass.
+     */
+    private String retriveClassNameInDefinitions(SootClass aClass, Map<String, List<Integer>> definitions) {
+        if(definitions.containsKey(aClass.getName())) {
+            return aClass.getName();
+        }
+        SootClass outerClass = retrieveOuterClass(aClass);
+        if(outerClass != null && definitions.containsKey(outerClass.getName())) {
+            return outerClass.getName();
+        }
+        return null;
+    }
+
+    /*
+     * Retrieves the outer class. Either using the
+     * getOuterClass method (if the isInnerClass returns true),
+     * or finding the name of the outer class via substring.
+     */
+    private SootClass retrieveOuterClass(SootClass aClass) {
+        if(aClass.isInnerClass()) {
+            return aClass.getOuterClass();
+        }
+        if(aClass.getName().contains("$")) {
+            int idx = aClass.getName().indexOf("$");
+            String outer = aClass.getName().substring(0, idx);
+            return Scene.v().getSootClass(outer); // note: this method getSootClass might throw a RuntimeException.
+        }
+        return null;
+    }
+
+
+    /*
+     * Retrieves the active body of an method, if any. There is
+     * no simple way to check whether we can retrieve an active method
+     * or not. So, in this implementation, we first try to retrieve
+     * one. If an exception is thrown, we just return null.
+     */
+    private Body retrieveActiveBodySafely(SootMethod method) {
+        try {
+            return method.retrieveActiveBody();
+        }
+        catch(RuntimeException e) {
+            return null;
+        }
+    }
+
+    private List<SootClass> listSootClasses() {
+        List<SootClass> classes = new ArrayList<>();
+        for(SootClass c: Scene.v().getApplicationClasses()) {
+            Scene.v().loadClass(c.getName(), SootClass.BODIES);
+            classes.add(c);
+        }
+        return classes;
     }
 
     public Statement getExistingSinkNode(Statement s) {
