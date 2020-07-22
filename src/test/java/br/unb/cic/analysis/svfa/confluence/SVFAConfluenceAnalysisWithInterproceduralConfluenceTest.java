@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import java.util.*;
 
-public class SVFAConfluenceAnalysisWithInterproceduralConfluence {
+public class SVFAConfluenceAnalysisWithInterproceduralConfluenceTest {
 
     private SVFAConfluenceAnalysis analysis;
     @Before
