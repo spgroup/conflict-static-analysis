@@ -19,12 +19,10 @@ import java.util.stream.Collectors;
 public abstract class AbstractMergeConflictDefinition {
     protected List<Statement> sourceStatements;
     protected List<Statement> sinkStatements;
-    protected List<Statement> inBetweenStatements;
 
     public AbstractMergeConflictDefinition() {
         sourceStatements = new ArrayList<>();
         sinkStatements = new ArrayList<>();
-        inBetweenStatements = new ArrayList<>();
     }
 
     public void loadSourceStatements() {
