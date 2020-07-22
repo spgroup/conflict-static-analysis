@@ -75,8 +75,9 @@ public class SVFAConfluenceAnalysis {
      * @return The last node of the list
      */
     private Node getLastNode(List<Node> path) {
-        assert path.size() > 1; // assume that all paths have at least one source and one sink
-        return path.get(path.size() - 1);
+        int pathSize = path.size();
+        assert pathSize > 1; // assume that all paths have at least one source and one sink
+        return path.get(pathSize - 1);
     }
 
     /**
