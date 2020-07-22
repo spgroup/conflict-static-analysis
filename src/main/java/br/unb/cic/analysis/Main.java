@@ -7,10 +7,7 @@ import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
-import br.unb.cic.analysis.df.ConfluentTaintedAnalysis;
-import br.unb.cic.analysis.df.ReachDefinitionAnalysis;
-import br.unb.cic.analysis.df.ConfluentAnalysis;
-import br.unb.cic.analysis.df.TaintedAnalysis;
+import br.unb.cic.analysis.df.*;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
 import org.apache.commons.cli.*;
 
@@ -161,6 +158,8 @@ public class Main {
                             case "tainted"    : analysis = new TaintedAnalysis(body, definition);
                             case "confluence" : analysis = new ConfluentAnalysis(body, definition); break;
                             case "confluence-tainted": analysis = new ConfluentTaintedAnalysis(body, definition); break;
+                            case "overriding" : analysis = new OverridingAssignmentAnalysis(body, definition); break;
+                            case "overriding-fields" : analysis = new OverridingAssignmentFieldsRefAnalysis(body, definition); break;
                             default: {
                                 System.out.println("Error: " + "invalid mode " + mode);
                                 System.exit(-1);

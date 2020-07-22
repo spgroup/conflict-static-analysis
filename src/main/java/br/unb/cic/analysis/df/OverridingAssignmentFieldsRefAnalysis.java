@@ -126,13 +126,9 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
         for (KeyAndFlowHash left: generatedLeftList){
             for (KeyAndFlowHash right: generatedRightList){
                 if(left.getUniqueKey().equals(right.getUniqueKey())){
-                    Statement stmt = null;
                     //Get the statement of the left or right flow
-                    if (isSourceStatement(u)){
-                        stmt = getStatement(right);
-                    }else if (isSinkStatement(u)){
-                        stmt = getStatement(left);
-                    }
+                    Statement stmt = isSourceStatement(u)? getStatement(right) : getStatement(left) ;
+
                     Conflict c = new Conflict(stmt, findStatement(u));
                     Collector.instance().addConflict(c);
                 }
@@ -142,11 +138,7 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
 
     //Return the statement of a data flow abstraction
     private Statement getStatement(KeyAndFlowHash statement){
-        Iterator<DataFlowAbstraction> data = statement.getFlow().iterator();
-        while (data.hasNext()){
-            return data.next().getStmt();
-        }
-        return null;
+        return statement.getFlow().toList().get(0).getStmt();
     }
 
     //Returns the final key and elements of a hash with its flow list
@@ -215,8 +207,8 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
                 for(DataFlowAbstraction data: flow) {
                     if (map.get(mapKey).toString().equals(data.getJInstanceFieldRef().toString())) {
                         String def = "";
-                        for (ValueBox i: data.getStmt().getUnit().getDefBoxes()){
-                            def = i.getValue().toString();
+                        for (ValueBox value: data.getStmt().getUnit().getDefBoxes()){
+                            def = value.getValue().toString();
                         }
                         if (def.equals(mapKey)) {
                             flowSetReturn.add(data);
@@ -250,11 +242,8 @@ public class OverridingAssignmentFieldsRefAnalysis extends ReachDefinitionAnalys
         String initialKeyBase = "";
 
         if (u.getDefBoxes().size() > 0) {
-            for (ValueBox v : u.getDefBoxes()) {
-                if (v.getValue() instanceof JInstanceFieldRef) {
-                    initialKeyBase = v.getValue().toString();
-                }
-            }
+            List <String> auxKey = getKey(u);
+            initialKeyBase = auxKey.size()>0 ? auxKey.get(0): "";
         }
         FlowSet<DataFlowAbstraction> flowSetReturn = new ArraySparseSet<>();
 
