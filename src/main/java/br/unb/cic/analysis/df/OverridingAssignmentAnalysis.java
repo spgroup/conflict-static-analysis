@@ -85,7 +85,7 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
                 }else if(valueBox.getValue() instanceof  StaticFieldRef) {
                     res.add(new DataFlowAbstraction((StaticFieldRef) valueBox.getValue(), stmt));
                 }else if(valueBox.getValue() instanceof JInstanceFieldRef){
-                    res.add(new DataFlowAbstraction((JInstanceFieldRef) valueBox.getValue(), stmt, generatedChain(valueBox.getValue().toString())));
+                    res.add(new DataFlowAbstraction((JInstanceFieldRef) valueBox.getValue(), stmt, generatedChainJInstanceField(valueBox.getValue().toString())));
                 }
             });
         }
@@ -137,7 +137,7 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
     private boolean abstractionVariableIsInIUnitDefBoxes(DataFlowAbstraction dataFlowAbstraction, Unit u) {
         for (ValueBox valueBox : u.getDefBoxes()) {
             if (valueBox.getValue() instanceof JInstanceFieldRef && dataFlowAbstraction.getChain()!=null) {
-                return dataFlowAbstraction.getChain().equals(generatedChain(valueBox.getValue().toString()));
+                return dataFlowAbstraction.getChain().equals(generatedChainJInstanceField(valueBox.getValue().toString()));
             }else if (valueBox.getValue() instanceof JArrayRef && valueBox.getValue().toString().contains("$stack")) { // If contain $stack, contain a array chain
                 return getVarNameInAbstraction(dataFlowAbstraction).equals(getJArrayChain(valueBox));
             }
@@ -239,11 +239,11 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
     }
 
     /*
-     * Return the generated chain
+     * Return the generated hashmap chain from a key
      */
-    private String generatedChain(String nextKey){
+    private String generatedChainJInstanceField(String nextKey){
         List<HashMap<String, JInstanceFieldRef>> auxValuesHashMap = new ArrayList<>();
-        auxValuesHashMap.addAll(getHashMap());
+        auxValuesHashMap.addAll(getHashMapJInstanceField());
 
         //If nextKey not contain $stack is because simple key
         if (!(nextKey.contains("$stack"))){
@@ -260,7 +260,7 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
         boolean isNextKey = true;
         while(auxValuesHashMap.size()>0 && isNextKey) {
             isNextKey = false;
-            for (HashMap<String, JInstanceFieldRef> auxMap : getHashMap()) {
+            for (HashMap<String, JInstanceFieldRef> auxMap : getHashMapJInstanceField()) {
                 for (String mapKey : auxMap.keySet()) {
                     if (mapKey.equals(nextKey)) {
                         currentField = auxMap.get(mapKey);
@@ -294,9 +294,9 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
     public void filterJInstanceFields(Unit u){
         for (ValueBox valueBox: u.getUseBoxes()) {
             if (valueBox.getValue() instanceof JInstanceFieldRef) {
-                generateHash(getStatementAssociatedWithUnit(u));
+                generateHashJInstanceField(getStatementAssociatedWithUnit(u));
             }else if (valueBox.getValue() instanceof StaticFieldRef) {
-                generateHashStatic(u, valueBox);
+                generateHashStaticField(u, valueBox);
             }
         }
     }
@@ -304,20 +304,20 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
     /*
      * Generates a hashmap to StaticFieldRef
      */
-    private void generateHashStatic(Unit u, ValueBox valueBox){
+    private void generateHashStaticField(Unit u, ValueBox valueBox){
         StringBuilder strKey = new StringBuilder();
         for (ValueBox c: u.getDefBoxes()){
             strKey.append(c.getValue().toString());
         }
         HashMap<String, StaticFieldRef> auxHashMap = new HashMap<>();
         auxHashMap.put(strKey.toString(), (StaticFieldRef) valueBox.getValue());
-        Collector.instance().addHashStatic(auxHashMap);
+        Collector.instance().addHashStaticField(auxHashMap);
     }
 
     /*
-     * Generates a hashmap of a Statement
+     * Generates a hashmap to JInstanceFieldRef
      */
-    private void generateHash(Statement stmt){
+    private void generateHashJInstanceField(Statement stmt){
         HashMap<String, JInstanceFieldRef> auxHashMap = new HashMap<>();
         StringBuilder strKey = new StringBuilder();
         for (ValueBox valueBoxKey : stmt.getUnit().getDefBoxes()) {
@@ -331,7 +331,7 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
             }
         }
         if (auxHashMap.size() != 0) {
-            Collector.instance().addHash(auxHashMap);
+            Collector.instance().addHashJInstanceField(auxHashMap);
         }
     }
 }

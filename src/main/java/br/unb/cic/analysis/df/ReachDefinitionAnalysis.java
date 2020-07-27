@@ -31,8 +31,6 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 	protected Body methodBody;
 	private AbstractMergeConflictDefinition definition;
 	private Set<Conflict> conflicts;
-	private	Set<HashMap<String, JInstanceFieldRef>> hash;
-	private	Set<HashMap<String, StaticFieldRef>> hashStaticField;
 
 	/**
 	 * Constructor of the DataFlowAnalysis class.
@@ -47,8 +45,6 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 		this.methodBody = methodBody;
 		this.definition = definition;
 		this.conflicts = new HashSet<>();
-		this.hash = new HashSet<>();
-		this.hashStaticField = new HashSet<>();
 		definition.loadSourceStatements();
 		definition.loadSinkStatements();
 		doAnalysis();
@@ -190,12 +186,12 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 		return Collector.instance().getConflicts();
 	}
 
-	public Set<HashMap<String, JInstanceFieldRef>> getHashMap() {
-		return Collector.instance().getHash();
+	public Set<HashMap<String, JInstanceFieldRef>> getHashMapJInstanceField() {
+		return Collector.instance().getHashJInstanceField();
 	}
 
 	public Set<HashMap<String, StaticFieldRef>> getHashMapStatic() {
-		return Collector.instance().getHashStatic();
+		return Collector.instance().getHashStaticField();
 	}
 
 	protected List<Local> getUseVariables(Unit u) {
