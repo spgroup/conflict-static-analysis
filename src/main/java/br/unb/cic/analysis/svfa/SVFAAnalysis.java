@@ -40,7 +40,7 @@ public class SVFAAnalysis extends JSVFA  {
         return "";
     }
 
-    @Override
+//    @Override
     public List<String> getIncludeList() {
         String[] array = new String[0];
         return JavaConverters.asScalaBuffer(Arrays.asList(array)).toList();
@@ -50,15 +50,15 @@ public class SVFAAnalysis extends JSVFA  {
      * Computes the source-sink paths
      * @return a set with a list of nodes that together builds a source-sink path.
      */
-    public java.util.Set<java.util.List<Node>> findSourceSinkPaths() {
-        Set<java.util.List<Node>> paths = new HashSet<>();
-
-        JavaConverters
-                .asJavaCollection(findConflictingPaths())
-                .forEach(p -> paths.add(new ArrayList<>(JavaConverters.asJavaCollection(p))));
-
-       return paths;
-    }
+//    public java.util.Set<java.util.List<Node>> findSourceSinkPaths() {
+//        Set<java.util.List<Node>> paths = new HashSet<>();
+//
+//        JavaConverters
+//                .asJavaCollection(findConflictingPaths())
+//                .forEach(p -> paths.add(new ArrayList<>(JavaConverters.asJavaCollection(p))));
+//
+//       return paths;
+//    }
 
     @Override
     public final List<String> applicationClassPath() {

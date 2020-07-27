@@ -159,7 +159,6 @@ public class Main {
                             case "confluence" : analysis = new ConfluentAnalysis(body, definition); break;
                             case "confluence-tainted": analysis = new ConfluentTaintedAnalysis(body, definition); break;
                             case "overriding" : analysis = new OverridingAssignmentAnalysis(body, definition); break;
-                            case "overriding-fields" : analysis = new OverridingAssignmentFieldsRefAnalysis(body, definition); break;
                             default: {
                                 System.out.println("Error: " + "invalid mode " + mode);
                                 System.exit(-1);

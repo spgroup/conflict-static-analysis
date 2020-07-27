@@ -1,9 +1,6 @@
 package br.unb.cic.analysis.df;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import br.unb.cic.analysis.AbstractAnalysis;
@@ -13,6 +10,7 @@ import soot.Body;
 import soot.Local;
 import soot.Unit;
 import soot.ValueBox;
+import soot.jimple.StaticFieldRef;
 import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JInstanceFieldRef;
 import soot.toolkits.graph.ExceptionalUnitGraph;
@@ -33,6 +31,8 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 	protected Body methodBody;
 	private AbstractMergeConflictDefinition definition;
 	private Set<Conflict> conflicts;
+	private	Set<HashMap<String, JInstanceFieldRef>> hash;
+	private	Set<HashMap<String, StaticFieldRef>> hashStaticField;
 
 	/**
 	 * Constructor of the DataFlowAnalysis class.
@@ -47,6 +47,8 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 		this.methodBody = methodBody;
 		this.definition = definition;
 		this.conflicts = new HashSet<>();
+		this.hash = new HashSet<>();
+		this.hashStaticField = new HashSet<>();
 		definition.loadSourceStatements();
 		definition.loadSinkStatements();
 		doAnalysis();
@@ -163,7 +165,7 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 				.setSourceCodeLineNumber(d.getJavaSourceStartLineNumber()).build();
 	}
 
-	protected Statement getStatementBase(Unit d) {
+	protected Statement findStatementBase(Unit d) {
 		return Statement.builder()
 				.setClass(methodBody.getMethod().getDeclaringClass())
 				.setMethod(methodBody.getMethod())
@@ -186,6 +188,14 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 
 	public Set<Conflict> getConflicts() {
 		return Collector.instance().getConflicts();
+	}
+
+	public Set<HashMap<String, JInstanceFieldRef>> getHashMap() {
+		return Collector.instance().getHash();
+	}
+
+	public Set<HashMap<String, StaticFieldRef>> getHashMapStatic() {
+		return Collector.instance().getHashStatic();
 	}
 
 	protected List<Local> getUseVariables(Unit u) {

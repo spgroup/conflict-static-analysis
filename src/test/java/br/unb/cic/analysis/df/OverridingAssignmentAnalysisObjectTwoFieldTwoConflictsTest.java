@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class OverridingAssignmentAnalysisObjectTwoFieldTwoConflictsTest {
 
-    private OverridingAssignmentFieldsRefAnalysis analysis;
+    private OverridingAssignmentAnalysis analysis;
 
     @Before
     public void configure() {
@@ -47,7 +47,7 @@ public class OverridingAssignmentAnalysisObjectTwoFieldTwoConflictsTest {
                 new Transform("jtp.oneConflict", new BodyTransformer() {
                     @Override
                     protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-                        analysis = new OverridingAssignmentFieldsRefAnalysis(body, definition);
+                        analysis = new OverridingAssignmentAnalysis(body, definition);
                     }
                 }));
         String cp = "target/test-classes";

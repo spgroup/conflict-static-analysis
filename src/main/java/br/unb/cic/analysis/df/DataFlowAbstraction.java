@@ -7,8 +7,10 @@ import soot.ValueBox;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JInstanceFieldRef;
+import soot.toolkits.scalar.ArraySparseSet;
+import soot.toolkits.scalar.FlowSet;
 
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Information wee keep while traversing
@@ -18,6 +20,7 @@ public class DataFlowAbstraction {
 
     private Local local;
     private JInstanceFieldRef localInstanceField;
+    private String chain;
     private StaticFieldRef localStaticFieldRef;
     private Statement stmt;
 
@@ -26,9 +29,24 @@ public class DataFlowAbstraction {
         this.stmt = stmt;
     }
 
-    public DataFlowAbstraction(JInstanceFieldRef localInstanceField, Statement stmt) {
+    public DataFlowAbstraction(JInstanceFieldRef localInstanceField, Statement stmt, String chain) {
         this.localInstanceField = localInstanceField;
         this.stmt = stmt;
+        this.chain = chain;
+    }
+
+    public DataFlowAbstraction(StaticFieldRef localStaticFieldRef, Statement stmt, String chain) {
+        this.localStaticFieldRef = localStaticFieldRef;
+        this.stmt = stmt;
+        this.chain = chain;
+    }
+
+    public String getChain() {
+        return chain;
+    }
+
+    public void setChain(String chain) {
+        this.chain = chain;
     }
 
     public DataFlowAbstraction(StaticFieldRef localStaticFieldRef, Statement stmt) {

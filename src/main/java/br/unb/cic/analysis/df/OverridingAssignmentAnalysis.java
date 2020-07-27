@@ -6,10 +6,12 @@ import br.unb.cic.analysis.model.Statement;
 import soot.*;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.internal.JArrayRef;
+import soot.jimple.internal.JInstanceFieldRef;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -70,15 +72,20 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
     @Override
     protected FlowSet<DataFlowAbstraction> gen(Unit u, FlowSet<DataFlowAbstraction> in) {
         FlowSet<DataFlowAbstraction> res = new ArraySparseSet<>();
+
+        filterJInstanceFields(u);
+
         if (isLeftStatement(u) || isRightStatement(u)) {
             Statement stmt = getStatementAssociatedWithUnit(u);
             u.getDefBoxes().forEach(valueBox -> {
                 if(valueBox.getValue() instanceof Local){
                     res.add(new DataFlowAbstraction((Local) valueBox.getValue(), stmt));
                 }else if(valueBox.getValue() instanceof JArrayRef){
-                    res.add(new DataFlowAbstraction((Local) getJArrayRefName((JArrayRef) valueBox.getValue()), stmt));
+                    res.add(new DataFlowAbstraction(containArrayChain(valueBox), stmt));
                 }else if(valueBox.getValue() instanceof  StaticFieldRef) {
                     res.add(new DataFlowAbstraction((StaticFieldRef) valueBox.getValue(), stmt));
+                }else if(valueBox.getValue() instanceof JInstanceFieldRef){
+                    res.add(new DataFlowAbstraction((JInstanceFieldRef) valueBox.getValue(), stmt, generatedChain(valueBox.getValue().toString())));
                 }
             });
         }
@@ -129,6 +136,11 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
      */
     private boolean abstractionVariableIsInIUnitDefBoxes(DataFlowAbstraction dataFlowAbstraction, Unit u) {
         for (ValueBox valueBox : u.getDefBoxes()) {
+            if (valueBox.getValue() instanceof JInstanceFieldRef && dataFlowAbstraction.getChain()!=null) {
+                return dataFlowAbstraction.getChain().equals(generatedChain(valueBox.getValue().toString()));
+            }else if (valueBox.getValue() instanceof JArrayRef && valueBox.getValue().toString().contains("$stack")) { // If contain $stack, contain a array chain
+                return getVarNameInAbstraction(dataFlowAbstraction).equals(getJArrayChain(valueBox));
+            }
             return getVarNameInAbstraction(dataFlowAbstraction).equals(getVarNameFromValueBox(valueBox));
         }
         return false;
@@ -166,8 +178,10 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
     private Statement getStatementAssociatedWithUnit(Unit u) {
         if (isLeftStatement(u)) {
             return findLeftStatement(u);
+        }else if (isRightStatement(u)){
+            return findRightStatement(u);
         }
-        return findRightStatement(u);
+        return findStatementBase(u);
     }
 
     /*
@@ -188,6 +202,33 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
         return jArrayRef.getBaseBox().getValue();
     }
 
+
+    /*
+     * If it's a JArrayRef, return your complete name from the hashMapStatic
+     */
+    private Local containArrayChain(ValueBox valueBox){
+        Local aux = (Local) getJArrayRefName((JArrayRef) valueBox.getValue());
+        if (aux.toString().contains("$stack")) {
+            aux.setName(getJArrayChain(valueBox));
+        }
+        return aux;
+    }
+
+    /*
+     * Returns the name of the JArrayRef
+     */
+    private String getJArrayChain(ValueBox valueBox){
+        String nextKey = ((JArrayRef) valueBox.getValue()).getBase().toString();
+        for (HashMap<String, StaticFieldRef> auxMap : getHashMapStatic()) {
+            for (String mapKey : auxMap.keySet()) {
+                if (mapKey.equals(nextKey)) {
+                    return auxMap.get(mapKey).toString();
+                }
+            }
+        }
+        return "";
+    }
+
     /*
      * Returns a String containing the name
      * of the variable used to assign a static variable;
@@ -197,4 +238,100 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
         return staticFieldRef.getField().getName();
     }
 
+    /*
+     * Return the generated chain
+     */
+    private String generatedChain(String nextKey){
+        List<HashMap<String, JInstanceFieldRef>> auxValuesHashMap = new ArrayList<>();
+        auxValuesHashMap.addAll(getHashMap());
+
+        //If nextKey not contain $stack is because simple key
+        if (!(nextKey.contains("$stack"))){
+            return nextKey;
+        }
+
+        JInstanceFieldRef currentField = null;
+
+        //The second position is the field called
+        String currentUniqueKey = "<"+nextKey.split(".<")[1];
+
+        //The first key comes before ".<" if you have a stack as a substring
+        nextKey = nextKey.split(".<")[0];
+        boolean isNextKey = true;
+        while(auxValuesHashMap.size()>0 && isNextKey) {
+            isNextKey = false;
+            for (HashMap<String, JInstanceFieldRef> auxMap : getHashMap()) {
+                for (String mapKey : auxMap.keySet()) {
+                    if (mapKey.equals(nextKey)) {
+                        currentField = auxMap.get(mapKey);
+                        isNextKey = true;
+                        auxValuesHashMap.remove(auxMap);
+                    }
+                }
+                if (isNextKey) {
+                    break;
+                }
+            }
+
+            if (!isNextKey) {
+                currentUniqueKey = nextKey + (currentUniqueKey.equals("") ? "" : ".") + currentUniqueKey;
+            } else{
+                currentUniqueKey = currentField.getFieldRef().toString() + (currentUniqueKey.equals("") ? "" : ".") + currentUniqueKey;
+                nextKey = currentField.getBase().toString(); //Update the nextKey and repeat until the condition
+            }
+        }
+        //If auxValuesHasMap is equal to zero, there is a next key and currentField is not null, then it is the starting field of the object
+        if (!(currentField==null) && (isNextKey)){
+            currentUniqueKey = nextKey + (currentUniqueKey.equals("") ? "" : ".") + currentUniqueKey;
+        }
+
+        return currentUniqueKey;
+    }
+
+    /*
+     * Filters the UseBoxes instances of type JInstanceFieldRef and generate a HashMap
+     */
+    public void filterJInstanceFields(Unit u){
+        for (ValueBox valueBox: u.getUseBoxes()) {
+            if (valueBox.getValue() instanceof JInstanceFieldRef) {
+                generateHash(getStatementAssociatedWithUnit(u));
+            }else if (valueBox.getValue() instanceof StaticFieldRef) {
+                generateHashStatic(u, valueBox);
+            }
+        }
+    }
+
+    /*
+     * Generates a hashmap to StaticFieldRef
+     */
+    private void generateHashStatic(Unit u, ValueBox valueBox){
+        StringBuilder strKey = new StringBuilder();
+        for (ValueBox c: u.getDefBoxes()){
+            strKey.append(c.getValue().toString());
+        }
+        HashMap<String, StaticFieldRef> auxHashMap = new HashMap<>();
+        auxHashMap.put(strKey.toString(), (StaticFieldRef) valueBox.getValue());
+        Collector.instance().addHashStatic(auxHashMap);
+    }
+
+    /*
+     * Generates a hashmap of a Statement
+     */
+    private void generateHash(Statement stmt){
+        HashMap<String, JInstanceFieldRef> auxHashMap = new HashMap<>();
+        StringBuilder strKey = new StringBuilder();
+        for (ValueBox valueBoxKey : stmt.getUnit().getDefBoxes()) {
+            strKey.append(valueBoxKey.getValue().toString());
+        }
+        JInstanceFieldRef currentFieldRef = null;
+        for (ValueBox catchRef : stmt.getUnit().getUseBoxes()) {
+            if (catchRef.getValue() instanceof JInstanceFieldRef) {
+                currentFieldRef = (JInstanceFieldRef) catchRef.getValue();
+                auxHashMap.put(strKey.toString(), currentFieldRef);
+            }
+        }
+        if (auxHashMap.size() != 0) {
+            Collector.instance().addHash(auxHashMap);
+        }
+    }
 }
