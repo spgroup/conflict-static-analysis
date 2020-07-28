@@ -86,16 +86,23 @@ public class SVFAConfluenceAnalysis {
     private SVFAAnalysis sourceBaseAnalysis() {
         return new SVFAAnalysis(this.cp, this.definition) {
 
+            /**
+             * Here we define the list of source statements for the SVFA analysis as the confluence analysis source statements,
+             * this interferes with the isSource method, that will be used to determine if a Unit is a source and also
+             * will be used at the isSink method.
+             */
             @Override
             protected List<Statement> getSourceStatements() {
                 return definition.getSourceStatements();
             }
 
+            /**
+             * As in this case we want to detect flows between source and base, this methods defines isSink as all units
+             * that are neither source nor sink and are inside a method body
+             */
             @Override
             protected boolean isSink(Unit unit) {
-                return !isSource(unit) &&
-                        unit.getJavaSourceStartLineNumber() > 0 && // this is for ignoring lines that are not in any methods body
-                        definition.getSinkStatements().stream().map(stmt -> stmt.getUnit()).noneMatch(u -> u.equals(unit));
+                return isInMethodBody(unit) && isNotSourceOrSink(unit);
             }
         };
     }
@@ -105,18 +112,41 @@ public class SVFAConfluenceAnalysis {
      */
     private SVFAAnalysis sinkBaseAnalysis() {
         return new SVFAAnalysis(this.cp, this.definition) {
+
+            /**
+             * Here we define the list of source statements for the SVFA analysis as the confluence analysis sink statements,
+             * this interferes with the isSource method, that will be used to determine if a Unit is a source and also
+             * will be used at the isSink method.
+             */
             @Override
             protected List<Statement> getSourceStatements() {
                 return definition.getSinkStatements();
             }
 
+            /**
+             * As in this case we want to detect flows between sink and base, this methods defines isSink as all units
+             * that are neither source nor sink and are inside a method body
+             */
             @Override
             protected boolean isSink(Unit unit) {
-                return !isSource(unit) &&
-                        unit.getJavaSourceStartLineNumber() > 0 && // this is for ignoring lines that are not in any methods body
-                        definition.getSourceStatements().stream().map(stmt -> stmt.getUnit()).noneMatch(u -> u.equals(unit));
+                return isInMethodBody(unit) && isNotSourceOrSink(unit);
             }
         };
     }
 
+    private boolean isInMethodBody(Unit unit) {
+        /**
+         * Some Jimple units actually don't represent real lines and are not in inside the method body.
+         */
+        return unit.getJavaSourceStartLineNumber() > 0;
+    }
+
+    private boolean isNotSourceOrSink(Unit unit) {
+        return unitIsNotOnList(definition.getSourceStatements(), unit) &&
+                unitIsNotOnList(definition.getSinkStatements(), unit);
+    }
+
+    private boolean unitIsNotOnList(List<Statement> statements, Unit unit) {
+        return statements.stream().map(stmt -> stmt.getUnit()).noneMatch(u -> u.equals(unit));
+    }
 }
