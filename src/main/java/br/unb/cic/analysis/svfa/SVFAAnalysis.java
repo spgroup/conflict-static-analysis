@@ -1,14 +1,15 @@
 package br.unb.cic.analysis.svfa;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+import br.unb.cic.analysis.model.Statement;
 
 import br.unb.cic.soot.graph.*;
 import br.unb.cic.soot.svfa.jimple.JSVFA;
 import scala.collection.JavaConverters;
-import scala.collection.immutable.List;
 import soot.SootMethod;
 import soot.Unit;
 
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 public class SVFAAnalysis extends JSVFA  {
 
     private String cp;
+
     private AbstractMergeConflictDefinition definition;
 
     /**
@@ -40,8 +42,8 @@ public class SVFAAnalysis extends JSVFA  {
         return "";
     }
 
-//    @Override
-    public List<String> getIncludeList() {
+    @Override
+    public scala.collection.immutable.List<String> getIncludeList() {
         String[] array = new String[0];
         return JavaConverters.asScalaBuffer(Arrays.asList(array)).toList();
     }
@@ -50,27 +52,27 @@ public class SVFAAnalysis extends JSVFA  {
      * Computes the source-sink paths
      * @return a set with a list of nodes that together builds a source-sink path.
      */
-//    public java.util.Set<java.util.List<Node>> findSourceSinkPaths() {
-//        Set<java.util.List<Node>> paths = new HashSet<>();
-//
-//        JavaConverters
-//                .asJavaCollection(findConflictingPaths())
-//                .forEach(p -> paths.add(new ArrayList<>(JavaConverters.asJavaCollection(p))));
-//
-//       return paths;
-//    }
+    public java.util.Set<java.util.List<Node>> findSourceSinkPaths() {
+        Set<java.util.List<Node>> paths = new HashSet<>();
+
+        JavaConverters
+                .asJavaCollection(findConflictingPaths())
+                .forEach(p -> paths.add(new ArrayList<>(JavaConverters.asJavaCollection(p))));
+
+       return paths;
+    }
 
     @Override
-    public final List<String> applicationClassPath() {
+    public final scala.collection.immutable.List<String> applicationClassPath() {
         String[] array = cp.split(":");
         return JavaConverters.asScalaBuffer(Arrays.asList(array)).toList();
     }
 
     @Override
-    public final List<SootMethod> getEntryPoints() {
+    public final scala.collection.immutable.List<SootMethod> getEntryPoints() {
         definition.loadSourceStatements();
         definition.loadSinkStatements();
-        return JavaConverters.asScalaBuffer(definition.getSourceStatements()
+        return JavaConverters.asScalaBuffer(getSourceStatements()
                 .stream()
                 .map(stmt -> stmt.getSootMethod())
                 .collect(Collectors.toList())).toList();
@@ -87,18 +89,26 @@ public class SVFAAnalysis extends JSVFA  {
         return SimpleNode.instance();
     }
 
-    private boolean isSource(Unit unit) {
-        return definition.getSourceStatements()
+    protected boolean isSource(Unit unit) {
+        return getSourceStatements()
                 .stream()
                 .map(stmt -> stmt.getUnit())
                 .anyMatch(u -> u.equals(unit));
     }
 
-    private boolean isSink(Unit unit) {
-        return definition.getSinkStatements()
+    protected boolean isSink(Unit unit) {
+        return getSinkStatements()
                 .stream()
                 .map(stmt -> stmt.getUnit())
                 .anyMatch(u -> u.equals(unit));
+    }
+
+    protected List<Statement> getSourceStatements() {
+        return definition.getSourceStatements();
+    }
+
+    protected List<Statement> getSinkStatements() {
+        return definition.getSinkStatements();
     }
 
     @Override

@@ -6,7 +6,9 @@ import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
 
+import javax.swing.plaf.nimbus.State;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This abstract class works as a contract. Whenever we
@@ -24,11 +26,26 @@ public abstract class AbstractMergeConflictDefinition {
     }
 
     public void loadSourceStatements() {
-        sourceStatements = loadStatements(sourceDefinitions(), Statement.Type.SOURCE);
+        Map<String, List<Integer>> sourceDefinitions = sourceDefinitions();
+        List<Statement> statements = loadStatements(sourceDefinitions.keySet(), Statement.Type.SOURCE);
+
+        sourceStatements = filterIsInDefinitionsList(statements, sourceDefinitions);
     }
 
     public void loadSinkStatements() {
-        sinkStatements = loadStatements(sinkDefinitions(), Statement.Type.SINK);
+        Map<String, List<Integer>> sinkDefinitions = sinkDefinitions();
+        List<Statement> statements = loadStatements(sinkDefinitions.keySet(), Statement.Type.SINK);
+
+        sinkStatements = filterIsInDefinitionsList(statements, sinkDefinitions);
+    }
+
+    private List<Statement> filterIsInDefinitionsList(List<Statement> statements, Map<String, List<Integer>> definitions) {
+        return statements.stream().filter(statement -> {
+            String className = statement.getSootClass().getName();
+            Integer lineNumber = statement.getSourceCodeLineNumber();
+
+            return definitions.get(className).contains(lineNumber);
+        }).collect(Collectors.toList());
     }
 
     public List<Statement> getSourceStatements() {
@@ -38,6 +55,7 @@ public abstract class AbstractMergeConflictDefinition {
     public List<Statement> getSinkStatements() {
         return sinkStatements;
     }
+
 
     /**
      * This method should return a list of pairs, where the
@@ -65,19 +83,17 @@ public abstract class AbstractMergeConflictDefinition {
      * avoids some duplicated code that might arise on
      * loadSourceStatements and loadSinkStatements.
      */
-    private List<Statement> loadStatements(Map<String, List<Integer>> definitions, Statement.Type type) {
+    private List<Statement> loadStatements(Set<String> classList, Statement.Type type) {
         List<Statement> statements = new ArrayList<>();
-        for(String className: definitions.keySet()) {
+        for(String className: classList) {
             SootClass c = Scene.v().getSootClass(className);
             if(c == null || c.resolvingLevel() != SootClass.BODIES) continue;
             for(SootMethod m: c.getMethods()) {
                 for(Unit u: m.retrieveActiveBody().getUnits()) {
-                    if(definitions.get(className).contains(u.getJavaSourceStartLineNumber())) {
-                        Statement stmt = Statement.builder().setClass(c).setMethod(m)
-                                .setUnit(u).setType(type).setSourceCodeLineNumber(u.getJavaSourceStartLineNumber())
-                                .build();
-                        statements.add(stmt);
-                    }
+                    Statement stmt = Statement.builder().setClass(c).setMethod(m)
+                            .setUnit(u).setType(type).setSourceCodeLineNumber(u.getJavaSourceStartLineNumber())
+                            .build();
+                    statements.add(stmt);
                 }
             }
         }
