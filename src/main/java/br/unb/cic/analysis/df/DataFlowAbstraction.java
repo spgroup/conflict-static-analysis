@@ -20,7 +20,6 @@ public class DataFlowAbstraction {
 
     private Local local;
     private JInstanceFieldRef localInstanceField;
-    private String chain;
     private StaticFieldRef localStaticFieldRef;
     private Statement stmt;
 
@@ -29,24 +28,9 @@ public class DataFlowAbstraction {
         this.stmt = stmt;
     }
 
-    public DataFlowAbstraction(JInstanceFieldRef localInstanceField, Statement stmt, String chain) {
+    public DataFlowAbstraction(JInstanceFieldRef localInstanceField, Statement stmt) {
         this.localInstanceField = localInstanceField;
         this.stmt = stmt;
-        this.chain = chain;
-    }
-
-    public DataFlowAbstraction(StaticFieldRef localStaticFieldRef, Statement stmt, String chain) {
-        this.localStaticFieldRef = localStaticFieldRef;
-        this.stmt = stmt;
-        this.chain = chain;
-    }
-
-    public String getChain() {
-        return chain;
-    }
-
-    public void setChain(String chain) {
-        this.chain = chain;
     }
 
     public DataFlowAbstraction(StaticFieldRef localStaticFieldRef, Statement stmt) {
@@ -65,7 +49,6 @@ public class DataFlowAbstraction {
     public JInstanceFieldRef getJInstanceFieldRef() {
         return localInstanceField;
     }
-
     public Statement getStmt() {
         return stmt;
     }
