@@ -1,5 +1,8 @@
 dist: trusty
 
+before_install:
+  - echo -e "machine github.ibm.com\n  login $GIT_TOKEN" > ~/.netrc
+
 language: java
 
 jdk:
