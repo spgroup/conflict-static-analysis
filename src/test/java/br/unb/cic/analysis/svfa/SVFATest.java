@@ -48,6 +48,6 @@ public class SVFATest {
         Graph<Node> g = analysis.svg();
         Assert.assertEquals(9, g.nodes().size());
         Assert.assertEquals(1, analysis.reportConflicts().size());
-//        Assert.assertEquals(1, analysis.findSourceSinkPaths().size());
+        Assert.assertEquals(1, analysis.findSourceSinkPaths().size());
     }
 }
