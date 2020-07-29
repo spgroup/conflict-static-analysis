@@ -1,6 +1,6 @@
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
                       http://maven.apache.org/xsd/settings-1.0.0.xsd">
 
   <activeProfiles>
@@ -22,7 +22,7 @@
           <name>spgroup</name>
           <url>https://maven.pkg.github.com/spgroup/soot</url>
         </repository>
-	<repository>
+        <repository>
           <id>svfa</id>
           <name>svfa repository</name>
           <url>https://maven.pkg.github.com/rbonifacio/svfa-scala</url>
@@ -35,13 +35,13 @@
   <servers>
     <server>
       <id>spg</id>
-      <username>galilasmb</username>
-      <password>b134f44959546798b66fad0944c33430779a11e7</password>
+      <username>GIT_HUB_USER</username>
+      <password>GIT_HUB_TOKEN</password>
     </server>
-     <server>
+    <server>
       <id>svfa</id>
-      <username>galilasmb</username>
-      <password>b134f44959546798b66fad0944c33430779a11e7</password>
+      <username>GIT_HUB_USER</username>
+      <password>GIT_HUB_TOKEN</password>
     </server>
   </servers>
 </settings>
