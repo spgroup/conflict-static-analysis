@@ -12,6 +12,8 @@ import br.unb.cic.analysis.df.ReachDefinitionAnalysis;
 import br.unb.cic.analysis.df.ConfluentAnalysis;
 import br.unb.cic.analysis.df.TaintedAnalysis;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
+import br.unb.cic.analysis.svfa.SVFAInterProcedural;
+import br.unb.cic.analysis.svfa.SVFAIntraProcedural;
 import org.apache.commons.cli.*;
 
 import scala.collection.JavaConverters;
@@ -33,6 +35,8 @@ public class Main {
     private Set<String> targetClasses;
     private List<String> conflicts = new ArrayList<>();
     private ReachDefinitionAnalysis analysis;
+
+
 
     public static void main(String args[]) {
         Main m = new Main();
@@ -121,7 +125,8 @@ public class Main {
                 .build();
 
         Option analysisOption = Option.builder("mode").argName("mode")
-                .hasArg().desc("analysis mode [data-flow, tainted, reachability, svfa, confluence]")
+                .hasArg().desc("analysis mode [data-flow, tainted, reachability, svfa-{interprocedural | intraprocedural}" +
+                        ", confluence]")
                 .build();
 
         Option repoOption = Option.builder("repo").argName("repo")
@@ -145,7 +150,8 @@ public class Main {
     
     private void runAnalysis(String mode, String classpath) {
     	switch(mode) {
-            case "svfa"         : runSparseValueFlowAnalysis(classpath); break;
+            case "svfa-interprocedural" : runSparseValueFlowAnalysis(classpath, true); break;
+            case "svfa-intraprocedural" : runSparseValueFlowAnalysis(classpath, false); break;
             case "reachability" : runReachabilityAnalysis(classpath); break;
             default             : runDataFlowAnalysis(classpath, mode);
     	}
@@ -200,8 +206,11 @@ public class Main {
         conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
     }
 
-    private void runSparseValueFlowAnalysis(String classpath) {
-        SVFAAnalysis analysis = new SVFAAnalysis(classpath, definition);
+    private void runSparseValueFlowAnalysis(String classpath, boolean interprocedural) {
+        SVFAAnalysis analysis = interprocedural
+                ? new SVFAInterProcedural(classpath, definition)
+                : new SVFAIntraProcedural(classpath, definition);
+
         analysis.buildSparseValueFlowGraph();
         System.out.println(analysis.svgToDotModel());
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflicts())
@@ -287,4 +296,8 @@ public class Main {
             map.put(change.getKey(), lines);
         }
     }
+
+
+
+
 }

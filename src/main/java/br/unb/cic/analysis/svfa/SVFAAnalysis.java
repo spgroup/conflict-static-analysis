@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * An analysis wrapper around the Sparse value
  * flow analysis implementation.
  */
-public class SVFAAnalysis extends JSVFA  {
+public abstract class SVFAAnalysis extends JSVFA  {
 
     private String cp;
     private AbstractMergeConflictDefinition definition;
