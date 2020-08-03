@@ -3,7 +3,9 @@ package br.unb.cic.analysis;
 import br.unb.cic.analysis.model.Statement;
 import soot.*;
 
+import javax.swing.plaf.nimbus.State;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This abstract class works as a contract. Whenever we
@@ -21,11 +23,26 @@ public abstract class AbstractMergeConflictDefinition {
     }
 
     public void loadSourceStatements() {
-        sourceStatements = loadStatements(sourceDefinitions(), Statement.Type.SOURCE);
+        Map<String, List<Integer>> sourceDefinitions = sourceDefinitions();
+        List<Statement> statements = loadStatements(sourceDefinitions, Statement.Type.SOURCE);
+
+        sourceStatements = filterIsInDefinitionsList(statements, sourceDefinitions);
     }
 
     public void loadSinkStatements() {
-        sinkStatements = loadStatements(sinkDefinitions(), Statement.Type.SINK);
+        Map<String, List<Integer>> sinkDefinitions = sinkDefinitions();
+        List<Statement> statements = loadStatements(sinkDefinitions, Statement.Type.SINK);
+
+        sinkStatements = filterIsInDefinitionsList(statements, sinkDefinitions);
+    }
+
+    private List<Statement> filterIsInDefinitionsList(List<Statement> statements, Map<String, List<Integer>> definitions) {
+        return statements.stream().filter(statement -> {
+            String className = statement.getSootClass().getName();
+            Integer lineNumber = statement.getSourceCodeLineNumber();
+
+            return definitions.get(className).contains(lineNumber);
+        }).collect(Collectors.toList());
     }
 
     public List<Statement> getSourceStatements() {
@@ -35,6 +52,7 @@ public abstract class AbstractMergeConflictDefinition {
     public List<Statement> getSinkStatements() {
         return sinkStatements;
     }
+
 
     /**
      * This method should return a list of pairs, where the
@@ -62,6 +80,9 @@ public abstract class AbstractMergeConflictDefinition {
      * avoids some duplicated code that might arise on
      * loadSourceStatements and loadSinkStatements.
      */
+
+
+
     private List<Statement> loadStatements(Map<String, List<Integer>> definitions, Statement.Type type) {
         List<Statement> statements = new ArrayList<>();
         List<SootClass> classes = listSootClasses();

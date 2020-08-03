@@ -1,5 +1,7 @@
 package br.unb.cic.analysis;
 
+import soot.PhaseOptions;
+
 /**
  * A fluent API for executing the soot framework
  * in the context of the conflict static
@@ -25,6 +27,7 @@ public class SootWrapper {
                                     , "-f", "J"                    // Jimple format
                                     , "-keep-line-number"          // keep line numbers
                                     , "-p", "jb", "optimize:false" // disable the optimizer
+                                    , "-p", "jb", "use-original-names:true" // enable original names
                                     , "-cp", classPath             // soot class path
                                     , classes});                   // set of classes
     }

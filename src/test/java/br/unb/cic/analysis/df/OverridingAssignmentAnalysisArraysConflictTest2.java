@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OverridingAssignmentAnalysisObjectArraysConflictTest {
+public class OverridingAssignmentAnalysisArraysConflictTest2 {
 
     private OverridingAssignmentAnalysis analysis;
 
@@ -26,9 +26,9 @@ public class OverridingAssignmentAnalysisObjectArraysConflictTest {
             protected Map<String, List<Integer>> sourceDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(19);
-                lines.add(21);   //left
-                res.put("br.unb.cic.analysis.samples.OverridingAssignmentObjectArraysSample", lines);
+                lines.add(3);    //left
+                lines.add(12);    //left
+                res.put("br.unb.cic.analysis.samples.OverridingAssignmentArraysSample2", lines);
                 return res;
             }
 
@@ -36,8 +36,9 @@ public class OverridingAssignmentAnalysisObjectArraysConflictTest {
             protected Map<String, List<Integer>> sinkDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(22);    //right
-                res.put("br.unb.cic.analysis.samples.OverridingAssignmentObjectArraysSample", lines);
+                lines.add(10);    //right
+                lines.add(13);    //right
+                res.put("br.unb.cic.analysis.samples.OverridingAssignmentArraysSample2", lines);
                 return res;
             }
         };
@@ -50,7 +51,7 @@ public class OverridingAssignmentAnalysisObjectArraysConflictTest {
                     }
                 }));
         String cp = "target/test-classes";
-        String targetClass = "br.unb.cic.analysis.samples.OverridingAssignmentObjectArraysSample";
+        String targetClass = "br.unb.cic.analysis.samples.OverridingAssignmentArraysSample2";
         PhaseOptions.v().setPhaseOption("jb", "use-original-names:true");
 
         SootWrapper.builder().withClassPath(cp).addClass(targetClass).build().execute();

@@ -8,7 +8,7 @@ public class OverridingAssignmentObjectThreeFieldsTwoConflictsSample {
         OverridingAssignmentObjectThreeFieldsTwoConflictsSample instanceLocal = new OverridingAssignmentObjectThreeFieldsTwoConflictsSample();
 
         instanceLocal.b.a.a = instanceLocal.b.a.a + 3; // left
-        instanceLocal.b.a.b = 3; // right in {instanceLocal.b.a.a, instanceLocal.b.a.b }
+        instanceLocal.b.a.b = 3; // right
 
         instanceLocal.b.a.b = 4; //left
         instanceLocal.b.a.a = 4; //right
