@@ -10,7 +10,7 @@ public class OverridingAssignmentObjectOneFieldConditionalZeroConflictSample {
         if (a>b){
             instance.b = 3; // left
         }else{
-            instance.a = 4; //left
+            instance.b = 4; //right
         }
     }
 }
