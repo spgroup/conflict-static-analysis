@@ -11,14 +11,14 @@ import java.util.Set;
 class Collector {
 
     private Set<Conflict> conflicts;
-    private Set<HashMap<String, JInstanceFieldRef>> hashMapJInstanceField;
-    private Set<HashMap<String, StaticFieldRef>> hashMapStaticField;
+    private Set<HashMap<String, JInstanceFieldRef>> instanceFieldDictionary;
+    private Set<HashMap<String, StaticFieldRef>> staticFieldDictionary;
     private static Collector instance;
 
     public Collector() {
         conflicts = new HashSet<>();
-        hashMapJInstanceField = new HashSet<>();
-        hashMapStaticField = new HashSet<>();
+        instanceFieldDictionary = new HashSet<>();
+        staticFieldDictionary = new HashSet<>();
     }
 
     public static Collector instance() {
@@ -29,19 +29,19 @@ class Collector {
     }
 
     public Set<HashMap<String, JInstanceFieldRef>> getHashJInstanceField() {
-        return hashMapJInstanceField;
+        return instanceFieldDictionary;
     }
 
     public void addHashJInstanceField(HashMap<String, JInstanceFieldRef> hash) {
-        hashMapJInstanceField.add(hash) ;
+        instanceFieldDictionary.add(hash) ;
     }
 
     public Set<HashMap<String, StaticFieldRef>> getHashStaticField() {
-        return hashMapStaticField;
+        return staticFieldDictionary;
     }
 
     public void addHashStaticField(HashMap<String, StaticFieldRef> hash) {
-        hashMapStaticField.add(hash) ;
+        staticFieldDictionary.add(hash) ;
     }
 
     public void addConflict(Conflict conflict) {
@@ -53,8 +53,8 @@ class Collector {
     }
 
     public void clear() {
-        hashMapJInstanceField = new HashSet<>();
-        hashMapStaticField = new HashSet<>();
+        instanceFieldDictionary = new HashSet<>();
+        staticFieldDictionary = new HashSet<>();
         conflicts = new HashSet<>();
     }
 }
