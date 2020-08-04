@@ -11,6 +11,7 @@ import br.unb.cic.analysis.df.*;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
 import br.unb.cic.analysis.svfa.SVFAInterProcedural;
 import br.unb.cic.analysis.svfa.SVFAIntraProcedural;
+import br.unb.cic.analysis.svfa.confluence.SVFAConfluenceAnalysis;
 import org.apache.commons.cli.*;
 
 import scala.collection.JavaConverters;
@@ -123,7 +124,8 @@ public class Main {
 
         Option analysisOption = Option.builder("mode").argName("mode")
                 .hasArg().desc("analysis mode [data-flow, tainted, reachability, svfa-{interprocedural | intraprocedural}" +
-                        ", confluence]")
+                        ", svfa-confluence-{interprocedural | intraprocedural}]")
+
                 .build();
 
         Option repoOption = Option.builder("repo").argName("repo")
@@ -149,6 +151,8 @@ public class Main {
     	switch(mode) {
             case "svfa-interprocedural" : runSparseValueFlowAnalysis(classpath, true); break;
             case "svfa-intraprocedural" : runSparseValueFlowAnalysis(classpath, false); break;
+            case "svfa-confluence-interprocedural": runSparseValueFlowConfluenceAnalysis(classpath, true); break;
+            case "svfa-confluence-intraprocedural": runSparseValueFlowConfluenceAnalysis(classpath, false); break;
             case "reachability" : runReachabilityAnalysis(classpath); break;
             default             : runDataFlowAnalysis(classpath, mode);
     	}
@@ -212,6 +216,16 @@ public class Main {
 
         analysis.buildSparseValueFlowGraph();
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflicts())
+                .stream()
+                .map(p -> p.toString())
+                .collect(Collectors.toList()));
+    }
+
+    private void runSparseValueFlowConfluenceAnalysis(String classpath, boolean interprocedural) {
+        SVFAConfluenceAnalysis analysis = new SVFAConfluenceAnalysis(classpath, this.definition,  interprocedural);
+        
+        analysis.execute();
+        conflicts.addAll(analysis.getConfluentConflicts()
                 .stream()
                 .map(p -> p.toString())
                 .collect(Collectors.toList()));
