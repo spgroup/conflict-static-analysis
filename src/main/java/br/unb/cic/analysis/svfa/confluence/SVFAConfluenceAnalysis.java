@@ -16,7 +16,7 @@ public class SVFAConfluenceAnalysis {
     private AbstractMergeConflictDefinition definition;
     private Set<ConfluenceConflict> confluentFlows = new HashSet<>();
 
-    SVFAConfluenceAnalysis(String classPath, AbstractMergeConflictDefinition definition, boolean interprocedural) {
+    public SVFAConfluenceAnalysis(String classPath, AbstractMergeConflictDefinition definition, boolean interprocedural) {
         this.cp = classPath;
         this.definition = definition;
         this.interprocedural = interprocedural;
