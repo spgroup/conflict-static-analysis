@@ -27,6 +27,60 @@ Current supported algorithms:
 
 To build the project, you will need Maven and Java 8 (or higher).
 
+You will need create a token on [GitHub](https://docs.github.com/pt/github/authenticating-to-github/creating-a-personal-access-token) to authenticate the use of the dependencies. Check the token's permissions.
+
+Create a file called settings.xml in /home/.m2 and insert your GIT_HUB_USER and GIT_HUB_TOKEN into the following file.
+
+```xml
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+  <activeProfiles>
+    <activeProfile>github</activeProfile>
+  </activeProfiles>
+
+  <profiles>
+    <profile>
+      <id>github</id>
+      <repositories>
+        <repository>
+          <id>central</id>
+          <url>https://repo1.maven.org/maven2</url>
+          <releases><enabled>true</enabled></releases>
+          <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+        <repository>
+          <id>spg</id>
+          <name>spgroup</name>
+          <url>https://maven.pkg.github.com/spgroup/soot</url>
+        </repository>
+	<repository>
+          <id>svfa</id>
+          <name>svfa repository</name>
+          <url>https://maven.pkg.github.com/rbonifacio/svfa-scala</url>
+        </repository>
+
+      </repositories>
+    </profile>
+  </profiles>
+
+  <servers>
+    <server>
+      <id>spg</id>
+      <username>GIT_HUB_USER</username>
+      <password>GIT_HUB_TOKEN</password>
+    </server>
+     <server>
+      <id>svfa</id>
+      <username>GIT_HUB_USER</username>
+      <password>GIT_HUB_TOKEN</password>
+    </server>
+  </servers>
+</settings>
+```
+
 Clone the repository and than run the following commmand. 
 
 ```SHELL

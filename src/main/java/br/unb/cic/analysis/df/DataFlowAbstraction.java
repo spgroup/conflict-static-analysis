@@ -2,13 +2,10 @@ package br.unb.cic.analysis.df;
 
 import br.unb.cic.analysis.model.Statement;
 import soot.Local;
-import soot.Value;
-import soot.ValueBox;
 import soot.jimple.StaticFieldRef;
-import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JInstanceFieldRef;
 
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Information wee keep while traversing
@@ -17,8 +14,8 @@ import java.util.Objects;
 public class DataFlowAbstraction {
 
     private Local local;
-    private JInstanceFieldRef localInstanceField;
-    private StaticFieldRef localStaticFieldRef;
+    private JInstanceFieldRef localField;
+    private StaticFieldRef localStaticRef;
     private Statement stmt;
 
     public DataFlowAbstraction(Local local, Statement stmt) {
@@ -26,13 +23,13 @@ public class DataFlowAbstraction {
         this.stmt = stmt;
     }
 
-    public DataFlowAbstraction(JInstanceFieldRef localInstanceField, Statement stmt) {
-        this.localInstanceField = localInstanceField;
+    public DataFlowAbstraction(JInstanceFieldRef localField, Statement stmt) {
+        this.localField = localField;
         this.stmt = stmt;
     }
 
-    public DataFlowAbstraction(StaticFieldRef localStaticFieldRef, Statement stmt) {
-        this.localStaticFieldRef = localStaticFieldRef;
+    public DataFlowAbstraction(StaticFieldRef localStaticRef, Statement stmt) {
+        this.localStaticRef = localStaticRef;
         this.stmt = stmt;
     }
 
@@ -40,14 +37,13 @@ public class DataFlowAbstraction {
         return local;
     }
 
-    public StaticFieldRef getLocalStaticFieldRef() {
-        return localStaticFieldRef;
+    public StaticFieldRef getLocalStaticRef() {
+        return localStaticRef;
     }
 
-    public JInstanceFieldRef getJInstanceFieldRef() {
-        return localInstanceField;
+    public JInstanceFieldRef getFieldRef() {
+        return localField;
     }
-
     public Statement getStmt() {
         return stmt;
     }

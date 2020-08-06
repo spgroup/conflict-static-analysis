@@ -1,9 +1,8 @@
 package br.unb.cic.analysis.samples;
 
 public class OverridingAssignmentLocalVariablesSample {
-
+    public static int x, y;
     public static void main(String[] args) {
-        int x=0, y=0;
 
         x = 1;   // left
         y = 2;   // right

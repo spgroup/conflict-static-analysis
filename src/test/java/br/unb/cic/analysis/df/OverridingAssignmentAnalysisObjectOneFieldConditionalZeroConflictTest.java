@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OverridingAssignmentAnalysisObjectThreeFieldsOneConflictTest {
+public class OverridingAssignmentAnalysisObjectOneFieldConditionalZeroConflictTest {
 
     private OverridingAssignmentAnalysis analysis;
 
@@ -26,9 +26,8 @@ public class OverridingAssignmentAnalysisObjectThreeFieldsOneConflictTest {
             protected Map<String, List<Integer>> sourceDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(10);    //left
-                lines.add(13);    //left
-                res.put("br.unb.cic.analysis.samples.OverridingAssignmentObjectThreeFieldsOneConflictSample", lines);
+                lines.add(11);    //left
+                res.put("br.unb.cic.analysis.samples.OverridingAssignmentObjectOneFieldConditionalZeroConflictSample", lines);
                 return res;
             }
 
@@ -36,9 +35,8 @@ public class OverridingAssignmentAnalysisObjectThreeFieldsOneConflictTest {
             protected Map<String, List<Integer>> sinkDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(11);    //right
-                lines.add(14);    //right
-                res.put("br.unb.cic.analysis.samples.OverridingAssignmentObjectThreeFieldsOneConflictSample", lines);
+                lines.add(13);    //right
+                res.put("br.unb.cic.analysis.samples.OverridingAssignmentObjectOneFieldConditionalZeroConflictSample", lines);
                 return res;
             }
         };
@@ -51,7 +49,7 @@ public class OverridingAssignmentAnalysisObjectThreeFieldsOneConflictTest {
                     }
                 }));
         String cp = "target/test-classes";
-        String targetClass = "br.unb.cic.analysis.samples.OverridingAssignmentObjectThreeFieldsOneConflictSample";
+        String targetClass = "br.unb.cic.analysis.samples.OverridingAssignmentObjectOneFieldConditionalZeroConflictSample";
         PhaseOptions.v().setPhaseOption("jb", "use-original-names:true");
 
         SootWrapper.builder().withClassPath(cp).addClass(targetClass).build().execute();
@@ -59,6 +57,6 @@ public class OverridingAssignmentAnalysisObjectThreeFieldsOneConflictTest {
 
     @Test
     public void testDataFlowAnalysisExpectingOneConflict() {
-        Assert.assertEquals(1, analysis.getConflicts().size());
+        Assert.assertEquals(0, analysis.getConflicts().size());
     }
 }
