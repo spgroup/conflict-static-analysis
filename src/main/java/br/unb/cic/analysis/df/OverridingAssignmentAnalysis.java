@@ -155,11 +155,11 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
     private String getVarNameFromAbstraction(DataFlowAbstraction dataFlowAbstraction) {
         String varNameDataFlowAbstraction = "";
         Object local = dataFlowAbstraction.getLocal();
-        Object localArray = dataFlowAbstraction.getLocalArrayFieldRef();
+        Object localStaticRef = dataFlowAbstraction.getLocalStaticRef();
         if (local != null) {
             varNameDataFlowAbstraction = getLocalName((Local) local);
-        } else if (localArray != null) {
-            varNameDataFlowAbstraction = getArrayFieldName((StaticFieldRef) localArray);
+        } else if (localStaticRef != null) {
+            varNameDataFlowAbstraction = getStaticName((StaticFieldRef) localStaticRef);
         }
         return varNameDataFlowAbstraction;
     }
@@ -172,7 +172,7 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
         if (valueBox.getValue() instanceof Local) {
             varNameValueBox = getLocalName((Local) valueBox.getValue());
         } else if (valueBox.getValue() instanceof StaticFieldRef) {
-            varNameValueBox = getArrayFieldName((StaticFieldRef) valueBox.getValue());
+            varNameValueBox = getStaticName((StaticFieldRef) valueBox.getValue());
         } else if (valueBox.getValue() instanceof JArrayRef) {
             varNameValueBox = getArrayRefName((JArrayRef) valueBox.getValue()).toString();
         }
@@ -238,7 +238,7 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
      * of the variable used to assign a static variable;
      * e.g:  private static int x; --> "x"
      */
-    private String getArrayFieldName(StaticFieldRef staticField) {
+    private String getStaticName(StaticFieldRef staticField) {
         return staticField.getField().getName();
     }
 
@@ -346,7 +346,7 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
             if (valueBox.getValue() instanceof JInstanceFieldRef) {
                 generateClassFieldDictionary(getStatementAssociatedWithUnit(u));
             }else if (valueBox.getValue() instanceof StaticFieldRef) {
-                generateArrayFieldDictionary(u, valueBox);
+                generateStaticRefDictionary(u, valueBox);
             }
         }
     }
@@ -354,7 +354,7 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
     /*
      * Generates a dictionary to StaticFieldRef
      */
-    private void generateArrayFieldDictionary(Unit u, ValueBox valueBox){
+    private void generateStaticRefDictionary(Unit u, ValueBox valueBox){
         StringBuilder strKey = new StringBuilder();
         for (ValueBox c: u.getDefBoxes()){
             strKey.append(c.getValue().toString());

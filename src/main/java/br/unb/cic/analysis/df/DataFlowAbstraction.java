@@ -15,7 +15,7 @@ public class DataFlowAbstraction {
 
     private Local local;
     private JInstanceFieldRef localField;
-    private StaticFieldRef localArrayFieldRef;
+    private StaticFieldRef localStaticRef;
     private Statement stmt;
 
     public DataFlowAbstraction(Local local, Statement stmt) {
@@ -28,8 +28,8 @@ public class DataFlowAbstraction {
         this.stmt = stmt;
     }
 
-    public DataFlowAbstraction(StaticFieldRef localArrayFieldRef, Statement stmt) {
-        this.localArrayFieldRef = localArrayFieldRef;
+    public DataFlowAbstraction(StaticFieldRef localStaticRef, Statement stmt) {
+        this.localStaticRef = localStaticRef;
         this.stmt = stmt;
     }
 
@@ -37,8 +37,8 @@ public class DataFlowAbstraction {
         return local;
     }
 
-    public StaticFieldRef getLocalArrayFieldRef() {
-        return localArrayFieldRef;
+    public StaticFieldRef getLocalStaticRef() {
+        return localStaticRef;
     }
 
     public JInstanceFieldRef getFieldRef() {

@@ -26,8 +26,8 @@ public class OverridingAssignmentAnalysisLocalVariablesConflictTest {
             protected Map<String, List<Integer>> sourceDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(8);    //left
-                lines.add(11);    //left
+                lines.add(7);    //left
+                lines.add(10);    //left
                 res.put("br.unb.cic.analysis.samples.OverridingAssignmentLocalVariablesSample", lines);
                 return res;
             }
@@ -36,8 +36,8 @@ public class OverridingAssignmentAnalysisLocalVariablesConflictTest {
             protected Map<String, List<Integer>> sinkDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(9);    //right
-                lines.add(12);    //right
+                lines.add(8);    //right
+                lines.add(11);    //right
                 res.put("br.unb.cic.analysis.samples.OverridingAssignmentLocalVariablesSample", lines);
                 return res;
             }
