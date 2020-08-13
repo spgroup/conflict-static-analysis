@@ -93,10 +93,12 @@ public abstract class AbstractMergeConflictDefinition {
             for(SootMethod m: aClass.getMethods()) {
                 Body body = retrieveActiveBodySafely(m);
                 if(body == null) continue;
-                for(Unit u: body.getUnits()) {
-                    if(definitions.get(className).contains(u.getJavaSourceStartLineNumber())) {
+                HashMap<Integer, Unit> lineUnitMapping = defineLineRange(body);
+                for(Integer def : definitions.get(className)) {
+                    if(lineUnitMapping.containsKey(def)) {
+                        Unit u = lineUnitMapping.get(def);
                         Statement stmt = Statement.builder().setClass(aClass).setMethod(m)
-                                .setUnit(u).setType(type).setSourceCodeLineNumber(u.getJavaSourceStartLineNumber())
+                                .setUnit(u).setType(type).setSourceCodeLineNumber(def)
                                 .build();
                         statements.add(stmt);
                     }
@@ -104,6 +106,28 @@ public abstract class AbstractMergeConflictDefinition {
             }
         }
         return statements;
+    }
+
+    private HashMap<Integer, Unit>  defineLineRange(Body body) {
+        HashMap<Integer, Unit> lineUnitMapping = new HashMap<>();
+        List<Integer> lines = new ArrayList<>();
+
+        for(Unit unit: body.getUnits()) {
+            Integer line = unit.getJavaSourceStartLineNumber();
+            lines.add(line);
+            lineUnitMapping.put(line, unit);
+        }
+        Collections.sort(lines);
+
+        for(int i = 0; i < lines.size()-1; i++) {
+            int current = lines.get(i);
+            int next = lines.get(i + 1);
+            Unit unit = lineUnitMapping.get(current);
+            for(int j = current + 1; j < next; j++) {
+                lineUnitMapping.put(j, unit);
+            }
+        }
+        return lineUnitMapping;
     }
 
     /*
