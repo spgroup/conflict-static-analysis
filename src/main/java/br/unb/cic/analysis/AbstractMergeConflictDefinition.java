@@ -102,6 +102,7 @@ public abstract class AbstractMergeConflictDefinition {
 
         for(Unit unit: body.getUnits()) {
             Integer line = unit.getJavaSourceStartLineNumber();
+            if(line < 0) continue;
             lines.add(line);
             lineUnitMapping.put(line, unit);
         }
