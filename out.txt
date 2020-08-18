@@ -1,0 +1,2 @@
+source(org.elasticsearch.index.analysis.commongrams.CommonGramsTokenFilterFactoryTests, testQueryModeCommonGramsAnalysis, 228) =>
+sink(org.elasticsearch.index.analysis.commongrams.CommonGramsTokenFilterFactoryTests, testQueryModeCommonGramsAnalysis, 229)

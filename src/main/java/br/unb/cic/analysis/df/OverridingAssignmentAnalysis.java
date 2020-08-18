@@ -7,6 +7,7 @@ import soot.*;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JInstanceFieldRef;
+import soot.jimple.internal.JReturnStmt;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
 
@@ -125,10 +126,18 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
     private void checkConflicts(Unit u, List<DataFlowAbstraction> potentialConflictingAssignments) {
         for (DataFlowAbstraction dataFlowAbstraction : potentialConflictingAssignments) {
             if (abstractionVariableIsInIUnitDefBoxes(dataFlowAbstraction, u)) {
-                Conflict c = new Conflict(dataFlowAbstraction.getStmt(), findStatement(u));
-                Collector.instance().addConflict(c);
+                reportConflict(dataFlowAbstraction.getStmt(), u);
             }
         }
+        //Report conflict when changing the same return
+        if (u instanceof JReturnStmt && isLeftStatement(u) && isRightStatement(u)){
+            reportConflict(findStatement(u), u);
+        }
+    }
+
+    private void reportConflict(Statement left, Unit right){
+        Conflict c = new Conflict(left, findStatement(right));
+        Collector.instance().addConflict(c);
     }
 
     /*
