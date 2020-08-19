@@ -5,9 +5,7 @@ import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
 import soot.*;
 import soot.jimple.StaticFieldRef;
-import soot.jimple.internal.JArrayRef;
-import soot.jimple.internal.JInstanceFieldRef;
-import soot.jimple.internal.JReturnStmt;
+import soot.jimple.internal.*;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
 
@@ -79,6 +77,9 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
 
         if (isLeftStatement(u) || isRightStatement(u)) {
             Statement stmt = getStatementAssociatedWithUnit(u);
+            if (u instanceof JInvokeStmt){
+                res.add(new DataFlowAbstraction(((JInvokeStmt) u), stmt));
+            }
             u.getDefBoxes().forEach(valueBox -> {
                 if (valueBox.getValue() instanceof Local){
                     res.add(new DataFlowAbstraction((Local) valueBox.getValue(), stmt));
@@ -155,7 +156,48 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
                 return getVarNameFromAbstraction(dataFlowAbstraction).equals(getVarNameFromValueBox(valueBox));
             }
         }
+        if (u instanceof JInvokeStmt){
+            return compareMethodAndObjectName(dataFlowAbstraction, u);
+        }
         return false;
+    }
+
+    /*
+     * Compares whether left and right called the same object and method
+     */
+    private boolean compareMethodAndObjectName(DataFlowAbstraction dataFlowAbstraction, Unit u){
+        if ( !(dataFlowAbstraction.getStmt().getUnit() instanceof JInvokeStmt)){
+            return false;
+        }
+        String nameObjectFromUnit = getObjectName(u);
+        String methodStatementFromUnit = getMethodName(u);
+
+        String nameObjectFromAbstraction = getObjectName(dataFlowAbstraction.getStmt().getUnit());
+        String methodStatementFromAbstraction = getMethodName(dataFlowAbstraction.getStmt().getUnit());
+
+        String methodName = (((JInvokeStmt) u).getInvokeExpr()).getMethodRef().getName();
+
+        if ((nameObjectFromUnit+""+methodStatementFromUnit).equals(nameObjectFromAbstraction+""+methodStatementFromAbstraction) && !methodName.startsWith("get")){
+            return true;
+        }
+        return false;
+    }
+
+    /*
+     * Returns a String containing the name of the object given a Unit
+     */
+    private String getObjectName(Unit u){
+        if (u instanceof JVirtualInvokeExpr){
+            return ((JVirtualInvokeExpr)((JInvokeStmt) u).getInvokeExpr()).getBase().toString();
+        }
+        return "";
+    }
+
+    /*
+     * Returns a String containing the name of the method called given a Unit
+     */
+    private String getMethodName(Unit u){
+        return (((JInvokeStmt) u).getInvokeExpr()).getMethodRef().toString();
     }
 
     /*
