@@ -169,15 +169,15 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
         if ( !(dataFlowAbstraction.getStmt().getUnit() instanceof JInvokeStmt)){
             return false;
         }
-        String nameObjectFromUnit = getObjectName(u);
+        String objectNameFromUnit = getObjectName(u);
         String methodStatementFromUnit = getMethodName(u);
 
-        String nameObjectFromAbstraction = getObjectName(dataFlowAbstraction.getStmt().getUnit());
+        String objectNameFromAbstraction = getObjectName(dataFlowAbstraction.getStmt().getUnit());
         String methodStatementFromAbstraction = getMethodName(dataFlowAbstraction.getStmt().getUnit());
 
         String methodName = (((JInvokeStmt) u).getInvokeExpr()).getMethodRef().getName();
 
-        if ((nameObjectFromUnit+""+methodStatementFromUnit).equals(nameObjectFromAbstraction+""+methodStatementFromAbstraction) && !methodName.startsWith("get")){
+        if ((objectNameFromUnit+""+methodStatementFromUnit).equals(objectNameFromAbstraction+""+methodStatementFromAbstraction) && !methodName.startsWith("get")){
             return true;
         }
         return false;
