@@ -96,9 +96,7 @@ public abstract class AbstractMergeConflictDefinition {
                 if(body == null) continue;
                 for(Unit u: body.getUnits()) {
                     if(definitions.get(className).contains(u.getJavaSourceStartLineNumber())) {
-                        Statement stmt = Statement.builder().setClass(aClass).setMethod(m)
-                                .setUnit(u).setType(type).setSourceCodeLineNumber(u.getJavaSourceStartLineNumber())
-                                .build();
+                        Statement stmt = createStatement(m, u, type);
                         statements.add(stmt);
                     }
                 }
@@ -126,7 +124,7 @@ public abstract class AbstractMergeConflictDefinition {
         if(traversed.contains(sm) || level > 5 || (!sm.getDeclaringClass().isApplicationClass()) || (body == null)) {
             return new ArrayList<>();
         }
-        level = level + 1;
+        level++;
         traversed.add(sm);
 
         List<Statement> res = new ArrayList<>();
@@ -134,14 +132,14 @@ public abstract class AbstractMergeConflictDefinition {
         for(Unit u: body.getUnits()) {
             if(type.equals(Statement.Type.SOURCE) && u instanceof AssignStmt) {
                 AssignStmt assignStmt = (AssignStmt) u;
-                Statement stmt = Statement.builder().setClass(sm.getDeclaringClass()).setMethod(sm)
-                        .setUnit(u).setType(type).setSourceCodeLineNumber(u.getJavaSourceStartLineNumber())
-                        .build();
-                res.add(stmt);
+                res.add(createStatement(sm, u, type));
 
                 if(assignStmt.containsInvokeExpr()) {
                     res.addAll(traverse(assignStmt.getInvokeExpr().getMethod(), traversed, type, level));
                 }
+            }
+            else if(type.equals(Statement.Type.SINK) && u.getUseBoxes().size() > 0) {
+                res.add(createStatement(sm, u, type));
             }
             else if(u instanceof InvokeStmt) {
                 InvokeStmt invokeStmt = (InvokeStmt)u;
@@ -149,6 +147,12 @@ public abstract class AbstractMergeConflictDefinition {
             }
         }
         return res;
+    }
+
+    private Statement createStatement(SootMethod sm, Unit u,  Statement.Type type) {
+        return Statement.builder().setClass(sm.getDeclaringClass()).setMethod(sm)
+                .setUnit(u).setType(type).setSourceCodeLineNumber(u.getJavaSourceStartLineNumber())
+                .build();
     }
 
     /*
