@@ -101,20 +101,20 @@ public abstract class AbstractMergeConflictDefinition {
                     }
                 }
             }
-            if(recursive) {
-                List<Statement> recursiveStatements = new ArrayList<>();
-                List<SootMethod> traversedMethods = new ArrayList<>();
-                for(Statement s: statements) {
-                    if(s.getUnit() instanceof Stmt) {
-                        Stmt stmt = (Stmt)s.getUnit();
-                        if(stmt.containsInvokeExpr()) {
-                            SootMethod sm = stmt.getInvokeExpr().getMethod();
-                            recursiveStatements.addAll(traverse(sm, traversedMethods, type, 1));
-                        }
+        }
+        if(recursive) {
+            List<Statement> recursiveStatements = new ArrayList<>();
+            List<SootMethod> traversedMethods = new ArrayList<>();
+            for(Statement s: statements) {
+                if(s.getUnit() instanceof Stmt) {
+                    Stmt stmt = (Stmt)s.getUnit();
+                    if(stmt.containsInvokeExpr()) {
+                        SootMethod sm = stmt.getInvokeExpr().getMethod();
+                        recursiveStatements.addAll(traverse(sm, traversedMethods, type, 1));
                     }
                 }
-                statements.addAll(recursiveStatements);
             }
+            statements.addAll(recursiveStatements);
         }
         return statements;
     }
