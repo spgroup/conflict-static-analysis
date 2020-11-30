@@ -8,7 +8,11 @@ import java.util.stream.Collectors;
 public class DefinitionFactory {
 
     public static AbstractMergeConflictDefinition definition(String className, int sourceLines[], int sinkLines[]) {
-        return new AbstractMergeConflictDefinition() {
+        return definition(className, sourceLines, sinkLines, false);
+    }
+
+    public static AbstractMergeConflictDefinition definition(String className, int sourceLines[], int sinkLines[], boolean recursive) {
+        return new AbstractMergeConflictDefinition(recursive) {
                 @Override
                 protected Map<String, List<Integer>> sourceDefinitions() {
                     Map<String, List<Integer>> res = new HashMap<>();

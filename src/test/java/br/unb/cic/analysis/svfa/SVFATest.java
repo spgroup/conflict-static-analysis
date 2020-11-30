@@ -20,6 +20,8 @@ public class SVFATest {
     public static final String CLASS_NAME_INTRAPROCEDURAL = "br.unb.cic.analysis.samples.IntraproceduralDataFlow";
     public static final String CLASS_NAME_INTERROCEDURAL = "br.unb.cic.analysis.samples.InterproceduralTestCaseSameClass";
 
+    public static final String CLASS_NAME_RECURSIVE_DEFINITION = "br.unb.cic.analysis.samples.RecursiveDefinitionSample";
+
     public SVFAInterProcedural configureInterProceduralSameMethod() {
         AbstractMergeConflictDefinition definition = DefinitionFactory.definition(CLASS_NAME_INTRAPROCEDURAL, new int[]{6}, new int[]{11});
         String cp = "target/test-classes";
@@ -44,6 +46,12 @@ public class SVFATest {
         return new SVFAInterProcedural(cp, definition);
     }
 
+    public SVFAInterProcedural configureInterProceduralRecursiveDefinition() {
+        AbstractMergeConflictDefinition definition = DefinitionFactory.definition(CLASS_NAME_RECURSIVE_DEFINITION, new int[]{5}, new int[]{10}, true);
+        String cp = "target/test-classes";
+        return new SVFAInterProcedural(cp, definition);
+    }
+
     @Test
     public void testSVFAnalysisIntraProcedural() {
         SVFAAnalysis analysis = configureInterProceduralSameMethod();
@@ -58,8 +66,8 @@ public class SVFATest {
     public void testSVFAnalysisInterProcedural() {
         SVFAAnalysis analysis = configureInterProceduralDifferentMethod();
         analysis.buildSparseValueFlowGraph();
-        for(List<Node> paths: analysis.findSourceSinkPaths()) {
-            System.out.println(String.join("-> " , paths.stream().map(n -> n.toString()).collect(Collectors.toList())));
+        for (List<Node> paths : analysis.findSourceSinkPaths()) {
+            System.out.println(String.join("-> ", paths.stream().map(n -> n.toString()).collect(Collectors.toList())));
         }
         Assert.assertEquals(1, analysis.reportConflicts().size());
     }
@@ -77,4 +85,12 @@ public class SVFATest {
         analysis.buildSparseValueFlowGraph();
         Assert.assertEquals(0, analysis.reportConflicts().size());
     }
+
+    @Test
+    public void testSVFAnalysisInterProceduralRecursiveDefinition() {
+        SVFAAnalysis analysis = configureInterProceduralRecursiveDefinition();
+        analysis.buildSparseValueFlowGraph();
+        Assert.assertEquals(2, analysis.reportConflicts().size());
+    }
+
 }
