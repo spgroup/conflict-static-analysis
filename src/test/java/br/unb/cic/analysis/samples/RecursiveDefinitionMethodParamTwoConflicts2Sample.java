@@ -1,12 +1,12 @@
 package br.unb.cic.analysis.samples;
-
-public class RecursiveDefinitionMethodParamSample {
+//2 conflicts
+public class RecursiveDefinitionMethodParamTwoConflicts2Sample {
     public static void m() {
         int x = 0; // left
-        n(x);
+        n(x); //right
     }
 
     public static void n(int a) {
-        System.out.println(a); // right
+        System.out.println(a);
     }
 }

@@ -1,6 +1,6 @@
 package br.unb.cic.analysis.samples;
-
-public class RecursiveDefinitionClassAttribute3Sample {
+//1 conflict
+public class RecursiveDefinitionClassAttributeOneConflict3Sample {
     int x;
     public void m() {
         o(); // left
