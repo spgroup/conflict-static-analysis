@@ -20,7 +20,10 @@ public class SVFATest {
     public static final String CLASS_NAME_INTRAPROCEDURAL = "br.unb.cic.analysis.samples.IntraproceduralDataFlow";
     public static final String CLASS_NAME_INTERROCEDURAL = "br.unb.cic.analysis.samples.InterproceduralTestCaseSameClass";
 
-    public static final String CLASS_NAME_RECURSIVE_DEFINITION = "br.unb.cic.analysis.samples.RecursiveDefinitionSample";
+    public static final String CLASS_NAME_RECURSIVE_DEFINITION_01 = "br.unb.cic.analysis.samples.RecursiveDefinitionSample01";
+    public static final String CLASS_NAME_RECURSIVE_DEFINITION_02 = "br.unb.cic.analysis.samples.RecursiveDefinitionSample02";
+    public static final String CLASS_NAME_RECURSIVE_DEFINITION_03 = "br.unb.cic.analysis.samples.RecursiveDefinitionSample03";
+
 
     public SVFAInterProcedural configureInterProceduralSameMethod() {
         AbstractMergeConflictDefinition definition = DefinitionFactory.definition(CLASS_NAME_INTRAPROCEDURAL, new int[]{6}, new int[]{11});
@@ -46,8 +49,20 @@ public class SVFATest {
         return new SVFAInterProcedural(cp, definition);
     }
 
-    public SVFAInterProcedural configureInterProceduralRecursiveDefinition() {
-        AbstractMergeConflictDefinition definition = DefinitionFactory.definition(CLASS_NAME_RECURSIVE_DEFINITION, new int[]{5}, new int[]{10}, true);
+    public SVFAInterProcedural configureInterProceduralRecursiveDefinition01() {
+        AbstractMergeConflictDefinition definition = DefinitionFactory.definition(CLASS_NAME_RECURSIVE_DEFINITION_01, new int[]{5}, new int[]{10}, true);
+        String cp = "target/test-classes";
+        return new SVFAInterProcedural(cp, definition);
+    }
+
+    public SVFAInterProcedural configureInterProceduralRecursiveDefinition02() {
+        AbstractMergeConflictDefinition definition = DefinitionFactory.definition(CLASS_NAME_RECURSIVE_DEFINITION_02, new int[]{5}, new int[]{14}, true);
+        String cp = "target/test-classes";
+        return new SVFAInterProcedural(cp, definition);
+    }
+
+    public SVFAInterProcedural configureInterProceduralRecursiveDefinition03() {
+        AbstractMergeConflictDefinition definition = DefinitionFactory.definition(CLASS_NAME_RECURSIVE_DEFINITION_03, new int[]{11}, new int[]{6}, true);
         String cp = "target/test-classes";
         return new SVFAInterProcedural(cp, definition);
     }
@@ -87,10 +102,25 @@ public class SVFATest {
     }
 
     @Test
-    public void testSVFAnalysisInterProceduralRecursiveDefinition() {
-        SVFAAnalysis analysis = configureInterProceduralRecursiveDefinition();
+    public void testSVFAnalysisInterProceduralRecursiveDefinition01() {
+        SVFAAnalysis analysis = configureInterProceduralRecursiveDefinition01();
         analysis.buildSparseValueFlowGraph();
         Assert.assertEquals(2, analysis.reportConflicts().size());
+    }
+
+    @Test
+    public void testSVFAnalysisInterProceduralRecursiveDefinition02() {
+        SVFAAnalysis analysis = configureInterProceduralRecursiveDefinition02();
+        analysis.buildSparseValueFlowGraph();
+        Assert.assertEquals(2, analysis.reportConflicts().size());
+    }
+
+    @Test
+    public void testSVFAnalysisInterProceduralRecursiveDefinition03() {
+        SVFAAnalysis analysis = configureInterProceduralRecursiveDefinition03();
+        analysis.buildSparseValueFlowGraph();
+        Assert.assertEquals(1, analysis.reportConflicts().size());
+        //analysis.reportConflicts().foreach(path -> System.out.println(path));
     }
 
 }

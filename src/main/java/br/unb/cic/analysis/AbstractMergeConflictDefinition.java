@@ -140,6 +140,13 @@ public abstract class AbstractMergeConflictDefinition {
             }
             else if(type.equals(Statement.Type.SINK) && u.getUseBoxes().size() > 0) {
                 res.add(createStatement(sm, u, type));
+
+//                if(u instanceof Stmt) {
+//                    Stmt stmt = (Stmt)u;
+//                    if(stmt.containsInvokeExpr()) {
+//                        res.addAll(traverse(stmt.getInvokeExpr().getMethod(), traversed, type, level));
+//                    }
+//                }
             }
             else if(u instanceof InvokeStmt) {
                 InvokeStmt invokeStmt = (InvokeStmt)u;
@@ -220,6 +227,10 @@ public abstract class AbstractMergeConflictDefinition {
             }
         }
         return s;
+    }
+
+    public void setRecursiveMode(boolean value) {
+        this.recursive = value;
     }
 
     public boolean isSourceStatement(Unit u) {

@@ -137,6 +137,9 @@ public class Main {
                 .build();
 
         Option verbose = Option.builder("verbose").argName("verbose").desc("run in the verbose mode").build();
+        Option recursive = Option.builder("recursive").argName("recursive")
+                .desc("run using the recursive strategy for mapping sources and sinks")
+                .build();
 
         options.addOption(classPathOption);
         options.addOption(inputFileOption);
@@ -144,6 +147,7 @@ public class Main {
         options.addOption(repoOption);
         options.addOption(commitOption);
         options.addOption(verbose);
+        options.addOption(recursive);
     }
 
     
@@ -209,6 +213,7 @@ public class Main {
     }
 
     private void runSparseValueFlowAnalysis(String classpath, boolean interprocedural) {
+        definition.setRecursiveMode(options.hasOption("recursive"));
         SVFAAnalysis analysis = interprocedural
                 ? new SVFAInterProcedural(classpath, definition)
                 : new SVFAIntraProcedural(classpath, definition);
@@ -221,6 +226,7 @@ public class Main {
     }
 
     private void runSparseValueFlowConfluenceAnalysis(String classpath, boolean interprocedural) {
+        definition.setRecursiveMode(options.hasOption("recursive"));
         SVFAConfluenceAnalysis analysis = new SVFAConfluenceAnalysis(classpath, this.definition,  interprocedural);
         
         analysis.execute();
