@@ -1,6 +1,6 @@
 package br.unb.cic.analysis.samples;
 
-
+// Conflict: [left, ObjectFieldConflict.m():17] --> [right, ObjectFieldConflict.bar():21]
 public class OverridingAssignmentObjectFieldConflictInterProceduralSample {
     public void m() {
         ObjectFieldConflict c = new ObjectFieldConflict();

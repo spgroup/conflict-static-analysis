@@ -1,6 +1,6 @@
 package br.unb.cic.analysis.samples;
 
-
+// Conflict: [left, foo():13] --> [right, bar():17]
 public class OverridingAssignmentClassFieldConflictInterProceduralSample2 {
     private int x;
 

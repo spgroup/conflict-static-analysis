@@ -1,6 +1,6 @@
 package br.unb.cic.analysis.samples;
 
-
+// Not Conflict
 public class OverridingAssignmentObjectFieldNotConflictInterProceduralSample {
     public void m() {
         ObjectFieldNotConflict objectFieldNotConflict = new ObjectFieldNotConflict();

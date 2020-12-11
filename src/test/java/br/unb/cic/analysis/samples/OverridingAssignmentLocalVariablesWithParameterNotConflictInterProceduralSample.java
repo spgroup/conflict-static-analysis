@@ -1,6 +1,6 @@
 package br.unb.cic.analysis.samples;
 
-
+// Not Conflict
 public class OverridingAssignmentLocalVariablesWithParameterNotConflictInterProceduralSample {
     public void m() {
         foo(0); // LEFT
