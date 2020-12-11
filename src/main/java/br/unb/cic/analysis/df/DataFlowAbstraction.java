@@ -2,10 +2,10 @@ package br.unb.cic.analysis.df;
 
 import br.unb.cic.analysis.model.Statement;
 import soot.Local;
+import soot.jimple.InstanceFieldRef;
 import soot.jimple.StaticFieldRef;
-import soot.jimple.internal.JInstanceFieldRef;
 
-import java.util.*;
+import java.util.Objects;
 
 /**
  * Information wee keep while traversing
@@ -14,7 +14,7 @@ import java.util.*;
 public class DataFlowAbstraction {
 
     private Local local;
-    private JInstanceFieldRef localField;
+    private InstanceFieldRef localField;
     private StaticFieldRef localStaticRef;
     private Statement stmt;
 
@@ -23,7 +23,7 @@ public class DataFlowAbstraction {
         this.stmt = stmt;
     }
 
-    public DataFlowAbstraction(JInstanceFieldRef localField, Statement stmt) {
+    public DataFlowAbstraction(InstanceFieldRef localField, Statement stmt) {
         this.localField = localField;
         this.stmt = stmt;
     }
@@ -41,9 +41,10 @@ public class DataFlowAbstraction {
         return localStaticRef;
     }
 
-    public JInstanceFieldRef getFieldRef() {
+    public InstanceFieldRef getFieldRef() {
         return localField;
     }
+
     public Statement getStmt() {
         return stmt;
     }

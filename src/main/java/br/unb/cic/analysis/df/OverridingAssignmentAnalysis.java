@@ -4,6 +4,7 @@ import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
 import soot.*;
+import soot.jimple.InstanceFieldRef;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JInstanceFieldRef;
@@ -210,13 +211,13 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
     }
 
     /*
-     * If it's a JInstanceField, returns your complete name from the hashMapJInstanceField
+     * If it's a InstanceField, returns your complete name from the hashMapInstanceField
      */
-    private JInstanceFieldRef getFieldName(ValueBox valueBox){
-        JInstanceFieldRef fieldValue = (JInstanceFieldRef) valueBox.getValue();
+    private InstanceFieldRef getFieldName(ValueBox valueBox) {
+        InstanceFieldRef fieldValue = (InstanceFieldRef) valueBox.getValue();
         if (fieldValue.toString().contains("$stack")) {
             String chainName = getFieldsChain(valueBox.getValue().toString()); //return the complete chain with the FieldRef
-            ((Local) fieldValue.getBase()).setName(chainName.replace("."+fieldValue.getField().toString(), "")); //remove the double FieldRef from jInstanceFieldValue
+            ((Local) fieldValue.getBase()).setName(chainName.replace("." + fieldValue.getField().toString(), "")); //remove the double FieldRef from jInstanceFieldValue
         }
         return fieldValue;
     }
@@ -291,7 +292,7 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
      * InitialKey($stack8.a) -> nextKey ($stack8) -> nextKey ($stack3) -> object.b has no nextKey (STOP) -> Return object chain -> Return: object.b.a.a
      */
     private String getFieldsChain(String nextKey){
-        List<HashMap<String, JInstanceFieldRef>> auxValuesHashMap = new ArrayList<>();
+        List<HashMap<String, InstanceFieldRef>> auxValuesHashMap = new ArrayList<>();
         auxValuesHashMap.addAll(getHashMapJInstanceField());
 
         //If nextKey not contain $stack is because simple key
@@ -299,7 +300,7 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
             return nextKey;
         }
 
-        JInstanceFieldRef currentField = null;
+        InstanceFieldRef currentField = null;
 
         //The second position is the field called
         String currentUniqueKey = "<"+nextKey.split(".<")[1];
@@ -313,7 +314,7 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
 
             Iterator iterator = auxValuesHashMap.iterator();
             while (iterator.hasNext() && !isNextKey){
-                HashMap<String, JInstanceFieldRef> auxMap = (HashMap<String, JInstanceFieldRef>) iterator.next();
+                HashMap<String, InstanceFieldRef> auxMap = (HashMap<String, InstanceFieldRef>) iterator.next();
                 for (String mapKey : auxMap.keySet()) {
                     if (mapKey.equals(nextKey)) {
                         currentField = auxMap.get(mapKey);
@@ -339,13 +340,13 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
 
 
     /*
-     * Generates the dictionary with the UseBoxes instances of JInstanceFieldRef or StaticFieldRef
+     * Generates the dictionary with the UseBoxes instances of InstanceFieldRef or StaticFieldRef
      */
     public void generateFieldDictionary(Unit u){
         for (ValueBox valueBox: u.getUseBoxes()) {
-            if (valueBox.getValue() instanceof JInstanceFieldRef) {
+            if (valueBox.getValue() instanceof InstanceFieldRef) {
                 generateClassFieldDictionary(getStatementAssociatedWithUnit(u));
-            }else if (valueBox.getValue() instanceof StaticFieldRef) {
+            } else if (valueBox.getValue() instanceof StaticFieldRef) {
                 generateStaticRefDictionary(u, valueBox);
             }
         }
@@ -368,20 +369,20 @@ public class OverridingAssignmentAnalysis extends ReachDefinitionAnalysis {
      * Generates a dictionary to JInstanceFieldRef
      */
     private void generateClassFieldDictionary(Statement stmt){
-        HashMap<String, JInstanceFieldRef> auxHashMap = new HashMap<>();
+        HashMap<String, InstanceFieldRef> auxHashMap = new HashMap<>();
         StringBuilder strKey = new StringBuilder();
         for (ValueBox valueBoxKey : stmt.getUnit().getDefBoxes()) {
             strKey.append(valueBoxKey.getValue().toString());
         }
-        JInstanceFieldRef currentFieldRef = null;
+        InstanceFieldRef currentFieldRef = null;
         for (ValueBox catchRef : stmt.getUnit().getUseBoxes()) {
-            if (catchRef.getValue() instanceof JInstanceFieldRef) {
-                currentFieldRef = (JInstanceFieldRef) catchRef.getValue();
+            if (catchRef.getValue() instanceof InstanceFieldRef) {
+                currentFieldRef = (InstanceFieldRef) catchRef.getValue();
                 auxHashMap.put(strKey.toString(), currentFieldRef);
             }
         }
         if (auxHashMap.size() != 0) {
-            Collector.instance().addHashJInstanceField(auxHashMap);
+            Collector.instance().addHashInstanceField(auxHashMap);
         }
     }
 }
