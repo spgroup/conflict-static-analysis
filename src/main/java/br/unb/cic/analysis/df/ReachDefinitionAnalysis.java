@@ -8,10 +8,9 @@ import soot.Body;
 import soot.Local;
 import soot.Unit;
 import soot.ValueBox;
+import soot.jimple.ArrayRef;
 import soot.jimple.InstanceFieldRef;
 import soot.jimple.StaticFieldRef;
-import soot.jimple.internal.JArrayRef;
-import soot.jimple.internal.JInstanceFieldRef;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
@@ -205,16 +204,15 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 	protected List<Local> getDefVariables(Unit u) {
 		List<Local> localDefs = new ArrayList<>();
 		for (ValueBox v : u.getDefBoxes()) {
-			if (v.getValue() instanceof Local) {
-				localDefs.add((Local) v.getValue());
-			} else if (v.getValue() instanceof JArrayRef) {
-				JArrayRef ref = (JArrayRef) v.getValue();
-				localDefs.add((Local) ref.getBaseBox().getValue());
-			}
-			else if (v.getValue() instanceof JInstanceFieldRef) {
-				JInstanceFieldRef ref = (JInstanceFieldRef) v.getValue();
-				localDefs.add((Local) ref.getBaseBox().getValue());
-			}
+            if (v.getValue() instanceof Local) {
+                localDefs.add((Local) v.getValue());
+            } else if (v.getValue() instanceof ArrayRef) {
+                ArrayRef ref = (ArrayRef) v.getValue();
+                localDefs.add((Local) ref.getBaseBox().getValue());
+            } else if (v.getValue() instanceof InstanceFieldRef) {
+                InstanceFieldRef ref = (InstanceFieldRef) v.getValue();
+                localDefs.add((Local) ref.getBaseBox().getValue());
+            }
 		}
 		return localDefs;
 	}
