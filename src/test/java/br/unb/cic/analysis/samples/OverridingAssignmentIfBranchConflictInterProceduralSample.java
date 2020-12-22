@@ -1,7 +1,7 @@
 package br.unb.cic.analysis.samples;
 
 // Conflict: [left, m():8] --> [right, foo():14]
-public class OverridingAssignmentBranchConflictInterProceduralSample {
+public class OverridingAssignmentIfBranchConflictInterProceduralSample {
     private int x;
 
     public void m() {
