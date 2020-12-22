@@ -160,13 +160,16 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private void kill(Unit unit) {
         for (DataFlowAbstraction dataFlowAbstraction : res) {
-            // TODO extract method res.removeAll (unit.getDefBoxes ())
-            for (ValueBox valueBox : unit.getDefBoxes()) {
-                if (isSameVariable(valueBox, dataFlowAbstraction)) {
-                    res.remove(dataFlowAbstraction);
-                }
-            }
+            removeAll(unit.getDefBoxes(), dataFlowAbstraction);
         }
+    }
+
+    private void removeAll(List<ValueBox> defBoxes, DataFlowAbstraction dataFlowAbstraction) {
+        defBoxes.forEach(valueBox -> {
+            if (isSameVariable(valueBox, dataFlowAbstraction)) {
+                res.remove(dataFlowAbstraction);
+            }
+        });
     }
 
     /*
