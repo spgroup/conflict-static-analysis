@@ -99,15 +99,15 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private void runAnalyze(SootMethod sm, List<SootMethod> traversed, Statement.Type changeTag, Unit unit, boolean tagged) {
         if (unit instanceof AssignStmt) {
-            // TODO Verificar AssignStmt contem objetos, arrays ou outros tipos?
+            // TODO Does AssignStmt check contain objects, arrays or other types?
             AssignStmt assignStmt = (AssignStmt) unit;
 
-            // TODO Verificar caso: x = foo() + foo()
+            // TODO Check case: x = foo() + foo
             if (assignStmt.containsInvokeExpr()) {
                 traverse(assignStmt.getInvokeExpr().getMethod(), traversed, changeTag);
             }
 
-            // TODO renomear Statement. (UnitWithExtraInformations)
+            // TODO rename Statement. (UnitWithExtraInformations)
             Statement stmt = getStatementAssociatedWithUnit(sm, unit, changeTag);
 
             if (tagged) {
@@ -116,11 +116,10 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
                 kill(unit);
             }
 
-            // TODO Verificar tratamento em caso de for
+            // TODO Check treatment in case 'for'
         } else if (unit instanceof InvokeStmt) {
             InvokeStmt invokeStmt = (InvokeStmt) unit;
             Statement stmt = getStatementAssociatedWithUnit(sm, unit, changeTag);
-            // TODO trocar stmt.getType() por changeTag
             traverse(invokeStmt.getInvokeExpr().getMethod(), traversed, stmt.getType());
         }
     }
