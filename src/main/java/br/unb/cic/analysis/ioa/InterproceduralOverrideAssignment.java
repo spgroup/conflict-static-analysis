@@ -120,7 +120,14 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
                 kill(unit);
             }
 
-            // TODO Check treatment in case 'for'
+            /* TODO Check treatment in case 'for'
+            - Jimple does not exist for. The command is done using the goto.
+
+            - The variables of the force are marked as IN_BETWEEN so they do not enter the abstraction.
+
+            - The goto instructions have the following format "if i0> = 1 goto label2;" in this case,
+            they are treated as "IfStmt" and do not enter either the "if(unit instanceof AssignStmt)" nor the "else if(unit instanceof InvokeStmt)".
+             */
         } else if (unit instanceof InvokeStmt) {
             InvokeStmt invokeStmt = (InvokeStmt) unit;
             Statement stmt = getStatementAssociatedWithUnit(sm, unit, changeTag);
