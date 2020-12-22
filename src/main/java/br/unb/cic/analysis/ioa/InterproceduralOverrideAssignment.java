@@ -99,10 +99,14 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private void runAnalyze(SootMethod sm, List<SootMethod> traversed, Statement.Type changeTag, Unit unit, boolean tagged) {
         if (unit instanceof AssignStmt) {
-            // TODO Does AssignStmt check contain objects, arrays or other types?
+            /* TODO Does AssignStmt check contain objects, arrays or other types?
+             Yes, sssignStmt handles assignments and they can be of any type as long as they follow the structure: variable = value
+             */
             AssignStmt assignStmt = (AssignStmt) unit;
 
-            // TODO Check case: x = foo() + foo
+            /* TODO Check case: x = foo() + bar()
+            In this case, this condition will be executed for the call to the foo() method and then another call to the bar() method.
+             */
             if (assignStmt.containsInvokeExpr()) {
                 Statement stmt = getStatementAssociatedWithUnit(sm, unit, changeTag);
                 traverse(assignStmt.getInvokeExpr().getMethod(), traversed, stmt.getType());
@@ -137,9 +141,9 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         return changeTag.equals(Statement.Type.SOURCE);
     }
 
-    // TODO precisa tratar outros casos
-    // TODO adicionar em duas litas (left e right).
-    // TODO adicionar profundidade InstanceFieldRef e StaticFieldRef
+    // TODO need to treat other cases
+    // TODO add in two lists (left and right).
+    // TODO add depth to InstanceFieldRef and StaticFieldRef
     private void gen(Statement stmt) {
         stmt.getUnit().getDefBoxes().forEach(valueBox -> {
             if (valueBox.getValue() instanceof Local) {
@@ -147,7 +151,9 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             } else if (valueBox.getValue() instanceof StaticFieldRef) {
                 res.add(new DataFlowAbstraction((StaticFieldRef) valueBox.getValue(), stmt));
             } else if (valueBox.getValue() instanceof InstanceFieldRef) {
-                // TODO verificar o que é adicionado. (Objeto.field)
+                /* TODO check what is added. (Object.field)
+                r0.<br.unb.cic.analysis.samples.OverridingAssignmentClassFieldConflictInterProceduralSample: int x>
+                 */
                 res.add(new DataFlowAbstraction((InstanceFieldRef) valueBox.getValue(), stmt));
             }
         });
@@ -207,8 +213,8 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         }
     }
 
-    // TODO melhorar nome do metodo
-    // TODO não comparar como string
+    // TODO improve method name
+    // TODO don't compare as a string
     private boolean compareItens(ValueBox valueBox, DataFlowAbstraction dataFlowAbstraction) {
         if (valueBox.getValue() instanceof InstanceFieldRef && dataFlowAbstraction.getFieldRef() != null) {
             return getVariableNameInFromValueBoxInstanceFieldRef(valueBox).equals(dataFlowAbstraction.getFieldRef().getBase().toString());
