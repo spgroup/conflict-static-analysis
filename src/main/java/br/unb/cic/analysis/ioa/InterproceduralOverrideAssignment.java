@@ -78,7 +78,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
         body.getUnits().forEach(unit -> {
 
-            detectConflict(res, unit, changeTag, sm);
+            detectConflict(unit, changeTag, sm);
 
             if (isTagged(changeTag, unit)) {
                 runAnalyzeWithTaggedUnit(sm, traversed, changeTag, unit);
@@ -164,16 +164,15 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         }
     }
 
-    // TODO Obter res via atributo
     /*
-     * To detect conflicts in verified if "u" is owned by LEFT or RIGHT
-     * and we fill in the "potentialConflictingAssignments" list with the changes from the other developer.
+     * To detect conflicts res verified if "u" is owned by LEFT or RIGHT
+     * and we fill res the "potentialConflictingAssignments" list with the changes from the other developer.
      *
      * We pass "u" and "potentialConflictingAssignments" to the checkConflits method
      * to see if Left assignments interfere with Right changes or
      * Right assignments interfere with Left changes.
      */
-    private void detectConflict(FlowSet<DataFlowAbstraction> in, Unit u, Statement.Type changeTag, SootMethod sm) {
+    private void detectConflict(Unit u, Statement.Type changeTag, SootMethod sm) {
 
         if (!isTagged(changeTag, u)) {
             return;
@@ -182,10 +181,10 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         List<DataFlowAbstraction> potentialConflictingAssignments = new ArrayList<>();
 
         if (isRightStatement(u) || isInRightStatementFLow(changeTag)) {
-            potentialConflictingAssignments = in.toList().stream().filter(
+            potentialConflictingAssignments = res.toList().stream().filter(
                     DataFlowAbstraction::containsLeftStatement).collect(Collectors.toList());
         } else if (isLeftStatement(u) || isInLeftStatementFLow(changeTag)) {
-            potentialConflictingAssignments = in.toList().stream().filter(
+            potentialConflictingAssignments = res.toList().stream().filter(
                     DataFlowAbstraction::containsRightStatement).collect(Collectors.toList());
         }
 
