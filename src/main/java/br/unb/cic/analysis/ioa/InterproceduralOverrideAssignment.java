@@ -80,7 +80,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
             detectConflict(res, unit, changeTag, sm);
 
-            if ((isLeftStatement(unit) || isRightStatement(unit)) || (isInLeftStatementFLow(changeTag) || isInRightStatementFLow(changeTag))) {
+            if (isTagged(changeTag, unit)) {
                 // TODO  mover if e else para metodos diferentes
                 if (unit instanceof AssignStmt) {
                     // TODO Verificar AssignStmt contem objetos, arrays ou outros tipos?
@@ -121,6 +121,10 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
                 }
             }
         });
+    }
+
+    private boolean isTagged(Statement.Type changeTag, Unit unit) {
+        return (isLeftStatement(unit) || isRightStatement(unit)) || (isInLeftStatementFLow(changeTag) || isInRightStatementFLow(changeTag));
     }
 
     private boolean isInRightStatementFLow(Statement.Type changeTag) {
@@ -169,8 +173,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
      */
     private void detectConflict(FlowSet<DataFlowAbstraction> in, Unit u, Statement.Type changeTag, SootMethod sm) {
 
-        if (!(isRightStatement(u) || isLeftStatement(u) || isInLeftStatementFLow(changeTag)
-                || isInRightStatementFLow(changeTag))) {
+        if (!isTagged(changeTag, u)) {
             return;
         }
 
