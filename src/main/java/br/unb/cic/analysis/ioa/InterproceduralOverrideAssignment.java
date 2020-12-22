@@ -79,9 +79,8 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         body.getUnits().forEach(unit -> {
 
             detectConflict(res, unit, changeTag, sm);
-            // TODO isInLeftStatementFLow ...  isInRightStatementFLow
-            if ((isLeftStatement(unit) || isRightStatement(unit)) ||
-                    (changeTag.equals(Statement.Type.SOURCE) || changeTag.equals(Statement.Type.SINK))) {
+
+            if ((isLeftStatement(unit) || isRightStatement(unit)) || (isInLeftStatementFLow(changeTag) || isInRightStatementFLow(changeTag))) {
                 // TODO  mover if e else para metodos diferentes
                 if (unit instanceof AssignStmt) {
                     // TODO Verificar AssignStmt contem objetos, arrays ou outros tipos?
@@ -124,6 +123,14 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         });
     }
 
+    private boolean isInRightStatementFLow(Statement.Type changeTag) {
+        return changeTag.equals(Statement.Type.SINK);
+    }
+
+    private boolean isInLeftStatementFLow(Statement.Type changeTag) {
+        return changeTag.equals(Statement.Type.SOURCE);
+    }
+
     // TODO precisa tratar outros casos
     // TODO adicionar em duas litas (left e right).
     // TODO adicionar profundidade InstanceFieldRef e StaticFieldRef
@@ -160,35 +167,35 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
      * to see if Left assignments interfere with Right changes or
      * Right assignments interfere with Left changes.
      */
-    private void detectConflict(FlowSet<DataFlowAbstraction> in, Unit u, Statement.Type type, SootMethod sm) {
+    private void detectConflict(FlowSet<DataFlowAbstraction> in, Unit u, Statement.Type changeTag, SootMethod sm) {
 
-        if (!(isRightStatement(u) || isLeftStatement(u) || type.equals(Statement.Type.SOURCE)
-                || type.equals(Statement.Type.SINK))) {
+        if (!(isRightStatement(u) || isLeftStatement(u) || isInLeftStatementFLow(changeTag)
+                || isInRightStatementFLow(changeTag))) {
             return;
         }
 
         List<DataFlowAbstraction> potentialConflictingAssignments = new ArrayList<>();
 
-        if (isRightStatement(u) || type.equals(Statement.Type.SINK)) {
+        if (isRightStatement(u) || isInRightStatementFLow(changeTag)) {
             potentialConflictingAssignments = in.toList().stream().filter(
                     DataFlowAbstraction::containsLeftStatement).collect(Collectors.toList());
-        } else if (isLeftStatement(u) || type.equals(Statement.Type.SOURCE)) {
+        } else if (isLeftStatement(u) || isInLeftStatementFLow(changeTag)) {
             potentialConflictingAssignments = in.toList().stream().filter(
                     DataFlowAbstraction::containsRightStatement).collect(Collectors.toList());
         }
 
-        checkConflicts(u, potentialConflictingAssignments, type, sm);
+        checkConflicts(u, potentialConflictingAssignments, changeTag, sm);
 
     }
 
     /*
      * Checks if there is a conflict and if so adds it to the conflict list.
      */
-    private void checkConflicts(Unit unit, List<DataFlowAbstraction> potentialConflictingAssignments, Statement.Type type, SootMethod sm) {
+    private void checkConflicts(Unit unit, List<DataFlowAbstraction> potentialConflictingAssignments, Statement.Type changeTag, SootMethod sm) {
         for (DataFlowAbstraction dataFlowAbstraction : potentialConflictingAssignments) {
             for (ValueBox valueBox : unit.getDefBoxes()) {
                 if (compareItens(valueBox, dataFlowAbstraction)) {
-                    Conflict c = new Conflict(getStatementAssociatedWithUnit(sm, unit, type), dataFlowAbstraction.getStmt());
+                    Conflict c = new Conflict(getStatementAssociatedWithUnit(sm, unit, changeTag), dataFlowAbstraction.getStmt());
                     conflicts.add(c);
                     System.out.println(c);
                 }
@@ -225,17 +232,17 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     /*
-     * Returns the Statement type
+     * Returns the Statement changeTag
      */
-    private Statement getStatementAssociatedWithUnit(SootMethod sm, Unit u, Statement.Type type) {
+    private Statement getStatementAssociatedWithUnit(SootMethod sm, Unit u, Statement.Type changeTag) {
         if (isLeftStatement(u)) {
             return findLeftStatement(u);
         } else if (isRightStatement(u)) {
             return findRightStatement(u);
-        } else if (!isLeftStatement(u) && type.equals(Statement.Type.SOURCE)) {
-            return createStatement(sm, u, type);
-        } else if (!isRightStatement(u) && type.equals(Statement.Type.SINK)) {
-            return createStatement(sm, u, type);
+        } else if (!isLeftStatement(u) && isInLeftStatementFLow(changeTag)) {
+            return createStatement(sm, u, changeTag);
+        } else if (!isRightStatement(u) && isInRightStatementFLow(changeTag)) {
+            return createStatement(sm, u, changeTag);
         }
         return findStatementBase(u);
     }
@@ -267,9 +274,9 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
                 .setSourceCodeLineNumber(d.getJavaSourceStartLineNumber()).build();
     }
 
-    private Statement createStatement(SootMethod sm, Unit u, Statement.Type type) {
+    private Statement createStatement(SootMethod sm, Unit u, Statement.Type changeTag) {
         return Statement.builder().setClass(sm.getDeclaringClass()).setMethod(sm)
-                .setUnit(u).setType(type).setSourceCodeLineNumber(u.getJavaSourceStartLineNumber())
+                .setUnit(u).setType(changeTag).setSourceCodeLineNumber(u.getJavaSourceStartLineNumber())
                 .build();
     }
 
