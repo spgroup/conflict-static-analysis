@@ -23,8 +23,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private PointsToAnalysis pta;
     private AbstractMergeConflictDefinition definition;
 
-    // TODO dataflowabstraction provavelmente deve ser subustituido por algo que faça mais sentido na analise inter procedural
-    // TODO Adicionar tratamento de if, loops... (ForwardFlowAnalysis)
+    // TODO Add treatment of if, loops ... (ForwardFlowAnalysis)
     private FlowSet<DataFlowAbstraction> res;
     private Body body;
 
@@ -161,9 +160,9 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private void kill(Unit unit) {
         for (DataFlowAbstraction dataFlowAbstraction : res) {
-            // TODO extrair metodo res.removeAll(unit.getDefBoxes())
+            // TODO extract method res.removeAll (unit.getDefBoxes ())
             for (ValueBox valueBox : unit.getDefBoxes()) {
-                if (compareItens(valueBox, dataFlowAbstraction)) {
+                if (isSameVariable(valueBox, dataFlowAbstraction)) {
                     res.remove(dataFlowAbstraction);
                 }
             }
@@ -204,7 +203,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private void checkConflicts(Unit unit, List<DataFlowAbstraction> potentialConflictingAssignments, Statement.Type changeTag, SootMethod sm) {
         for (DataFlowAbstraction dataFlowAbstraction : potentialConflictingAssignments) {
             for (ValueBox valueBox : unit.getDefBoxes()) {
-                if (compareItens(valueBox, dataFlowAbstraction)) {
+                if (isSameVariable(valueBox, dataFlowAbstraction)) {
                     Conflict c = new Conflict(getStatementAssociatedWithUnit(sm, unit, changeTag), dataFlowAbstraction.getStmt());
                     conflicts.add(c);
                     System.out.println(c);
@@ -213,9 +212,8 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         }
     }
 
-    // TODO improve method name
     // TODO need to treat other cases (Arrays...)
-    private boolean compareItens(ValueBox valueBox, DataFlowAbstraction dataFlowAbstraction) {
+    private boolean isSameVariable(ValueBox valueBox, DataFlowAbstraction dataFlowAbstraction) {
         // TODO check why equivTo(Object o) doesn't work
         if (valueBox.getValue() instanceof InstanceFieldRef && dataFlowAbstraction.getFieldRef() != null) {
             return valueBox.getValue().equivHashCode() == dataFlowAbstraction.getFieldRef().equivHashCode();
