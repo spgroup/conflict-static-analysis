@@ -6,15 +6,12 @@ public class OverridingAssignmentClassFieldConflictInterProceduralSample {
 
     public void m() {
         x = 0; // LEFT
-        x = foo() + bar(); // RIGHT
+        foo(); // RIGHT
     }
 
-    private int foo() {
-        return 1;
+    private void foo() {
+        x = 1;
     }
 
-    private int bar() {
-        return 1;
-    }
 
 }
