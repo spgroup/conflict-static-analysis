@@ -214,32 +214,18 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     // TODO improve method name
-    // TODO don't compare as a string
     private boolean compareItens(ValueBox valueBox, DataFlowAbstraction dataFlowAbstraction) {
+        // TODO check why equivTo(Object o) doesn't work
         if (valueBox.getValue() instanceof InstanceFieldRef && dataFlowAbstraction.getFieldRef() != null) {
-            return getVariableNameInFromValueBoxInstanceFieldRef(valueBox).equals(dataFlowAbstraction.getFieldRef().getBase().toString());
+            return valueBox.getValue().equivHashCode() == dataFlowAbstraction.getFieldRef().equivHashCode();
         } else if (valueBox.getValue() instanceof StaticFieldRef && dataFlowAbstraction.getLocalStaticRef() != null) {
-            return getVariableNameInFromValueBoxStaticFieldRef(valueBox).equals(dataFlowAbstraction.getLocalStaticRef().getField().getName());
+            return valueBox.getValue().equivHashCode() == dataFlowAbstraction.getLocalStaticRef().equivHashCode();
         } else if (valueBox.getValue() instanceof Local && dataFlowAbstraction.getLocal() != null) {
-            return getVariableNameInFromValueBoxLocal(valueBox).equals(dataFlowAbstraction.getLocal().getName());
+            return valueBox.getValue().equivHashCode() == dataFlowAbstraction.getLocal().equivHashCode();
         }
         return false;
     }
 
-    private String getVariableNameInFromValueBoxInstanceFieldRef(ValueBox valueBox) {
-        InstanceFieldRef instanceFieldRef = (InstanceFieldRef) valueBox.getValue();
-        return instanceFieldRef.getBase().toString();
-    }
-
-    private String getVariableNameInFromValueBoxStaticFieldRef(ValueBox valueBox) {
-        StaticFieldRef staticFieldRef = (StaticFieldRef) valueBox.getValue();
-        return staticFieldRef.getField().getName();
-    }
-
-    private String getVariableNameInFromValueBoxLocal(ValueBox valueBox) {
-        Local local = (Local) valueBox.getValue();
-        return local.getName();
-    }
 
     /*
      * Returns the Statement changeTag
