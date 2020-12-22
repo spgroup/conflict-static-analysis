@@ -81,46 +81,48 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             detectConflict(res, unit, changeTag, sm);
 
             if (isTagged(changeTag, unit)) {
-                // TODO  mover if e else para metodos diferentes
-                if (unit instanceof AssignStmt) {
-                    // TODO Verificar AssignStmt contem objetos, arrays ou outros tipos?
-                    AssignStmt assignStmt = (AssignStmt) unit;
+                runAnalyzeWithTaggedUnit(sm, traversed, changeTag, unit);
 
-                    // TODO Verificar caso: x = foo() + foo()
-                    if (assignStmt.containsInvokeExpr()) {
-                        traverse(assignStmt.getInvokeExpr().getMethod(), traversed, changeTag);
-                    }
-
-                    // TODO renomear Statement. (UnitWithExtraInformations)
-                    Statement stmt = getStatementAssociatedWithUnit(sm, unit, changeTag);
-                    gen(stmt);
-
-                    // TODO Verificar tratamento em caso de for
-                } else if (unit instanceof InvokeStmt) {
-                    InvokeStmt invokeStmt = (InvokeStmt) unit;
-                    Statement stmt = getStatementAssociatedWithUnit(sm, unit, changeTag);
-                    // TODO trocar stmt.getType() por changeTag
-                    traverse(invokeStmt.getInvokeExpr().getMethod(), traversed, stmt.getType());
-                }
             } else {
-                // TODO parametrizar
-                if (unit instanceof AssignStmt) {
-                    AssignStmt assignStmt = (AssignStmt) unit;
-                    Statement stmt = getStatementAssociatedWithUnit(sm, unit, changeTag);
-
-                    if (assignStmt.containsInvokeExpr()) {
-                        traverse(assignStmt.getInvokeExpr().getMethod(), traversed, stmt.getType());
-                    }
-
-                    kill(unit);
-
-                } else if (unit instanceof InvokeStmt) {
-                    InvokeStmt invokeStmt = (InvokeStmt) unit;
-                    Statement stmt = getStatementAssociatedWithUnit(sm, unit, changeTag);
-                    traverse(invokeStmt.getInvokeExpr().getMethod(), traversed, stmt.getType());
-                }
+                runAnalyzeWithBaseUnit(sm, traversed, changeTag, unit);
             }
         });
+    }
+
+    private void runAnalyzeWithTaggedUnit(SootMethod sm, List<SootMethod> traversed, Statement.Type changeTag, Unit unit) {
+        runAnalyze(sm, traversed, changeTag, unit, true);
+    }
+
+    private void runAnalyzeWithBaseUnit(SootMethod sm, List<SootMethod> traversed, Statement.Type changeTag, Unit unit) {
+        runAnalyze(sm, traversed, changeTag, unit, false);
+    }
+
+    private void runAnalyze(SootMethod sm, List<SootMethod> traversed, Statement.Type changeTag, Unit unit, boolean tagged) {
+        if (unit instanceof AssignStmt) {
+            // TODO Verificar AssignStmt contem objetos, arrays ou outros tipos?
+            AssignStmt assignStmt = (AssignStmt) unit;
+
+            // TODO Verificar caso: x = foo() + foo()
+            if (assignStmt.containsInvokeExpr()) {
+                traverse(assignStmt.getInvokeExpr().getMethod(), traversed, changeTag);
+            }
+
+            // TODO renomear Statement. (UnitWithExtraInformations)
+            Statement stmt = getStatementAssociatedWithUnit(sm, unit, changeTag);
+
+            if (tagged) {
+                gen(stmt);
+            } else {
+                kill(unit);
+            }
+
+            // TODO Verificar tratamento em caso de for
+        } else if (unit instanceof InvokeStmt) {
+            InvokeStmt invokeStmt = (InvokeStmt) unit;
+            Statement stmt = getStatementAssociatedWithUnit(sm, unit, changeTag);
+            // TODO trocar stmt.getType() por changeTag
+            traverse(invokeStmt.getInvokeExpr().getMethod(), traversed, stmt.getType());
+        }
     }
 
     private boolean isTagged(Statement.Type changeTag, Unit unit) {
