@@ -104,7 +104,8 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
             // TODO Check case: x = foo() + foo
             if (assignStmt.containsInvokeExpr()) {
-                traverse(assignStmt.getInvokeExpr().getMethod(), traversed, changeTag);
+                Statement stmt = getStatementAssociatedWithUnit(sm, unit, changeTag);
+                traverse(assignStmt.getInvokeExpr().getMethod(), traversed, stmt.getType());
             }
 
             // TODO rename Statement. (UnitWithExtraInformations)
