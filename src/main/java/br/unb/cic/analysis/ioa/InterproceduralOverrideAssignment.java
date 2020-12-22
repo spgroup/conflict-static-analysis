@@ -68,9 +68,8 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         methods.forEach(m -> traverse(m, traversedMethods, Statement.Type.IN_BETWEEN));
     }
 
-    // TODO rename type to changeTag
-    private void traverse(SootMethod sm, List<SootMethod> traversed, Statement.Type type) {
-        // TODO Verificar o que é isPhantom()
+    private void traverse(SootMethod sm, List<SootMethod> traversed, Statement.Type changeTag) {
+
         if (visitedMethods.contains(sm) || sm.isPhantom()) {
             return;
         }
@@ -79,10 +78,10 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
         body.getUnits().forEach(unit -> {
 
-            detectConflict(res, unit, type, sm);
+            detectConflict(res, unit, changeTag, sm);
             // TODO isInLeftStatementFLow ...  isInRightStatementFLow
             if ((isLeftStatement(unit) || isRightStatement(unit)) ||
-                    (type.equals(Statement.Type.SOURCE) || type.equals(Statement.Type.SINK))) {
+                    (changeTag.equals(Statement.Type.SOURCE) || changeTag.equals(Statement.Type.SINK))) {
                 // TODO  mover if e else para metodos diferentes
                 if (unit instanceof AssignStmt) {
                     // TODO Verificar AssignStmt contem objetos, arrays ou outros tipos?
@@ -90,25 +89,25 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
                     // TODO Verificar caso: x = foo() + foo()
                     if (assignStmt.containsInvokeExpr()) {
-                        traverse(assignStmt.getInvokeExpr().getMethod(), traversed, type);
+                        traverse(assignStmt.getInvokeExpr().getMethod(), traversed, changeTag);
                     }
 
                     // TODO renomear Statement. (UnitWithExtraInformations)
-                    Statement stmt = getStatementAssociatedWithUnit(sm, unit, type);
+                    Statement stmt = getStatementAssociatedWithUnit(sm, unit, changeTag);
                     gen(stmt);
 
                     // TODO Verificar tratamento em caso de for
                 } else if (unit instanceof InvokeStmt) {
                     InvokeStmt invokeStmt = (InvokeStmt) unit;
-                    Statement stmt = getStatementAssociatedWithUnit(sm, unit, type);
-                    // TODO trocar stmt.getType() por type
+                    Statement stmt = getStatementAssociatedWithUnit(sm, unit, changeTag);
+                    // TODO trocar stmt.getType() por changeTag
                     traverse(invokeStmt.getInvokeExpr().getMethod(), traversed, stmt.getType());
                 }
             } else {
                 // TODO parametrizar
                 if (unit instanceof AssignStmt) {
                     AssignStmt assignStmt = (AssignStmt) unit;
-                    Statement stmt = getStatementAssociatedWithUnit(sm, unit, type);
+                    Statement stmt = getStatementAssociatedWithUnit(sm, unit, changeTag);
 
                     if (assignStmt.containsInvokeExpr()) {
                         traverse(assignStmt.getInvokeExpr().getMethod(), traversed, stmt.getType());
@@ -118,7 +117,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
                 } else if (unit instanceof InvokeStmt) {
                     InvokeStmt invokeStmt = (InvokeStmt) unit;
-                    Statement stmt = getStatementAssociatedWithUnit(sm, unit, type);
+                    Statement stmt = getStatementAssociatedWithUnit(sm, unit, changeTag);
                     traverse(invokeStmt.getInvokeExpr().getMethod(), traversed, stmt.getType());
                 }
             }
