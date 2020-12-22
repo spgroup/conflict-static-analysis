@@ -99,7 +99,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private void runAnalyze(SootMethod sm, List<SootMethod> traversed, Statement.Type changeTag, Unit unit, boolean tagged) {
         if (unit instanceof AssignStmt) {
             /* TODO Does AssignStmt check contain objects, arrays or other types?
-             Yes, sssignStmt handles assignments and they can be of any type as long as they follow the structure: variable = value
+             Yes, AssignStmt handles assignments and they can be of any type as long as they follow the structure: variable = value
              */
             AssignStmt assignStmt = (AssignStmt) unit;
 
@@ -159,9 +159,9 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     private void kill(Unit unit) {
-        for (DataFlowAbstraction dataFlowAbstraction : res) {
+        res.forEach(dataFlowAbstraction -> {
             removeAll(unit.getDefBoxes(), dataFlowAbstraction);
-        }
+        });
     }
 
     private void removeAll(List<ValueBox> defBoxes, DataFlowAbstraction dataFlowAbstraction) {
@@ -204,15 +204,15 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
      * Checks if there is a conflict and if so adds it to the conflict list.
      */
     private void checkConflicts(Unit unit, List<DataFlowAbstraction> potentialConflictingAssignments, Statement.Type changeTag, SootMethod sm) {
-        for (DataFlowAbstraction dataFlowAbstraction : potentialConflictingAssignments) {
-            for (ValueBox valueBox : unit.getDefBoxes()) {
+        potentialConflictingAssignments.forEach(dataFlowAbstraction -> {
+            unit.getDefBoxes().forEach(valueBox -> {
                 if (isSameVariable(valueBox, dataFlowAbstraction)) {
                     Conflict c = new Conflict(getStatementAssociatedWithUnit(sm, unit, changeTag), dataFlowAbstraction.getStmt());
                     conflicts.add(c);
                     System.out.println(c);
                 }
-            }
-        }
+            });
+        });
     }
 
     // TODO need to treat other cases (Arrays...)
@@ -227,7 +227,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         }
         return false;
     }
-
 
     /*
      * Returns the Statement changeTag
