@@ -141,7 +141,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         return changeTag.equals(Statement.Type.SOURCE);
     }
 
-    // TODO need to treat other cases
+    // TODO need to treat other cases (Arrays...)
     // TODO add in two lists (left and right).
     // TODO add depth to InstanceFieldRef and StaticFieldRef
     private void gen(Statement stmt) {
@@ -214,6 +214,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     // TODO improve method name
+    // TODO need to treat other cases (Arrays...)
     private boolean compareItens(ValueBox valueBox, DataFlowAbstraction dataFlowAbstraction) {
         // TODO check why equivTo(Object o) doesn't work
         if (valueBox.getValue() instanceof InstanceFieldRef && dataFlowAbstraction.getFieldRef() != null) {
@@ -275,29 +276,4 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
                 .setUnit(u).setType(changeTag).setSourceCodeLineNumber(u.getJavaSourceStartLineNumber())
                 .build();
     }
-
-    /*private String getVariableNameInFromValueBox(ValueBox valueBox) {
-        if (valueBox.getValue() instanceof InstanceFieldRef) {
-            InstanceFieldRef instanceFieldRef = (InstanceFieldRef) valueBox.getValue();
-            return instanceFieldRef.getBase().toString();
-        } else if (valueBox.getValue() instanceof Local) {
-            Local local = (Local) valueBox.getValue();
-            return local.getName();
-        } else if (valueBox.getValue() instanceof StaticFieldRef) {
-            StaticFieldRef staticFieldRef = (StaticFieldRef) valueBox.getValue();
-            return staticFieldRef.getField().getName();
-        } else {
-            return "";
-        }
-    }*/
-    /*    private String getVariableNameInDataFlowAbstraction(DataFlowAbstraction dataFlowAbstraction) {
-        if (dataFlowAbstraction.getLocal() != null) {
-            return dataFlowAbstraction.getLocal().getName();
-        } else if (dataFlowAbstraction.getLocalStaticRef() != null) {
-            return dataFlowAbstraction.getLocalStaticRef().getField().getName();
-        } else {
-            return dataFlowAbstraction.getFieldRef().getBase().toString();
-        }
-
-    }*/
 }
