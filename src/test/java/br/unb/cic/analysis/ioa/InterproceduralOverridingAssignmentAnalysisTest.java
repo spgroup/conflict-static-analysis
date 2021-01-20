@@ -126,6 +126,17 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
     }
 
     @Test
+    public void concatMethodsConflict() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.OverridingAssignmentConcatMethodsConflictInterProceduralSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{7}, new int[]{8});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    //@Ignore
+    @Test
     public void ifBranchConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.OverridingAssignmentIfBranchConflictInterProceduralSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
