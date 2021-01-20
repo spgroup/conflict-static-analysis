@@ -24,12 +24,12 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private AbstractMergeConflictDefinition definition;
 
     // TODO Add treatment of if, loops ... (ForwardFlowAnalysis)
+    // TODO Do not add anything when assignments are equal.
     private FlowSet<DataFlowAbstraction> res;
     private Body body;
 
     public InterproceduralOverrideAssignment(AbstractMergeConflictDefinition definition) {
 
-        this.visitedMethods = new HashSet<>();
         this.conflicts = new HashSet<>();
 
         this.definition = definition;
@@ -48,9 +48,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private void configureEntryPoints() {
         List<SootMethod> entryPoints = new ArrayList<>();
-        definition.getSourceStatements().forEach(s -> {
-            entryPoints.add(s.getSootMethod());
-        });
+        definition.getSourceStatements().forEach(s -> entryPoints.add(s.getSootMethod()));
         Scene.v().setEntryPoints(entryPoints);
     }
 
@@ -69,23 +67,34 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private void traverse(SootMethod sm, List<SootMethod> traversed, Statement.Type changeTag) {
 
-        if (visitedMethods.contains(sm) || sm.isPhantom()) {
+        if (traversed.contains(sm) || sm.isPhantom()) {
             return;
         }
+
         traversed.add(sm);
-        this.body = sm.retrieveActiveBody();
 
-        body.getUnits().forEach(unit -> {
+        this.body = retrieveActiveBodySafely(sm);
+        if (body != null) {
+            body.getUnits().forEach(unit -> {
 
-            detectConflict(unit, changeTag, sm);
+                detectConflict(unit, changeTag, sm);
 
-            if (isTagged(changeTag, unit)) {
-                runAnalyzeWithTaggedUnit(sm, traversed, changeTag, unit);
+                if (isTagged(changeTag, unit)) {
+                    runAnalyzeWithTaggedUnit(sm, traversed, changeTag, unit);
 
-            } else {
-                runAnalyzeWithBaseUnit(sm, traversed, changeTag, unit);
-            }
-        });
+                } else {
+                    runAnalyzeWithBaseUnit(sm, traversed, changeTag, unit);
+                }
+            });
+        }
+    }
+
+    private Body retrieveActiveBodySafely(SootMethod sm) {
+        try {
+            return sm.retrieveActiveBody();
+        } catch (RuntimeException e) {
+            return null;
+        }
     }
 
     private void runAnalyzeWithTaggedUnit(SootMethod sm, List<SootMethod> traversed, Statement.Type changeTag, Unit unit) {
@@ -166,9 +175,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     private void kill(Unit unit) {
-        res.forEach(dataFlowAbstraction -> {
-            removeAll(unit.getDefBoxes(), dataFlowAbstraction);
-        });
+        res.forEach(dataFlowAbstraction -> removeAll(unit.getDefBoxes(), dataFlowAbstraction));
     }
 
     private void removeAll(List<ValueBox> defBoxes, DataFlowAbstraction dataFlowAbstraction) {
@@ -211,15 +218,13 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
      * Checks if there is a conflict and if so adds it to the conflict list.
      */
     private void checkConflicts(Unit unit, List<DataFlowAbstraction> potentialConflictingAssignments, Statement.Type changeTag, SootMethod sm) {
-        potentialConflictingAssignments.forEach(dataFlowAbstraction -> {
-            unit.getDefBoxes().forEach(valueBox -> {
-                if (isSameVariable(valueBox, dataFlowAbstraction)) {
-                    Conflict c = new Conflict(getStatementAssociatedWithUnit(sm, unit, changeTag), dataFlowAbstraction.getStmt());
-                    conflicts.add(c);
-                    System.out.println(c);
-                }
-            });
-        });
+        potentialConflictingAssignments.forEach(dataFlowAbstraction -> unit.getDefBoxes().forEach(valueBox -> {
+            if (isSameVariable(valueBox, dataFlowAbstraction)) {
+                Conflict c = new Conflict(getStatementAssociatedWithUnit(sm, unit, changeTag), dataFlowAbstraction.getStmt());
+                conflicts.add(c);
+                System.out.println(c);
+            }
+        }));
     }
 
     // TODO need to treat other cases (Arrays...)

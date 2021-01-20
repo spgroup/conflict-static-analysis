@@ -13,7 +13,8 @@ public class OverridingAssignmentIfBranchConflictInterProceduralSample {
         if (x >= 0) {
             x = 1;
         } else {
-            System.out.println(x);
+            int a = 0;
+            // System.out.println(x)
         }
         ;
     }
