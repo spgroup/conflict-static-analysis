@@ -3,6 +3,7 @@ package br.unb.cic.analysis;
 import br.unb.cic.analysis.model.Statement;
 import soot.*;
 import soot.jimple.AssignStmt;
+import soot.jimple.IdentityStmt;
 import soot.jimple.InvokeStmt;
 import soot.jimple.Stmt;
 import soot.jimple.internal.JAssignStmt;
@@ -130,6 +131,10 @@ public abstract class AbstractMergeConflictDefinition {
         List<Statement> res = new ArrayList<>();
 
         for(Unit u: body.getUnits()) {
+            if(u instanceof IdentityStmt) {
+                continue;
+            }
+
             if(type.equals(Statement.Type.SOURCE) && u instanceof AssignStmt) {
                 AssignStmt assignStmt = (AssignStmt) u;
                 res.add(createStatement(sm, u, type));
@@ -141,12 +146,12 @@ public abstract class AbstractMergeConflictDefinition {
             else if(type.equals(Statement.Type.SINK) && u.getUseBoxes().size() > 0) {
                 res.add(createStatement(sm, u, type));
 
-//                if(u instanceof Stmt) {
-//                    Stmt stmt = (Stmt)u;
-//                    if(stmt.containsInvokeExpr()) {
-//                        res.addAll(traverse(stmt.getInvokeExpr().getMethod(), traversed, type, level));
-//                    }
-//                }
+                if(u instanceof Stmt) {
+                    Stmt stmt = (Stmt)u;
+                    if(stmt.containsInvokeExpr()) {
+                        res.addAll(traverse(stmt.getInvokeExpr().getMethod(), traversed, type, level));
+                    }
+                }
             }
             else if(u instanceof InvokeStmt) {
                 InvokeStmt invokeStmt = (InvokeStmt)u;
