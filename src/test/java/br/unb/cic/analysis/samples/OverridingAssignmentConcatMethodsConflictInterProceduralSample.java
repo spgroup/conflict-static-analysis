@@ -4,9 +4,8 @@ package br.unb.cic.analysis.samples;
 public class OverridingAssignmentConcatMethodsConflictInterProceduralSample {
 
     public void m() {
-        int x = foo() + bar(); // LEFT
-        x = x + qux(); // RIGHT
-        System.out.println(x);
+        int x = foo() + bar(); // LEFT i3 = $i0 + $i1 - x = $stack2 + $stack3
+        x = x + qux();         // RIGHT i4 = i3 + $i2 - x = x + $stack4
     }
 
     private int foo() {
