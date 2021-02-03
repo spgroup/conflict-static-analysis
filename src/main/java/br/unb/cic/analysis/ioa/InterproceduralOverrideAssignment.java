@@ -7,19 +7,19 @@ import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
 import soot.*;
 import soot.jimple.AssignStmt;
-import soot.jimple.InstanceFieldRef;
 import soot.jimple.InvokeStmt;
-import soot.jimple.StaticFieldRef;
+import soot.jimple.internal.JInstanceFieldRef;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class InterproceduralOverrideAssignment extends SceneTransformer implements AbstractAnalysis {
 
     private Set<Conflict> conflicts;
-    private Set<SootMethod> visitedMethods;
     private PointsToAnalysis pta;
     private AbstractMergeConflictDefinition definition;
 
@@ -28,12 +28,15 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private FlowSet<DataFlowAbstraction> res;
     private Body body;
 
+    private Logger logger;
+
     public InterproceduralOverrideAssignment(AbstractMergeConflictDefinition definition) {
-
         this.conflicts = new HashSet<>();
-
         this.definition = definition;
         this.res = new ArraySparseSet<>();
+
+        this.logger = Logger.getLogger(
+                InterproceduralOverrideAssignment.class.getName());
     }
 
     @Override
@@ -63,6 +66,9 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         List<SootMethod> methods = Scene.v().getEntryPoints();
         pta = Scene.v().getPointsToAnalysis();
         methods.forEach(m -> traverse(m, traversedMethods, Statement.Type.IN_BETWEEN));
+
+        String stringConflicts = String.format("%s", conflicts);
+        logger.log(Level.INFO, stringConflicts);
     }
 
     private void traverse(SootMethod sm, List<SootMethod> traversed, Statement.Type changeTag) {
@@ -74,14 +80,13 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         traversed.add(sm);
 
         this.body = retrieveActiveBodySafely(sm);
-        if (body != null) {
-            body.getUnits().forEach(unit -> {
 
-                detectConflict(unit, changeTag, sm);
+        if (this.body != null) {
+            this.body.getUnits().forEach(unit -> {
 
                 if (isTagged(changeTag, unit)) {
                     runAnalyzeWithTaggedUnit(sm, traversed, changeTag, unit);
-
+                    detectConflict(unit, changeTag, sm); //TODO Do I only need to call the conflict detection method if unit is not base?
                 } else {
                     runAnalyzeWithBaseUnit(sm, traversed, changeTag, unit);
                 }
@@ -160,18 +165,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     // TODO add in two lists (left and right).
     // TODO add depth to InstanceFieldRef and StaticFieldRef
     private void gen(Statement stmt) {
-        stmt.getUnit().getDefBoxes().forEach(valueBox -> {
-            if (valueBox.getValue() instanceof Local) {
-                res.add(new DataFlowAbstraction((Local) valueBox.getValue(), stmt));
-            } else if (valueBox.getValue() instanceof StaticFieldRef) {
-                res.add(new DataFlowAbstraction((StaticFieldRef) valueBox.getValue(), stmt));
-            } else if (valueBox.getValue() instanceof InstanceFieldRef) {
-                /* TODO check what is added. (Object.field)
-                r0.<br.unb.cic.analysis.samples.OverridingAssignmentClassFieldConflictInterProceduralSample: int x>
-                 */
-                res.add(new DataFlowAbstraction((InstanceFieldRef) valueBox.getValue(), stmt));
-            }
-        });
+        stmt.getUnit().getDefBoxes().forEach(valueBox -> res.add(new DataFlowAbstraction(valueBox.getValue(), stmt)));
     }
 
     private void kill(Unit unit) {
@@ -180,7 +174,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private void removeAll(List<ValueBox> defBoxes, DataFlowAbstraction dataFlowAbstraction) {
         defBoxes.forEach(valueBox -> {
-            if (isSameVariable(valueBox, dataFlowAbstraction)) {
+            if (containsVariable(dataFlowAbstraction, valueBox.getValue())) {
                 res.remove(dataFlowAbstraction);
             }
         });
@@ -195,11 +189,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
      * Right assignments interfere with Left changes.
      */
     private void detectConflict(Unit u, Statement.Type changeTag, SootMethod sm) {
-
-        if (!isTagged(changeTag, u)) {
-            return;
-        }
-
         List<DataFlowAbstraction> potentialConflictingAssignments = new ArrayList<>();
 
         if (isRightStatement(u) || isInRightStatementFLow(changeTag)) {
@@ -219,25 +208,19 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
      */
     private void checkConflicts(Unit unit, List<DataFlowAbstraction> potentialConflictingAssignments, Statement.Type changeTag, SootMethod sm) {
         potentialConflictingAssignments.forEach(dataFlowAbstraction -> unit.getDefBoxes().forEach(valueBox -> {
-            if (isSameVariable(valueBox, dataFlowAbstraction)) {
+            if (containsVariable(dataFlowAbstraction, valueBox.getValue())) {
                 Conflict c = new Conflict(getStatementAssociatedWithUnit(sm, unit, changeTag), dataFlowAbstraction.getStmt());
                 conflicts.add(c);
-                System.out.println(c);
             }
         }));
     }
 
     // TODO need to treat other cases (Arrays...)
-    private boolean isSameVariable(ValueBox valueBox, DataFlowAbstraction dataFlowAbstraction) {
-        // TODO check why equivTo(Object o) doesn't work
-        if (valueBox.getValue() instanceof InstanceFieldRef && dataFlowAbstraction.getFieldRef() != null) {
-            return valueBox.getValue().equivHashCode() == dataFlowAbstraction.getFieldRef().equivHashCode();
-        } else if (valueBox.getValue() instanceof StaticFieldRef && dataFlowAbstraction.getLocalStaticRef() != null) {
-            return valueBox.getValue().equivHashCode() == dataFlowAbstraction.getLocalStaticRef().equivHashCode();
-        } else if (valueBox.getValue() instanceof Local && dataFlowAbstraction.getLocal() != null) {
-            return valueBox.getValue().equivHashCode() == dataFlowAbstraction.getLocal().equivHashCode();
+    private boolean containsVariable(DataFlowAbstraction dataFlowAbstraction, Value variable) {
+        if (dataFlowAbstraction.getValue() instanceof JInstanceFieldRef && variable instanceof JInstanceFieldRef) {
+            return ((JInstanceFieldRef) dataFlowAbstraction.getValue()).getFieldRef().equals(((JInstanceFieldRef) variable).getFieldRef());
         }
-        return false;
+        return dataFlowAbstraction.getValue().equals(variable);
     }
 
     /*
