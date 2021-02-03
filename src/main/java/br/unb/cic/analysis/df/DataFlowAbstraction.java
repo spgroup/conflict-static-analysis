@@ -2,6 +2,7 @@ package br.unb.cic.analysis.df;
 
 import br.unb.cic.analysis.model.Statement;
 import soot.Local;
+import soot.Value;
 import soot.jimple.InstanceFieldRef;
 import soot.jimple.StaticFieldRef;
 
@@ -16,7 +17,13 @@ public class DataFlowAbstraction {
     private Local local;
     private InstanceFieldRef localField;
     private StaticFieldRef localStaticRef;
+    private Value value;
     private Statement stmt;
+
+    public DataFlowAbstraction(Value value, Statement stmt) {
+        this.value = value;
+        this.stmt = stmt;
+    }
 
     public DataFlowAbstraction(Local local, Statement stmt) {
         this.local = local;
@@ -69,5 +76,13 @@ public class DataFlowAbstraction {
     @Override
     public int hashCode() {
         return Objects.hash(local, stmt);
+    }
+
+    public Value getValue() {
+        return this.value;
+    }
+
+    public void setValue(Value value) {
+        this.value = value;
     }
 }
