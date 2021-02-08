@@ -179,5 +179,23 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
+    @Test
+    public void sequenceConflict() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.OverridingAssignmentSequenceConflictInterProceduralSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{7, 9}, new int[]{8});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(2, analysis.getConflicts().size());
+    }
 
+    @Test
+    public void sequenceConflict2() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.OverridingAssignmentSequenceConflictInterProceduralSample2";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{7}, new int[]{8, 9});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
 }
