@@ -1,6 +1,7 @@
 package br.unb.cic.analysis.samples;
 
-// Not Conflict
+// Not Conflict - Not implemented yet. You will need constant propagation.
+// Currently detected as conflict: [left, m():9] --> [right, foo():14]
 public class OverridingAssignmentClassFieldWithParameterNotConflictInterProceduralSample {
     private int x;
 
@@ -12,6 +13,5 @@ public class OverridingAssignmentClassFieldWithParameterNotConflictInterProcedur
     private void foo(int a) {
         x = a;
     }
-
 
 }
