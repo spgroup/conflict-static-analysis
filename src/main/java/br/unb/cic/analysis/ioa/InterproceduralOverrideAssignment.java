@@ -22,7 +22,8 @@ import java.util.stream.Collectors;
 public class InterproceduralOverrideAssignment extends SceneTransformer implements AbstractAnalysis {
 
     private Set<Conflict> conflicts;
-    private PointsToAnalysis pta;
+    private PointsToAnalysis pointsToAnalysis;
+    private List<SootMethod> traversedMethods;
     private AbstractMergeConflictDefinition definition;
     private FlowSet<DataFlowAbstraction> res;
     private Body body;
@@ -30,9 +31,12 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private Logger logger;
 
     public InterproceduralOverrideAssignment(AbstractMergeConflictDefinition definition) {
-        this.conflicts = new HashSet<>();
         this.definition = definition;
+
+        this.conflicts = new HashSet<>();
         this.res = new ArraySparseSet<>();
+        this.traversedMethods = new ArrayList<>();
+        this.pointsToAnalysis = Scene.v().getPointsToAnalysis();
 
         this.logger = Logger.getLogger(
                 InterproceduralOverrideAssignment.class.getName());
@@ -58,13 +62,11 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     protected void internalTransform(String s, Map<String, String> map) {
         definition.loadSourceStatements();
         definition.loadSinkStatements();
-        List<SootMethod> traversedMethods = new ArrayList<>();
 
         configureEntryPoints();
 
         List<SootMethod> methods = Scene.v().getEntryPoints();
-        this.pta = Scene.v().getPointsToAnalysis();
-        methods.forEach(m -> traverse(m, traversedMethods, Statement.Type.IN_BETWEEN));
+        methods.forEach(sootMethod -> traverse(sootMethod, Statement.Type.IN_BETWEEN));
 
         String stringConflicts = String.format("%s", conflicts);
         logger.log(Level.INFO, stringConflicts);
@@ -73,62 +75,60 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     /**
      * This method captures the safe body of the current method and delegates the analysis function to units of (LEFT or RIGHT) or units of BASE.
      *
-     * @param sm            name of the current method to be traversed;
-     * @param traversed     list of methods that have already been traversed;
-     * @param flowChangeTag This parameter identifies whether statement is in the flow of any statements already marked.
-     *                      Initially it receives the value IN_BETWEEN but changes if the call to the current method (sm) has been marked as SOURCE or SINK.
+     * @param sootMethod    Current method to be traversed;
+     * @param flowChangeTag This parameter identifies whether the unit under analysis is in the flow of any statement already marked.
+     *                      Initially it receives the value IN_BETWEEN but changes if the call to the current method (sootMethod) has been marked as SOURCE or SINK.
      *                      The remaining statements of the current method that have no markup will be marked according to the flowChangeTag.
      */
-    private void traverse(SootMethod sm, List<SootMethod> traversed, Statement.Type flowChangeTag) {
+    private void traverse(SootMethod sootMethod, Statement.Type flowChangeTag) {
 
-        if (traversed.contains(sm) || sm.isPhantom()) {
+        if (this.traversedMethods.contains(sootMethod) || sootMethod.isPhantom()) {
             return;
         }
 
-        traversed.add(sm);
+        this.traversedMethods.add(sootMethod);
 
-        this.body = retrieveActiveBodySafely(sm);
+        this.body = retrieveActiveBodySafely(sootMethod);
 
         if (this.body != null) {
             this.body.getUnits().forEach(unit -> {
 
                 if (isTagged(flowChangeTag, unit)) {
-                    runAnalysisWithTaggedUnit(sm, traversed, flowChangeTag, unit);
-                    detectConflict(unit, flowChangeTag, sm);
+                    runAnalysisWithTaggedUnit(sootMethod, flowChangeTag, unit);
+                    detectConflict(unit, flowChangeTag, sootMethod);
                 } else {
-                    runAnalysisWithBaseUnit(sm, traversed, flowChangeTag, unit);
+                    runAnalysisWithBaseUnit(sootMethod, flowChangeTag, unit);
                 }
             });
         }
     }
 
-    private Body retrieveActiveBodySafely(SootMethod sm) {
+    private Body retrieveActiveBodySafely(SootMethod sootMethod) {
         try {
-            return sm.retrieveActiveBody();
+            return sootMethod.retrieveActiveBody();
         } catch (RuntimeException e) {
             return null;
         }
     }
 
-    private void runAnalysisWithTaggedUnit(SootMethod sm, List<SootMethod> traversed, Statement.Type flowChangeTag, Unit unit) {
-        runAnalyze(sm, traversed, flowChangeTag, unit, true);
+    private void runAnalysisWithTaggedUnit(SootMethod sootMethod, Statement.Type flowChangeTag, Unit unit) {
+        runAnalysis(sootMethod, flowChangeTag, unit, true);
     }
 
-    private void runAnalysisWithBaseUnit(SootMethod sm, List<SootMethod> traversed, Statement.Type flowChangeTag, Unit unit) {
-        runAnalyze(sm, traversed, flowChangeTag, unit, false);
+    private void runAnalysisWithBaseUnit(SootMethod sootMethod, Statement.Type flowChangeTag, Unit unit) {
+        runAnalysis(sootMethod, flowChangeTag, unit, false);
     }
 
     /**
      * This method analyzes a method and adds or removes items from the list of possible conflicts.
      *
-     * @param sm            name of the current method to be traversed;
-     * @param traversed     list of methods that have already been traversed;
-     * @param flowChangeTag This parameter identifies whether statement is in the flow of any statements already marked.
-     *                      Initially it receives the value IN_BETWEEN but changes if the call to the current method (sm) has been marked as SOURCE or SINK.
+     * @param sootMethod    Current method to be traversed;
+     * @param flowChangeTag This parameter identifies whether the unit under analysis is in the flow of any statement already marked.
+     *                      Initially it receives the value IN_BETWEEN but changes if the call to the current method (sootMethod) has been marked as SOURCE or SINK.
      *                      The remaining statements of the current method that have no markup will be marked according to the flowChangeTag.
-     * @param tagged        Identifies whether the unit is checked or not. If false the unit is base, if true the unit is left or right.
+     * @param tagged        Identifies whether the unit to be analyzed has been tagged. If false the unit is base, if true the unit is left or right.
      */
-    private void runAnalyze(SootMethod sm, List<SootMethod> traversed, Statement.Type flowChangeTag, Unit unit, boolean tagged) {
+    private void runAnalysis(SootMethod sootMethod, Statement.Type flowChangeTag, Unit unit, boolean tagged) {
         /* Are there other possible cases? Yes, see follow links:
         https://soot-build.cs.uni-paderborn.de/public/origin/develop/soot/soot-develop/jdoc/soot/jimple/Stmt.html
         https://github.com/PAMunb/JimpleFramework/blob/d585caefa8d5f967bfdbeb877346e0ff316e0b5e/src/main/rascal/lang/jimple/core/Syntax.rsc#L77-L95
@@ -144,12 +144,12 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             In this case, this condition will be executed for the call to the foo() method and then another call to the bar() method.
              */
             if (assignStmt.containsInvokeExpr()) {
-                Statement stmt = getStatementAssociatedWithUnit(sm, unit, flowChangeTag);
-                traverse(assignStmt.getInvokeExpr().getMethod(), traversed, stmt.getType());
+                Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
+                traverse(assignStmt.getInvokeExpr().getMethod(), stmt.getType());
             }
 
             // TODO rename Statement. (UnitWithExtraInformations)
-            Statement stmt = getStatementAssociatedWithUnit(sm, unit, flowChangeTag);
+            Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
 
             if (tagged) {
                 gen(stmt);
@@ -171,20 +171,20 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
               For builders, InvokeExpression is an instance of InvokeSpecial */
         } else if (unit instanceof InvokeStmt) {
             InvokeStmt invokeStmt = (InvokeStmt) unit;
-            Statement stmt = getStatementAssociatedWithUnit(sm, unit, flowChangeTag);
-            traverse(invokeStmt.getInvokeExpr().getMethod(), traversed, stmt.getType());
+            Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
+            traverse(invokeStmt.getInvokeExpr().getMethod(), stmt.getType());
         }
     }
 
     private boolean isTagged(Statement.Type flowChangeTag, Unit unit) {
-        return (isLeftStatement(unit) || isRightStatement(unit)) || (isInLeftStatementFLow(flowChangeTag) || isInRightStatementFLow(flowChangeTag));
+        return (isLeftStatement(unit) || isRightStatement(unit)) || (isInLeftStatementFlow(flowChangeTag) || isInRightStatementFlow(flowChangeTag));
     }
 
-    private boolean isInRightStatementFLow(Statement.Type flowChangeTag) {
+    private boolean isInRightStatementFlow(Statement.Type flowChangeTag) {
         return flowChangeTag.equals(Statement.Type.SINK);
     }
 
-    private boolean isInLeftStatementFLow(Statement.Type flowChangeTag) {
+    private boolean isInLeftStatementFlow(Statement.Type flowChangeTag) {
         return flowChangeTag.equals(Statement.Type.SOURCE);
     }
 
@@ -215,28 +215,28 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
      * to see if Left assignments interfere with Right changes or
      * Right assignments interfere with Left changes.
      */
-    private void detectConflict(Unit u, Statement.Type flowChangeTag, SootMethod sm) {
+    private void detectConflict(Unit u, Statement.Type flowChangeTag, SootMethod sootMethod) {
         List<DataFlowAbstraction> potentialConflictingAssignments = new ArrayList<>();
 
-        if (isRightStatement(u) || isInRightStatementFLow(flowChangeTag)) {
+        if (isRightStatement(u) || isInRightStatementFlow(flowChangeTag)) {
             potentialConflictingAssignments = res.toList().stream().filter(
                     DataFlowAbstraction::containsLeftStatement).collect(Collectors.toList());
-        } else if (isLeftStatement(u) || isInLeftStatementFLow(flowChangeTag)) {
+        } else if (isLeftStatement(u) || isInLeftStatementFlow(flowChangeTag)) {
             potentialConflictingAssignments = res.toList().stream().filter(
                     DataFlowAbstraction::containsRightStatement).collect(Collectors.toList());
         }
 
-        checkConflicts(u, potentialConflictingAssignments, flowChangeTag, sm);
+        checkConflicts(u, potentialConflictingAssignments, flowChangeTag, sootMethod);
 
     }
 
     /*
      * Checks if there is a conflict and if so adds it to the conflict list.
      */
-    private void checkConflicts(Unit unit, List<DataFlowAbstraction> potentialConflictingAssignments, Statement.Type flowChangeTag, SootMethod sm) {
+    private void checkConflicts(Unit unit, List<DataFlowAbstraction> potentialConflictingAssignments, Statement.Type flowChangeTag, SootMethod sootMethod) {
         potentialConflictingAssignments.forEach(dataFlowAbstraction -> unit.getDefBoxes().forEach(valueBox -> {
             if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
-                Conflict c = new Conflict(getStatementAssociatedWithUnit(sm, unit, flowChangeTag), dataFlowAbstraction.getStmt());
+                Conflict c = new Conflict(getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag), dataFlowAbstraction.getStmt());
                 conflicts.add(c);
                 // TODO remove variable from list to avoid duplication of conflicts.
             }
@@ -251,15 +251,15 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         return dataFlowAbstraction.getValue().equals(value);
     }
 
-    private Statement getStatementAssociatedWithUnit(SootMethod sm, Unit u, Statement.Type flowChangeTag) {
+    private Statement getStatementAssociatedWithUnit(SootMethod sootMethod, Unit u, Statement.Type flowChangeTag) {
         if (isLeftStatement(u)) {
             return findLeftStatement(u);
         } else if (isRightStatement(u)) {
             return findRightStatement(u);
-        } else if (!isLeftStatement(u) && isInLeftStatementFLow(flowChangeTag)) {
-            return createStatement(sm, u, flowChangeTag);
-        } else if (!isRightStatement(u) && isInRightStatementFLow(flowChangeTag)) {
-            return createStatement(sm, u, flowChangeTag);
+        } else if (!isLeftStatement(u) && isInLeftStatementFlow(flowChangeTag)) {
+            return createStatement(sootMethod, u, flowChangeTag);
+        } else if (!isRightStatement(u) && isInRightStatementFlow(flowChangeTag)) {
+            return createStatement(sootMethod, u, flowChangeTag);
         }
         return findStatementBase(u);
     }
@@ -284,15 +284,15 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private Statement findStatementBase(Unit d) {
         return Statement.builder()
-                .setClass(body.getMethod().getDeclaringClass())
-                .setMethod(body.getMethod())
+                .setClass(this.body.getMethod().getDeclaringClass())
+                .setMethod(this.body.getMethod())
                 .setType(Statement.Type.IN_BETWEEN)
                 .setUnit(d)
                 .setSourceCodeLineNumber(d.getJavaSourceStartLineNumber()).build();
     }
 
-    private Statement createStatement(SootMethod sm, Unit u, Statement.Type flowChangeTag) {
-        return Statement.builder().setClass(sm.getDeclaringClass()).setMethod(sm)
+    private Statement createStatement(SootMethod sootMethod, Unit u, Statement.Type flowChangeTag) {
+        return Statement.builder().setClass(sootMethod.getDeclaringClass()).setMethod(sootMethod)
                 .setUnit(u).setType(flowChangeTag).setSourceCodeLineNumber(u.getJavaSourceStartLineNumber())
                 .build();
     }
