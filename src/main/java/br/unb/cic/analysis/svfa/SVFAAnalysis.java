@@ -2,18 +2,13 @@ package br.unb.cic.analysis.svfa;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Statement;
-
 import br.unb.cic.soot.graph.*;
 import br.unb.cic.soot.svfa.jimple.JSVFA;
 import scala.collection.JavaConverters;
 import soot.SootMethod;
 import soot.Unit;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -74,7 +69,7 @@ public abstract class SVFAAnalysis extends JSVFA  {
         definition.loadSinkStatements();
         return JavaConverters.asScalaBuffer(getSourceStatements()
                 .stream()
-                .map(stmt -> stmt.getSootMethod())
+                .map(Statement::getSootMethod)
                 .collect(Collectors.toList())).toList();
     }
 
