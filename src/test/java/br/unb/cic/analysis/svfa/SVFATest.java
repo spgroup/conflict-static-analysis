@@ -2,7 +2,7 @@ package br.unb.cic.analysis.svfa;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.soot.graph.Graph;
-import br.unb.cic.soot.graph.Node;
+import br.unb.cic.soot.graph.LambdaNode;
 import br.unc.cic.analysis.test.DefinitionFactory;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -72,8 +72,8 @@ public class SVFATest {
     public void testSVFAnalysisInterProcedural() {
         SVFAAnalysis analysis = configureInterTest(CLASS_NAME_INTRAPROCEDURAL, new int[]{6}, new int[]{11});
         analysis.buildSparseValueFlowGraph();
-        Graph<Node> g = analysis.svg();
-        Assert.assertEquals(9, g.nodes().size());
+        Graph g = analysis.svg();
+        Assert.assertEquals(5, g.nodes().size());
         Assert.assertEquals(1, analysis.reportConflicts().size());
         Assert.assertEquals(1, analysis.findSourceSinkPaths().size());
     }
@@ -82,8 +82,8 @@ public class SVFATest {
     public void testSVFAnalysisInterProcedural2() {
         SVFAAnalysis analysis = configureInterTest(CLASS_NAME_INTERPROCEDURAL, new int[]{9}, new int[]{19});
         analysis.buildSparseValueFlowGraph();
-        for (List<Node> paths : analysis.findSourceSinkPaths()) {
-            System.out.println(String.join("-> ", paths.stream().map(n -> n.toString()).collect(Collectors.toList())));
+        for (List<LambdaNode> paths : analysis.findSourceSinkPaths()) {
+            System.out.println(String.join("-> ", paths.stream().map(n -> n.show()).collect(Collectors.toList())));
         }
         Assert.assertEquals(1, analysis.reportConflicts().size());
     }
