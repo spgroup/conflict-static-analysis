@@ -3,6 +3,7 @@ package br.unb.cic.analysis;
 import br.unb.cic.analysis.model.Statement;
 import soot.*;
 import soot.jimple.AssignStmt;
+import soot.jimple.IdentityStmt;
 import soot.jimple.InvokeStmt;
 import soot.jimple.Stmt;
 import soot.jimple.internal.JAssignStmt;
@@ -96,27 +97,25 @@ public abstract class AbstractMergeConflictDefinition {
                 if(body == null) continue;
                 for(Unit u: body.getUnits()) {
                     if(definitions.get(className).contains(u.getJavaSourceStartLineNumber())) {
-                        Statement stmt = Statement.builder().setClass(aClass).setMethod(m)
-                                .setUnit(u).setType(type).setSourceCodeLineNumber(u.getJavaSourceStartLineNumber())
-                                .build();
+                        Statement stmt = createStatement(m, u, type);
                         statements.add(stmt);
                     }
                 }
             }
-            if(recursive) {
-                List<Statement> recursiveStatements = new ArrayList<>();
-                List<SootMethod> traversedMethods = new ArrayList<>();
-                for(Statement s: statements) {
-                    if(s.getUnit() instanceof Stmt) {
-                        Stmt stmt = (Stmt)s.getUnit();
-                        if(stmt.containsInvokeExpr()) {
-                            SootMethod sm = stmt.getInvokeExpr().getMethod();
-                            recursiveStatements.addAll(traverse(sm, traversedMethods, type, 1));
-                        }
+        }
+        if(recursive) {
+            List<Statement> recursiveStatements = new ArrayList<>();
+            List<SootMethod> traversedMethods = new ArrayList<>();
+            for(Statement s: statements) {
+                if(s.getUnit() instanceof Stmt) {
+                    Stmt stmt = (Stmt)s.getUnit();
+                    if(stmt.containsInvokeExpr()) {
+                        SootMethod sm = stmt.getInvokeExpr().getMethod();
+                        recursiveStatements.addAll(traverse(sm, traversedMethods, type, 1));
                     }
                 }
-                statements.addAll(recursiveStatements);
             }
+            statements.addAll(recursiveStatements);
         }
         return statements;
     }
@@ -126,21 +125,32 @@ public abstract class AbstractMergeConflictDefinition {
         if(traversed.contains(sm) || level > 5 || (!sm.getDeclaringClass().isApplicationClass()) || (body == null)) {
             return new ArrayList<>();
         }
-        level = level + 1;
+        level++;
         traversed.add(sm);
 
         List<Statement> res = new ArrayList<>();
 
         for(Unit u: body.getUnits()) {
+            if(u instanceof IdentityStmt) {
+                continue;
+            }
+
             if(type.equals(Statement.Type.SOURCE) && u instanceof AssignStmt) {
                 AssignStmt assignStmt = (AssignStmt) u;
-                Statement stmt = Statement.builder().setClass(sm.getDeclaringClass()).setMethod(sm)
-                        .setUnit(u).setType(type).setSourceCodeLineNumber(u.getJavaSourceStartLineNumber())
-                        .build();
-                res.add(stmt);
+                res.add(createStatement(sm, u, type));
 
                 if(assignStmt.containsInvokeExpr()) {
                     res.addAll(traverse(assignStmt.getInvokeExpr().getMethod(), traversed, type, level));
+                }
+            }
+            else if(type.equals(Statement.Type.SINK) && u.getUseBoxes().size() > 0) {
+                res.add(createStatement(sm, u, type));
+
+                if(u instanceof Stmt) {
+                    Stmt stmt = (Stmt)u;
+                    if(stmt.containsInvokeExpr()) {
+                        res.addAll(traverse(stmt.getInvokeExpr().getMethod(), traversed, type, level));
+                    }
                 }
             }
             else if(u instanceof InvokeStmt) {
@@ -149,6 +159,12 @@ public abstract class AbstractMergeConflictDefinition {
             }
         }
         return res;
+    }
+
+    private Statement createStatement(SootMethod sm, Unit u,  Statement.Type type) {
+        return Statement.builder().setClass(sm.getDeclaringClass()).setMethod(sm)
+                .setUnit(u).setType(type).setSourceCodeLineNumber(u.getJavaSourceStartLineNumber())
+                .build();
     }
 
     /*
@@ -216,6 +232,10 @@ public abstract class AbstractMergeConflictDefinition {
             }
         }
         return s;
+    }
+
+    public void setRecursiveMode(boolean value) {
+        this.recursive = value;
     }
 
     public boolean isSourceStatement(Unit u) {
