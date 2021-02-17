@@ -25,7 +25,8 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private PointsToAnalysis pointsToAnalysis;
     private List<SootMethod> traversedMethods;
     private AbstractMergeConflictDefinition definition;
-    private FlowSet<DataFlowAbstraction> res;
+    private FlowSet<DataFlowAbstraction> left;
+    private FlowSet<DataFlowAbstraction> right;
     private Body body;
 
     private Logger logger;
@@ -34,7 +35,8 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         this.definition = definition;
 
         this.conflicts = new HashSet<>();
-        this.res = new ArraySparseSet<>();
+        this.left = new ArraySparseSet<>();
+        this.right = new ArraySparseSet<>();
         this.traversedMethods = new ArrayList<>();
         this.pointsToAnalysis = Scene.v().getPointsToAnalysis();
 
@@ -68,8 +70,16 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         List<SootMethod> methods = Scene.v().getEntryPoints();
         methods.forEach(sootMethod -> traverse(sootMethod, Statement.Type.IN_BETWEEN));
 
-        String stringConflicts = String.format("%s", conflicts);
-        logger.log(Level.INFO, stringConflicts);
+
+        left.forEach(dataFlowAbstraction -> {
+            String stringConflicts = String.format("%s", "LEFT: " + dataFlowAbstraction.getStmt());
+            logger.log(Level.INFO, stringConflicts);
+        });
+
+        right.forEach(dataFlowAbstraction -> {
+            String stringConflicts = String.format("%s", "RIGHT: " + dataFlowAbstraction.getStmt());
+            logger.log(Level.INFO, stringConflicts);
+        });
     }
 
     /**
@@ -192,20 +202,27 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     // TODO add depth to InstanceFieldRef and StaticFieldRef...
     private void gen(Statement stmt) {
         // TODO Check for conflict when adding.
-        stmt.getUnit().getDefBoxes().forEach(valueBox -> res.add(new DataFlowAbstraction(valueBox.getValue(), stmt)));
+        if (stmt.getType().equals(Statement.Type.SOURCE)) {
+            stmt.getUnit().getDefBoxes().forEach(valueBox -> left.add(new DataFlowAbstraction(valueBox.getValue(), stmt)));
+        } else if (stmt.getType().equals(Statement.Type.SINK)) {
+            stmt.getUnit().getDefBoxes().forEach(valueBox -> right.add(new DataFlowAbstraction(valueBox.getValue(), stmt)));
+        }
+
     }
 
     private void kill(Unit unit) {
-        res.forEach(dataFlowAbstraction -> removeAll(unit.getDefBoxes(), dataFlowAbstraction));
+        unit.getDefBoxes().forEach(valueBox -> removeAll(valueBox, left));
+        unit.getDefBoxes().forEach(valueBox -> removeAll(valueBox, right));
     }
 
-    private void removeAll(List<ValueBox> defBoxes, DataFlowAbstraction dataFlowAbstraction) {
-        defBoxes.forEach(valueBox -> {
+    private void removeAll(ValueBox valueBox, FlowSet<DataFlowAbstraction> dataFlowAbstractionFlowSet) {
+        dataFlowAbstractionFlowSet.forEach(dataFlowAbstraction -> {
             if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
-                res.remove(dataFlowAbstraction);
+                dataFlowAbstractionFlowSet.remove(dataFlowAbstraction);
             }
         });
     }
+
 
     /*
      * To detect conflicts res verified if "u" is owned by LEFT or RIGHT
@@ -219,10 +236,10 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         List<DataFlowAbstraction> potentialConflictingAssignments = new ArrayList<>();
 
         if (isRightStatement(u) || isInRightStatementFlow(flowChangeTag)) {
-            potentialConflictingAssignments = res.toList().stream().filter(
+            potentialConflictingAssignments = right.toList().stream().filter(
                     DataFlowAbstraction::containsLeftStatement).collect(Collectors.toList());
         } else if (isLeftStatement(u) || isInLeftStatementFlow(flowChangeTag)) {
-            potentialConflictingAssignments = res.toList().stream().filter(
+            potentialConflictingAssignments = left.toList().stream().filter(
                     DataFlowAbstraction::containsRightStatement).collect(Collectors.toList());
         }
 
