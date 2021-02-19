@@ -70,15 +70,17 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         List<SootMethod> methods = Scene.v().getEntryPoints();
         methods.forEach(sootMethod -> traverse(sootMethod, Statement.Type.IN_BETWEEN));
 
+        String stringConflicts = String.format("%s", "CONFLICTS: " + conflicts);
+        logger.log(Level.INFO, stringConflicts);
 
         left.forEach(dataFlowAbstraction -> {
-            String stringConflicts = String.format("%s", "LEFT: " + dataFlowAbstraction.getStmt());
-            logger.log(Level.INFO, stringConflicts);
+            String leftStmt = String.format("%s", "LEFT: " + dataFlowAbstraction.getStmt());
+            logger.log(Level.INFO, leftStmt);
         });
 
         right.forEach(dataFlowAbstraction -> {
-            String stringConflicts = String.format("%s", "RIGHT: " + dataFlowAbstraction.getStmt());
-            logger.log(Level.INFO, stringConflicts);
+            String rightStmt = String.format("%s", "RIGHT: " + dataFlowAbstraction.getStmt());
+            logger.log(Level.INFO, rightStmt);
         });
     }
 
@@ -105,7 +107,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
                 if (isTagged(flowChangeTag, unit)) {
                     runAnalysisWithTaggedUnit(sootMethod, flowChangeTag, unit);
-                    detectConflict(unit, flowChangeTag, sootMethod);
                 } else {
                     runAnalysisWithBaseUnit(sootMethod, flowChangeTag, unit);
                 }
@@ -201,13 +202,40 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     // TODO add in two lists (left and right).
     // TODO add depth to InstanceFieldRef and StaticFieldRef...
     private void gen(Statement stmt) {
-        // TODO Check for conflict when adding.
-        if (stmt.getType().equals(Statement.Type.SOURCE)) {
-            stmt.getUnit().getDefBoxes().forEach(valueBox -> left.add(new DataFlowAbstraction(valueBox.getValue(), stmt)));
-        } else if (stmt.getType().equals(Statement.Type.SINK)) {
-            stmt.getUnit().getDefBoxes().forEach(valueBox -> right.add(new DataFlowAbstraction(valueBox.getValue(), stmt)));
+        if (isLeftStatement(stmt)) {
+            checkConflict(stmt, right);
+            addToList(stmt, left); // TODO Add only if there is no immediate conflict?
+
+        } else if (isRightStatement(stmt)) {
+            checkConflict(stmt, left);
+            addToList(stmt, right);
         }
 
+    }
+
+    private boolean isRightStatement(Statement stmt) {
+        return stmt.getType().equals(Statement.Type.SINK);
+    }
+
+    private boolean isLeftStatement(Statement stmt) {
+        return stmt.getType().equals(Statement.Type.SOURCE);
+    }
+
+    //TODO Improve the name of this method and the second parameter
+    private void addToList(Statement stmt, FlowSet<DataFlowAbstraction> dataFlowAbstractionFlowSet) {
+        stmt.getUnit().getDefBoxes().forEach(valueBox -> dataFlowAbstractionFlowSet.add(new DataFlowAbstraction(valueBox.getValue(), stmt)));
+    }
+
+    /*
+     * Checks if there is a conflict and if so adds it to the conflict list.
+     */
+    private void checkConflict(Statement stmt, FlowSet<DataFlowAbstraction> dataFlowAbstractionFlowSet) {
+        dataFlowAbstractionFlowSet.forEach(dataFlowAbstraction -> stmt.getUnit().getDefBoxes().forEach(valueBox -> {
+            if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
+                conflicts.add(new Conflict(stmt, dataFlowAbstraction.getStmt()));
+                dataFlowAbstractionFlowSet.remove(dataFlowAbstraction);
+            }
+        }));
     }
 
     private void kill(Unit unit) {
@@ -221,43 +249,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
                 dataFlowAbstractionFlowSet.remove(dataFlowAbstraction);
             }
         });
-    }
-
-
-    /*
-     * To detect conflicts res verified if "u" is owned by LEFT or RIGHT
-     * and we fill res the "potentialConflictingAssignments" list with the changes from the other developer.
-     *
-     * We pass "u" and "potentialConflictingAssignments" to the checkConflits method
-     * to see if Left assignments interfere with Right changes or
-     * Right assignments interfere with Left changes.
-     */
-    private void detectConflict(Unit u, Statement.Type flowChangeTag, SootMethod sootMethod) {
-        List<DataFlowAbstraction> potentialConflictingAssignments = new ArrayList<>();
-
-        if (isRightStatement(u) || isInRightStatementFlow(flowChangeTag)) {
-            potentialConflictingAssignments = right.toList().stream().filter(
-                    DataFlowAbstraction::containsLeftStatement).collect(Collectors.toList());
-        } else if (isLeftStatement(u) || isInLeftStatementFlow(flowChangeTag)) {
-            potentialConflictingAssignments = left.toList().stream().filter(
-                    DataFlowAbstraction::containsRightStatement).collect(Collectors.toList());
-        }
-
-        checkConflicts(u, potentialConflictingAssignments, flowChangeTag, sootMethod);
-
-    }
-
-    /*
-     * Checks if there is a conflict and if so adds it to the conflict list.
-     */
-    private void checkConflicts(Unit unit, List<DataFlowAbstraction> potentialConflictingAssignments, Statement.Type flowChangeTag, SootMethod sootMethod) {
-        potentialConflictingAssignments.forEach(dataFlowAbstraction -> unit.getDefBoxes().forEach(valueBox -> {
-            if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
-                Conflict c = new Conflict(getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag), dataFlowAbstraction.getStmt());
-                conflicts.add(c);
-                // TODO remove variable from list to avoid duplication of conflicts.
-            }
-        }));
     }
 
     // TODO need to treat other cases (Arrays...)
