@@ -5,10 +5,11 @@ import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.df.DataFlowAbstraction;
 import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
+import br.unb.cic.exceptions.ValueNotHandledException;
 import soot.*;
 import soot.jimple.AssignStmt;
+import soot.jimple.InstanceFieldRef;
 import soot.jimple.InvokeStmt;
-import soot.jimple.internal.JInstanceFieldRef;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
 
@@ -210,7 +211,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             checkConflict(stmt, left);
             addToList(stmt, right);
         }
-
     }
 
     private boolean isRightStatement(Statement stmt) {
@@ -231,9 +231,13 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
      */
     private void checkConflict(Statement stmt, FlowSet<DataFlowAbstraction> dataFlowAbstractionFlowSet) {
         dataFlowAbstractionFlowSet.forEach(dataFlowAbstraction -> stmt.getUnit().getDefBoxes().forEach(valueBox -> {
-            if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
-                conflicts.add(new Conflict(stmt, dataFlowAbstraction.getStmt()));
-                dataFlowAbstractionFlowSet.remove(dataFlowAbstraction);
+            try {
+                if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
+                    conflicts.add(new Conflict(stmt, dataFlowAbstraction.getStmt()));
+                    dataFlowAbstractionFlowSet.remove(dataFlowAbstraction);
+                }
+            } catch (ValueNotHandledException e) {
+                e.printStackTrace();
             }
         }));
     }
@@ -245,18 +249,25 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private void removeAll(ValueBox valueBox, FlowSet<DataFlowAbstraction> dataFlowAbstractionFlowSet) {
         dataFlowAbstractionFlowSet.forEach(dataFlowAbstraction -> {
-            if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
-                dataFlowAbstractionFlowSet.remove(dataFlowAbstraction);
+            try {
+                if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
+                    dataFlowAbstractionFlowSet.remove(dataFlowAbstraction);
+                }
+            } catch (ValueNotHandledException e) {
+                e.printStackTrace();
             }
         });
     }
 
     // TODO need to treat other cases (Arrays...)
-    private boolean containsValue(DataFlowAbstraction dataFlowAbstraction, Value value) {
-        if (dataFlowAbstraction.getValue() instanceof JInstanceFieldRef && value instanceof JInstanceFieldRef) {
-            return ((JInstanceFieldRef) dataFlowAbstraction.getValue()).getFieldRef().equals(((JInstanceFieldRef) value).getFieldRef());
+    private boolean containsValue(DataFlowAbstraction dataFlowAbstraction, Value value) throws ValueNotHandledException {
+        if (dataFlowAbstraction.getValue() instanceof InstanceFieldRef && value instanceof InstanceFieldRef) {
+            return ((InstanceFieldRef) dataFlowAbstraction.getValue()).getFieldRef().equals(((InstanceFieldRef) value).getFieldRef());
         }
-        return dataFlowAbstraction.getValue().equals(value);
+        if (dataFlowAbstraction.getValue() instanceof Local && value instanceof Local) {
+            return dataFlowAbstraction.getValue().equals(value);
+        }
+        throw new ValueNotHandledException("Value Not Handled");
     }
 
     private Statement getStatementAssociatedWithUnit(SootMethod sootMethod, Unit u, Statement.Type flowChangeTag) {
