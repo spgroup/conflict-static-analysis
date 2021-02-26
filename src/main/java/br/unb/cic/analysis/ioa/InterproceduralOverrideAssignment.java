@@ -5,10 +5,11 @@ import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.df.DataFlowAbstraction;
 import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
+import br.unb.cic.exceptions.ValueNotHandledException;
 import soot.*;
 import soot.jimple.AssignStmt;
+import soot.jimple.InstanceFieldRef;
 import soot.jimple.InvokeStmt;
-import soot.jimple.internal.JInstanceFieldRef;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
 
@@ -25,7 +26,8 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private PointsToAnalysis pointsToAnalysis;
     private List<SootMethod> traversedMethods;
     private AbstractMergeConflictDefinition definition;
-    private FlowSet<DataFlowAbstraction> res;
+    private FlowSet<DataFlowAbstraction> left;
+    private FlowSet<DataFlowAbstraction> right;
     private Body body;
 
     private Logger logger;
@@ -34,7 +36,8 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         this.definition = definition;
 
         this.conflicts = new HashSet<>();
-        this.res = new ArraySparseSet<>();
+        this.left = new ArraySparseSet<>();
+        this.right = new ArraySparseSet<>();
         this.traversedMethods = new ArrayList<>();
         this.pointsToAnalysis = Scene.v().getPointsToAnalysis();
 
@@ -68,8 +71,18 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         List<SootMethod> methods = Scene.v().getEntryPoints();
         methods.forEach(sootMethod -> traverse(sootMethod, Statement.Type.IN_BETWEEN));
 
-        String stringConflicts = String.format("%s", conflicts);
+        String stringConflicts = String.format("%s", "CONFLICTS: " + conflicts);
         logger.log(Level.INFO, stringConflicts);
+
+        left.forEach(dataFlowAbstraction -> {
+            String leftStmt = String.format("%s", "LEFT: " + dataFlowAbstraction.getStmt());
+            logger.log(Level.INFO, leftStmt);
+        });
+
+        right.forEach(dataFlowAbstraction -> {
+            String rightStmt = String.format("%s", "RIGHT: " + dataFlowAbstraction.getStmt());
+            logger.log(Level.INFO, rightStmt);
+        });
     }
 
     /**
@@ -95,7 +108,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
                 if (isTagged(flowChangeTag, unit)) {
                     runAnalysisWithTaggedUnit(sootMethod, flowChangeTag, unit);
-                    detectConflict(unit, flowChangeTag, sootMethod);
                 } else {
                     runAnalysisWithBaseUnit(sootMethod, flowChangeTag, unit);
                 }
@@ -191,64 +203,71 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     // TODO add in two lists (left and right).
     // TODO add depth to InstanceFieldRef and StaticFieldRef...
     private void gen(Statement stmt) {
-        // TODO Check for conflict when adding.
-        stmt.getUnit().getDefBoxes().forEach(valueBox -> res.add(new DataFlowAbstraction(valueBox.getValue(), stmt)));
-    }
+        if (isLeftStatement(stmt)) {
+            checkConflict(stmt, right);
+            addToList(stmt, left); // TODO Add only if there is no immediate conflict?
 
-    private void kill(Unit unit) {
-        res.forEach(dataFlowAbstraction -> removeAll(unit.getDefBoxes(), dataFlowAbstraction));
-    }
-
-    private void removeAll(List<ValueBox> defBoxes, DataFlowAbstraction dataFlowAbstraction) {
-        defBoxes.forEach(valueBox -> {
-            if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
-                res.remove(dataFlowAbstraction);
-            }
-        });
-    }
-
-    /*
-     * To detect conflicts res verified if "u" is owned by LEFT or RIGHT
-     * and we fill res the "potentialConflictingAssignments" list with the changes from the other developer.
-     *
-     * We pass "u" and "potentialConflictingAssignments" to the checkConflits method
-     * to see if Left assignments interfere with Right changes or
-     * Right assignments interfere with Left changes.
-     */
-    private void detectConflict(Unit u, Statement.Type flowChangeTag, SootMethod sootMethod) {
-        List<DataFlowAbstraction> potentialConflictingAssignments = new ArrayList<>();
-
-        if (isRightStatement(u) || isInRightStatementFlow(flowChangeTag)) {
-            potentialConflictingAssignments = res.toList().stream().filter(
-                    DataFlowAbstraction::containsLeftStatement).collect(Collectors.toList());
-        } else if (isLeftStatement(u) || isInLeftStatementFlow(flowChangeTag)) {
-            potentialConflictingAssignments = res.toList().stream().filter(
-                    DataFlowAbstraction::containsRightStatement).collect(Collectors.toList());
+        } else if (isRightStatement(stmt)) {
+            checkConflict(stmt, left);
+            addToList(stmt, right);
         }
+    }
 
-        checkConflicts(u, potentialConflictingAssignments, flowChangeTag, sootMethod);
+    private boolean isRightStatement(Statement stmt) {
+        return stmt.getType().equals(Statement.Type.SINK);
+    }
 
+    private boolean isLeftStatement(Statement stmt) {
+        return stmt.getType().equals(Statement.Type.SOURCE);
+    }
+
+    //TODO Improve the name of this method and the second parameter
+    private void addToList(Statement stmt, FlowSet<DataFlowAbstraction> dataFlowAbstractionFlowSet) {
+        stmt.getUnit().getDefBoxes().forEach(valueBox -> dataFlowAbstractionFlowSet.add(new DataFlowAbstraction(valueBox.getValue(), stmt)));
     }
 
     /*
      * Checks if there is a conflict and if so adds it to the conflict list.
      */
-    private void checkConflicts(Unit unit, List<DataFlowAbstraction> potentialConflictingAssignments, Statement.Type flowChangeTag, SootMethod sootMethod) {
-        potentialConflictingAssignments.forEach(dataFlowAbstraction -> unit.getDefBoxes().forEach(valueBox -> {
-            if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
-                Conflict c = new Conflict(getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag), dataFlowAbstraction.getStmt());
-                conflicts.add(c);
-                // TODO remove variable from list to avoid duplication of conflicts.
+    private void checkConflict(Statement stmt, FlowSet<DataFlowAbstraction> dataFlowAbstractionFlowSet) {
+        dataFlowAbstractionFlowSet.forEach(dataFlowAbstraction -> stmt.getUnit().getDefBoxes().forEach(valueBox -> {
+            try {
+                if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
+                    conflicts.add(new Conflict(stmt, dataFlowAbstraction.getStmt()));
+                    dataFlowAbstractionFlowSet.remove(dataFlowAbstraction);
+                }
+            } catch (ValueNotHandledException e) {
+                e.printStackTrace();
             }
         }));
     }
 
+    private void kill(Unit unit) {
+        unit.getDefBoxes().forEach(valueBox -> removeAll(valueBox, left));
+        unit.getDefBoxes().forEach(valueBox -> removeAll(valueBox, right));
+    }
+
+    private void removeAll(ValueBox valueBox, FlowSet<DataFlowAbstraction> dataFlowAbstractionFlowSet) {
+        dataFlowAbstractionFlowSet.forEach(dataFlowAbstraction -> {
+            try {
+                if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
+                    dataFlowAbstractionFlowSet.remove(dataFlowAbstraction);
+                }
+            } catch (ValueNotHandledException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
     // TODO need to treat other cases (Arrays...)
-    private boolean containsValue(DataFlowAbstraction dataFlowAbstraction, Value value) {
-        if (dataFlowAbstraction.getValue() instanceof JInstanceFieldRef && value instanceof JInstanceFieldRef) {
-            return ((JInstanceFieldRef) dataFlowAbstraction.getValue()).getFieldRef().equals(((JInstanceFieldRef) value).getFieldRef());
+    private boolean containsValue(DataFlowAbstraction dataFlowAbstraction, Value value) throws ValueNotHandledException {
+        if (dataFlowAbstraction.getValue() instanceof InstanceFieldRef && value instanceof InstanceFieldRef) {
+            return ((InstanceFieldRef) dataFlowAbstraction.getValue()).getFieldRef().equals(((InstanceFieldRef) value).getFieldRef());
         }
-        return dataFlowAbstraction.getValue().equals(value);
+        if (dataFlowAbstraction.getValue() instanceof Local && value instanceof Local) {
+            return dataFlowAbstraction.getValue().equals(value);
+        }
+        throw new ValueNotHandledException("Value Not Handled");
     }
 
     private Statement getStatementAssociatedWithUnit(SootMethod sootMethod, Unit u, Statement.Type flowChangeTag) {
