@@ -186,7 +186,7 @@ public class Main {
                             case "confluence-tainted":
                                 analysis = new ConfluentTaintedAnalysis(body, definition);
                                 break;
-                            case "overriding":
+                            case "overriding-intraprocedural":
                                 analysis = new OverridingAssignmentAnalysis(body, definition);
                                 break;
                             default: {
