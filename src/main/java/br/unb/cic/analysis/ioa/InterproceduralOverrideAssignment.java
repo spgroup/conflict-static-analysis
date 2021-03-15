@@ -7,9 +7,7 @@ import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.exceptions.ValueNotHandledException;
 import soot.*;
-import soot.jimple.AssignStmt;
-import soot.jimple.InstanceFieldRef;
-import soot.jimple.InvokeStmt;
+import soot.jimple.*;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
 
@@ -71,8 +69,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         List<SootMethod> methods = Scene.v().getEntryPoints();
         methods.forEach(sootMethod -> traverse(sootMethod, Statement.Type.IN_BETWEEN));
 
-        String stringConflicts = String.format("%s", "CONFLICTS: " + conflicts);
-        logger.log(Level.INFO, stringConflicts);
+
 
         left.forEach(dataFlowAbstraction -> {
             String leftStmt = String.format("%s", "LEFT: " + dataFlowAbstraction.getStmt());
@@ -235,8 +232,10 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
                 if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
                     conflicts.add(new Conflict(stmt, dataFlowAbstraction.getStmt()));
                     dataFlowAbstractionFlowSet.remove(dataFlowAbstraction);
+
                 }
             } catch (ValueNotHandledException e) {
+                assert false;
                 e.printStackTrace();
             }
         }));
@@ -267,6 +266,16 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         if (dataFlowAbstraction.getValue() instanceof Local && value instanceof Local) {
             return dataFlowAbstraction.getValue().equals(value);
         }
+        if (dataFlowAbstraction.getValue() instanceof ArrayRef && value instanceof ArrayRef) {
+            return ((ArrayRef) dataFlowAbstraction.getValue()).getBaseBox().getValue().toString().equals(((ArrayRef) value).getBaseBox().getValue().toString());
+        }
+        if (dataFlowAbstraction.getValue() instanceof StaticFieldRef && value instanceof StaticFieldRef) {
+            return ((StaticFieldRef) dataFlowAbstraction.getValue()).getField().getName().equals(((StaticFieldRef) value).getField().getName());
+        }
+        if (!dataFlowAbstraction.getValue().getClass().equals(value.getClass())) {
+            return false;
+        }
+
         throw new ValueNotHandledException("Value Not Handled");
     }
 
