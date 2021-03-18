@@ -110,6 +110,51 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
     }
 
     @Test
+    public void additionToArrayConflict() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.OverridingAssignmentAdditionToArrayConflictInterProceduralSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{11}, new int[]{12});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        System.out.println(analysis.getConflicts());
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+
+    @Test
+    public void changePublicAttributesConflict() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.OverridingAssignmentChangePublicAttributesConflictInterProceduralSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{13, 20}, new int[]{17});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        System.out.println(analysis.getConflicts());
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void changeInstanceAttributeConflict() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.OverridingAssignmentChangeInstanceAttributeConflictInterProceduralSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{8}, new int[]{9});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        System.out.println(analysis.getConflicts());
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void differentMethodOnIdenticalClass() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.OverridingAssignmentDifferentMethodOnIdenticalClassConflictInterProceduralSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{12}, new int[]{13});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        System.out.println(analysis.getConflicts());
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    @Test
     public void localArraysNotConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.OverridingAssignmentArrayNotConflictInterProceduralSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
