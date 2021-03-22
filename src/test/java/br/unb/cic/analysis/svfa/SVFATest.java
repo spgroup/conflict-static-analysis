@@ -21,17 +21,7 @@ public class SVFATest {
 
     public static final String CLASS_NAME_LINE_REFERENCE = "br.unb.cic.analysis.samples.LineReference";
 
-    public SVFAIntraProcedural configureLineReference() {
-        AbstractMergeConflictDefinition definition = DefinitionFactory.definition(CLASS_NAME_LINE_REFERENCE, new int[]{6}, new int[]{9});
-        String cp = "target/test-classes";
-        return new SVFAIntraProcedural(cp, definition);
-    }
 
-    public SVFAInterProcedural configureInterProceduralSameMethod() {
-        AbstractMergeConflictDefinition definition = DefinitionFactory.definition(CLASS_NAME_INTRAPROCEDURAL, new int[]{6}, new int[]{11});
-        String cp = "target/test-classes";
-        return new SVFAInterProcedural(cp, definition);
-    }
     public static final String CLASS_NAME_INTRAPROCEDURAL_FIELD_SAMPLE = "br.unb.cic.analysis.samples.SVFAIntraproceduralFieldSample";
 
     public static final String CLASS_NAME_RECURSIVE_DEFINITION = "br.unb.cic.analysis.samples.RecursiveDefinitionSample";
@@ -45,6 +35,17 @@ public class SVFATest {
     public static final String CLASS_NAME_RECURSIVE_CLASS_ATTRIBUTE_ONE_CONFLICT_TWO_LEVELS2_DEFINITION = "br.unb.cic.analysis.samples.RecursiveDefinitionClassAttributeOneConflictTwoLevels2Sample";
 
 
+    public SVFAIntraProcedural configureLineReference() {
+        AbstractMergeConflictDefinition definition = DefinitionFactory.definition(CLASS_NAME_LINE_REFERENCE, new int[]{7}, new int[]{12});
+        String cp = "target/test-classes";
+        return new SVFAIntraProcedural(cp, definition);
+    }
+
+    public SVFAInterProcedural configureInterTest(String classpath, int[] leftchangedlines, int[] rightchangedlines) {
+        AbstractMergeConflictDefinition definition = DefinitionFactory.definition(classpath, leftchangedlines, rightchangedlines);
+        String cp = "target/test-classes";
+        return new SVFAInterProcedural(cp, definition);
+    }
 
     public SVFAIntraProcedural configureIntraTest(String classpath, int[] leftchangedlines, int[] rightchangedlines) {
         AbstractMergeConflictDefinition definition = DefinitionFactory.definition(classpath, leftchangedlines, rightchangedlines);
@@ -84,6 +85,25 @@ public class SVFATest {
         Assert.assertEquals(1, analysis.findSourceSinkPaths().size());
     }
 
+    @Test
+    public void testSVFAnalysisInterProcedural() {
+        SVFAAnalysis analysis = configureInterTest(CLASS_NAME_INTRAPROCEDURAL, new int[]{6}, new int[]{11});
+        analysis.buildSparseValueFlowGraph();
+        Graph g = analysis.svg();
+        Assert.assertEquals(5, g.nodes().size());
+        Assert.assertEquals(1, analysis.reportConflicts().size());
+        Assert.assertEquals(1, analysis.findSourceSinkPaths().size());
+    }
+
+    @Test
+    public void testSVFAnalysisInterProcedural2() {
+        SVFAAnalysis analysis = configureInterTest(CLASS_NAME_INTERPROCEDURAL, new int[]{9}, new int[]{19});
+        analysis.buildSparseValueFlowGraph();
+        for (List<LambdaNode> paths : analysis.findSourceSinkPaths()) {
+            System.out.println(String.join("-> ", paths.stream().map(n -> n.show()).collect(Collectors.toList())));
+        }
+        Assert.assertEquals(1, analysis.reportConflicts().size());
+    }
 
     @Test
     public void testSVFAnalysisIntraProceduralSameMethod() {
@@ -213,4 +233,5 @@ public class SVFATest {
         analysis.buildSparseValueFlowGraph();
         Assert.assertTrue(analysis.reportConflicts().size()>0);
     }
+
 }
