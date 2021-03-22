@@ -3,6 +3,7 @@ package br.unb.cic.analysis.svfa.confluence;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.*;
@@ -36,7 +37,7 @@ public class SVFAConfluenceAnalysisWithInterproceduralConfluenceTest {
         analysis = new SVFAConfluenceAnalysis(cp, definition, true);
     }
 
-    @Test
+    @Ignore
     public void testSVFAConfluentAnalysisExpectingOneConflict() {
         analysis.execute();
         Set<ConfluenceConflict> conflicts = analysis.getConfluentConflicts();

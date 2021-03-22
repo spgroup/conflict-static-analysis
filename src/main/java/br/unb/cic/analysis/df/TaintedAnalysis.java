@@ -1,13 +1,11 @@
 package br.unb.cic.analysis.df;
 
-import soot.*;
-import soot.jimple.internal.JArrayRef;
+import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+import soot.Body;
+import soot.Local;
+import soot.Unit;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
-
-import br.unb.cic.analysis.AbstractMergeConflictDefinition;
-
-import java.util.List;
 
 public class TaintedAnalysis extends ReachDefinitionAnalysis {
 

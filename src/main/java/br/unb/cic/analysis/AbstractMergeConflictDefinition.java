@@ -2,8 +2,12 @@ package br.unb.cic.analysis;
 
 import br.unb.cic.analysis.model.Statement;
 import soot.*;
+import soot.jimple.AssignStmt;
+import soot.jimple.IdentityStmt;
+import soot.jimple.InvokeStmt;
+import soot.jimple.Stmt;
+import soot.jimple.internal.JAssignStmt;
 
-import javax.swing.plaf.nimbus.State;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -16,10 +20,16 @@ import java.util.stream.Collectors;
 public abstract class AbstractMergeConflictDefinition {
     protected List<Statement> sourceStatements;
     protected List<Statement> sinkStatements;
+    private boolean recursive;
 
     public AbstractMergeConflictDefinition() {
+        this(false);
+    }
+
+    public AbstractMergeConflictDefinition(boolean recursive) {
         sourceStatements = new ArrayList<>();
         sinkStatements = new ArrayList<>();
+        this.recursive = recursive;
     }
 
     public void loadSourceStatements() {
@@ -60,7 +70,6 @@ public abstract class AbstractMergeConflictDefinition {
      */
     protected abstract Map<String, List<Integer>> sinkDefinitions();
 
-
     /*
      * just an auxiliary method to load the statements
      * related to either the source elements or sink
@@ -68,9 +77,6 @@ public abstract class AbstractMergeConflictDefinition {
      * avoids some duplicated code that might arise on
      * loadSourceStatements and loadSinkStatements.
      */
-
-
-
     private List<Statement> loadStatements(Map<String, List<Integer>> definitions, Statement.Type type) {
         List<Statement> statements = new ArrayList<>();
         List<SootClass> classes = listSootClasses();
@@ -85,38 +91,99 @@ public abstract class AbstractMergeConflictDefinition {
                 for(Integer def : definitions.get(className)) {
                     if(lineUnitMapping.containsKey(def)) {
                         Unit u = lineUnitMapping.get(def);
-                        Statement stmt = Statement.builder().setClass(aClass).setMethod(m)
-                                .setUnit(u).setType(type).setSourceCodeLineNumber(def)
-                                .build();
+                        Statement stmt = createStatement(m, u, type);
                         statements.add(stmt);
                     }
                 }
             }
         }
+        if(recursive) {
+            List<Statement> recursiveStatements = new ArrayList<>();
+            List<SootMethod> traversedMethods = new ArrayList<>();
+            for(Statement s: statements) {
+                if(s.getUnit() instanceof Stmt) {
+                    Stmt stmt = (Stmt)s.getUnit();
+                    if(stmt.containsInvokeExpr()) {
+                        SootMethod sm = stmt.getInvokeExpr().getMethod();
+                        recursiveStatements.addAll(traverse(sm, traversedMethods, type, 1));
+                    }
+                }
+            }
+            statements.addAll(recursiveStatements);
+        }
         return statements;
     }
 
-    private HashMap<Integer, Unit>  defineLineRange(Body body) {
+    private HashMap<Integer, Unit>  defineLineRange(Body body){
         HashMap<Integer, Unit> lineUnitMapping = new HashMap<>();
         List<Integer> lines = new ArrayList<>();
 
-        for(Unit unit: body.getUnits()) {
+        for (Unit unit : body.getUnits()) {
             Integer line = unit.getJavaSourceStartLineNumber();
-            if(line < 0) continue;
+            if (line < 0) continue;
+
             lines.add(line);
-            lineUnitMapping.put(line, unit);
+                lineUnitMapping.put(line, unit);
         }
+
         Collections.sort(lines);
 
-        for(int i = 0; i < lines.size()-1; i++) {
+        for (int i = 0; i < lines.size() - 1; i++) {
             int current = lines.get(i);
             int next = lines.get(i + 1);
             Unit unit = lineUnitMapping.get(current);
-            for(int j = current + 1; j < next; j++) {
+            for (int j = current + 1; j < next; j++) {
                 lineUnitMapping.put(j, unit);
             }
         }
         return lineUnitMapping;
+    }
+
+    public List<Statement> traverse(SootMethod sm, List<SootMethod> traversed, Statement.Type type, int level) {
+        Body body = retrieveActiveBodySafely(sm);
+        if(traversed.contains(sm) || level > 5 || (!sm.getDeclaringClass().isApplicationClass()) || (body == null)) {
+            return new ArrayList<>();
+        }
+        level++;
+        traversed.add(sm);
+
+        List<Statement> res = new ArrayList<>();
+
+        for(Unit u: body.getUnits()) {
+            if(u instanceof IdentityStmt) {
+                continue;
+            }
+
+            if(type.equals(Statement.Type.SOURCE) && u instanceof AssignStmt) {
+                AssignStmt assignStmt = (AssignStmt) u;
+                res.add(createStatement(sm, u, type));
+
+                if(assignStmt.containsInvokeExpr()) {
+                    res.addAll(traverse(assignStmt.getInvokeExpr().getMethod(), traversed, type, level));
+                }
+            }
+            else if(type.equals(Statement.Type.SINK) && u.getUseBoxes().size() > 0) {
+                res.add(createStatement(sm, u, type));
+
+                if(u instanceof Stmt) {
+                    Stmt stmt = (Stmt)u;
+                    if(stmt.containsInvokeExpr()) {
+                        res.addAll(traverse(stmt.getInvokeExpr().getMethod(), traversed, type, level));
+                    }
+                }
+            }
+            else if(u instanceof InvokeStmt) {
+                InvokeStmt invokeStmt = (InvokeStmt)u;
+                res.addAll(traverse(invokeStmt.getInvokeExpr().getMethod(), traversed, type, level));
+            }
+        }
+        return res;
+    }
+
+    private Statement createStatement(SootMethod sm, Unit u,  Statement.Type type) {
+        return Statement.builder().setClass(sm.getDeclaringClass()).setMethod(sm)
+                .setUnit(u).setType(type).setSourceCodeLineNumber(u.getJavaSourceStartLineNumber())
+                .build();
     }
 
     /*
@@ -184,6 +251,10 @@ public abstract class AbstractMergeConflictDefinition {
             }
         }
         return s;
+    }
+
+    public void setRecursiveMode(boolean value) {
+        this.recursive = value;
     }
 
     public boolean isSourceStatement(Unit u) {

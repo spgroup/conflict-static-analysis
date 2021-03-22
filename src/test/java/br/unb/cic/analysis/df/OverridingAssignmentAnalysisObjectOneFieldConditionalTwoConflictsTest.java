@@ -59,6 +59,6 @@ public class OverridingAssignmentAnalysisObjectOneFieldConditionalTwoConflictsTe
 
     @Test
     public void testDataFlowAnalysisExpectingOneConflict() {
-        Assert.assertEquals(2, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 }
