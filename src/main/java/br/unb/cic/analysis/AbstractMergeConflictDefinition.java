@@ -2,8 +2,12 @@ package br.unb.cic.analysis;
 
 import br.unb.cic.analysis.model.Statement;
 import soot.*;
+import soot.jimple.AssignStmt;
+import soot.jimple.IdentityStmt;
+import soot.jimple.InvokeStmt;
+import soot.jimple.Stmt;
+import soot.jimple.internal.JAssignStmt;
 
-import javax.swing.plaf.nimbus.State;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -16,34 +20,28 @@ import java.util.stream.Collectors;
 public abstract class AbstractMergeConflictDefinition {
     protected List<Statement> sourceStatements;
     protected List<Statement> sinkStatements;
+    private boolean recursive;
 
     public AbstractMergeConflictDefinition() {
+        this(false);
+    }
+
+    public AbstractMergeConflictDefinition(boolean recursive) {
         sourceStatements = new ArrayList<>();
         sinkStatements = new ArrayList<>();
+        this.recursive = recursive;
     }
 
     public void loadSourceStatements() {
         Map<String, List<Integer>> sourceDefinitions = sourceDefinitions();
-        List<Statement> statements = loadStatements(sourceDefinitions, Statement.Type.SOURCE);
-
-        sourceStatements = filterIsInDefinitionsList(statements, sourceDefinitions);
+        sourceStatements = loadStatements(sourceDefinitions, Statement.Type.SOURCE);
     }
 
     public void loadSinkStatements() {
         Map<String, List<Integer>> sinkDefinitions = sinkDefinitions();
-        List<Statement> statements = loadStatements(sinkDefinitions, Statement.Type.SINK);
-
-        sinkStatements = filterIsInDefinitionsList(statements, sinkDefinitions);
+        sinkStatements = loadStatements(sinkDefinitions, Statement.Type.SINK);
     }
 
-    private List<Statement> filterIsInDefinitionsList(List<Statement> statements, Map<String, List<Integer>> definitions) {
-        return statements.stream().filter(statement -> {
-            String className = statement.getSootClass().getName();
-            Integer lineNumber = statement.getSourceCodeLineNumber();
-
-            return definitions.get(className).contains(lineNumber);
-        }).collect(Collectors.toList());
-    }
 
     public List<Statement> getSourceStatements() {
         return sourceStatements;
@@ -72,7 +70,6 @@ public abstract class AbstractMergeConflictDefinition {
      */
     protected abstract Map<String, List<Integer>> sinkDefinitions();
 
-
     /*
      * just an auxiliary method to load the statements
      * related to either the source elements or sink
@@ -80,9 +77,6 @@ public abstract class AbstractMergeConflictDefinition {
      * avoids some duplicated code that might arise on
      * loadSourceStatements and loadSinkStatements.
      */
-
-
-
     private List<Statement> loadStatements(Map<String, List<Integer>> definitions, Statement.Type type) {
         List<Statement> statements = new ArrayList<>();
         List<SootClass> classes = listSootClasses();
@@ -95,15 +89,74 @@ public abstract class AbstractMergeConflictDefinition {
                 if(body == null) continue;
                 for(Unit u: body.getUnits()) {
                     if(definitions.get(className).contains(u.getJavaSourceStartLineNumber())) {
-                        Statement stmt = Statement.builder().setClass(aClass).setMethod(m)
-                                .setUnit(u).setType(type).setSourceCodeLineNumber(u.getJavaSourceStartLineNumber())
-                                .build();
+                        Statement stmt = createStatement(m, u, type);
                         statements.add(stmt);
                     }
                 }
             }
         }
+        if(recursive) {
+            List<Statement> recursiveStatements = new ArrayList<>();
+            List<SootMethod> traversedMethods = new ArrayList<>();
+            for(Statement s: statements) {
+                if(s.getUnit() instanceof Stmt) {
+                    Stmt stmt = (Stmt)s.getUnit();
+                    if(stmt.containsInvokeExpr()) {
+                        SootMethod sm = stmt.getInvokeExpr().getMethod();
+                        recursiveStatements.addAll(traverse(sm, traversedMethods, type, 1));
+                    }
+                }
+            }
+            statements.addAll(recursiveStatements);
+        }
         return statements;
+    }
+
+    public List<Statement> traverse(SootMethod sm, List<SootMethod> traversed, Statement.Type type, int level) {
+        Body body = retrieveActiveBodySafely(sm);
+        if(traversed.contains(sm) || level > 5 || (!sm.getDeclaringClass().isApplicationClass()) || (body == null)) {
+            return new ArrayList<>();
+        }
+        level++;
+        traversed.add(sm);
+
+        List<Statement> res = new ArrayList<>();
+
+        for(Unit u: body.getUnits()) {
+            if(u instanceof IdentityStmt) {
+                continue;
+            }
+
+            if(type.equals(Statement.Type.SOURCE) && u instanceof AssignStmt) {
+                AssignStmt assignStmt = (AssignStmt) u;
+                res.add(createStatement(sm, u, type));
+
+                if(assignStmt.containsInvokeExpr()) {
+                    res.addAll(traverse(assignStmt.getInvokeExpr().getMethod(), traversed, type, level));
+                }
+            }
+            else if(type.equals(Statement.Type.SINK) && u.getUseBoxes().size() > 0) {
+                res.add(createStatement(sm, u, type));
+
+                if(u instanceof Stmt) {
+                    Stmt stmt = (Stmt)u;
+                    if(stmt.containsInvokeExpr()) {
+                        res.addAll(traverse(stmt.getInvokeExpr().getMethod(), traversed, type, level));
+                    }
+                }
+            }
+            else if(u instanceof InvokeStmt) {
+                InvokeStmt invokeStmt = (InvokeStmt)u;
+                res.addAll(traverse(invokeStmt.getInvokeExpr().getMethod(), traversed, type, level));
+            }
+        }
+        return res;
+    }
+
+    private Statement createStatement(SootMethod sm, Unit u,  Statement.Type type) {
+        return Statement.builder().setClass(sm.getDeclaringClass()).setMethod(sm)
+                .setUnit(u).setType(type).setSourceCodeLineNumber(u.getJavaSourceStartLineNumber())
+                .build();
     }
 
     /*
@@ -171,6 +224,10 @@ public abstract class AbstractMergeConflictDefinition {
             }
         }
         return s;
+    }
+
+    public void setRecursiveMode(boolean value) {
+        this.recursive = value;
     }
 
     public boolean isSourceStatement(Unit u) {

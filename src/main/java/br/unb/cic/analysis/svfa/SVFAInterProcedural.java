@@ -7,7 +7,7 @@ public class SVFAInterProcedural extends SVFAAnalysis {
         super(classPath, definition);
     }
     @Override
-    public boolean interproceduralAnalysis() {
+    public boolean interprocedural() {
         return true;
     }
 }

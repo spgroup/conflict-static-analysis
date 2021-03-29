@@ -1,30 +1,28 @@
 package br.unb.cic.analysis;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.ArrayList;
-import java.util.Map.Entry;
-
 import br.unb.cic.analysis.df.*;
+import br.unb.cic.analysis.io.DefaultReader;
+import br.unb.cic.analysis.io.MergeConflictReader;
+import br.unb.cic.analysis.ioa.InterproceduralOverrideAssignment;
+import br.unb.cic.analysis.model.Statement;
+import br.unb.cic.analysis.reachability.ReachabilityAnalysis;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
 import br.unb.cic.analysis.svfa.SVFAInterProcedural;
 import br.unb.cic.analysis.svfa.SVFAIntraProcedural;
 import br.unb.cic.analysis.svfa.confluence.SVFAConfluenceAnalysis;
+import br.unb.cic.diffclass.DiffClass;
 import org.apache.commons.cli.*;
-
 import scala.collection.JavaConverters;
 import soot.Body;
 import soot.BodyTransformer;
 import soot.PackManager;
 import soot.Transform;
 
-import br.unb.cic.analysis.io.DefaultReader;
-import br.unb.cic.analysis.io.MergeConflictReader;
-import br.unb.cic.analysis.model.Statement;
-import br.unb.cic.analysis.reachability.ReachabilityAnalysis;
-import br.unb.cic.diffclass.DiffClass;
+import java.io.File;
+import java.io.FileWriter;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class Main {
 
@@ -137,6 +135,9 @@ public class Main {
                 .build();
 
         Option verbose = Option.builder("verbose").argName("verbose").desc("run in the verbose mode").build();
+        Option recursive = Option.builder("recursive").argName("recursive")
+                .desc("run using the recursive strategy for mapping sources and sinks")
+                .build();
 
         options.addOption(classPathOption);
         options.addOption(inputFileOption);
@@ -144,18 +145,33 @@ public class Main {
         options.addOption(repoOption);
         options.addOption(commitOption);
         options.addOption(verbose);
+        options.addOption(recursive);
     }
 
     
     private void runAnalysis(String mode, String classpath) {
     	switch(mode) {
-            case "svfa-interprocedural" : runSparseValueFlowAnalysis(classpath, true); break;
-            case "svfa-intraprocedural" : runSparseValueFlowAnalysis(classpath, false); break;
-            case "svfa-confluence-interprocedural": runSparseValueFlowConfluenceAnalysis(classpath, true); break;
-            case "svfa-confluence-intraprocedural": runSparseValueFlowConfluenceAnalysis(classpath, false); break;
-            case "reachability" : runReachabilityAnalysis(classpath); break;
-            default             : runDataFlowAnalysis(classpath, mode);
-    	}
+            case "svfa-interprocedural":
+                runSparseValueFlowAnalysis(classpath, true);
+                break;
+            case "svfa-intraprocedural":
+                runSparseValueFlowAnalysis(classpath, false);
+                break;
+            case "svfa-confluence-interprocedural":
+                runSparseValueFlowConfluenceAnalysis(classpath, true);
+                break;
+            case "svfa-confluence-intraprocedural":
+                runSparseValueFlowConfluenceAnalysis(classpath, false);
+                break;
+            case "reachability":
+                runReachabilityAnalysis(classpath);
+                break;
+            case "overriding-interprocedural":
+                runInterproceduralOverrideAssignmentAnalysis(classpath);
+                break;
+            default:
+                runDataFlowAnalysis(classpath, mode);
+        }
     }
 
     private void runDataFlowAnalysis(String classpath, String mode) {
@@ -167,8 +183,12 @@ public class Main {
                             case "dataflow"   : analysis = new ReachDefinitionAnalysis(body, definition); break;
                             case "tainted"    : analysis = new TaintedAnalysis(body, definition);
                             case "confluence" : analysis = new ConfluentAnalysis(body, definition); break;
-                            case "confluence-tainted": analysis = new ConfluentTaintedAnalysis(body, definition); break;
-                            case "overriding" : analysis = new OverridingAssignmentAnalysis(body, definition); break;
+                            case "confluence-tainted":
+                                analysis = new ConfluentTaintedAnalysis(body, definition);
+                                break;
+                            case "overriding-intraprocedural":
+                                analysis = new OverridingAssignmentAnalysis(body, definition);
+                                break;
                             default: {
                                 System.out.println("Error: " + "invalid mode " + mode);
                                 System.exit(-1);
@@ -177,13 +197,29 @@ public class Main {
                     }
                 }));
         SootWrapper.builder()
-                   .withClassPath(classpath)
-                   .addClass(targetClasses.stream().collect(Collectors.joining(" ")))
-                   .build()
-                   .execute();
+                .withClassPath(classpath)
+                .addClass(targetClasses.stream().collect(Collectors.joining(" ")))
+                .build()
+                .execute();
         if (analysis != null) {
             conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
         }
+    }
+
+    private void runInterproceduralOverrideAssignmentAnalysis(String classpath) {
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+
+        PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
+        soot.options.Options.v().setPhaseOption("cg.spark", "on");
+        soot.options.Options.v().setPhaseOption("cg.spark", "verbose:true");
+
+        SootWrapper.builder()
+                .withClassPath(classpath)
+                .addClass(targetClasses.stream().collect(Collectors.joining(" ")))
+                .build()
+                .execute();
+
+        conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
     }
 
     /*
@@ -193,9 +229,9 @@ public class Main {
      */
     @Deprecated
     private void runReachabilityAnalysis(String classpath) {
-    	ReachabilityAnalysis analysis = new ReachabilityAnalysis(definition);
-    	
-    	PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
+        ReachabilityAnalysis analysis = new ReachabilityAnalysis(definition);
+
+        PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
         soot.options.Options.v().setPhaseOption("cg.spark", "on");
         soot.options.Options.v().setPhaseOption("cg.spark", "verbose:true");
 
@@ -204,11 +240,12 @@ public class Main {
                 .addClass(targetClasses.stream().collect(Collectors.joining(" ")))
                 .build()
                 .execute();
-        
+
         conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
     }
 
     private void runSparseValueFlowAnalysis(String classpath, boolean interprocedural) {
+        definition.setRecursiveMode(options.hasOption("recursive"));
         SVFAAnalysis analysis = interprocedural
                 ? new SVFAInterProcedural(classpath, definition)
                 : new SVFAIntraProcedural(classpath, definition);
@@ -221,6 +258,7 @@ public class Main {
     }
 
     private void runSparseValueFlowConfluenceAnalysis(String classpath, boolean interprocedural) {
+        definition.setRecursiveMode(options.hasOption("recursive"));
         SVFAConfluenceAnalysis analysis = new SVFAConfluenceAnalysis(classpath, this.definition,  interprocedural);
         
         analysis.execute();
