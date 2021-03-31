@@ -69,9 +69,9 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         List<SootMethod> methods = Scene.v().getEntryPoints();
         methods.forEach(sootMethod -> traverse(sootMethod, Statement.Type.IN_BETWEEN));
 
+       logger.log(Level.INFO, () -> String.format("%s", "CONFLICTS: " + getConflicts()));
 
-
-        left.forEach(dataFlowAbstraction -> {
+        /*left.forEach(dataFlowAbstraction -> {
             String leftStmt = String.format("%s", "LEFT: " + dataFlowAbstraction.getStmt());
             logger.log(Level.INFO, leftStmt);
         });
@@ -79,7 +79,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         right.forEach(dataFlowAbstraction -> {
             String rightStmt = String.format("%s", "RIGHT: " + dataFlowAbstraction.getStmt());
             logger.log(Level.INFO, rightStmt);
-        });
+        });*/
     }
 
     /**

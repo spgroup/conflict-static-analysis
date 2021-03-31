@@ -1,5 +1,7 @@
 package br.unb.cic.analysis.model;
 
+import soot.Unit;
+
 import java.util.Objects;
 
 /**
@@ -14,14 +16,18 @@ public class Conflict {
     protected String sinkClassName;
     protected String sinkMethodName;
     protected Integer sinkLineNumber;
+    protected Unit sourceUnit;
+    protected Unit sinkUnit;
 
     public Conflict(Statement source, Statement sink) {
         this.sourceClassName = source.getSootClass().getName();
         this.sourceMethodName = source.getSootMethod().getName();
         this.sourceLineNumber = source.getSourceCodeLineNumber();
+        this.sourceUnit = source.getUnit();
         this.sinkClassName = sink.getSootClass().getName();
         this.sinkMethodName = sink.getSootMethod().getName();
         this.sinkLineNumber = sink.getSourceCodeLineNumber();
+        this.sinkUnit = sink.getUnit();
     }
 
     @Deprecated
@@ -66,9 +72,11 @@ public class Conflict {
         return Objects.equals(sourceClassName, conflict.sourceClassName) &&
                 Objects.equals(sourceMethodName, conflict.sourceMethodName) &&
                 Objects.equals(sourceLineNumber, conflict.sourceLineNumber) &&
+                Objects.equals(sourceUnit, conflict.sourceUnit) &&
                 Objects.equals(sinkClassName, conflict.sinkClassName) &&
                 Objects.equals(sinkMethodName, conflict.sinkMethodName) &&
-                Objects.equals(sinkLineNumber, conflict.sinkLineNumber);
+                Objects.equals(sinkLineNumber, conflict.sinkLineNumber) &&
+                Objects.equals(sinkUnit, conflict.sinkUnit);
     }
 
     @Override
@@ -78,7 +86,7 @@ public class Conflict {
 
     @Override
     public String toString() {
-        return String.format("source(%s, %s, %d) => sink(%s, %s, %d)", sourceClassName, sourceMethodName, sourceLineNumber,
-                sinkClassName, sinkMethodName, sinkLineNumber);
+        return String.format("source(%s, %s, %d, %s) => sink(%s, %s, %d, %s)", sourceClassName, sourceMethodName, sourceLineNumber, sourceUnit,
+                sinkClassName, sinkMethodName, sinkLineNumber, sinkUnit);
     }
 }

@@ -212,6 +212,7 @@ public class Main {
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
         soot.options.Options.v().setPhaseOption("cg.spark", "on");
         soot.options.Options.v().setPhaseOption("cg.spark", "verbose:true");
+        soot.options.Options.v().setPhaseOption("jb", "use-original-names:true");
 
         SootWrapper.builder()
                 .withClassPath(classpath)
