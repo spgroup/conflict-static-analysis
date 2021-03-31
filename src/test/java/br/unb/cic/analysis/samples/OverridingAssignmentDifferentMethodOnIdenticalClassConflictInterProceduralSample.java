@@ -1,6 +1,6 @@
 package br.unb.cic.analysis.samples;
 
-// Conflict: [left, IdenticalClassSample.setFoo():21] --> [right, IdenticalClassSample.setBar():21]
+// Conflict: [left, IdenticalClassSample.setFoo():25] --> [right, IdenticalClassSample.setBar():21]
 public class OverridingAssignmentDifferentMethodOnIdenticalClassConflictInterProceduralSample {
     private IdenticalClassSample identicalClassSample;
 

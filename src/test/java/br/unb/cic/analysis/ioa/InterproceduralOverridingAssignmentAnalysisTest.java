@@ -3,13 +3,12 @@ package br.unb.cic.analysis.ioa;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unc.cic.analysis.test.DefinitionFactory;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import soot.G;
 import soot.PackManager;
 import soot.Transform;
 
-@Ignore
+
 public class InterproceduralOverridingAssignmentAnalysisTest {
 
 
@@ -114,6 +113,17 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.OverridingAssignmentAdditionToArrayConflictInterProceduralSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{11}, new int[]{12});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        System.out.println(analysis.getConflicts());
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void hashmapConflict() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.OverridingAssignmentHashmapConflictInterProceduralSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{13}, new int[]{14});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
         System.out.println(analysis.getConflicts());
