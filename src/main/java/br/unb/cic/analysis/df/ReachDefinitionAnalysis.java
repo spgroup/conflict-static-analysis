@@ -186,7 +186,7 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 		return Collector.instance().getConflicts();
 	}
 
-	public Set<HashMap<String, JInstanceFieldRef>> getHashMapJInstanceField() {
+	public Set<HashMap<String, InstanceFieldRef>> getHashMapInstanceField() {
 		return Collector.instance().getHashInstanceField();
 	}
 

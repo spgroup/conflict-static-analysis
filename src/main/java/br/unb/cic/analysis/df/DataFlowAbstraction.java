@@ -3,9 +3,9 @@ package br.unb.cic.analysis.df;
 import br.unb.cic.analysis.model.Statement;
 import soot.Local;
 import soot.Value;
+import soot.jimple.InstanceFieldRef;
+import soot.jimple.InvokeStmt;
 import soot.jimple.StaticFieldRef;
-import soot.jimple.internal.JInstanceFieldRef;
-import soot.jimple.internal.JInvokeStmt;
 
 import java.util.*;
 
@@ -16,13 +16,13 @@ import java.util.*;
 public class DataFlowAbstraction {
 
     private Local local;
-    private JInstanceFieldRef localField;
+    private InstanceFieldRef localField;
     private StaticFieldRef localStaticRef;
-    private JInvokeStmt methodCall;
+    private InvokeStmt methodCall;
     private Statement stmt;
     private Value value;
 
-    public DataFlowAbstraction(JInvokeStmt methodCall, Statement stmt){
+    public DataFlowAbstraction(InvokeStmt methodCall, Statement stmt){
         this.methodCall = methodCall;
         this.stmt = stmt;
     }
@@ -37,7 +37,7 @@ public class DataFlowAbstraction {
         this.stmt = stmt;
     }
 
-    public DataFlowAbstraction(JInstanceFieldRef localField, Statement stmt) {
+    public DataFlowAbstraction(InstanceFieldRef localField, Statement stmt) {
         this.localField = localField;
         this.stmt = stmt;
     }
@@ -47,11 +47,11 @@ public class DataFlowAbstraction {
         this.stmt = stmt;
     }
 
-    public JInvokeStmt getMethodCall() {
+    public InvokeStmt getMethodCall() {
         return methodCall;
     }
 
-    public void setMethodCall(JInvokeStmt methodCall) {
+    public void setMethodCall(InvokeStmt methodCall) {
         this.methodCall = methodCall;
     }
 
@@ -71,7 +71,7 @@ public class DataFlowAbstraction {
         this.value = value;
     }
 
-    public JInstanceFieldRef getFieldRef() {
+    public InstanceFieldRef getFieldRef() {
         return localField;
     }
     public Statement getStmt() {
