@@ -11,6 +11,7 @@ import soot.ValueBox;
 import soot.jimple.ArrayRef;
 import soot.jimple.InstanceFieldRef;
 import soot.jimple.StaticFieldRef;
+import soot.jimple.internal.JInstanceFieldRef;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
@@ -48,7 +49,7 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 		definition.loadSinkStatements();
 		doAnalysis();
 	}
-	
+
 	/**
 	 * Runs the algorithm analysis at a given statement (Unit d). Here we
 	 * manipulate and compute an out set from the income set in (foward analysis).
@@ -175,28 +176,28 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 
 	protected boolean isSinkStatement(Unit d) {
 		return definition.getSinkStatements().stream().map(s -> s.getUnit()).collect(Collectors.toList()).contains(d);
-    }
+	}
 
-    public void clear() {
-        Collector.instance().clear();
-    }
+	public void clear() {
+		Collector.instance().clear();
+	}
 
-    public Set<Conflict> getConflicts() {
-        return Collector.instance().getConflicts();
-    }
+	public Set<Conflict> getConflicts() {
+		return Collector.instance().getConflicts();
+	}
 
-    public Set<HashMap<String, InstanceFieldRef>> getHashMapJInstanceField() {
-        return Collector.instance().getHashInstanceField();
-    }
+	public Set<HashMap<String, JInstanceFieldRef>> getHashMapJInstanceField() {
+		return Collector.instance().getHashInstanceField();
+	}
 
-    public Set<HashMap<String, StaticFieldRef>> getHashMapStatic() {
-        return Collector.instance().getHashStaticField();
-    }
+	public Set<HashMap<String, StaticFieldRef>> getHashMapStatic() {
+		return Collector.instance().getHashStaticField();
+	}
 
-    protected List<Local> getUseVariables(Unit u) {
-        return u.getUseBoxes().stream()
-                .map(box -> box.getValue())
-                .filter(v -> v instanceof Local)
+	protected List<Local> getUseVariables(Unit u) {
+		return u.getUseBoxes().stream()
+				.map(box -> box.getValue())
+				.filter(v -> v instanceof Local)
 				.map(v -> (Local)v)
 				.collect(Collectors.toList());
 	}
@@ -204,15 +205,15 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 	protected List<Local> getDefVariables(Unit u) {
 		List<Local> localDefs = new ArrayList<>();
 		for (ValueBox v : u.getDefBoxes()) {
-            if (v.getValue() instanceof Local) {
-                localDefs.add((Local) v.getValue());
-            } else if (v.getValue() instanceof ArrayRef) {
-                ArrayRef ref = (ArrayRef) v.getValue();
-                localDefs.add((Local) ref.getBaseBox().getValue());
-            } else if (v.getValue() instanceof InstanceFieldRef) {
-                InstanceFieldRef ref = (InstanceFieldRef) v.getValue();
-                localDefs.add((Local) ref.getBaseBox().getValue());
-            }
+			if (v.getValue() instanceof Local) {
+				localDefs.add((Local) v.getValue());
+			} else if (v.getValue() instanceof ArrayRef) {
+				ArrayRef ref = (ArrayRef) v.getValue();
+				localDefs.add((Local) ref.getBaseBox().getValue());
+			} else if (v.getValue() instanceof InstanceFieldRef) {
+				InstanceFieldRef ref = (InstanceFieldRef) v.getValue();
+				localDefs.add((Local) ref.getBaseBox().getValue());
+			}
 		}
 		return localDefs;
 	}

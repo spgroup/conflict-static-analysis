@@ -3,10 +3,11 @@ package br.unb.cic.analysis.df;
 import br.unb.cic.analysis.model.Statement;
 import soot.Local;
 import soot.Value;
-import soot.jimple.InstanceFieldRef;
 import soot.jimple.StaticFieldRef;
+import soot.jimple.internal.JInstanceFieldRef;
+import soot.jimple.internal.JInvokeStmt;
 
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Information wee keep while traversing
@@ -15,10 +16,16 @@ import java.util.Objects;
 public class DataFlowAbstraction {
 
     private Local local;
-    private InstanceFieldRef localField;
+    private JInstanceFieldRef localField;
     private StaticFieldRef localStaticRef;
-    private Value value;
+    private JInvokeStmt methodCall;
     private Statement stmt;
+    private Value value;
+
+    public DataFlowAbstraction(JInvokeStmt methodCall, Statement stmt){
+        this.methodCall = methodCall;
+        this.stmt = stmt;
+    }
 
     public DataFlowAbstraction(Value value, Statement stmt) {
         this.value = value;
@@ -30,7 +37,7 @@ public class DataFlowAbstraction {
         this.stmt = stmt;
     }
 
-    public DataFlowAbstraction(InstanceFieldRef localField, Statement stmt) {
+    public DataFlowAbstraction(JInstanceFieldRef localField, Statement stmt) {
         this.localField = localField;
         this.stmt = stmt;
     }
@@ -38,6 +45,14 @@ public class DataFlowAbstraction {
     public DataFlowAbstraction(StaticFieldRef localStaticRef, Statement stmt) {
         this.localStaticRef = localStaticRef;
         this.stmt = stmt;
+    }
+
+    public JInvokeStmt getMethodCall() {
+        return methodCall;
+    }
+
+    public void setMethodCall(JInvokeStmt methodCall) {
+        this.methodCall = methodCall;
     }
 
     public Local getLocal() {
@@ -48,16 +63,23 @@ public class DataFlowAbstraction {
         return localStaticRef;
     }
 
-    public InstanceFieldRef getFieldRef() {
-        return localField;
+    public Value getValue() {
+        return value;
     }
 
+    public void setValue(Value value) {
+        this.value = value;
+    }
+
+    public JInstanceFieldRef getFieldRef() {
+        return localField;
+    }
     public Statement getStmt() {
         return stmt;
     }
 
     public Boolean containsLeftStatement(){
-       return getStmt().getType().equals(Statement.Type.SOURCE);
+        return getStmt().getType().equals(Statement.Type.SOURCE);
     }
 
     public Boolean containsRightStatement(){
@@ -76,13 +98,5 @@ public class DataFlowAbstraction {
     @Override
     public int hashCode() {
         return Objects.hash(local, stmt);
-    }
-
-    public Value getValue() {
-        return this.value;
-    }
-
-    public void setValue(Value value) {
-        this.value = value;
     }
 }

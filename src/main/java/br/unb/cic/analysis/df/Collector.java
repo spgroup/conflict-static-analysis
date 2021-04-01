@@ -3,6 +3,7 @@ package br.unb.cic.analysis.df;
 import br.unb.cic.analysis.model.Conflict;
 import soot.jimple.InstanceFieldRef;
 import soot.jimple.StaticFieldRef;
+import soot.jimple.internal.JInstanceFieldRef;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,7 +12,7 @@ import java.util.Set;
 class Collector {
 
     private Set<Conflict> conflicts;
-    private Set<HashMap<String, InstanceFieldRef>> instanceFieldDictionary;
+    private Set<HashMap<String, JInstanceFieldRef>> instanceFieldDictionary;
     private Set<HashMap<String, StaticFieldRef>> staticFieldDictionary;
     private static Collector instance;
 
@@ -28,11 +29,11 @@ class Collector {
         return instance;
     }
 
-    public Set<HashMap<String, InstanceFieldRef>> getHashInstanceField() {
+    public Set<HashMap<String, JInstanceFieldRef>> getHashInstanceField() {
         return instanceFieldDictionary;
     }
 
-    public void addHashInstanceField(HashMap<String, InstanceFieldRef> hash) {
+    public void addHashInstanceField(HashMap<String, JInstanceFieldRef> hash) {
         instanceFieldDictionary.add(hash);
     }
 
