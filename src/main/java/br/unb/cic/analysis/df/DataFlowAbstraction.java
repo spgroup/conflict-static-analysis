@@ -4,9 +4,10 @@ import br.unb.cic.analysis.model.Statement;
 import soot.Local;
 import soot.Value;
 import soot.jimple.InstanceFieldRef;
+import soot.jimple.InvokeStmt;
 import soot.jimple.StaticFieldRef;
 
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Information wee keep while traversing
@@ -17,8 +18,14 @@ public class DataFlowAbstraction {
     private Local local;
     private InstanceFieldRef localField;
     private StaticFieldRef localStaticRef;
-    private Value value;
+    private InvokeStmt methodCall;
     private Statement stmt;
+    private Value value;
+
+    public DataFlowAbstraction(InvokeStmt methodCall, Statement stmt){
+        this.methodCall = methodCall;
+        this.stmt = stmt;
+    }
 
     public DataFlowAbstraction(Value value, Statement stmt) {
         this.value = value;
@@ -40,6 +47,14 @@ public class DataFlowAbstraction {
         this.stmt = stmt;
     }
 
+    public InvokeStmt getMethodCall() {
+        return methodCall;
+    }
+
+    public void setMethodCall(InvokeStmt methodCall) {
+        this.methodCall = methodCall;
+    }
+
     public Local getLocal() {
         return local;
     }
@@ -48,16 +63,23 @@ public class DataFlowAbstraction {
         return localStaticRef;
     }
 
+    public Value getValue() {
+        return value;
+    }
+
+    public void setValue(Value value) {
+        this.value = value;
+    }
+
     public InstanceFieldRef getFieldRef() {
         return localField;
     }
-
     public Statement getStmt() {
         return stmt;
     }
 
     public Boolean containsLeftStatement(){
-       return getStmt().getType().equals(Statement.Type.SOURCE);
+        return getStmt().getType().equals(Statement.Type.SOURCE);
     }
 
     public Boolean containsRightStatement(){
@@ -76,13 +98,5 @@ public class DataFlowAbstraction {
     @Override
     public int hashCode() {
         return Objects.hash(local, stmt);
-    }
-
-    public Value getValue() {
-        return this.value;
-    }
-
-    public void setValue(Value value) {
-        this.value = value;
     }
 }
