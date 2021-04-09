@@ -36,12 +36,10 @@ public class SVFAConfluenceAnalysis {
     public void execute() {
         SVFAAnalysis sourceBaseAnalysis = sourceBaseAnalysis(interprocedural);
         sourceBaseAnalysis.buildSparseValueFlowGraph();
-        System.out.println(sourceBaseAnalysis.svgToDotModel());
         Set<List<LambdaNode>> sourceBasePaths = sourceBaseAnalysis.findSourceSinkPaths();
 
         SVFAAnalysis sinkBaseAnalysis = sinkBaseAnalysis(interprocedural);
         sinkBaseAnalysis.buildSparseValueFlowGraph();
-        System.out.println(sinkBaseAnalysis.svgToDotModel());
         Set<List<LambdaNode>> sinkBasePaths = sinkBaseAnalysis.findSourceSinkPaths();
 
         confluentFlows = intersectPathsByLastNode(sourceBasePaths, sinkBasePaths);

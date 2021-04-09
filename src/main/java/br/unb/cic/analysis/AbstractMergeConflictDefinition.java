@@ -42,14 +42,6 @@ public abstract class AbstractMergeConflictDefinition {
         sinkStatements = loadStatements(sinkDefinitions, Statement.Type.SINK);
     }
 
-    private List<Statement> filterIsInDefinitionsList(List<Statement> statements, Map<String, List<Integer>> definitions) {
-        return statements.stream().filter(statement -> {
-            String className = statement.getSootClass().getName();
-            Integer lineNumber = statement.getSourceCodeLineNumber();
-
-            return definitions.get(className).contains(lineNumber);
-        }).collect(Collectors.toList());
-    }
 
     public List<Statement> getSourceStatements() {
         return sourceStatements;
