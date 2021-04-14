@@ -1,4 +1,4 @@
-package br.unb.cic.analysis.samples;
+package br.unb.cic.analysis.samples.ioa;
 
 // Conflict: [left, m():12] --> [right, foo():13]
 public class OverridingAssignmentSameAttributeOnIdenticalClassConflictInterProceduralSample {

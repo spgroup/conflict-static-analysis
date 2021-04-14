@@ -1,4 +1,4 @@
-package br.unb.cic.analysis.samples;
+package br.unb.cic.analysis.samples.ioa;
 
 // Not Conflict - Not implemented yet. You will need constant propagation.
 // Currently detected as conflict: [left, m():9] --> [right, foo():14]

@@ -1,21 +1,16 @@
-package br.unb.cic.analysis.samples;
+package br.unb.cic.analysis.samples.ioa;
 
-// Not Conflict
-public class OverridingAssignmentArraysClassFieldNotConflictInterProceduralSample {
+// Conflict: [left, foo():13] --> [right, bar():17]
+public class OverridingAssignmentArraysClassFieldConflictInterProceduralSample {
     public static int[] y;
 
     public static void main(String[] args) {
         foo();           //left
-        base();          //base
         bar();           //right
     }
 
     private static void foo() {
         y[0] = 3;
-    }
-
-    private static void base() {
-        y[1] = 1;
     }
 
     private static void bar() {

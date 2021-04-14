@@ -1,4 +1,4 @@
-package br.unb.cic.analysis.samples;
+package br.unb.cic.analysis.samples.ioa;
 
 // Conflict: [left, m():7] --> [right, foo():8]
 public class OverridingAssignmentConcatMethodsConflictInterProceduralSample {

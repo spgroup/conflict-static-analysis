@@ -1,4 +1,6 @@
-package br.unb.cic.analysis.samples;
+package br.unb.cic.analysis.samples.ioa;
+
+import br.unb.cic.analysis.samples.OverridingAssignmentInstance2;
 
 // Conflict: [left, baz():33] --> [right, bar():29]
 public class OverridingAssignmentObjectThreeFieldsOneConflictInterProceduralSample {

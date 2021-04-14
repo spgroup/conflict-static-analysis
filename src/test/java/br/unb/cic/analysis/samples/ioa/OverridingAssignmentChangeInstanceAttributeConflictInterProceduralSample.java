@@ -1,4 +1,4 @@
-package br.unb.cic.analysis.samples;
+package br.unb.cic.analysis.samples.ioa;
 
 // Conflict: [left, m():8] --> [right, InstanceAttributeSample.setFoo():17]
 public class OverridingAssignmentChangeInstanceAttributeConflictInterProceduralSample {
