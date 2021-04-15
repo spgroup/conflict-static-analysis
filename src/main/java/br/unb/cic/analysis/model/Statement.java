@@ -80,6 +80,8 @@ public class Statement {
 	}
 
 	public String toString() {
-		return unit.toString();
+
+		return String.format("stmt(%d, %s, %s)", sourceCodeLineNumber, unit,
+				type);
 	}
 }
