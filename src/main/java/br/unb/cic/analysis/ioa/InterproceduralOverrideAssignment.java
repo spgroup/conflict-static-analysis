@@ -69,7 +69,8 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         List<SootMethod> methods = Scene.v().getEntryPoints();
         methods.forEach(sootMethod -> traverse(sootMethod, Statement.Type.IN_BETWEEN));
 
-       logger.log(Level.INFO, () -> String.format("%s", "CONFLICTS: " + getConflicts()));
+        //logger.log(Level.INFO, () -> String.format("%s", "traversedMethods: " + this.traversedMethods));
+        logger.log(Level.INFO, () -> String.format("%s", "CONFLICTS: " + getConflicts()));
 
         /*left.forEach(dataFlowAbstraction -> {
             String leftStmt = String.format("%s", "LEFT: " + dataFlowAbstraction.getStmt());
@@ -148,22 +149,22 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
              Yes, AssignStmt handles assignments and they can be of any type as long as they follow the structure: variable = value
              */
             AssignStmt assignStmt = (AssignStmt) unit;
+            // TODO rename Statement. (UnitWithExtraInformations)
 
             /* Check case: x = foo() + bar()
             In this case, this condition will be executed for the call to the foo() method and then another call to the bar() method.
              */
-            if (assignStmt.containsInvokeExpr()) {
-                Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
-                traverse(assignStmt.getInvokeExpr().getMethod(), stmt.getType());
+            if (!assignStmt.containsInvokeExpr() && !tagged) {
+                kill(unit);
             }
 
-            // TODO rename Statement. (UnitWithExtraInformations)
             Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
+            logger.log(Level.INFO, () -> String.format("%s", "stmt: " + stmt.toString()));
 
-            if (tagged) {
-                gen(stmt);
+            if (assignStmt.containsInvokeExpr()) {
+                traverse(assignStmt.getInvokeExpr().getMethod(), stmt.getType());
             } else {
-                kill(unit);
+                gen(stmt);
             }
 
             /* Check treatment in case 'for'
@@ -178,11 +179,14 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             /* InvokeStmt involves builder?
               Yes. InvokeStmt also involves builders. What changes is the corresponding InvokeExpression.
               For builders, InvokeExpression is an instance of InvokeSpecial */
+
         } else if (unit instanceof InvokeStmt) {
             InvokeStmt invokeStmt = (InvokeStmt) unit;
             Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
+            logger.log(Level.INFO, () -> String.format("%s", "stmt: " + stmt.toString()));
             traverse(invokeStmt.getInvokeExpr().getMethod(), stmt.getType());
         }
+
     }
 
     private boolean isTagged(Statement.Type flowChangeTag, Unit unit) {
@@ -232,7 +236,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
                 if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
                     conflicts.add(new Conflict(stmt, dataFlowAbstraction.getStmt()));
                     dataFlowAbstractionFlowSet.remove(dataFlowAbstraction);
-
                 }
             } catch (ValueNotHandledException e) {
                 assert false;
