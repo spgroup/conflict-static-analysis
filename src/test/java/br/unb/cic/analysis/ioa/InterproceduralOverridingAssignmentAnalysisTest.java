@@ -342,7 +342,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
     public void RecursiveMockupConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.RecursiveMockupConflictSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
-                .definition(sampleClassPath, new int[]{6}, new int[]{7});
+                .definition(sampleClassPath, new int[]{8}, new int[]{9});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());
@@ -352,7 +352,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
     public void RecursiveMockupNotConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.RecursiveMockupNotConflictSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
-                .definition(sampleClassPath, new int[]{8}, new int[]{10});
+                .definition(sampleClassPath, new int[]{9}, new int[]{11});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
         Assert.assertEquals(0, analysis.getConflicts().size());
