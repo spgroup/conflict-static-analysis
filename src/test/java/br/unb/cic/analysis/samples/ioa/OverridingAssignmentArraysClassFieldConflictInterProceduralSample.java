@@ -14,6 +14,6 @@ public class OverridingAssignmentArraysClassFieldConflictInterProceduralSample {
     }
 
     private static void bar() {
-        y[3] = 4;
+        y[0] = 4;
     }
 }

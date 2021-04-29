@@ -1,12 +1,11 @@
 package br.unb.cic.analysis.samples.ioa;
 
-// Conflict: [left, foo():15] --> [right, bar():19]
-public class OverridingAssignmentArrayAliasingConflictInterProceduralSample {
-    private int[] arr, barr;
+// Conflict: [left, foo():14] --> [right, bar():18]
+public class ArraySameIndexConflictSample {
+    private int[] arr;
 
     public void m() {
         arr = new int[]{0, 0, 0, 0, 0};
-        barr = arr;
         foo(); // LEFT
         bar(); // RIGHT
     }
@@ -16,8 +15,6 @@ public class OverridingAssignmentArrayAliasingConflictInterProceduralSample {
     }
 
     private void bar() {
-        barr[1] = 2;
+        arr[1] = 2;
     }
-
-
 }
