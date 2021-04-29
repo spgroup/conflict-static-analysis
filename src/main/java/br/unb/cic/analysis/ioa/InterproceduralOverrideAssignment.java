@@ -111,6 +111,9 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
                 }
             });
         }
+
+        this.traversedMethods.remove(sootMethod);
+
     }
 
     private Body retrieveActiveBodySafely(SootMethod sootMethod) {
