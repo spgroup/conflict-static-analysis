@@ -154,21 +154,23 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             AssignStmt assignStmt = (AssignStmt) unit;
             // TODO rename Statement. (UnitWithExtraInformations)
 
-            /* Check case: x = foo() + bar()
-            In this case, this condition will be executed for the call to the foo() method and then another call to the bar() method.
-             */
-            if (!assignStmt.containsInvokeExpr() && !tagged) {
+
+            if (assignStmt.containsInvokeExpr()) {
+                Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
+                traverse(assignStmt.getInvokeExpr().getMethod(), stmt.getType());
+            }
+
+            if (tagged) {
+                Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
+                // logger.log(Level.INFO, () -> String.format("%s", "stmt: " + stmt.toString()));
+                gen(stmt);
+            } else {
                 kill(unit);
             }
 
-            Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
-            logger.log(Level.INFO, () -> String.format("%s", "stmt: " + stmt.toString()));
-
-            if (assignStmt.containsInvokeExpr()) {
-                traverse(assignStmt.getInvokeExpr().getMethod(), stmt.getType());
-            } else {
-                gen(stmt);
-            }
+            /* Check case: x = foo() + bar()
+            In this case, this condition will be executed for the call to the foo() method and then another call to the bar() method.
+             */
 
             /* Check treatment in case 'for'
             - Jimple does not exist for. The command is done using the goto.
@@ -186,7 +188,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         } else if (unit instanceof InvokeStmt) {
             InvokeStmt invokeStmt = (InvokeStmt) unit;
             Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
-            logger.log(Level.INFO, () -> String.format("%s", "stmt: " + stmt.toString()));
+            // logger.log(Level.INFO, () -> String.format("%s", "stmt: " + stmt.toString()));
             traverse(invokeStmt.getInvokeExpr().getMethod(), stmt.getType());
         }
 
@@ -204,7 +206,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         return flowChangeTag.equals(Statement.Type.SOURCE);
     }
 
-    // TODO add in two lists (left and right).
     // TODO add depth to InstanceFieldRef and StaticFieldRef...
     private void gen(Statement stmt) {
         if (isLeftStatement(stmt)) {
@@ -214,6 +215,13 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         } else if (isRightStatement(stmt)) {
             checkConflict(stmt, left);
             addToList(stmt, right);
+
+        } else if (isBothStatement(stmt)) {
+            checkConflict(stmt, left);
+            addToList(stmt, right);
+            checkConflict(stmt, right);
+            addToList(stmt, left);
+
         }
     }
 
@@ -223,6 +231,10 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private boolean isLeftStatement(Statement stmt) {
         return stmt.getType().equals(Statement.Type.SOURCE);
+    }
+
+    private boolean isBothStatement(Statement stmt) {
+        return stmt.getType().equals(Statement.Type.BOTH);
     }
 
     //TODO Improve the name of this method and the second parameter
@@ -256,6 +268,11 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         dataFlowAbstractionFlowSet.forEach(dataFlowAbstraction -> {
             try {
                 if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
+                    dataFlowAbstractionFlowSet.forEach(dt -> {
+                        if (dt.getStmt().getSourceCodeLineNumber().equals(dataFlowAbstraction.getStmt().getSourceCodeLineNumber())) {
+                            dataFlowAbstractionFlowSet.remove(dt);
+                        }
+                    });
                     dataFlowAbstractionFlowSet.remove(dataFlowAbstraction);
                 }
             } catch (ValueNotHandledException e) {
@@ -295,7 +312,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         } else if (!isRightStatement(u) && isInRightStatementFlow(flowChangeTag)) {
             return createStatement(sootMethod, u, flowChangeTag);
         }
-        return findStatementBase(u);
+        return findBothStatement(u);
     }
 
     private boolean isLeftStatement(Unit u) {
@@ -316,11 +333,11 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
                 findFirst().get();
     }
 
-    private Statement findStatementBase(Unit d) {
+    private Statement findBothStatement(Unit d) {
         return Statement.builder()
                 .setClass(this.body.getMethod().getDeclaringClass())
                 .setMethod(this.body.getMethod())
-                .setType(Statement.Type.IN_BETWEEN)
+                .setType(Statement.Type.BOTH)
                 .setUnit(d)
                 .setSourceCodeLineNumber(d.getJavaSourceStartLineNumber()).build();
     }

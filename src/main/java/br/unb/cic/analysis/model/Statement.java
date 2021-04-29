@@ -14,9 +14,10 @@ import java.util.Objects;
  */
 public class Statement {
 	public enum Type {
-		SOURCE, 
+		SOURCE,
 		SINK,
-		IN_BETWEEN;
+		IN_BETWEEN,
+		BOTH;
 	}
 
 	private static StatementBuilder builder;
