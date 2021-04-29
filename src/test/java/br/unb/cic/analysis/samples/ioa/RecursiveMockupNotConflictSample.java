@@ -1,6 +1,5 @@
 package br.unb.cic.analysis.samples.ioa;
 
-
 public class RecursiveMockupNotConflictSample {
 
     private int x;
