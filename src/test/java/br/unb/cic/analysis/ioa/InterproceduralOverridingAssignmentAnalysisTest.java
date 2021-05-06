@@ -158,7 +158,6 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
                 .definition(sampleClassPath, new int[]{13, 20}, new int[]{17});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
-        System.out.println(analysis.getConflicts());
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
@@ -169,7 +168,6 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
                 .definition(sampleClassPath, new int[]{8}, new int[]{9});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
-        System.out.println(analysis.getConflicts());
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
