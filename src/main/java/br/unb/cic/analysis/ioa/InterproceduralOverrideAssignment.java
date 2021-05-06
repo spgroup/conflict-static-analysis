@@ -53,7 +53,11 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private void configureEntryPoints() {
         List<SootMethod> entryPoints = new ArrayList<>();
-        definition.getSourceStatements().forEach(s -> entryPoints.add(s.getSootMethod()));
+        definition.getSourceStatements().forEach(s -> {
+            if (!entryPoints.contains(s.getSootMethod())) {
+                entryPoints.add(s.getSootMethod());
+            }
+        });
         Scene.v().setEntryPoints(entryPoints);
     }
 
@@ -193,7 +197,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     private boolean isTagged(Statement.Type flowChangeTag, Unit unit) {
-        return (isLeftUnit(unit) || isRightUnit(unit)) || (isInLeftStatementFlow(flowChangeTag) || isInRightStatementFlow(flowChangeTag) || isInBothStatementFlow(flowChangeTag));
+        return (isLeftUnit(unit) || isRightUnit(unit)) || (isInLeftStatementFlow(flowChangeTag) || isInRightStatementFlow(flowChangeTag) || isInLeftAndRightStatementFlow(flowChangeTag));
     }
 
     private boolean isInRightStatementFlow(Statement.Type flowChangeTag) {
@@ -204,7 +208,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         return flowChangeTag.equals(Statement.Type.SOURCE);
     }
 
-    private boolean isInBothStatementFlow(Statement.Type flowChangeTag) {
+    private boolean isInLeftAndRightStatementFlow(Statement.Type flowChangeTag) {
         return flowChangeTag.equals(Statement.Type.BOTH);
     }
 
@@ -218,7 +222,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             checkConflict(stmt, left);
             addToList(stmt, right);
 
-        } else if (isBothStatement(stmt)) {
+        } else if (isLefAndRightStatement(stmt)) {
             addConflict(stmt, stmt);
 
             addToList(stmt, left);
@@ -305,7 +309,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     private Statement getStatementAssociatedWithUnit(SootMethod sootMethod, Unit u, Statement.Type flowChangeTag) {
-        if (isLeftUnit(u) && isRightUnit(u) || isInBothStatementFlow(flowChangeTag)) {
+        if (isLeftAndRightUnit(u) || isInLeftAndRightStatementFlow(flowChangeTag)) {
             return createStatement(sootMethod, u, Statement.Type.BOTH);
         } else if (isLeftUnit(u)) {
             return findLeftStatement(u);
@@ -325,6 +329,11 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private boolean isRightUnit(Unit u) {
         return definition.getSinkStatements().stream().map(Statement::getUnit).collect(Collectors.toList()).contains(u);
+    }
+
+
+    private boolean isLeftAndRightUnit(Unit u) {
+        return isLeftUnit(u) && isRightUnit(u);
     }
 
     private Statement findRightStatement(Unit u) {
@@ -351,7 +360,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         return stmt.getType().equals(Statement.Type.SOURCE);
     }
 
-    private boolean isBothStatement(Statement stmt) {
+    private boolean isLefAndRightStatement(Statement stmt) {
         return stmt.getType().equals(Statement.Type.BOTH);
     }
 
