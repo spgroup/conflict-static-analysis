@@ -12,8 +12,8 @@ public class OverridingAssignmentObjectThreeFieldsOneConflictInterProceduralSamp
     public void m() {
         instanceLocal = new OverridingAssignmentObjectThreeFieldsOneConflictInterProceduralSample();
 
-        foo();    // left
-        bar();    // right in {instanceLocal.b.a.a, instanceLocal.b.a.b }
+        foo();   // left
+        bar();   // right in {instanceLocal.b.a.a, instanceLocal.b.a.b }
         base();  // base
         baz();   //left
         qux();   //right
