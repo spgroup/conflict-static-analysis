@@ -13,10 +13,7 @@ import br.unb.cic.analysis.svfa.confluence.SVFAConfluenceAnalysis;
 import br.unb.cic.diffclass.DiffClass;
 import org.apache.commons.cli.*;
 import scala.collection.JavaConverters;
-import soot.Body;
-import soot.BodyTransformer;
-import soot.PackManager;
-import soot.Transform;
+import soot.*;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -207,12 +204,17 @@ public class Main {
     }
 
     private void runInterproceduralOverrideAssignmentAnalysis(String classpath) {
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        InterproceduralOverrideAssignment interproceduralOverrideAssignment =
+                new InterproceduralOverrideAssignment(definition);
 
-        PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
+        PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", interproceduralOverrideAssignment));
         soot.options.Options.v().setPhaseOption("cg.spark", "on");
         soot.options.Options.v().setPhaseOption("cg.spark", "verbose:true");
         soot.options.Options.v().setPhaseOption("jb", "use-original-names:true");
+
+        Scene.v().loadNecessaryClasses();
+
+        interproceduralOverrideAssignment.configureEntryPoints();
 
         SootWrapper.builder()
                 .withClassPath(classpath)
@@ -220,7 +222,7 @@ public class Main {
                 .build()
                 .execute();
 
-        conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
+        conflicts.addAll(interproceduralOverrideAssignment.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
     }
 
     /*

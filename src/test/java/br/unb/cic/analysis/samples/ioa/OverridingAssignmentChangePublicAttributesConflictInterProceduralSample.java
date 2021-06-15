@@ -20,3 +20,4 @@ class Result {
         this.bar = 0;
     }
 }
+

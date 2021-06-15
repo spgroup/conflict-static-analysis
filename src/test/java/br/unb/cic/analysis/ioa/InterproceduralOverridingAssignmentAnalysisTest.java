@@ -6,23 +6,60 @@ import org.junit.Assert;
 import org.junit.Test;
 import soot.G;
 import soot.PackManager;
+import soot.Scene;
 import soot.Transform;
+import soot.options.Options;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 
 public class InterproceduralOverridingAssignmentAnalysisTest {
 
-
     private void configureTest(InterproceduralOverrideAssignment analysis) {
         G.reset();
 
-        PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
-        soot.options.Options.v().setPhaseOption("cg.spark", "on");
-        soot.options.Options.v().setPhaseOption("cg.spark", "verbose:true");
-        soot.options.Options.v().setPhaseOption("jb", "use-original-names:true");
+        List<String> testClasses = Collections.singletonList("target/test-classes/");
+
+        Options.v().set_no_bodies_for_excluded(true);
+        Options.v().set_allow_phantom_refs(true);
+        Options.v().set_output_format(Options.output_format_jimple);
+        Options.v().set_whole_program(true);
+        Options.v().set_process_dir(testClasses);
+        Options.v().set_full_resolver(true);
+        Options.v().set_keep_line_number(true);
+        Options.v().set_prepend_classpath(true);
+
+        Options.v().setPhaseOption("cg.spark", "on");
+        Options.v().setPhaseOption("cg.spark", "verbose:true");
+        Options.v().setPhaseOption("jb", "use-original-names:true");
         //PhaseOptions.v().setPhaseOption("jb", "use-original-names:true");
 
-        String testClasses = "target/test-classes/";
-        soot.Main.main(new String[]{"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-process-dir", testClasses});
+        PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
+        Scene.v().loadNecessaryClasses();
+
+        analysis.configureEntryPoints();
+
+        configurePackages().forEach(p -> PackManager.v().getPack(p).apply());
+
+    }
+
+    private List<String> configurePackages() {
+        List<String> packages = new ArrayList<String>();
+        packages.add("cg");
+        packages.add("wjtp");
+        return packages;
+    }
+
+    @Test
+    public void callGraphTest() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.CallGraphSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{6}, new int[]{7});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
     @Test
