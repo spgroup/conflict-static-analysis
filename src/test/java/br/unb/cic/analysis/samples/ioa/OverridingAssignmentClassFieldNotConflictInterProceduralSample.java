@@ -18,5 +18,4 @@ public class OverridingAssignmentClassFieldNotConflictInterProceduralSample {
         x = 1;
     }
 
-
 }
