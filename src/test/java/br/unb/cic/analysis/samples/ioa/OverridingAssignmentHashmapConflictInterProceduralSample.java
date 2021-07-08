@@ -6,11 +6,10 @@ import java.util.Map;
 // Conflict: [left, m():13] --> [right, m():14]
 public class OverridingAssignmentHashmapConflictInterProceduralSample {
 
-    private Map<String, String> hashMap = new HashMap<>();
 
     public void m() {
+        Map<String, String> hashMap = new HashMap<>();
         hashMap.put("Left", "left"); // LEFT
         hashMap.put("Right", "right"); // RIGHT
-
     }
 }
