@@ -8,6 +8,8 @@ import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.exceptions.ValueNotHandledException;
 import soot.*;
 import soot.jimple.*;
+import soot.jimple.toolkits.callgraph.CallGraph;
+import soot.jimple.toolkits.callgraph.Edge;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
 
@@ -51,7 +53,10 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         return conflicts;
     }
 
-    private void configureEntryPoints() {
+    public void configureEntryPoints() {
+        definition.loadSourceStatements();
+        definition.loadSinkStatements();
+
         List<SootMethod> entryPoints = new ArrayList<>();
         definition.getSourceStatements().forEach(s -> {
             if (!entryPoints.contains(s.getSootMethod())) {
@@ -63,10 +68,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     @Override
     protected void internalTransform(String s, Map<String, String> map) {
-        definition.loadSourceStatements();
-        definition.loadSinkStatements();
-
-        configureEntryPoints();
 
         List<SootMethod> methods = Scene.v().getEntryPoints();
         methods.forEach(sootMethod -> traverse(sootMethod, Statement.Type.IN_BETWEEN));
@@ -74,7 +75,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         //logger.log(Level.INFO, () -> String.format("%s", "traversedMethods: " + this.traversedMethods));
         logger.log(Level.INFO, () -> String.format("%s", "CONFLICTS: " + getConflicts()));
 
-        /*left.forEach(dataFlowAbstraction -> {
+        /* left.forEach(dataFlowAbstraction -> {
             String leftStmt = String.format("%s", "LEFT: " + dataFlowAbstraction.getStmt());
             logger.log(Level.INFO, leftStmt);
         });
@@ -94,7 +95,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
      *                      The remaining statements of the current method that have no markup will be marked according to the flowChangeTag.
      */
     private void traverse(SootMethod sootMethod, Statement.Type flowChangeTag) {
-
         if (this.traversedMethods.contains(sootMethod) || sootMethod.isPhantom()) {
             return;
         }
@@ -170,6 +170,11 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
                 kill(unit);
             }
 
+            // CallGraph callGraph = Scene.v().getCallGraph();
+            // Iterator<Edge> edges = callGraph.edgesOutOf(unit);
+            // showAllEdges(edges, unit);
+
+
             /* Check case: x = foo() + bar()
             In this case, this condition will be executed for the call to the foo() method and then another call to the bar() method.
              */
@@ -189,11 +194,24 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
         } else if (unit instanceof InvokeStmt) {
             InvokeStmt invokeStmt = (InvokeStmt) unit;
-            Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
-            // logger.log(Level.INFO, () -> String.format("%s", "stmt: " + stmt.toString()));
-            traverse(invokeStmt.getInvokeExpr().getMethod(), stmt.getType());
-        }
 
+            // logger.log(Level.INFO, () -> String.format("%s", "stmt: " + stmt.toString()));
+
+            CallGraph callGraph = Scene.v().getCallGraph();
+            Iterator<Edge> edges = callGraph.edgesOutOf(unit);
+
+            if (invokeStmt.getInvokeExpr() instanceof InterfaceInvokeExpr) {
+                while (edges.hasNext()) {
+                    Edge e = edges.next();
+                    Statement stmt = getStatementAssociatedWithUnit(e.getTgt().method(), unit, flowChangeTag);
+                    traverse(e.getTgt().method(), stmt.getType());
+                }
+            } else {
+                Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
+                traverse(invokeStmt.getInvokeExpr().getMethod(), stmt.getType());
+            }
+
+        }
     }
 
     private boolean isTagged(Statement.Type flowChangeTag, Unit unit) {
@@ -331,7 +349,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         return definition.getSinkStatements().stream().map(Statement::getUnit).collect(Collectors.toList()).contains(u);
     }
 
-
     private boolean isLeftAndRightUnit(Unit u) {
         return isLeftUnit(u) && isRightUnit(u);
     }
@@ -363,5 +380,4 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private boolean isLefAndRightStatement(Statement stmt) {
         return stmt.getType().equals(Statement.Type.BOTH);
     }
-
 }
