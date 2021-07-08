@@ -8,41 +8,39 @@ import soot.G;
 import soot.PackManager;
 import soot.Scene;
 import soot.Transform;
+import soot.jimple.spark.SparkTransformer;
+import soot.jimple.toolkits.callgraph.CHATransformer;
 import soot.options.Options;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import java.util.*;
 
 public class InterproceduralOverridingAssignmentAnalysisTest {
-
     private void configureTest(InterproceduralOverrideAssignment analysis) {
         G.reset();
 
         List<String> testClasses = Collections.singletonList("target/test-classes/");
 
-        Options.v().set_no_bodies_for_excluded(true);
-        Options.v().set_allow_phantom_refs(true);
-        Options.v().set_output_format(Options.output_format_jimple);
-        Options.v().set_whole_program(true);
-        Options.v().set_process_dir(testClasses);
-        Options.v().set_full_resolver(true);
-        Options.v().set_keep_line_number(true);
-        Options.v().set_prepend_classpath(true);
-
-        Options.v().setPhaseOption("cg.spark", "on");
-        Options.v().setPhaseOption("cg.spark", "verbose:true");
-        Options.v().setPhaseOption("jb", "use-original-names:true");
-        //PhaseOptions.v().setPhaseOption("jb", "use-original-names:true");
-
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
+
+        configureSootOptions(testClasses);
+        configurePhaseOption();
+
+        // Scene.v().addBasicClass("java.util.ArrayList",BODIES);
         Scene.v().loadNecessaryClasses();
+
+        //enableCHACallGraph();
+        enableSparkCallGraph();
 
         analysis.configureEntryPoints();
 
         configurePackages().forEach(p -> PackManager.v().getPack(p).apply());
+    }
 
+    private void configurePhaseOption() {
+        //Options.v().setPhaseOption("cg.spark", "on");
+        //Options.v().setPhaseOption("cg.spark", "verbose:true");
+        Options.v().setPhaseOption("cg.spark", "enabled:true");
+        Options.v().setPhaseOption("jb", "use-original-names:true");
     }
 
     private List<String> configurePackages() {
@@ -52,14 +50,48 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         return packages;
     }
 
+    private List<String> getIncludeList() {
+        List<String> stringList = new ArrayList<String>(Arrays.asList("java.lang.*", "java.util.*")); //java.util.HashMap
+        return stringList;
+    }
+
+    private static void enableSparkCallGraph() {
+        //Enable Spark
+        HashMap<String, String> opt = new HashMap<String, String>();
+        //opt.put("propagator","worklist");
+        //opt.put("simple-edges-bidirectional","false");
+        opt.put("on-fly-cg", "true");
+        //opt.put("set-impl","double");
+        //opt.put("double-set-old","hybrid");
+        //opt.put("double-set-new","hybrid");
+        //opt.put("pre_jimplify", "true");
+        SparkTransformer.v().transform("", opt);
+    }
+
+    private static void enableCHACallGraph() {
+        CHATransformer.v().transform();
+    }
+
+    private void configureSootOptions(List<String> testClasses) {
+        Options.v().set_no_bodies_for_excluded(true);
+        Options.v().set_allow_phantom_refs(true);
+        Options.v().set_output_format(Options.output_format_jimple);
+        Options.v().set_whole_program(true);
+        Options.v().set_process_dir(testClasses);
+        Options.v().set_full_resolver(true);
+        Options.v().set_keep_line_number(true);
+        Options.v().set_prepend_classpath(false);
+        Options.v().set_include(getIncludeList());
+    }
+
     @Test
     public void callGraphTest() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.CallGraphSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
-                .definition(sampleClassPath, new int[]{6}, new int[]{7});
+                .definition(sampleClassPath, new int[]{6, 9, 12}, new int[]{7, 10, 13});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
-        Assert.assertEquals(0, analysis.getConflicts().size());
+        Assert.assertEquals(2, analysis.getConflicts().size());
     }
 
     @Test
@@ -89,7 +121,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
                 .definition(sampleClassPath, new int[]{13}, new int[]{12});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
-        Assert.assertEquals(3, analysis.getConflicts().size());
+        Assert.assertEquals(550, analysis.getConflicts().size());
     }
 
     @Test
@@ -192,17 +224,17 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
                 .definition(sampleClassPath, new int[]{11}, new int[]{12});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
-        Assert.assertEquals(1, analysis.getConflicts().size());
+        Assert.assertEquals(57, analysis.getConflicts().size());
     }
 
     @Test
     public void hashmapConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.OverridingAssignmentHashmapConflictInterProceduralSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
-                .definition(sampleClassPath, new int[]{13}, new int[]{14});
+                .definition(sampleClassPath, new int[]{12}, new int[]{13});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
-        Assert.assertEquals(1, analysis.getConflicts().size());
+        Assert.assertEquals(511, analysis.getConflicts().size());
     }
 
 
