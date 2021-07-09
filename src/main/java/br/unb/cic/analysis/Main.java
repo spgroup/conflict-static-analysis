@@ -14,6 +14,7 @@ import br.unb.cic.diffclass.DiffClass;
 import org.apache.commons.cli.*;
 import scala.collection.JavaConverters;
 import soot.*;
+import soot.jimple.spark.SparkTransformer;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -208,11 +209,10 @@ public class Main {
                 new InterproceduralOverrideAssignment(definition);
 
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", interproceduralOverrideAssignment));
-        soot.options.Options.v().setPhaseOption("cg.spark", "on");
-        soot.options.Options.v().setPhaseOption("cg.spark", "verbose:true");
-        soot.options.Options.v().setPhaseOption("jb", "use-original-names:true");
+        soot.options.Options.v().set_include(getIncludeList());
 
         Scene.v().loadNecessaryClasses();
+        enableSparkCallGraph();
 
         interproceduralOverrideAssignment.configureEntryPoints();
 
@@ -223,6 +223,25 @@ public class Main {
                 .execute();
 
         conflicts.addAll(interproceduralOverrideAssignment.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
+    }
+
+    private List<String> getIncludeList() {
+        List<String> stringList = new ArrayList<String>(Arrays.asList("java.lang.*", "java.util.*")); //java.util.HashMap
+        return stringList;
+    }
+
+    private static void enableSparkCallGraph() {
+        //Enable Spark
+        HashMap<String, String> opt = new HashMap<String, String>();
+        //opt.put("propagator","worklist");
+        //opt.put("simple-edges-bidirectional","false");
+        opt.put("on-fly-cg", "true");
+        //opt.put("set-impl","double");
+        //opt.put("double-set-old","hybrid");
+        //opt.put("double-set-new","hybrid");
+        //opt.put("pre_jimplify", "true");
+        SparkTransformer.v().transform("", opt);
+        soot.options.Options.v().setPhaseOption("cg.spark", "enable:true");
     }
 
     /*
