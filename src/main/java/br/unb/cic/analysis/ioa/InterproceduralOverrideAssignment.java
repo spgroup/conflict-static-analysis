@@ -154,12 +154,14 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
              Yes, AssignStmt handles assignments and they can be of any type as long as they follow the structure: variable = value
              */
             AssignStmt assignStmt = (AssignStmt) unit;
-            // TODO rename Statement. (UnitWithExtraInformations)
-
 
             if (assignStmt.containsInvokeExpr()) {
-                Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
-                traverse(assignStmt.getInvokeExpr().getMethod(), stmt.getType());
+                if (assignStmt.getInvokeExpr() instanceof InterfaceInvokeExpr) {
+                    executeCallGraph(flowChangeTag, unit);
+                } else {
+                    Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
+                    traverse(assignStmt.getInvokeExpr().getMethod(), stmt.getType());
+                }
             }
 
             if (tagged) {
@@ -169,11 +171,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             } else {
                 kill(unit);
             }
-
-            // CallGraph callGraph = Scene.v().getCallGraph();
-            // Iterator<Edge> edges = callGraph.edgesOutOf(unit);
-            // showAllEdges(edges, unit);
-
 
             /* Check case: x = foo() + bar()
             In this case, this condition will be executed for the call to the foo() method and then another call to the bar() method.
@@ -197,20 +194,24 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
             // logger.log(Level.INFO, () -> String.format("%s", "stmt: " + stmt.toString()));
 
-            CallGraph callGraph = Scene.v().getCallGraph();
-            Iterator<Edge> edges = callGraph.edgesOutOf(unit);
-
             if (invokeStmt.getInvokeExpr() instanceof InterfaceInvokeExpr) {
-                while (edges.hasNext()) {
-                    Edge e = edges.next();
-                    Statement stmt = getStatementAssociatedWithUnit(e.getTgt().method(), unit, flowChangeTag);
-                    traverse(e.getTgt().method(), stmt.getType());
-                }
+                executeCallGraph(flowChangeTag, unit);
             } else {
                 Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
                 traverse(invokeStmt.getInvokeExpr().getMethod(), stmt.getType());
             }
 
+        }
+    }
+
+    private void executeCallGraph(Statement.Type flowChangeTag, Unit unit) {
+        CallGraph callGraph = Scene.v().getCallGraph();
+        Iterator<Edge> edges = callGraph.edgesOutOf(unit);
+
+        while (edges.hasNext()) {
+            Edge e = edges.next();
+            Statement stmt = getStatementAssociatedWithUnit(e.getTgt().method(), unit, flowChangeTag);
+            traverse(e.getTgt().method(), stmt.getType());
         }
     }
 
@@ -231,37 +232,37 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     // TODO add depth to InstanceFieldRef and StaticFieldRef...
+    // TODO rename Statement. (UnitWithExtraInformations)
     private void gen(Statement stmt) {
         if (isLeftStatement(stmt)) {
             checkConflict(stmt, right);
-            addToList(stmt, left); // TODO Add only if there is no immediate conflict?
+            addStmtToList(stmt, left);
 
         } else if (isRightStatement(stmt)) {
             checkConflict(stmt, left);
-            addToList(stmt, right);
+            addStmtToList(stmt, right);
 
         } else if (isLefAndRightStatement(stmt)) {
             addConflict(stmt, stmt);
 
-            addToList(stmt, left);
-            addToList(stmt, right);
+            addStmtToList(stmt, left);
+            addStmtToList(stmt, right);
         }
     }
 
-    //TODO Improve the name of this method and the second parameter
-    private void addToList(Statement stmt, FlowSet<DataFlowAbstraction> dataFlowAbstractionFlowSet) {
-        stmt.getUnit().getDefBoxes().forEach(valueBox -> dataFlowAbstractionFlowSet.add(new DataFlowAbstraction(valueBox.getValue(), stmt)));
+    private void addStmtToList(Statement stmt, FlowSet<DataFlowAbstraction> rightOrLeftList) {
+        stmt.getUnit().getDefBoxes().forEach(valueBox -> rightOrLeftList.add(new DataFlowAbstraction(valueBox.getValue(), stmt)));
     }
 
     /*
      * Checks if there is a conflict and if so adds it to the conflict list.
      */
-    private void checkConflict(Statement stmt, FlowSet<DataFlowAbstraction> dataFlowAbstractionFlowSet) {
-        dataFlowAbstractionFlowSet.forEach(dataFlowAbstraction -> stmt.getUnit().getDefBoxes().forEach(valueBox -> {
+    private void checkConflict(Statement stmt, FlowSet<DataFlowAbstraction> rightOrLeftList) {
+        rightOrLeftList.forEach(dataFlowAbstraction -> stmt.getUnit().getDefBoxes().forEach(valueBox -> {
             try {
                 if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
                     addConflict(stmt, dataFlowAbstraction.getStmt());
-                    dataFlowAbstractionFlowSet.remove(dataFlowAbstraction);
+                    rightOrLeftList.remove(dataFlowAbstraction);
                 }
             } catch (ValueNotHandledException e) {
                 assert false;
@@ -284,16 +285,16 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         unit.getDefBoxes().forEach(valueBox -> removeAll(valueBox, right));
     }
 
-    private void removeAll(ValueBox valueBox, FlowSet<DataFlowAbstraction> dataFlowAbstractionFlowSet) {
-        dataFlowAbstractionFlowSet.forEach(dataFlowAbstraction -> {
+    private void removeAll(ValueBox valueBox, FlowSet<DataFlowAbstraction> rightOrLeftList) {
+        rightOrLeftList.forEach(dataFlowAbstraction -> {
             try {
                 if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
-                    dataFlowAbstractionFlowSet.forEach(dt -> {
+                    rightOrLeftList.forEach(dt -> {
                         if (dt.getStmt().getSourceCodeLineNumber().equals(dataFlowAbstraction.getStmt().getSourceCodeLineNumber())) {
-                            dataFlowAbstractionFlowSet.remove(dt);
+                            rightOrLeftList.remove(dt);
                         }
                     });
-                    dataFlowAbstractionFlowSet.remove(dataFlowAbstraction);
+                    rightOrLeftList.remove(dataFlowAbstraction);
                 }
             } catch (ValueNotHandledException e) {
                 e.printStackTrace();
@@ -301,7 +302,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         });
     }
 
-    // TODO need to treat other cases (Arrays...)
     private boolean containsValue(DataFlowAbstraction dataFlowAbstraction, Value value) throws ValueNotHandledException {
         if (dataFlowAbstraction.getValue() instanceof InstanceFieldRef && value instanceof InstanceFieldRef) {
             return ((InstanceFieldRef) dataFlowAbstraction.getValue()).getFieldRef().equals(((InstanceFieldRef) value).getFieldRef());
