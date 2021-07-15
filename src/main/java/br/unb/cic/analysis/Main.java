@@ -208,21 +208,49 @@ public class Main {
         InterproceduralOverrideAssignment interproceduralOverrideAssignment =
                 new InterproceduralOverrideAssignment(definition);
 
+        List<String> testClasses = Collections.singletonList(classpath);
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", interproceduralOverrideAssignment));
-        soot.options.Options.v().set_include(getIncludeList());
 
+        configureSootOptions(testClasses);
+        configurePhaseOption();
+
+        // Scene.v().addBasicClass("java.util.ArrayList",BODIES);
         Scene.v().loadNecessaryClasses();
+
+        //enableCHACallGraph();
         enableSparkCallGraph();
 
         interproceduralOverrideAssignment.configureEntryPoints();
 
-        SootWrapper.builder()
-                .withClassPath(classpath)
-                .addClass(targetClasses.stream().collect(Collectors.joining(" ")))
-                .build()
-                .execute();
+        configurePackages().forEach(p -> PackManager.v().getPack(p).apply());
 
         conflicts.addAll(interproceduralOverrideAssignment.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
+    }
+
+    private void configureSootOptions(List<String> classpath) {
+        soot.options.Options.v().set_no_bodies_for_excluded(true);
+        soot.options.Options.v().set_allow_phantom_refs(true);
+        soot.options.Options.v().set_output_format(soot.options.Options.output_format_jimple);
+        soot.options.Options.v().set_whole_program(true);
+        soot.options.Options.v().set_process_dir(classpath);
+        soot.options.Options.v().set_full_resolver(true);
+        soot.options.Options.v().set_keep_line_number(true);
+        soot.options.Options.v().set_prepend_classpath(false);
+        soot.options.Options.v().set_include(getIncludeList());
+    }
+
+    private void configurePhaseOption() {
+        //Options.v().setPhaseOption("cg.spark", "on");
+        //Options.v().setPhaseOption("cg.spark", "verbose:true");
+        soot.options.Options.v().setPhaseOption("cg.spark", "enabled:true");
+        soot.options.Options.v().setPhaseOption("jb", "use-original-names:true");
+    }
+
+    private List<String> configurePackages() {
+        List<String> packages = new ArrayList<String>();
+        packages.add("cg");
+        packages.add("wjtp");
+        return packages;
     }
 
     private List<String> getIncludeList() {
