@@ -15,6 +15,7 @@ import org.apache.commons.cli.*;
 import scala.collection.JavaConverters;
 import soot.*;
 import soot.jimple.spark.SparkTransformer;
+import soot.jimple.toolkits.callgraph.CHATransformer;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -225,6 +226,9 @@ public class Main {
         configurePackages().forEach(p -> PackManager.v().getPack(p).apply());
 
         conflicts.addAll(interproceduralOverrideAssignment.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
+    }
+    private static void enableCHACallGraph() {
+        CHATransformer.v().transform();
     }
 
     private void configureSootOptions(List<String> classpath) {
