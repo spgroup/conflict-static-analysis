@@ -95,6 +95,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
      *                      The remaining statements of the current method that have no markup will be marked according to the flowChangeTag.
      */
     private void traverse(SootMethod sootMethod, Statement.Type flowChangeTag) {
+        System.out.println(sootMethod);
         if (this.traversedMethods.contains(sootMethod) || sootMethod.isPhantom()) {
             return;
         }
@@ -156,12 +157,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             AssignStmt assignStmt = (AssignStmt) unit;
 
             if (assignStmt.containsInvokeExpr()) {
-                if (assignStmt.getInvokeExpr() instanceof InterfaceInvokeExpr) {
-                    executeCallGraph(flowChangeTag, unit);
-                } else {
-                    Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
-                    traverse(assignStmt.getInvokeExpr().getMethod(), stmt.getType());
-                }
+                executeCallGraph(flowChangeTag, unit);
             }
 
             if (tagged) {
@@ -190,17 +186,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
               For builders, InvokeExpression is an instance of InvokeSpecial */
 
         } else if (unit instanceof InvokeStmt) {
-            InvokeStmt invokeStmt = (InvokeStmt) unit;
-
-            // logger.log(Level.INFO, () -> String.format("%s", "stmt: " + stmt.toString()));
-
-            if (invokeStmt.getInvokeExpr() instanceof InterfaceInvokeExpr) {
-                executeCallGraph(flowChangeTag, unit);
-            } else {
-                Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
-                traverse(invokeStmt.getInvokeExpr().getMethod(), stmt.getType());
-            }
-
+            executeCallGraph(flowChangeTag, unit);
         }
     }
 
