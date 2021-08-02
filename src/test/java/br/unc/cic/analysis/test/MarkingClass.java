@@ -1,11 +1,11 @@
 package br.unc.cic.analysis.test;
 
-public class Marking {
+public class MarkingClass {
     String className;
     int sourceLines[];
     int sinkLines[];
 
-    public Marking(String className, int[] sourceLines, int[] sinkLines) {
+    public MarkingClass(String className, int[] sourceLines, int[] sinkLines) {
         this.className = className;
         this.sourceLines = sourceLines;
         this.sinkLines = sinkLines;
