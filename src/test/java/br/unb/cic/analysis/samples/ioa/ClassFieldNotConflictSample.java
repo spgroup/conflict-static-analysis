@@ -4,10 +4,12 @@ package br.unb.cic.analysis.samples.ioa;
 public class ClassFieldNotConflictSample {
     private int x;
 
-    public void m() {
-        x = 0; // LEFT
-        base();
-        foo(); // RIGHT
+    public static void main(String[] args) {
+        ClassFieldNotConflictSample m = new ClassFieldNotConflictSample();
+
+        m.x = 0; // LEFT
+        m.base();
+        m.foo(); // RIGHT
     }
 
     private void base() {

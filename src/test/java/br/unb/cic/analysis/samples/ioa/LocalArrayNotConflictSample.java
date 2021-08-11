@@ -2,9 +2,11 @@ package br.unb.cic.analysis.samples.ioa;
 
 // Not Conflict
 public class LocalArrayNotConflictSample {
-    public void m() {
-        foo(); // LEFT
-        bar(); // RIGHT
+    public static void main(String[] args) {
+        LocalArrayNotConflictSample m = new LocalArrayNotConflictSample();
+
+        m.foo(); // LEFT
+        m.bar(); // RIGHT
     }
 
     private void foo() {

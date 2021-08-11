@@ -5,8 +5,8 @@ public class IfBranchConflictSample {
     private int x;
 
     public static void main() {
-        IfBranchConflictSample m =
-                new IfBranchConflictSample();
+        IfBranchConflictSample m = new IfBranchConflictSample();
+
         m.x = 0; // LEFT
         m.foo(); // RIGHT
     }

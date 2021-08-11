@@ -2,7 +2,7 @@ package br.unb.cic.analysis.samples.ioa;
 // Not Conflict
 public class SubclassConflictSample {
 
-    public static void m(A a) {
+    public static void main(String[] args) {
         A x = new A();
         int y = 0; // left
         x.m();  // right

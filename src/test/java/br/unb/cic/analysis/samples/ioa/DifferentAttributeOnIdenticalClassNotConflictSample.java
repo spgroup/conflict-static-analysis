@@ -9,9 +9,12 @@ public class DifferentAttributeOnIdenticalClassNotConflictSample {
         objectSample2 = new ObjectSample();
     }
 
-    public void m() {
-        objectSample1.setFoo(1); // LEFT
-        objectSample2.setBar(2); // RIGHT
+    public static void main(String[] args) {
+        DifferentAttributeOnIdenticalClassNotConflictSample m =
+                new DifferentAttributeOnIdenticalClassNotConflictSample();
+
+        m.objectSample1.setFoo(1); // LEFT
+        m.objectSample2.setBar(2); // RIGHT
     }
 }
 

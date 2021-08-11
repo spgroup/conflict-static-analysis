@@ -5,8 +5,8 @@ public class ClassFieldConflictSample2 {
     private int x;
 
     public static void main(String[] args) {
-        ClassFieldConflictSample2 m =
-                new ClassFieldConflictSample2();
+        ClassFieldConflictSample2 m = new ClassFieldConflictSample2();
+
         m.foo(); // LEFT
         m.bar(); // RIGHT
     }

@@ -4,9 +4,9 @@ package br.unb.cic.analysis.samples.ioa;
 // {left, CallGraphClassImplements<init>():38] --> [right, CallGraphClassImplements.baz():43}]
 
 public class CallGraphSample {
-    private int[] arr;
+    private static int[] arr;
 
-    public void m() {
+    public static void main(String[] args) {
         CallGraphInterface callGraphInterface = new CallGraphClassImplements(); // LEFT
         callGraphInterface.baz(); // RIGHT
 
@@ -21,8 +21,8 @@ public class CallGraphSample {
         int y = 1;
     }
 
-    private void foo() {
-        this.arr[1] = 1;
+    private static void foo() {
+        arr[1] = 1;
     }
 }
 

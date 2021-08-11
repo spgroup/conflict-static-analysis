@@ -10,9 +10,11 @@ public class DifferentClassWithSameAttributeNotConflictSample {
         objectExample2 = new ObjectExample2();
     }
 
-    public void m() {
-        objectExample.setFoo(1); // LEFT
-        objectExample2.setFoo(2); // RIGHT
+    public static void main(String[] args) {
+        DifferentClassWithSameAttributeNotConflictSample m = new DifferentClassWithSameAttributeNotConflictSample();
+
+        m.objectExample.setFoo(1); // LEFT
+        m.objectExample2.setFoo(2); // RIGHT
     }
 }
 

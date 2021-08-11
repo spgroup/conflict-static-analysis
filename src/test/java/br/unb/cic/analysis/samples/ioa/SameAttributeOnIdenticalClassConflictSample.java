@@ -1,14 +1,11 @@
 package br.unb.cic.analysis.samples.ioa;
 
-// Not Conflict
+// Conflict: [left, setFoo():18] --> [right, setFoo():18]
 public class SameAttributeOnIdenticalClassConflictSample {
-    private TestObject testObject;
 
-    public SameAttributeOnIdenticalClassConflictSample() {
-        testObject = new TestObject();
-    }
+    public static void main(String[] args) {
+        TestObject testObject = new TestObject();
 
-    public void m() {
         testObject.setFoo(1); // LEFT
         testObject.setFoo(2); // RIGHT
     }

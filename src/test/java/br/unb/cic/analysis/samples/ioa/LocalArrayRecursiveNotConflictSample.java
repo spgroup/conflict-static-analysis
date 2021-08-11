@@ -2,9 +2,11 @@ package br.unb.cic.analysis.samples.ioa;
 
 // Not Conflict
 public class LocalArrayRecursiveNotConflictSample {
-    public void m() {
-        foo(); // LEFT
-        bar(); // RIGHT
+    public static void main(String[] args) {
+        LocalArrayRecursiveNotConflictSample m = new LocalArrayRecursiveNotConflictSample();
+
+        m.foo(); // LEFT
+        m.bar(); // RIGHT
     }
 
     private void foo() {

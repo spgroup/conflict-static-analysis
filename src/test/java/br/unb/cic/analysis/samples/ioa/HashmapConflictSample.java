@@ -6,7 +6,6 @@ import java.util.Map;
 // Conflict: [left, m():13] --> [right, m():14]
 public class HashmapConflictSample {
 
-
     public void m() {
         Map<String, String> hashMap = new HashMap<>();
         hashMap.put("Left", "left"); // LEFT

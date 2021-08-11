@@ -2,9 +2,11 @@ package br.unb.cic.analysis.samples.ioa;
 
 // Not Conflict
 public class LocalVariablesWithParameterNotConflictSample {
-    public void m() {
-        foo(0); // LEFT
-        bar(1); // RIGHT
+    public static void main(String[] args) {
+        LocalVariablesWithParameterNotConflictSample m = new LocalVariablesWithParameterNotConflictSample();
+
+        m.foo(0); // LEFT
+        m.bar(1); // RIGHT
     }
 
     private void foo(int a) {
