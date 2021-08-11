@@ -1,16 +1,20 @@
 package br.unb.cic.analysis.samples.ioa;
+
+// Conflict: [{left, CallGraphClassImplements.baz():43] --> [right, CallGraphClassImplements<init>():38},
+// {left, CallGraphClassImplements<init>():38] --> [right, CallGraphClassImplements.baz():43}]
+
 public class CallGraphSample {
     private int[] arr;
 
     public void m() {
-        CallGraphInterface callGraphInterface = new CallGraphClassImplements();
-        callGraphInterface.baz();
+        CallGraphInterface callGraphInterface = new CallGraphClassImplements(); // LEFT
+        callGraphInterface.baz(); // RIGHT
 
-        CallGraphClassImplements callGraphClassImplements = new CallGraphClassImplements();
-        callGraphClassImplements.baz();
+        CallGraphClassImplements callGraphClassImplements = new CallGraphClassImplements(); // LEFT
+        callGraphClassImplements.baz(); // RIGHT
 
-        CallGraphClass callGraphClass = new CallGraphClass();
-        callGraphClass.bar();
+        CallGraphClass callGraphClass = new CallGraphClass(); // LEFT
+        callGraphClass.bar(); // RIGHT
 
         foo();
 

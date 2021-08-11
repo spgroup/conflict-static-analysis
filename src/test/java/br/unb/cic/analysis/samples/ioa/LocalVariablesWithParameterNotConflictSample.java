@@ -1,7 +1,7 @@
 package br.unb.cic.analysis.samples.ioa;
 
 // Not Conflict
-public class OverridingAssignmentLocalVariablesWithParameterNotConflictInterProceduralSample {
+public class LocalVariablesWithParameterNotConflictSample {
     public void m() {
         foo(0); // LEFT
         bar(1); // RIGHT

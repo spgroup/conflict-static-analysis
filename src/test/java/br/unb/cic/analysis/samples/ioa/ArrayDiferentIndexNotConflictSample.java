@@ -1,5 +1,5 @@
 package br.unb.cic.analysis.samples.ioa;
-
+// Not Conflict
 public class ArrayDiferentIndexNotConflictSample {
     private int[] arr;
 

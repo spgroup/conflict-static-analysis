@@ -1,7 +1,7 @@
 package br.unb.cic.analysis.samples.ioa;
 
 // Not Conflict
-public class OverridingAssignmentClassFieldNotConflictInterProceduralSample {
+public class ClassFieldNotConflictSample {
     private int x;
 
     public void m() {

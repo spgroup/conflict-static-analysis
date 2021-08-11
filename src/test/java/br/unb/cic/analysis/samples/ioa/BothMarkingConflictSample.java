@@ -5,9 +5,8 @@ public class BothMarkingConflictSample {
     private static int x;
 
     public void main() {
-        foo();
+        foo(); // LEFT
     }
-
 
     private static void foo() {
         x = 1; // RIGHT

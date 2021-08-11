@@ -1,7 +1,7 @@
 package br.unb.cic.analysis.samples.ioa;
 
 // Not Conflict
-public class OverridingAssignmentLocalArrayRecursiveNotConflictInterProceduralSample {
+public class LocalArrayNotConflictSample {
     public void m() {
         foo(); // LEFT
         bar(); // RIGHT
@@ -9,7 +9,6 @@ public class OverridingAssignmentLocalArrayRecursiveNotConflictInterProceduralSa
 
     private void foo() {
         int[] arr = {0};
-        bar();
     }
 
     private void bar() {

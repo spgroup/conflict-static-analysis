@@ -1,12 +1,12 @@
 package br.unb.cic.analysis.samples.ioa;
 
-// Conflict: [left, m():8] --> [right, foo():14]
-public class OverridingAssignmentIfBranchConflictInterProceduralSample {
+// Conflict: [left, main():10] --> [right, foo():16]
+public class IfBranchConflictSample {
     private int x;
 
     public static void main() {
-        OverridingAssignmentIfBranchConflictInterProceduralSample m =
-                new OverridingAssignmentIfBranchConflictInterProceduralSample();
+        IfBranchConflictSample m =
+                new IfBranchConflictSample();
         m.x = 0; // LEFT
         m.foo(); // RIGHT
     }

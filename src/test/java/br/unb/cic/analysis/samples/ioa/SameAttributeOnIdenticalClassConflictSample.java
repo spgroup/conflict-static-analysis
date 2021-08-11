@@ -1,10 +1,10 @@
 package br.unb.cic.analysis.samples.ioa;
 
-// Conflict: [left, m():12] --> [right, foo():13]
-public class OverridingAssignmentSameAttributeOnIdenticalClassConflictInterProceduralSample {
+// Not Conflict
+public class SameAttributeOnIdenticalClassConflictSample {
     private TestObject testObject;
 
-    public OverridingAssignmentSameAttributeOnIdenticalClassConflictInterProceduralSample() {
+    public SameAttributeOnIdenticalClassConflictSample() {
         testObject = new TestObject();
     }
 

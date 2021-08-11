@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 // Conflict: [left, m():13] --> [right, m():14]
-public class OverridingAssignmentHashmapConflictInterProceduralSample {
+public class HashmapConflictSample {
 
 
     public void m() {

@@ -1,17 +1,24 @@
 package br.unb.cic.analysis.samples.ioa;
 
 // Not Conflict
-public class OverridingAssignmentLocalArrayNotConflictInterProceduralSample {
+public class ClassFieldNotConflictSample2 {
+    private int x;
+
     public void m() {
         foo(); // LEFT
+        base();
         bar(); // RIGHT
     }
 
+    private void base() {
+        x = 0;
+    }
+
     private void foo() {
-        int[] arr = {0};
+        x = 1;
     }
 
     private void bar() {
-        int[] arr = {1};
+        x = 2;
     }
 }

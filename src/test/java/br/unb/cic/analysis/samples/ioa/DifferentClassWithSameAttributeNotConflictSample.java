@@ -1,11 +1,11 @@
 package br.unb.cic.analysis.samples.ioa;
 
 // Not Conflict
-public class OverridingAssignmentDifferentClassWithSameAttributeNotConflictInterProceduralSample {
+public class DifferentClassWithSameAttributeNotConflictSample {
     private ObjectExample objectExample;
     private ObjectExample2 objectExample2;
 
-    public OverridingAssignmentDifferentClassWithSameAttributeNotConflictInterProceduralSample() {
+    public DifferentClassWithSameAttributeNotConflictSample() {
         objectExample = new ObjectExample();
         objectExample2 = new ObjectExample2();
     }

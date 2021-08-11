@@ -1,5 +1,5 @@
 package br.unb.cic.analysis.samples.ioa;
-
+// Not Conflict
 public class SubclassConflictSample {
 
     public static void m(A a) {

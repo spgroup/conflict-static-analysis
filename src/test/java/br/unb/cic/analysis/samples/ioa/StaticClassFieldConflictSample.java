@@ -1,7 +1,7 @@
 package br.unb.cic.analysis.samples.ioa;
 
 // Conflict: [left, foo():14] --> [right, bar():22]
-public class OverridingAssignmentStaticClassFieldConflictInterProceduralSample {
+public class StaticClassFieldConflictSample {
     public static int y;
 
     public static void main(String[] args) {

@@ -1,6 +1,6 @@
 package br.unb.cic.analysis.samples.ioa;
 
-// Conflict: [left, foo():13] --> [right, foo():13]
+// Conflict: [left, foo():15] --> [right, foo():15]
 public class RecursiveCallConflictSample {
 
     public static void main(String[] args) {

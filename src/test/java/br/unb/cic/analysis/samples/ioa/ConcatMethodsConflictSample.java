@@ -1,11 +1,11 @@
 package br.unb.cic.analysis.samples.ioa;
 
-// Conflict: [left, m():7] --> [right, foo():8]
-public class OverridingAssignmentConcatMethodsConflictInterProceduralSample {
+// Conflict: [left, main():10] --> [right, main():11]
+public class ConcatMethodsConflictSample {
 
     public static void main(String[] args) {
-        OverridingAssignmentConcatMethodsConflictInterProceduralSample m =
-                new OverridingAssignmentConcatMethodsConflictInterProceduralSample();
+        ConcatMethodsConflictSample m =
+                new ConcatMethodsConflictSample();
 
         int x = m.foo() + m.bar(); // LEFT i3 = $i0 + $i1 - x = $stack2 + $stack3
         x = x + m.qux();         // RIGHT i4 = i3 + $i2 - x = x + $stack4

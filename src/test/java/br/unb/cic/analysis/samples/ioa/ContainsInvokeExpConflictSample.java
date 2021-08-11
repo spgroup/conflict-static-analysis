@@ -4,10 +4,12 @@ package br.unb.cic.analysis.samples.ioa;
 public class ContainsInvokeExpConflictSample {
     private int x, y;
 
-    public void m() {
-        x = 0; // LEFT
-        y = 0;
-        x = foo(); // RIGHT
+    public static void main() {
+        ContainsInvokeExpConflictSample m = new ContainsInvokeExpConflictSample();
+
+        m.x = 0; // LEFT
+        m.y = 0;
+        m.x = m.foo(); // RIGHT
     }
 
     private int foo() {

@@ -2,15 +2,15 @@ package br.unb.cic.analysis.samples.ioa;
 
 import br.unb.cic.analysis.samples.OverridingAssignmentInstance2;
 
-// Conflict: [left, baz():33] --> [right, bar():29]
-public class OverridingAssignmentObjectThreeFieldsOneConflictInterProceduralSample {
+// Conflict: [left, baz():35] --> [right, bar():31]
+public class ObjectThreeFieldsOneConflictSample {
     public OverridingAssignmentInstance2 a;
     public OverridingAssignmentInstance2 b;
 
-    public static OverridingAssignmentObjectThreeFieldsOneConflictInterProceduralSample instanceLocal;
+    public static ObjectThreeFieldsOneConflictSample instanceLocal;
 
     public static void main(String[] args) {
-        instanceLocal = new OverridingAssignmentObjectThreeFieldsOneConflictInterProceduralSample();
+        instanceLocal = new ObjectThreeFieldsOneConflictSample();
 
         instanceLocal.foo();   // left
         instanceLocal.bar();   // right in {instanceLocal.b.a.a, instanceLocal.b.a.b }

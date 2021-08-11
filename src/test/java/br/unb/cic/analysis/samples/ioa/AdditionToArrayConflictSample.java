@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // Conflict: [left, m():11] --> [right, m():12]
-public class OverridingAssignmentAdditionToArrayConflictInterProceduralSample {
+public class AdditionToArrayConflictSample {
 
     public void m() {
         List<String> validParameterAnnotations = new ArrayList<String>();
