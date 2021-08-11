@@ -4,11 +4,13 @@ package br.unb.cic.analysis.samples.ioa;
 public class OverridingAssignmentArrayAliasingConflictInterProceduralSample {
     private int[] arr, barr;
 
-    public void m() {
-        arr = new int[]{0, 0, 0, 0, 0};
-        barr = arr;
-        foo(); // LEFT
-        bar(); // RIGHT
+    public static void main(String[] args) {
+        OverridingAssignmentArrayAliasingConflictInterProceduralSample m =
+                new OverridingAssignmentArrayAliasingConflictInterProceduralSample();
+        m.arr = new int[]{0, 0, 0, 0, 0};
+        m.barr = m.arr;
+        m.foo(); // LEFT
+        m.bar(); // RIGHT
     }
 
     private void foo() {

@@ -4,9 +4,10 @@ package br.unb.cic.analysis.samples.ioa;
 public class RecursiveMockupConflictSample {
     private int x;
 
-    public void m() {
-        foo(); // LEFT
-        foo(); // Right
+    public static void main(String[] args) {
+        RecursiveMockupConflictSample m = new RecursiveMockupConflictSample();
+        m.foo(); // LEFT
+        m.foo(); // Right
     }
 
     private void foo() {

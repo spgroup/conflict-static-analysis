@@ -4,10 +4,11 @@ package br.unb.cic.analysis.samples.ioa;
 public class ArraySameIndexConflictSample {
     private int[] arr;
 
-    public void m() {
-        arr = new int[]{0, 0, 0, 0, 0};
-        foo(); // LEFT
-        bar(); // RIGHT
+    public static void main(String[] args) {
+        ArraySameIndexConflictSample m = new ArraySameIndexConflictSample();
+        m.arr = new int[]{0, 0, 0, 0, 0};
+        m.foo(); // LEFT
+        m.bar(); // RIGHT
     }
 
     private void foo() {

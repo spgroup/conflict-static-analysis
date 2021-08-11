@@ -4,9 +4,12 @@ package br.unb.cic.analysis.samples.ioa;
 public class OverridingAssignmentChangeInstanceAttributeConflictInterProceduralSample {
     private InstanceAttributeSample instanceAttributeSample;
 
-    public void m() {
-        this.instanceAttributeSample = new InstanceAttributeSample(); // LEFT
-        instanceAttributeSample.setFoo(2); // RIGHT
+    public static void main(String[] args) {
+        OverridingAssignmentChangeInstanceAttributeConflictInterProceduralSample m =
+                new OverridingAssignmentChangeInstanceAttributeConflictInterProceduralSample();
+
+        m.instanceAttributeSample = new InstanceAttributeSample(); // LEFT
+        m.instanceAttributeSample.setFoo(2); // RIGHT
     }
 }
 

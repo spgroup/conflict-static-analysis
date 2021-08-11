@@ -4,11 +4,12 @@ package br.unb.cic.analysis.samples.ioa;
 public class IfWithInvokeConflictSample {
     private int x, y;
 
-    public void m() {
-        x = 0; // LEFT
-        y = 0;
-        if (foo()) { // RIGHT
-            y = 1;
+    public static void main(String[] args) {
+        IfWithInvokeConflictSample m = new IfWithInvokeConflictSample();
+        m.x = 0; // LEFT
+        m.y = 0;
+        if (m.foo()) { // RIGHT
+            m.y = 1;
         }
     }
 

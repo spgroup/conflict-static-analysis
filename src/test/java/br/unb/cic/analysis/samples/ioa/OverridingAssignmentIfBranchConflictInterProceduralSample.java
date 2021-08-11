@@ -4,9 +4,11 @@ package br.unb.cic.analysis.samples.ioa;
 public class OverridingAssignmentIfBranchConflictInterProceduralSample {
     private int x;
 
-    public void m() {
-        x = 0; // LEFT
-        foo(); // RIGHT
+    public static void main() {
+        OverridingAssignmentIfBranchConflictInterProceduralSample m =
+                new OverridingAssignmentIfBranchConflictInterProceduralSample();
+        m.x = 0; // LEFT
+        m.foo(); // RIGHT
     }
 
     private void foo() {
@@ -16,6 +18,5 @@ public class OverridingAssignmentIfBranchConflictInterProceduralSample {
             int a = 0;
             // System.out.println(x)
         }
-        ;
     }
 }

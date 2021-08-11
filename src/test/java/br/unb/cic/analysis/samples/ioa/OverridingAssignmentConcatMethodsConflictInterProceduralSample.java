@@ -3,9 +3,12 @@ package br.unb.cic.analysis.samples.ioa;
 // Conflict: [left, m():7] --> [right, foo():8]
 public class OverridingAssignmentConcatMethodsConflictInterProceduralSample {
 
-    public void m() {
-        int x = foo() + bar(); // LEFT i3 = $i0 + $i1 - x = $stack2 + $stack3
-        x = x + qux();         // RIGHT i4 = i3 + $i2 - x = x + $stack4
+    public static void main(String[] args) {
+        OverridingAssignmentConcatMethodsConflictInterProceduralSample m =
+                new OverridingAssignmentConcatMethodsConflictInterProceduralSample();
+
+        int x = m.foo() + m.bar(); // LEFT i3 = $i0 + $i1 - x = $stack2 + $stack3
+        x = x + m.qux();         // RIGHT i4 = i3 + $i2 - x = x + $stack4
     }
 
     private int foo() {

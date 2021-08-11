@@ -7,16 +7,16 @@ public class OverridingAssignmentObjectThreeFieldsOneConflictInterProceduralSamp
     public OverridingAssignmentInstance2 a;
     public OverridingAssignmentInstance2 b;
 
-    public OverridingAssignmentObjectThreeFieldsOneConflictInterProceduralSample instanceLocal;
+    public static OverridingAssignmentObjectThreeFieldsOneConflictInterProceduralSample instanceLocal;
 
-    public void m() {
+    public static void main(String[] args) {
         instanceLocal = new OverridingAssignmentObjectThreeFieldsOneConflictInterProceduralSample();
 
-        foo();   // left
-        bar();   // right in {instanceLocal.b.a.a, instanceLocal.b.a.b }
-        base();  // base
-        baz();   //left
-        qux();   //right
+        instanceLocal.foo();   // left
+        instanceLocal.bar();   // right in {instanceLocal.b.a.a, instanceLocal.b.a.b }
+        instanceLocal.base();  // base
+        instanceLocal.baz();   //left
+        instanceLocal.qux();   //right
     }
 
     private void foo() {

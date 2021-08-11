@@ -5,9 +5,11 @@ package br.unb.cic.analysis.samples.ioa;
 public class OverridingAssignmentClassFieldWithParameterNotConflictInterProceduralSample {
     private int x;
 
-    public void m() {
-        x = 0; // LEFT
-        foo(x); // RIGHT
+    public static void main(String[] args) {
+        OverridingAssignmentClassFieldWithParameterNotConflictInterProceduralSample m =
+                new OverridingAssignmentClassFieldWithParameterNotConflictInterProceduralSample();
+        m.x = 0; // LEFT
+        m.foo(m.x); // RIGHT
     }
 
     private void foo(int a) {

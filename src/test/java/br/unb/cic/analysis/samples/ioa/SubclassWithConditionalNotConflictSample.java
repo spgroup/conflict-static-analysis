@@ -16,16 +16,21 @@ public class SubclassWithConditionalNotConflictSample {
         }
         c.m();
     }
-
 }
 
 class C {
     public int x;
-    C(){
+
+    C() {
         this.x = 0;
     }
+
     public void m() {
-         this.x = 1; // LEFT
+        foo(); // LEFT
+    }
+
+    public void foo() {
+        this.x = 1; // LEFT
     }
 }
 

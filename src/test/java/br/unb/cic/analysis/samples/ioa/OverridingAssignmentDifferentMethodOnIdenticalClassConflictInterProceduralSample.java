@@ -4,13 +4,13 @@ package br.unb.cic.analysis.samples.ioa;
 public class OverridingAssignmentDifferentMethodOnIdenticalClassConflictInterProceduralSample {
     private IdenticalClassSample identicalClassSample;
 
-    public OverridingAssignmentDifferentMethodOnIdenticalClassConflictInterProceduralSample() {
-        this.identicalClassSample = new IdenticalClassSample();
-    }
+    public static void main(String[] args) {
+        OverridingAssignmentDifferentMethodOnIdenticalClassConflictInterProceduralSample m =
+                new OverridingAssignmentDifferentMethodOnIdenticalClassConflictInterProceduralSample();
 
-    public void m() {
-        identicalClassSample.setFoo(1); // LEFT
-        identicalClassSample.setBar(2); // RIGHT
+        m.identicalClassSample = new IdenticalClassSample();
+        m.identicalClassSample.setFoo(1); // LEFT
+        m.identicalClassSample.setBar(2); // RIGHT
     }
 }
 
