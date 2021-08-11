@@ -28,7 +28,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private final AbstractMergeConflictDefinition definition;
     private final FlowSet<DataFlowAbstraction> left;
     private final FlowSet<DataFlowAbstraction> right;
-    private FlowSet<DataFlowAbstraction> abstraction;
 
     private final Logger logger;
 
@@ -38,7 +37,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         this.conflicts = new HashSet<>();
         this.left = new ArraySparseSet<>();
         this.right = new ArraySparseSet<>();
-        this.abstraction = new ArraySparseSet<>();
         this.traversedMethods = new ArrayList<>();
         this.pointsToAnalysis = Scene.v().getPointsToAnalysis();
 
@@ -73,11 +71,11 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     protected void internalTransform(String s, Map<String, String> map) {
 
         List<SootMethod> methods = Scene.v().getEntryPoints();
-        methods.forEach(sootMethod -> traverse(this.abstraction, sootMethod, Statement.Type.IN_BETWEEN));
+        methods.forEach(sootMethod -> traverse(new ArraySparseSet<>(), sootMethod, Statement.Type.IN_BETWEEN));
 
         logger.log(Level.INFO, () -> String.format("%s", "CONFLICTS: " + getConflicts()));
 
-        /*left.forEach(dataFlowAbstraction -> {
+        /* left.forEach(dataFlowAbstraction -> {
             String leftStmt = String.format("%s", "LEFT: " + dataFlowAbstraction.getStmt());
             logger.log(Level.INFO, leftStmt);
         });
@@ -85,7 +83,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         right.forEach(dataFlowAbstraction -> {
             String rightStmt = String.format("%s", "RIGHT: " + dataFlowAbstraction.getStmt());
             logger.log(Level.INFO, rightStmt);
-        });*/
+        }); */
     }
 
     /**
@@ -95,11 +93,12 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
      * @param flowChangeTag This parameter identifies whether the unit under analysis is in the flow of any statement already marked.
      *                      Initially it receives the value IN_BETWEEN but changes if the call to the current method (sootMethod) has been marked as SOURCE or SINK.
      *                      The remaining statements of the current method that have no markup will be marked according to the flowChangeTag.
+     * @return the result of applying the analysis considering the income abstraction (in) and the sootMethod
      */
     private FlowSet<DataFlowAbstraction> traverse(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod, Statement.Type flowChangeTag) {
         //System.out.println(sootMethod);
         if (this.traversedMethods.contains(sootMethod) || sootMethod.isPhantom()) {
-            return null;
+            return in;
         }
 
         this.traversedMethods.add(sootMethod);
@@ -107,15 +106,13 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         Body body = retrieveActiveBodySafely(sootMethod);
 
         if (body != null) {
-
-            body.getUnits().forEach(unit -> {
-
+            for (Unit unit : body.getUnits()) {
                 if (isTagged(flowChangeTag, unit)) {
-                    runAnalysisWithTaggedUnit(in, sootMethod, flowChangeTag, unit);
+                    in = runAnalysisWithTaggedUnit(in, sootMethod, flowChangeTag, unit);
                 } else {
-                    runAnalysisWithBaseUnit(in, sootMethod, flowChangeTag, unit);
+                    in = runAnalysisWithBaseUnit(in, sootMethod, flowChangeTag, unit);
                 }
-            });
+            }
         }
 
         this.traversedMethods.remove(sootMethod);
@@ -136,8 +133,8 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     private FlowSet<DataFlowAbstraction> runAnalysisWithBaseUnit(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod,
-                                         Statement.Type flowChangeTag, Unit unit) {
-       return runAnalysis(in, sootMethod, flowChangeTag, unit, false);
+                                                                 Statement.Type flowChangeTag, Unit unit) {
+        return runAnalysis(in, sootMethod, flowChangeTag, unit, false);
     }
 
     /**
@@ -163,14 +160,16 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             AssignStmt assignStmt = (AssignStmt) unit;
 
             if (assignStmt.containsInvokeExpr()) {
-                return executeCallGraph(in.clone(), flowChangeTag, unit);
+                return executeCallGraph(in, flowChangeTag, unit);
             }
 
             if (tagged) {
                 Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
                 // logger.log(Level.INFO, () -> String.format("%s", "stmt: " + stmt.toString()));
+                separeteAbstraction(in);
                 gen(in, stmt);
             } else {
+                separeteAbstraction(in);
                 kill(in, unit);
             }
 
@@ -198,35 +197,39 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         return in;
     }
 
+    private void separeteAbstraction(FlowSet<DataFlowAbstraction> in) {
+        in.forEach(item -> {
+            if (isLefAndRightStatement(item.getStmt())) {
+                right.add(item);
+                left.add(item);
+            } else if (isLeftStatement(item.getStmt())) {
+                left.add(item);
+            } else if (isRightStatement(item.getStmt())) {
+                right.add(item);
+            }
+        });
+    }
+
     private FlowSet<DataFlowAbstraction> executeCallGraph(FlowSet<DataFlowAbstraction> in, Statement.Type flowChangeTag, Unit unit) {
         CallGraph callGraph = Scene.v().getCallGraph();
         Iterator<Edge> edges = callGraph.edgesOutOf(unit);
 
-        List<FlowSet<DataFlowAbstraction>>  flowSetList = new ArrayList<FlowSet<DataFlowAbstraction>>();
-        FlowSet<DataFlowAbstraction> flowSetUnion = new ArraySparseSet<>();
+        List<FlowSet<DataFlowAbstraction>> flowSetList = new ArrayList<FlowSet<DataFlowAbstraction>>();
 
         while (edges.hasNext()) {
             Edge e = edges.next();
-            Statement stmt = getStatementAssociatedWithUnit(e.getTgt().method(), unit, flowChangeTag);
+            SootMethod method = e.getTgt().method();
+            Statement stmt = getStatementAssociatedWithUnit(method, unit, flowChangeTag);
 
-            FlowSet<DataFlowAbstraction> traverseResult = traverse(in.clone(), e.getTgt().method(), stmt.getType());
+            FlowSet<DataFlowAbstraction> traverseResult = traverse(in.clone(), method, stmt.getType());
             flowSetList.add(traverseResult);
 
-           /* System.out.println("------traverseResult--------");
-            System.out.println("METHOD: " + e.getTgt().method());
-            traverseResult.forEach(item -> System.out.println(item.getStmt()));
-            System.out.println("------traverseResult--------");*/
         }
 
+        FlowSet<DataFlowAbstraction> flowSetUnion = new ArraySparseSet<>();
         flowSetList.forEach(flowSet -> flowSetUnion.union(flowSet));
 
-        System.out.println("--------------flowSetUnion--------------");
-        flowSetUnion.forEach(item -> System.out.println(item.getStmt()));
-        System.out.println("--------------in--------------");
-        in.forEach(item -> System.out.println(item.getStmt()));
-
         return flowSetUnion;
-
     }
 
     private boolean isTagged(Statement.Type flowChangeTag, Unit unit) {
@@ -295,7 +298,8 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private void kill(FlowSet<DataFlowAbstraction> in, Unit unit) {
         unit.getDefBoxes().forEach(valueBox -> removeAll(valueBox, in));
-        //unit.getDefBoxes().forEach(valueBox -> removeAll(valueBox, right));
+        unit.getDefBoxes().forEach(valueBox -> removeAll(valueBox, left));
+        unit.getDefBoxes().forEach(valueBox -> removeAll(valueBox, right));
     }
 
     private void removeAll(ValueBox valueBox, FlowSet<DataFlowAbstraction> rightOrLeftList) {
@@ -340,7 +344,8 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     private Statement getStatementAssociatedWithUnit(SootMethod sootMethod, Unit u, Statement.Type flowChangeTag) {
-        if (isLeftAndRightUnit(u) || isInLeftAndRightStatementFlow(flowChangeTag)) {
+        if (isLeftAndRightUnit(u) || isInLeftAndRightStatementFlow(flowChangeTag) || isBothUnitOrBothStatementFlow(u,
+                flowChangeTag)) {
             return createStatement(sootMethod, u, Statement.Type.BOTH);
         } else if (isLeftUnit(u)) {
             return findLeftStatement(u);
@@ -352,6 +357,15 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             return createStatement(sootMethod, u, flowChangeTag);
         }
         return createStatement(sootMethod, u, Statement.Type.IN_BETWEEN);
+    }
+
+    private boolean isBothUnitOrBothStatementFlow(Unit u, Statement.Type flowChangeTag) {
+        if (isRightUnit(u) && isInLeftStatementFlow(flowChangeTag)) {
+            return true;
+        } else if (isLeftUnit(u) && isInRightStatementFlow(flowChangeTag)) {
+            return true;
+        }
+        return false;
     }
 
     private boolean isLeftUnit(Unit u) {

@@ -4,7 +4,6 @@ import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unc.cic.analysis.test.DefinitionFactory;
 import br.unc.cic.analysis.test.MarkingClass;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import soot.G;
 import soot.PackManager;
@@ -53,20 +52,21 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
     }
 
     private List<String> getIncludeList() {
-        List<String> stringList = new ArrayList<String>(Arrays.asList("java.lang.*", "java.util.*")); //java.util.HashMap
+        // "java.lang.*"
+        List<String> stringList = new ArrayList<String>(Arrays.asList("java.util.*")); //java.util.HashMap
         return stringList;
     }
 
     private static void enableSparkCallGraph() {
         //Enable Spark
         HashMap<String, String> opt = new HashMap<String, String>();
-        opt.put("propagator", "worklist"); //
-        opt.put("simple-edges-bidirectional", "false"); //
+        // opt.put("propagator", "worklist");
+        // opt.put("simple-edges-bidirectional", "false");
         opt.put("on-fly-cg", "true");
-        opt.put("set-impl", "double"); //
-        opt.put("double-set-old", "hybrid"); //
-        opt.put("double-set-new", "hybrid"); //
-        opt.put("pre_jimplify", "true"); //
+        // opt.put("set-impl", "double");
+        // opt.put("double-set-old", "hybrid");
+        // opt.put("double-set-new", "hybrid");
+        // opt.put("pre_jimplify", "true");
         SparkTransformer.v().transform("", opt);
     }
 
@@ -144,7 +144,6 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
-    @Ignore
     @Test
     public void chainedMethodCallsConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.ChainedMethodCallsConflictSample";
@@ -152,7 +151,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
                 .definition(sampleClassPath, new int[]{13}, new int[]{12});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
-        Assert.assertEquals(550, analysis.getConflicts().size());
+        Assert.assertEquals(854, analysis.getConflicts().size());
     }
 
     @Test
@@ -248,7 +247,6 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
-    @Ignore
     @Test
     public void additionToArrayConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.AdditionToArrayConflictSample";
@@ -256,10 +254,9 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
                 .definition(sampleClassPath, new int[]{11}, new int[]{12});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
-        Assert.assertEquals(57, analysis.getConflicts().size());
+        Assert.assertEquals(58, analysis.getConflicts().size());
     }
 
-    @Ignore
     @Test
     public void hashmapConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.HashmapConflictSample";
@@ -267,7 +264,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
                 .definition(sampleClassPath, new int[]{11}, new int[]{12});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
-        Assert.assertEquals(511, analysis.getConflicts().size());
+        Assert.assertEquals(510, analysis.getConflicts().size());
     }
 
 
