@@ -67,7 +67,8 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
                 // add conflict
             }
         }
-        if (statement.isInvoke() && in.hasMarkedFields(statement)) {
+        if (statement.isInvoke()) {
+
             // add conflict
         }
     }
@@ -102,7 +103,7 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
 
     @Override
     protected void merge(PessimisticTaintedAnalysisAbstraction in1, PessimisticTaintedAnalysisAbstraction in2, PessimisticTaintedAnalysisAbstraction out) {
-        in1.merge(in2, out);
+        in1.union(in2, out);
     }
 
     @Override
