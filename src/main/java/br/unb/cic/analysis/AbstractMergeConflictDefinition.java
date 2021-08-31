@@ -233,4 +233,9 @@ public abstract class AbstractMergeConflictDefinition {
     public boolean isSourceStatement(Unit u) {
         return sourceStatements.stream().anyMatch(s -> s.getUnit().equals(u));
     }
+
+    public boolean isSinkStatement(Unit u) {
+        return sinkStatements.stream().anyMatch(s -> s.getUnit().equals(u));
+    }
+
 }

@@ -60,6 +60,7 @@ public class ReachDefinitionAnalysis extends ForwardFlowAnalysis<Unit, FlowSet<D
 	 */
 	@Override
 	protected void flowThrough(FlowSet<DataFlowAbstraction> in, Unit u, FlowSet<DataFlowAbstraction> out) {
+		System.out.println(u.getJavaSourceStartLineNumber() + " - " + u);
 		detectConflict(in, u);
 		FlowSet<DataFlowAbstraction> temp = new ArraySparseSet<>();
 

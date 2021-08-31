@@ -3,6 +3,11 @@ package br.unb.cic.analysis.model;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
+import soot.ValueBox;
+import soot.jimple.AssignStmt;
+import soot.jimple.InvokeStmt;
+import soot.jimple.VirtualInvokeExpr;
+import soot.jimple.internal.JAssignStmt;
 
 import java.util.Objects;
 
@@ -81,5 +86,20 @@ public class Statement {
 
 	public String toString() {
 		return unit.toString();
+	}
+
+	public boolean isAssign() {
+		return this.unit instanceof AssignStmt;
+	}
+
+	public boolean isInvoke() {
+		if (this.unit instanceof InvokeStmt) return true;
+
+		for (ValueBox use : this.unit.getUseBoxes()) {
+			if (use.getValue() instanceof VirtualInvokeExpr) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
