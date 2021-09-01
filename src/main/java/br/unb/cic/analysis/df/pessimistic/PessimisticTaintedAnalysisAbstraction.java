@@ -52,24 +52,6 @@ public class PessimisticTaintedAnalysisAbstraction {
         target.markedFields.putAll(this.markedFields);
     }
 
-    public void union(PessimisticTaintedAnalysisAbstraction in) {
-        this.marked.putAll(in.marked);
-        this.markedFields.putAll(in.markedFields);
-    }
-
-    public void difference(PessimisticTaintedAnalysisAbstraction in) {
-        for (String key : this.marked.keySet()) {
-            if (in.marked.containsKey(key)) {
-               this.marked.remove(key);
-            }
-        }
-        for (String key: this.markedFields.keySet()) {
-            if (in.markedFields.containsKey(key)) {
-                this.markedFields.remove(key);
-            }
-        }
-    }
-
     public void mark(Value value, Statement statement) {
         this.marked.put(value.toString(), new Definition(value, statement));
     }

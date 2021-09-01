@@ -123,18 +123,5 @@ public class PessimisticTaintedAnalysisAbstractionTest {
         Assert.assertTrue(target.hasMarkedFields(otherLocal));
     }
 
-    @Test
-    public void testUnionInplace() {
-        PessimisticTaintedAnalysisAbstraction instance2 = new PessimisticTaintedAnalysisAbstraction();
-        PessimisticTaintedAnalysisAbstraction target = new PessimisticTaintedAnalysisAbstraction();
-
-        instance.mark(local, emptyStatement);
-        instance2.markFields(otherLocal, emptyStatement);
-
-        instance.union(instance2);
-
-        Assert.assertTrue(instance.hasMarkedFields(otherLocal));
-    }
-
     // TODO: The logic for the difference method is a bit more complex will fit it and add tests later
 }

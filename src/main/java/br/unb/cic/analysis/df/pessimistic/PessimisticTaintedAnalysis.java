@@ -40,8 +40,8 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
         Statement statement = createStatement(unit);
         in.copy(out);
         detectConflicts(in, statement);
-        out.difference(kill(statement));
-        out.union(gen(statement));
+        kill(out, statement);
+        gen(out, statement);
     }
 
     protected Statement createStatement(Unit d) {
@@ -77,34 +77,22 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
         }
     }
 
-    protected PessimisticTaintedAnalysisAbstraction gen(Statement statement) {
-        PessimisticTaintedAnalysisAbstraction res = new PessimisticTaintedAnalysisAbstraction();
-
+    protected void gen(PessimisticTaintedAnalysisAbstraction in, Statement statement) {
+        // TODO: Implement indirect flow logic
         if (statement.getType() == Statement.Type.SOURCE) {
             for (ValueBox def : statement.getUnit().getDefBoxes()) {
-                res.mark(def.getValue(), statement);
+                in.mark(def.getValue(), statement);
             }
             if (statement.isInvoke()) {
                 InstanceInvokeExpr invoke = statement.getInvoke();
 
-                res.markFields(invoke.getBase(), statement);
+                in.markFields(invoke.getBase(), statement);
             }
         }
-
-        return res;
     }
 
-    protected PessimisticTaintedAnalysisAbstraction kill(Statement statement) {
-        PessimisticTaintedAnalysisAbstraction res = new PessimisticTaintedAnalysisAbstraction();
-//
-//        if (statement.isAssign()) {
-//            // mark target
-//        }
-//        if (statement.isInvoke()) {
-//            // mark called object instance fields
-//        }
-
-        return res;
+    protected void kill(PessimisticTaintedAnalysisAbstraction in, Statement statement) {
+        // TODO: Implement kill logic
     }
 
     @Override
