@@ -59,4 +59,12 @@ public class PessimisticTaintedAnalysisTest {
         Assert.assertTrue(conflicts.size() == 1);
     }
 
+    @Test
+    public void testInterproceduralDataflowSameClass() {
+        // InterproceduralDataflowField
+        Set<Conflict> conflicts = executeAnalysis("br.unb.cic.analysis.samples.InterproceduralDataflowField", new int[]{8}, new int[]{10});
+        System.out.println(conflicts);
+        Assert.assertTrue(conflicts.size() == 1);
+    }
+
 }
