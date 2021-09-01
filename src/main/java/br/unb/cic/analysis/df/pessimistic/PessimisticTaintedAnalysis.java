@@ -92,8 +92,15 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
     }
 
     protected void kill(PessimisticTaintedAnalysisAbstraction in, Statement statement) {
-        // TODO: Implement kill logic
-    }
+        for (ValueBox def : statement.getUnit().getDefBoxes()) {
+            in.unmark(def.getValue());
+        }
+        if (statement.isInvoke()) {
+            InstanceInvokeExpr invoke = statement.getInvoke();
+
+            // unmark fields invoke.getBase()
+        }
+     }
 
     @Override
     protected void merge(PessimisticTaintedAnalysisAbstraction in1, PessimisticTaintedAnalysisAbstraction in2, PessimisticTaintedAnalysisAbstraction out) {

@@ -3,11 +3,10 @@ package br.unb.cic.analysis.df.pessimistic;
 
 import br.unb.cic.analysis.model.Statement;
 import soot.Value;
+import soot.baf.Inst;
 import soot.jimple.InstanceFieldRef;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 class Definition {
     private Value value;
@@ -32,17 +31,22 @@ public class PessimisticTaintedAnalysisAbstraction {
 
     private Map<String, Definition> marked;
     private Map<String, Definition> markedFields;
+    private Map<String, Value> unmarked;
 
     PessimisticTaintedAnalysisAbstraction() {
         this.marked = new HashMap<>();
         this.markedFields = new HashMap<>();
+        this.unmarked = new HashMap<>();
     }
 
     public void union(PessimisticTaintedAnalysisAbstraction in, PessimisticTaintedAnalysisAbstraction target) {
         target.marked.putAll(this.marked);
         target.marked.putAll(in.marked);
+        target.unmarked.putAll(this.unmarked);
+        target.unmarked.putAll(in.unmarked);
         target.markedFields.putAll(this.markedFields);
         target.markedFields.putAll(in.markedFields);
+
     }
 
     public void copy(PessimisticTaintedAnalysisAbstraction target) {
@@ -50,14 +54,36 @@ public class PessimisticTaintedAnalysisAbstraction {
         target.marked.putAll(this.marked);
         target.markedFields.clear();
         target.markedFields.putAll(this.markedFields);
+        target.unmarked.clear();
+        target.unmarked.putAll(this.unmarked);
     }
 
     public void mark(Value value, Statement statement) {
-        this.marked.put(value.toString(), new Definition(value, statement));
+        String valueKey = value.toString();
+        this.unmarked.remove(valueKey);
+        this.marked.put(valueKey, new Definition(value, statement));
+    }
+
+    public void unmark(Value value) {
+        String valueKey = value.toString();
+        this.marked.remove(valueKey);
+        this.unmarked.put(valueKey, value);
     }
 
     public void markFields(Value value, Statement statement) {
-        this.markedFields.put(value.toString(), new Definition(value, statement));
+        String valueKey = value.toString();
+
+        for (Value unmarkedValue : this.unmarked.values())  {
+            if (unmarkedValue instanceof InstanceFieldRef) {
+                InstanceFieldRef fieldRef = (InstanceFieldRef) unmarkedValue;
+
+                if (fieldRef.getBase().toString().equals(valueKey)) {
+                    this.unmarked.remove(fieldRef.toString());
+                }
+            }
+        }
+
+        this.markedFields.put(valueKey, new Definition(value, statement));
     }
 
     public boolean isMarked(Value value) {
@@ -72,17 +98,19 @@ public class PessimisticTaintedAnalysisAbstraction {
         Definition result = null;
 
         String valueKey = value.toString();
-        if (this.marked.containsKey(valueKey)) {
-            result = this.marked.get(valueKey);
-        } else if (value instanceof InstanceFieldRef) {
-            InstanceFieldRef fieldRef = (InstanceFieldRef) value;
-            Value base = fieldRef.getBase();
-            String baseKey = base.toString();
+        if (!this.unmarked.containsKey(valueKey)) {
+            if (this.marked.containsKey(valueKey)) {
+                result = this.marked.get(valueKey);
+            } else if (value instanceof InstanceFieldRef) {
+                InstanceFieldRef fieldRef = (InstanceFieldRef) value;
+                Value base = fieldRef.getBase();
+                String baseKey = base.toString();
 
-            if (this.marked.containsKey(baseKey)) {
-                result = this.marked.get(baseKey);
-            } else if (this.markedFields.containsKey(baseKey)) {
-                result = this.markedFields.get(baseKey);
+                if (this.marked.containsKey(baseKey)) {
+                    result = this.marked.get(baseKey);
+                } else if (this.markedFields.containsKey(baseKey)) {
+                    result = this.markedFields.get(baseKey);
+                }
             }
         }
 

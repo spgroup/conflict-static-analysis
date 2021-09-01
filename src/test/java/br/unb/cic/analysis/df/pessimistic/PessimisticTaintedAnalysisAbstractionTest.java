@@ -123,5 +123,83 @@ public class PessimisticTaintedAnalysisAbstractionTest {
         Assert.assertTrue(target.hasMarkedFields(otherLocal));
     }
 
-    // TODO: The logic for the difference method is a bit more complex will fit it and add tests later
+    @Test
+    public void markAndUnmark() {
+        instance.mark(local, emptyStatement);
+
+        Assert.assertTrue(instance.isMarked(local));
+        Assert.assertTrue(instance.hasMarkedFields(local));
+
+        instance.unmark(local);
+
+        Assert.assertFalse(instance.isMarked(local));
+        Assert.assertFalse(instance.hasMarkedFields(local));
+    }
+
+    @Test
+    public void markFieldsAndUnmarkSpecificField() {
+        instance.markFields(local, emptyStatement);
+
+        Assert.assertTrue(instance.isMarked(field));
+
+        instance.unmark(field);
+
+        Assert.assertFalse(instance.isMarked(field));
+        Assert.assertTrue(instance.hasMarkedFields(local));
+    }
+
+    @Test
+    public void markObjectAndUnmarkField() {
+        instance.mark(local, emptyStatement);
+
+        Assert.assertTrue(instance.isMarked(local));
+        Assert.assertTrue(instance.isMarked(field));
+        Assert.assertTrue(instance.hasMarkedFields(local));
+
+        instance.unmark(field);
+
+        Assert.assertTrue(instance.isMarked(local));
+        Assert.assertFalse(instance.isMarked(field));
+        Assert.assertTrue(instance.hasMarkedFields(local));
+    }
+
+    @Test
+    public void markUnmarkAndMarkAgain() {
+        instance.mark(local, emptyStatement);
+
+        Assert.assertTrue(instance.isMarked(local));
+        Assert.assertTrue(instance.hasMarkedFields(local));
+
+        instance.unmark(local);
+
+        Assert.assertFalse(instance.isMarked(local));
+        Assert.assertFalse(instance.hasMarkedFields(local));
+
+        instance.mark(local, emptyStatement);
+
+        Assert.assertTrue(instance.isMarked(local));
+        Assert.assertTrue(instance.hasMarkedFields(local));
+    }
+
+    @Test
+    public void markObjectUnmarkFieldAndMarkFields() {
+        instance.mark(local, emptyStatement);
+
+        Assert.assertTrue(instance.isMarked(local));
+        Assert.assertTrue(instance.hasMarkedFields(local));
+        Assert.assertTrue(instance.isMarked(field));
+
+        instance.unmark(field);
+
+        Assert.assertTrue(instance.isMarked(local));
+        Assert.assertTrue(instance.hasMarkedFields(local));
+        Assert.assertFalse(instance.isMarked(field));
+
+        instance.markFields(local, emptyStatement);
+
+        Assert.assertTrue(instance.isMarked(local));
+        Assert.assertTrue(instance.hasMarkedFields(local));
+        Assert.assertTrue(instance.isMarked(field));
+    }
+
 }

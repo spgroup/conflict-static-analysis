@@ -42,12 +42,38 @@ public class PessimisticTaintedAnalysisTest {
     @Test
     public void testSimpleDataflow() {
         Set<Conflict> conflicts = executeAnalysis("br.unb.cic.analysis.samples.IntraproceduralDataFlow", new int[]{6}, new int[]{11});
+        System.out.println(conflicts);
         Assert.assertTrue(conflicts.size() == 1);
+    }
+
+    @Test
+    public void testCanceledDataflow() {
+        Set<Conflict> conflicts = executeAnalysis("br.unb.cic.analysis.samples.IntraproceduralDataFlow", new int[]{19}, new int[]{26});
+        Assert.assertTrue(conflicts.size() == 0);
     }
 
     @Test
     public void testSimpleFieldDataflow() {
         Set<Conflict> conflicts = executeAnalysis("br.unb.cic.analysis.samples.IntraproceduralDataflowField", new int[]{8}, new int[]{10});
+        System.out.println(conflicts);
+        Assert.assertTrue(conflicts.size() == 1);
+    }
+
+    @Test
+    public void testFieldCanceledDataflow() {
+        Set<Conflict> conflicts = executeAnalysis("br.unb.cic.analysis.samples.IntraproceduralDataflowField", new int[]{14}, new int[]{16});
+        Assert.assertTrue(conflicts.size() == 0);
+    }
+
+    @Test
+    public void testMethodCallCanceledFieldDataflow() {
+        Set<Conflict> conflicts = executeAnalysis("br.unb.cic.analysis.samples.IntraproceduralDataflowField", new int[]{22}, new int[]{26});
+        Assert.assertTrue(conflicts.size() == 0);
+    }
+
+    @Test
+    public void testFieldCanceledAndMarkedAgain() {
+        Set<Conflict> conflicts = executeAnalysis("br.unb.cic.analysis.samples.IntraproceduralDataflowField", new int[]{30, 34}, new int[]{36});
         System.out.println(conflicts);
         Assert.assertTrue(conflicts.size() == 1);
     }
@@ -61,7 +87,6 @@ public class PessimisticTaintedAnalysisTest {
 
     @Test
     public void testInterproceduralDataflowSameClass() {
-        // InterproceduralDataflowField
         Set<Conflict> conflicts = executeAnalysis("br.unb.cic.analysis.samples.InterproceduralDataflowField", new int[]{8}, new int[]{10});
         System.out.println(conflicts);
         Assert.assertTrue(conflicts.size() == 1);
