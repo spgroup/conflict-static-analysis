@@ -4,10 +4,7 @@ import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
 import soot.ValueBox;
-import soot.jimple.AssignStmt;
-import soot.jimple.InvokeStmt;
-import soot.jimple.VirtualInvokeExpr;
-import soot.jimple.internal.JAssignStmt;
+import soot.jimple.*;
 
 import java.util.Objects;
 
@@ -93,13 +90,24 @@ public class Statement {
 	}
 
 	public boolean isInvoke() {
-		if (this.unit instanceof InvokeStmt) return true;
+		return getInvoke() != null;
+	}
 
+	public InstanceInvokeExpr getInvoke() {
+		if (this.unit instanceof InvokeStmt) {
+			InvokeStmt invoke = (InvokeStmt) this.unit;
+			InvokeExpr expr = invoke.getInvokeExpr();
+
+			if (expr instanceof InstanceInvokeExpr) {
+				return (InstanceInvokeExpr) expr;
+			}
+ 		}
 		for (ValueBox use : this.unit.getUseBoxes()) {
-			if (use.getValue() instanceof VirtualInvokeExpr) {
-				return true;
+			if (use.getValue() instanceof InstanceInvokeExpr) {
+				return (InstanceInvokeExpr) use.getValue();
 			}
 		}
-		return false;
+		return null;
 	}
+
 }

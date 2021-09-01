@@ -16,7 +16,6 @@ public class StatementTest {
     InvokeStmt simpleInvoke;
     AssignStmt simpleAssign;
     AssignStmt assignWithInvoke;
-    AssignStmt assignWithInvokeInExpr;
 
     @Before
     public void configure() {
@@ -29,6 +28,7 @@ public class StatementTest {
                 Jimple.v().newLocal("x", typeString),
                 StringConstant.v("hello")
         );
+
 
         SootMethod toCall = typeString.getSootClass().getMethod("int hashCode()");
         simpleInvoke = Jimple.v().newInvokeStmt(
@@ -47,13 +47,6 @@ public class StatementTest {
                 )
         );
 
-        assignWithInvokeInExpr = Jimple.v().newAssignStmt(
-            Jimple.v().newLocal("y", RefType.v("int")),
-            Jimple.v().newAddExpr(
-                    Jimple.v().newLocal("z", RefType.v("int")),
-                    Jimple.v().newLocal("z", RefType.v("int"))
-            )
-        );
     }
 
     @Test

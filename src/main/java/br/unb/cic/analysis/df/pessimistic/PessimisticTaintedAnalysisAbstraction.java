@@ -9,10 +9,29 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+class Definition {
+    private Value value;
+    private Statement statement;
+
+    Definition(Value value, Statement statement) {
+        this.value = value;
+        this.statement = statement;
+    }
+
+    public Value getValue() {
+        return value;
+    }
+
+    public Statement getStatement() {
+        return statement;
+    }
+}
+
+
 public class PessimisticTaintedAnalysisAbstraction {
 
-    private Map<Value, Statement> marked;
-    private Map<Value, Statement> markedFields;
+    private Map<String, Definition> marked;
+    private Map<String, Definition> markedFields;
 
     PessimisticTaintedAnalysisAbstraction() {
         this.marked = new HashMap<>();
@@ -39,12 +58,12 @@ public class PessimisticTaintedAnalysisAbstraction {
     }
 
     public void difference(PessimisticTaintedAnalysisAbstraction in) {
-        for (Value key : this.marked.keySet()) {
-           if (in.marked.containsKey(key)) {
+        for (String key : this.marked.keySet()) {
+            if (in.marked.containsKey(key)) {
                this.marked.remove(key);
-           }
+            }
         }
-        for (Value key: this.markedFields.keySet()) {
+        for (String key: this.markedFields.keySet()) {
             if (in.markedFields.containsKey(key)) {
                 this.markedFields.remove(key);
             }
@@ -52,38 +71,70 @@ public class PessimisticTaintedAnalysisAbstraction {
     }
 
     public void mark(Value value, Statement statement) {
-        this.marked.put(value, statement);
+        this.marked.put(value.toString(), new Definition(value, statement));
     }
 
     public void markFields(Value value, Statement statement) {
-        this.markedFields.put(value, statement);
+        this.markedFields.put(value.toString(), new Definition(value, statement));
     }
 
     public boolean isMarked(Value value) {
-        if (this.marked.containsKey(value)) return true;
-
-        if (value instanceof InstanceFieldRef) {
-            InstanceFieldRef fieldRef = (InstanceFieldRef) value;
-            Value base = fieldRef.getBase();
-
-            if (this.markedFields.containsKey(base) || this.marked.containsKey(base)) {
-                return true;
-            }
-        }
-        return false;
+        return getMarkedStatement(value) != null;
     }
 
     public boolean hasMarkedFields(Value value) {
-        if (this.markedFields.containsKey(value) || this.marked.containsKey(value)) return true;
+        return getMarkedFieldsStatement(value) != null;
+    }
 
-        for (Value key: this.marked.keySet()) {
-            if (key instanceof InstanceFieldRef) {
-                InstanceFieldRef fieldRef = (InstanceFieldRef) key;
+    public Statement getMarkedStatement(Value value) {
+        Definition result = null;
 
-                if (fieldRef.getBase().equals(value)) return true;
+        String valueKey = value.toString();
+        if (this.marked.containsKey(valueKey)) {
+            result = this.marked.get(valueKey);
+        } else if (value instanceof InstanceFieldRef) {
+            InstanceFieldRef fieldRef = (InstanceFieldRef) value;
+            Value base = fieldRef.getBase();
+            String baseKey = base.toString();
+
+            if (this.marked.containsKey(baseKey)) {
+                result = this.marked.get(baseKey);
+            } else if (this.markedFields.containsKey(baseKey)) {
+                result = this.markedFields.get(baseKey);
             }
         }
-        return false;
+
+        if (result != null) {
+            return result.getStatement();
+        }
+        return null;
+    }
+
+    public Statement getMarkedFieldsStatement(Value value) {
+        Definition result = null;
+        String valueKey = value.toString();
+
+        if (this.marked.containsKey(valueKey)) {
+            result = this.marked.get(valueKey);
+        } else if (this.markedFields.containsKey(valueKey)) {
+            result = this.markedFields.get(valueKey);
+        } else {
+            for (Definition definition: this.marked.values()) {
+                Value fieldValue = definition.getValue();
+                if (fieldValue instanceof InstanceFieldRef) {
+                    InstanceFieldRef fieldRef = (InstanceFieldRef) fieldValue;
+
+                    if (fieldRef.getBase().toString().equals(valueKey)) {
+                        result = definition;
+                    };
+                }
+            }
+        }
+
+        if (result != null) {
+            return result.getStatement();
+        }
+        return null;
     }
 
     @Override

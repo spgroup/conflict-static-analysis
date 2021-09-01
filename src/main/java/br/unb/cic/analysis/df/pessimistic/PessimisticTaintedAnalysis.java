@@ -7,6 +7,7 @@ import br.unb.cic.analysis.model.Statement;
 import soot.Body;
 import soot.Unit;
 import soot.ValueBox;
+import soot.jimple.InstanceInvokeExpr;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.scalar.ForwardFlowAnalysis;
 
@@ -24,8 +25,8 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
         this.methodBody = methodBody;
         this.conflicts = new HashSet<>();
         this.definition = definition;
-        definition.loadSinkStatements();
-        definition.loadSourceStatements();
+        this.definition.loadSinkStatements();
+        this.definition.loadSourceStatements();
         doAnalysis();
     }
 
@@ -62,14 +63,17 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
     }
 
     protected void detectConflicts(PessimisticTaintedAnalysisAbstraction in, Statement statement) {
-        for (ValueBox use : statement.getUnit().getUseBoxes()) {
-            if (in.isMarked(use.getValue())) {
-                // add conflict
+        // TODO: Currently the isMarked and getMarkedStatement and the hasMarkedFields and getMarkedFieldsStatements
+        // execute redundantly
+        if (statement.getType() == Statement.Type.SINK) {
+            for (ValueBox use : statement.getUnit().getUseBoxes()) {
+                if (in.isMarked(use.getValue())) {
+                    conflicts.add(new Conflict(in.getMarkedStatement(use.getValue()), statement));
+                }
             }
-        }
-        if (statement.isInvoke()) {
-
-            // add conflict
+            if (statement.isInvoke() && in.hasMarkedFields(statement.getInvoke().getBase())) {
+                conflicts.add(new Conflict(in.getMarkedFieldsStatement(statement.getInvoke().getBase()), statement));
+            }
         }
     }
 
@@ -77,11 +81,13 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
         PessimisticTaintedAnalysisAbstraction res = new PessimisticTaintedAnalysisAbstraction();
 
         if (statement.getType() == Statement.Type.SOURCE) {
-            if (statement.isAssign()) {
-                // mark target
+            for (ValueBox def : statement.getUnit().getDefBoxes()) {
+                res.mark(def.getValue(), statement);
             }
             if (statement.isInvoke()) {
-                // mark called object instance fields
+                InstanceInvokeExpr invoke = statement.getInvoke();
+
+                res.markFields(invoke.getBase(), statement);
             }
         }
 
@@ -90,13 +96,13 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
 
     protected PessimisticTaintedAnalysisAbstraction kill(Statement statement) {
         PessimisticTaintedAnalysisAbstraction res = new PessimisticTaintedAnalysisAbstraction();
-
-        if (statement.isAssign()) {
-            // mark target
-        }
-        if (statement.isInvoke()) {
-            // mark called object instance fields
-        }
+//
+//        if (statement.isAssign()) {
+//            // mark target
+//        }
+//        if (statement.isInvoke()) {
+//            // mark called object instance fields
+//        }
 
         return res;
     }
