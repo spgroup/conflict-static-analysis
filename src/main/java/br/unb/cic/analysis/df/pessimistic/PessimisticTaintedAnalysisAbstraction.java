@@ -3,7 +3,6 @@ package br.unb.cic.analysis.df.pessimistic;
 
 import br.unb.cic.analysis.model.Statement;
 import soot.Value;
-import soot.baf.Inst;
 import soot.jimple.InstanceFieldRef;
 
 import java.util.*;
@@ -147,6 +146,26 @@ public class PessimisticTaintedAnalysisAbstraction {
         return null;
     }
 
+    public boolean usesMarkedValue(Statement statement) {
+        boolean isDirectlyMarked = statement
+                .getUnit()
+                .getUseBoxes()
+                .stream()
+                .anyMatch(use -> this.isMarked(use.getValue()));
+
+        if (isDirectlyMarked) {
+            return true;
+        }
+
+        // if it is an invoke we will consider it used all fields
+        // so if any of the is marked, that it uses a marked field
+        if (statement.isInvoke() && this.hasMarkedFields(statement.getInvoke().getBase())) {
+            return true;
+        }
+
+        return false;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -154,4 +173,5 @@ public class PessimisticTaintedAnalysisAbstraction {
         PessimisticTaintedAnalysisAbstraction that = (PessimisticTaintedAnalysisAbstraction) o;
         return Objects.equals(marked, that.marked) && Objects.equals(markedFields, that.markedFields);
     }
+
 }

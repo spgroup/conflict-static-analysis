@@ -78,8 +78,8 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
     }
 
     protected void gen(PessimisticTaintedAnalysisAbstraction in, Statement statement) {
-        // TODO: Implement indirect flow logic
-        if (statement.getType() == Statement.Type.SOURCE) {
+        // TODO: Fix conflict reporting for indirect flow
+        if (statement.getType() == Statement.Type.SOURCE || in.usesMarkedValue(statement)) {
             for (ValueBox def : statement.getUnit().getDefBoxes()) {
                 in.mark(def.getValue(), statement);
             }
