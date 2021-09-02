@@ -4,11 +4,14 @@ import br.unb.cic.analysis.model.Statement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import soot.G;
 import soot.Local;
 import soot.RefType;
 import soot.Scene;
+import soot.jimple.AssignStmt;
 import soot.jimple.InstanceFieldRef;
 import soot.jimple.Jimple;
+import soot.jimple.StringConstant;
 
 public class PessimisticTaintedAnalysisAbstractionTest {
 
@@ -18,10 +21,14 @@ public class PessimisticTaintedAnalysisAbstractionTest {
     Local otherLocal;
     InstanceFieldRef field;
     InstanceFieldRef otherField;
+    AssignStmt assignUnit;
+
     Statement emptyStatement;
+    Statement assignStatement;
 
     @Before
     public void configure() {
+        G.reset();
         Scene.v().loadClassAndSupport("java.lang.Object");
         Scene.v().loadClassAndSupport("java.lang.String");
 
@@ -44,6 +51,15 @@ public class PessimisticTaintedAnalysisAbstractionTest {
                 local, mockType.getSootClass().getFieldByName("hash").makeRef()
         );
 
+        assignUnit = Jimple.v().newAssignStmt(
+                local,
+                Jimple.v().newAddExpr(
+                        otherLocal,
+                        StringConstant.v("hello")
+                )
+        );
+
+        assignStatement = Statement.builder().setUnit(assignUnit).build();
         emptyStatement = Statement.builder().build();
     }
 
@@ -200,6 +216,20 @@ public class PessimisticTaintedAnalysisAbstractionTest {
         Assert.assertTrue(instance.isMarked(local));
         Assert.assertTrue(instance.hasMarkedFields(local));
         Assert.assertTrue(instance.isMarked(field));
+    }
+
+    @Test
+    public void markLocalAndCheckIfStatementsUsesAMarkedValue() {
+        instance.mark(otherLocal, emptyStatement);
+
+        Assert.assertTrue(instance.usesMarkedValue(assignStatement));
+    }
+
+    @Test
+    public void markLocalThatIsNotUsedAndCheckIfUsesAMarkedValue() {
+        instance.mark(local, emptyStatement);
+
+        Assert.assertFalse(instance.usesMarkedValue(assignStatement));
     }
 
 }

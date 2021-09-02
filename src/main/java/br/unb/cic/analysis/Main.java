@@ -32,6 +32,8 @@ public class Main {
     private List<String> conflicts = new ArrayList<>();
     private ReachDefinitionAnalysis analysis;
 
+
+
     public static void main(String args[]) {
         Main m = new Main();
         try {
@@ -249,7 +251,7 @@ public class Main {
                 : new SVFAIntraProcedural(classpath, definition);
 
         analysis.buildSparseValueFlowGraph();
-        System.out.println(analysis.svgToDotModel());
+
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflicts())
                 .stream()
                 .map(p -> p.toString())

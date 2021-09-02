@@ -3,6 +3,7 @@ package br.unb.cic.analysis.model;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import soot.G;
 import soot.RefType;
 import soot.Scene;
 import soot.SootMethod;
@@ -19,6 +20,7 @@ public class StatementTest {
 
     @Before
     public void configure() {
+        G.reset();
         Scene.v().loadClassAndSupport("java.lang.Object");
         Scene.v().loadClassAndSupport("java.lang.String");
 
