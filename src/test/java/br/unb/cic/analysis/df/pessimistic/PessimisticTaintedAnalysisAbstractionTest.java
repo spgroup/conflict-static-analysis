@@ -117,7 +117,7 @@ public class PessimisticTaintedAnalysisAbstractionTest {
         instance.mark(local, emptyStatement);
         instance2.markFields(otherLocal, emptyStatement);
 
-        instance.union(instance2, target);
+        instance.merge(instance2, target);
 
         Assert.assertTrue(target.isMarked(local));
         Assert.assertTrue(target.hasMarkedFields(otherLocal));

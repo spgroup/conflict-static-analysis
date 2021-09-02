@@ -38,7 +38,7 @@ public class PessimisticTaintedAnalysisAbstraction {
         this.unmarked = new HashMap<>();
     }
 
-    public void union(PessimisticTaintedAnalysisAbstraction in, PessimisticTaintedAnalysisAbstraction target) {
+    public void merge(PessimisticTaintedAnalysisAbstraction in, PessimisticTaintedAnalysisAbstraction target) {
         target.marked.putAll(this.marked);
         target.marked.putAll(in.marked);
         target.unmarked.putAll(this.unmarked);

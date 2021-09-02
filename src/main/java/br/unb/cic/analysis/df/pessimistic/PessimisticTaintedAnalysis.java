@@ -6,6 +6,7 @@ import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
 import soot.Body;
 import soot.Unit;
+import soot.Value;
 import soot.ValueBox;
 import soot.jimple.InstanceInvokeExpr;
 import soot.toolkits.graph.ExceptionalUnitGraph;
@@ -63,16 +64,27 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
     }
 
     protected void detectConflicts(PessimisticTaintedAnalysisAbstraction in, Statement statement) {
-        // TODO: Currently the isMarked and getMarkedStatement and the hasMarkedFields and getMarkedFieldsStatements
-        // execute redundantly
         if (statement.getType() == Statement.Type.SINK) {
             for (ValueBox use : statement.getUnit().getUseBoxes()) {
-                if (in.isMarked(use.getValue())) {
+                Value value = use.getValue();
+                Statement markedStatement = in.getMarkedStatement(value);
+                boolean isMarked = markedStatement != null;
+
+                if (isMarked) {
                     conflicts.add(new Conflict(in.getMarkedStatement(use.getValue()), statement));
                 }
             }
-            if (statement.isInvoke() && in.hasMarkedFields(statement.getInvoke().getBase())) {
-                conflicts.add(new Conflict(in.getMarkedFieldsStatement(statement.getInvoke().getBase()), statement));
+
+            InstanceInvokeExpr invokeExpr = statement.getInvoke();
+            boolean isInvoke = invokeExpr != null;
+            if (isInvoke) {
+                Value baseValue = invokeExpr.getBase();
+                Statement markedFieldsStatement = in.getMarkedFieldsStatement(baseValue);
+                boolean hasMarkedFields = markedFieldsStatement != null;
+
+                if (hasMarkedFields) {
+                    conflicts.add(new Conflict(markedFieldsStatement, statement));
+                }
             }
         }
     }
@@ -81,12 +93,15 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
         // TODO: Fix conflict reporting for indirect flow
         if (statement.getType() == Statement.Type.SOURCE || in.usesMarkedValue(statement)) {
             for (ValueBox def : statement.getUnit().getDefBoxes()) {
-                in.mark(def.getValue(), statement);
+                Value value = def.getValue();
+
+                in.mark(value, statement);
             }
             if (statement.isInvoke()) {
                 InstanceInvokeExpr invoke = statement.getInvoke();
+                Value baseValue = invoke.getBase();
 
-                in.markFields(invoke.getBase(), statement);
+                in.markFields(baseValue, statement);
             }
         }
     }
@@ -103,7 +118,7 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
 
     @Override
     protected void merge(PessimisticTaintedAnalysisAbstraction in1, PessimisticTaintedAnalysisAbstraction in2, PessimisticTaintedAnalysisAbstraction out) {
-        in1.union(in2, out);
+        in1.merge(in2, out);
     }
 
     @Override
