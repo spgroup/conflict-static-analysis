@@ -18,7 +18,8 @@ public class Statement {
 	public enum Type {
 		SOURCE, 
 		SINK,
-		IN_BETWEEN;
+		IN_BETWEEN,
+		SOURCE_SINK
 	}
 
 	private static StatementBuilder builder;
@@ -83,6 +84,14 @@ public class Statement {
 
 	public String toString() {
 		return unit.toString();
+	}
+
+	public boolean isSource() {
+		return type == Type.SOURCE || type == Type.SOURCE_SINK;
+	}
+
+	public boolean isSink() {
+		return type == Type.SINK || type == Type.SOURCE_SINK;
 	}
 
 	public boolean isAssign() {

@@ -48,10 +48,13 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
     protected Statement createStatement(Unit d) {
         Statement.Type type = Statement.Type.IN_BETWEEN;
 
-        // TODO: For now we will assume that a field can only be either source or sink
-        if (this.definition.isSourceStatement(d)) {
+        boolean isSource = this.definition.isSourceStatement(d);
+        boolean isSink = this.definition.isSinkStatement(d);
+        if (isSource && isSink) {
+            type = Statement.Type.SOURCE_SINK;
+        } else if (isSource) {
             type = Statement.Type.SOURCE;
-        } else if (this.definition.isSinkStatement(d)){
+        } else if (isSink){
             type = Statement.Type.SINK;
         }
 
@@ -64,7 +67,11 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
     }
 
     protected void detectConflicts(PessimisticTaintedAnalysisAbstraction in, Statement statement) {
-        if (statement.getType() == Statement.Type.SINK) {
+        if (statement.getType() == Statement.Type.SOURCE_SINK) {
+            conflicts.add(new Conflict(statement, statement));
+        }
+
+        if (statement.isSink()) {
             for (ValueBox use : statement.getUnit().getUseBoxes()) {
                 Value value = use.getValue();
                 Statement markedStatement = in.getMarkedStatement(value);
@@ -90,8 +97,7 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
     }
 
     protected void gen(PessimisticTaintedAnalysisAbstraction in, Statement statement) {
-        // TODO: Fix conflict reporting for indirect flow
-        if (statement.getType() == Statement.Type.SOURCE || in.usesMarkedValue(statement)) {
+        if (statement.isSource() || in.usesMarkedValue(statement)) {
             for (ValueBox def : statement.getUnit().getDefBoxes()) {
                 Value value = def.getValue();
 
