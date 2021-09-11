@@ -87,14 +87,14 @@ public class PessimisticTaintedAnalysisAbstraction {
     }
 
     public boolean isMarked(Value value) {
-        return getMarkedStatement(value) != null;
+        return getValueDefinitionStatement(value) != null;
     }
 
     public boolean hasMarkedFields(Value value) {
-        return getMarkedFieldsStatement(value) != null;
+        return getValueFieldsDefinitionStatement(value) != null;
     }
 
-    public Statement getMarkedStatement(Value value) {
+    public Statement getValueDefinitionStatement(Value value) {
         Definition result = null;
 
         String valueKey = value.toString();
@@ -120,7 +120,7 @@ public class PessimisticTaintedAnalysisAbstraction {
         return null;
     }
 
-    public Statement getMarkedFieldsStatement(Value value) {
+    public Statement getValueFieldsDefinitionStatement(Value value) {
         Definition result = null;
         String valueKey = value.toString();
 

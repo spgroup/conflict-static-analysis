@@ -70,11 +70,11 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
         if (statement.isSink()) {
             for (ValueBox use : statement.getUnit().getUseBoxes()) {
                 Value value = use.getValue();
-                Statement markedStatement = in.getMarkedStatement(value);
-                boolean isMarked = markedStatement != null;
+                Statement valueDefinitionStatement = in.getValueDefinitionStatement(value);
+                boolean isMarked = valueDefinitionStatement != null;
 
                 if (isMarked) {
-                    conflicts.add(new Conflict(in.getMarkedStatement(use.getValue()), statement));
+                    conflicts.add(new Conflict(in.getValueDefinitionStatement(use.getValue()), statement));
                 }
             }
 
@@ -82,11 +82,11 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
             boolean isInvoke = invokeExpr != null;
             if (isInvoke) {
                 Value baseValue = invokeExpr.getBase();
-                Statement markedFieldsStatement = in.getMarkedFieldsStatement(baseValue);
-                boolean hasMarkedFields = markedFieldsStatement != null;
+                Statement valueFieldsDefinitionStatement = in.getValueFieldsDefinitionStatement(baseValue);
+                boolean hasMarkedFields = valueFieldsDefinitionStatement != null;
 
                 if (hasMarkedFields) {
-                    conflicts.add(new Conflict(markedFieldsStatement, statement));
+                    conflicts.add(new Conflict(valueFieldsDefinitionStatement, statement));
                 }
             }
         }
