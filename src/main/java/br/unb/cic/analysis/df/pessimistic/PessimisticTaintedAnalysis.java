@@ -67,10 +67,6 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
     }
 
     protected void detectConflicts(PessimisticTaintedAnalysisAbstraction in, Statement statement) {
-        if (statement.getType() == Statement.Type.SOURCE_SINK) {
-            conflicts.add(new Conflict(statement, statement));
-        }
-
         if (statement.isSink()) {
             for (ValueBox use : statement.getUnit().getUseBoxes()) {
                 Value value = use.getValue();
