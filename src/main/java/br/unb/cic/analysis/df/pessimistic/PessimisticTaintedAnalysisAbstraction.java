@@ -26,11 +26,32 @@ class Definition {
     }
 }
 
-
+/**
+ * This data structure is used to allow two types of checks:
+ *      - If the value is marked
+ *      - If the value has marked fields
+ *
+ * It also allows to mark all fields for a value, always assuming that the
+ * value class has at least one field that can be marked.
+ *
+ * Note that marking fields for a value can also cause a check on one of the value's fields
+ * to return true.
+ */
 public class PessimisticTaintedAnalysisAbstraction {
 
+    /**
+     * This map is used to represent values that were directly marked
+     */
     private Map<String, Definition> marked;
+    /**
+     * This map represents values that were passed to the markFields method
+     * if a value is in this map, then it means that all its fields are marked
+     */
     private Map<String, Definition> markedFields;
+    /**
+     * This map represents the unmarked values for the cases that we want o unmark a specific field
+     * in a value that has all fields marked.
+     */
     private Map<String, Value> unmarked;
 
     PessimisticTaintedAnalysisAbstraction() {
@@ -58,21 +79,47 @@ public class PessimisticTaintedAnalysisAbstraction {
         target.unmarked.putAll(this.unmarked);
     }
 
+    /**
+     * Marks directly the value so that the whole value and its fields are considered for dataflows.
+     * @param value
+     * @param statement
+     */
     public void mark(Value value, Statement statement) {
         String valueKey = value.toString();
+
+        // tries to remove the value from the unmarked map if
+        // it has been unmarked before
         this.unmarked.remove(valueKey);
+
         this.marked.put(valueKey, new Definition(value, statement));
     }
 
+    /**
+     * Unmarks directly the value so that it or its fields are no longer considered for dataflows.
+     * @param value
+     */
     public void unmark(Value value) {
         String valueKey = value.toString();
+
         this.marked.remove(valueKey);
+        this.markedFields.remove(valueKey);
+
+        // adds it to the unmarked map, so that if it is a field in value that
+        // has its fields marked, this specific field is unmarked
         this.unmarked.put(valueKey, value);
     }
 
+
+    /**
+     * Marks a value fields so that only its fields are considered for dataflows.
+     * @param value
+     * @param statement
+     */
     public void markFields(Value value, Statement statement) {
         String valueKey = value.toString();
 
+        // check if any of the value's fields are in the unmarked
+        // map and remove them
         for (Value unmarkedValue : this.unmarked.values())  {
             if (unmarkedValue instanceof InstanceFieldRef) {
                 InstanceFieldRef fieldRef = (InstanceFieldRef) unmarkedValue;
@@ -86,19 +133,41 @@ public class PessimisticTaintedAnalysisAbstraction {
         this.markedFields.put(valueKey, new Definition(value, statement));
     }
 
+    /**
+     * Returns true if the value should be considered for dataflows.
+     * @param value
+     */
     public boolean isMarked(Value value) {
         return getValueDefinitionStatement(value) != null;
     }
 
+    /**
+     * Returns true if at least one if its fields should be considered for dataflows.
+     * @param value
+     */
     public boolean hasMarkedFields(Value value) {
         return getValueFieldsDefinitionStatement(value) != null;
     }
 
+    /**
+     * Returns the statement that was passed for the mark or markFields that marked value
+     *
+     * If the value is a Local, returns the statement that marked it directly if it exists
+     *
+     * If tha value is a Field, returns the statement that marked it directly, or marked the parent value
+     * or marked the parent value fields
+     *
+     * @param value
+     */
     public Statement getValueDefinitionStatement(Value value) {
         Definition result = null;
 
         String valueKey = value.toString();
+
+        // check if the value was directly unmarked
+        // (useful for the case that the value is field in a value that has fields marked)
         if (!this.unmarked.containsKey(valueKey)) {
+            // if the value was directly marked than return the statement that marked it
             if (this.marked.containsKey(valueKey)) {
                 result = this.marked.get(valueKey);
             } else if (value instanceof InstanceFieldRef) {
@@ -106,8 +175,12 @@ public class PessimisticTaintedAnalysisAbstraction {
                 Value base = fieldRef.getBase();
                 String baseKey = base.toString();
 
+                // if the value is a field and its base value was directly marked
+                // return the statement that marked the base value
                 if (this.marked.containsKey(baseKey)) {
                     result = this.marked.get(baseKey);
+                // if the value is a field and its base value had its fields marked
+                // return the statement that marked the fields
                 } else if (this.markedFields.containsKey(baseKey)) {
                     result = this.markedFields.get(baseKey);
                 }
@@ -120,15 +193,27 @@ public class PessimisticTaintedAnalysisAbstraction {
         return null;
     }
 
+    /**
+     * Returns the statement that marked the value fields, it can return either the statement that
+     * marked directly one of the fields or that marked all fields with the markFields method.
+     * @param value
+     */
     public Statement getValueFieldsDefinitionStatement(Value value) {
         Definition result = null;
         String valueKey = value.toString();
 
+        // if the value was directly marked then it has the fields marked as well
+        // return the statement that marked the value
         if (this.marked.containsKey(valueKey)) {
             result = this.marked.get(valueKey);
+
+        // if the value had its fields marked then it has at least one field marked
+        // return the statement that marked the value fields
         } else if (this.markedFields.containsKey(valueKey)) {
             result = this.markedFields.get(valueKey);
         } else {
+            // check if any of the fields was directly marked, in that case
+            // return the statement that marked the field
             for (Definition definition: this.marked.values()) {
                 Value fieldValue = definition.getValue();
                 if (fieldValue instanceof InstanceFieldRef) {
@@ -147,6 +232,12 @@ public class PessimisticTaintedAnalysisAbstraction {
         return null;
     }
 
+    /**
+     * This is used to check if any of the value used by the statement is marked in any way
+     * it also assumes that a method call in an object uses the object fields
+     * @param statement
+     * @return
+     */
     public boolean usesMarkedValue(Statement statement) {
         boolean isDirectlyMarked = statement
                 .getUnit()
