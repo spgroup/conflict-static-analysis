@@ -327,7 +327,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             return dataFlowAbstraction.getValue().equals(value);
         }
         if (dataFlowAbstraction.getValue() instanceof ArrayRef && value instanceof ArrayRef) {
-            return getArrayRefName(((ArrayRef) dataFlowAbstraction.getValue())).equals(getArrayRefName((ArrayRef) value));
+            return dataFlowAbstraction.getValue().equals(value);
         }
         if (dataFlowAbstraction.getValue() instanceof StaticFieldRef && value instanceof StaticFieldRef) {
             return ((StaticFieldRef) dataFlowAbstraction.getValue()).getField().getName().equals(((StaticFieldRef) value).getField().getName());

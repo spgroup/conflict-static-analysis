@@ -115,6 +115,16 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
     }
 
     @Test
+    public void arrayConstantTest() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.ArrayConstantSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{10}, new int[]{11});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    @Test
     public void callGraphTest() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.CallGraphSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
@@ -214,7 +224,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
 
         // Not Conflict - Not implemented yet. You will need constant propagation.
         // Currently detected as conflict: [left, m():9] --> [right, foo():14]
-        Assert.assertEquals(1, analysis.getConflicts().size());
+        Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
     @Test
@@ -251,7 +261,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
     public void additionToArrayConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.AdditionToArrayConflictSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
-                .definition(sampleClassPath, new int[]{11}, new int[]{12});
+                .definition(sampleClassPath, new int[]{11}, new int[]{13});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
         Assert.assertEquals(58, analysis.getConflicts().size());
@@ -322,7 +332,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
     public void classFieldArraysConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.ArraysClassFieldConflictSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
-                .definition(sampleClassPath, new int[]{8}, new int[]{9});
+                .definition(sampleClassPath, new int[]{13}, new int[]{14});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());

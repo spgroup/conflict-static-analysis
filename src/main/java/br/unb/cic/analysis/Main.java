@@ -258,7 +258,8 @@ public class Main {
     }
 
     private List<String> getIncludeList() {
-        List<String> stringList = new ArrayList<String>(Arrays.asList("java.lang.*", "java.util.*")); //java.util.HashMap
+        //"java.lang.*"
+        List<String> stringList = new ArrayList<String>(Arrays.asList("java.util.*")); //java.util.HashMap
         return stringList;
     }
 
