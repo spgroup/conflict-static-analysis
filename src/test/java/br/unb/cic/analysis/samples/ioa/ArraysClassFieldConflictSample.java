@@ -1,19 +1,24 @@
 package br.unb.cic.analysis.samples.ioa;
 
-// Conflict: [left, foo():13] --> [right, bar():17]
+// Conflict: [left, foo():14] --> [right, bar():18]
 public class ArraysClassFieldConflictSample {
-    public static int[] y;
+    public int[] y;
 
-    public static void main(String[] args) {
-        foo();           //left
-        bar();           //right
+    public ArraysClassFieldConflictSample() {
+        this.y = new int[]{0};
     }
 
-    private static void foo() {
+    public static void main(String[] args) {
+        ArraysClassFieldConflictSample m = new ArraysClassFieldConflictSample();
+        m.foo();           //left
+        m.bar();           //right
+    }
+
+    private void foo() {
         y[0] = 3;
     }
 
-    private static void bar() {
+    private void bar() {
         y[0] = 4;
     }
 }
