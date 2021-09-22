@@ -5,6 +5,7 @@ import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.df.DataFlowAbstraction;
 import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
+import br.unb.cic.analysis.model.TraversedLine;
 import br.unb.cic.exceptions.ValueNotHandledException;
 import soot.*;
 import soot.jimple.*;
@@ -28,6 +29,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private final AbstractMergeConflictDefinition definition;
     private final FlowSet<DataFlowAbstraction> left;
     private final FlowSet<DataFlowAbstraction> right;
+    private List<TraversedLine> stacktraceList;
 
     private final Logger logger;
 
@@ -39,6 +41,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         this.right = new ArraySparseSet<>();
         this.traversedMethods = new ArrayList<>();
         this.pointsToAnalysis = Scene.v().getPointsToAnalysis();
+        this.stacktraceList = new ArrayList<>();
 
         this.logger = Logger.getLogger(
                 InterproceduralOverrideAssignment.class.getName());
@@ -95,7 +98,8 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
      *                      The remaining statements of the current method that have no markup will be marked according to the flowChangeTag.
      * @return the result of applying the analysis considering the income abstraction (in) and the sootMethod
      */
-    private FlowSet<DataFlowAbstraction> traverse(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod, Statement.Type flowChangeTag) {
+    private FlowSet<DataFlowAbstraction> traverse(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod,
+                                                  Statement.Type flowChangeTag) {
         //System.out.println(sootMethod);
         if (this.traversedMethods.contains(sootMethod) || sootMethod.isPhantom()) {
             return in;
@@ -107,11 +111,16 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
         if (body != null) {
             for (Unit unit : body.getUnits()) {
+                TraversedLine traversedLine = new TraversedLine(sootMethod, unit.getJavaSourceStartLineNumber());
+
                 if (isTagged(flowChangeTag, unit)) {
+                    addStackTrace(traversedLine);
                     in = runAnalysisWithTaggedUnit(in, sootMethod, flowChangeTag, unit);
                 } else {
                     in = runAnalysisWithBaseUnit(in, sootMethod, flowChangeTag, unit);
                 }
+
+                removeStackTrace(traversedLine);
             }
         }
 
@@ -160,16 +169,16 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             AssignStmt assignStmt = (AssignStmt) unit;
 
             if (assignStmt.containsInvokeExpr()) {
-                return executeCallGraph(in, flowChangeTag, unit);
+                return executeCallGraph(in, flowChangeTag, unit, sootMethod);
             }
 
+            separeteAbstraction(in);
             if (tagged) {
                 Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
+                setStackTraceInStmt(stmt);
                 // logger.log(Level.INFO, () -> String.format("%s", "stmt: " + stmt.toString()));
-                separeteAbstraction(in);
                 gen(in, stmt);
             } else {
-                separeteAbstraction(in);
                 kill(in, unit);
             }
 
@@ -191,7 +200,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
               For builders, InvokeExpression is an instance of InvokeSpecial */
 
         } else if (unit instanceof InvokeStmt) {
-            return executeCallGraph(in, flowChangeTag, unit);
+            return executeCallGraph(in, flowChangeTag, unit, sootMethod);
         }
 
         return in;
@@ -210,7 +219,8 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         });
     }
 
-    private FlowSet<DataFlowAbstraction> executeCallGraph(FlowSet<DataFlowAbstraction> in, Statement.Type flowChangeTag, Unit unit) {
+    private FlowSet<DataFlowAbstraction> executeCallGraph(FlowSet<DataFlowAbstraction> in,
+                                                          Statement.Type flowChangeTag, Unit unit, SootMethod sootMethod) {
         CallGraph callGraph = Scene.v().getCallGraph();
         Iterator<Edge> edges = callGraph.edgesOutOf(unit);
 
@@ -219,11 +229,11 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         while (edges.hasNext()) {
             Edge e = edges.next();
             SootMethod method = e.getTgt().method();
+
             Statement stmt = getStatementAssociatedWithUnit(method, unit, flowChangeTag);
 
             FlowSet<DataFlowAbstraction> traverseResult = traverse(in.clone(), method, stmt.getType());
             flowSetList.add(traverseResult);
-
         }
 
         FlowSet<DataFlowAbstraction> flowSetUnion = new ArraySparseSet<>();
@@ -259,9 +269,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
         } else if (isLefAndRightStatement(stmt)) {
             addConflict(stmt, stmt);
-
-            //addStmtToList(stmt, left);
-
         }
         addStmtToList(stmt, in);
     }
@@ -357,6 +364,18 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             return createStatement(sootMethod, u, flowChangeTag);
         }
         return createStatement(sootMethod, u, Statement.Type.IN_BETWEEN);
+    }
+
+    private void setStackTraceInStmt(Statement stmt) {
+        stmt.setStacktrace(new ArrayList<TraversedLine>(this.stacktraceList));
+    }
+
+    private void addStackTrace(TraversedLine traversedLine) {
+        this.stacktraceList.add(traversedLine);
+    }
+
+    private void removeStackTrace(TraversedLine traversedLine) {
+        this.stacktraceList.remove(traversedLine);
     }
 
     private boolean isBothUnitOrBothStatementFlow(Unit u, Statement.Type flowChangeTag) {

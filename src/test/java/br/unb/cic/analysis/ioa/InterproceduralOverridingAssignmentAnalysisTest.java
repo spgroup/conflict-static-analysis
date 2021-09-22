@@ -86,6 +86,17 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Options.v().set_include(getIncludeList());
     }
 
+
+    @Test
+    public void stacktraceConflictSample() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.StacktraceConflictSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{12}, new int[]{13});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(2, analysis.getConflicts().size());
+    }
+
     @Test
     public void subclassWithConditionalTeste() {
 

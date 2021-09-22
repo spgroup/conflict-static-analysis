@@ -4,6 +4,8 @@ import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -24,32 +26,42 @@ public class Statement {
 
 	public static StatementBuilder builder() {
 		if(builder == null) {
-			builder = new StatementBuilder();
-		}
-		return builder;
-	}
+            builder = new StatementBuilder();
+        }
+        return builder;
+    }
 
-	private SootClass sootClass; 
-	private SootMethod sootMethod; 
-	private Unit unit; 
-	private Type type;
-	private Integer sourceCodeLineNumber;
-	
-	Statement(SootClass sootClass, SootMethod sootMethod, Unit unit, Type type, Integer sourceCodeLineNumber) {
-		this.sootClass = sootClass;
-		this.sootMethod = sootMethod;
-		this.unit = unit;
-		this.type = type;
-		this.sourceCodeLineNumber = sourceCodeLineNumber;
-	}
+    private SootClass sootClass;
+    private SootMethod sootMethod;
+    private Unit unit;
+    private Type type;
+    private Integer sourceCodeLineNumber;
+    private List<TraversedLine> traversedLine;
 
-	public SootClass getSootClass() {
-		return sootClass;
-	}
+    Statement(SootClass sootClass, SootMethod sootMethod, Unit unit, Type type, Integer sourceCodeLineNumber) {
+        this.sootClass = sootClass;
+        this.sootMethod = sootMethod;
+        this.unit = unit;
+        this.type = type;
+        this.sourceCodeLineNumber = sourceCodeLineNumber;
+        this.traversedLine = new ArrayList<>();
+    }
 
-	public SootMethod getSootMethod() {
-		return sootMethod;
-	}
+    public List<TraversedLine> getStacktrace() {
+        return traversedLine;
+    }
+
+    public void setStacktrace(List<TraversedLine> traversedLine) {
+        this.traversedLine = traversedLine;
+    }
+
+    public SootClass getSootClass() {
+        return sootClass;
+    }
+
+    public SootMethod getSootMethod() {
+        return sootMethod;
+    }
 
 	public Unit getUnit() {
 		return unit;
