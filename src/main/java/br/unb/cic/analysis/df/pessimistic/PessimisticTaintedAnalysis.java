@@ -109,14 +109,16 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
     }
 
     protected void kill(PessimisticTaintedAnalysisAbstraction in, Statement statement) {
-        for (ValueBox def : statement.getUnit().getDefBoxes()) {
-            in.unmark(def.getValue());
+        if (!statement.isSource()) {
+            for (ValueBox def : statement.getUnit().getDefBoxes()) {
+                in.unmark(def.getValue());
+            }
         }
         // for now we wont consider method invocation for unmarking the
         // base object fields because the most pessimistic behaviour for this case
         // would be considering that the method didn't change any fields
         // if this causes to many false positives we can implement it
-     }
+    }
 
     @Override
     protected void merge(PessimisticTaintedAnalysisAbstraction in1, PessimisticTaintedAnalysisAbstraction in2, PessimisticTaintedAnalysisAbstraction out) {
