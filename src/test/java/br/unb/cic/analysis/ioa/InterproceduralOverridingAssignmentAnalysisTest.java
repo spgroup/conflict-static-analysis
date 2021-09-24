@@ -1,6 +1,7 @@
 package br.unb.cic.analysis.ioa;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+import br.unb.cic.analysis.model.Conflict;
 import br.unc.cic.analysis.test.DefinitionFactory;
 import br.unc.cic.analysis.test.MarkingClass;
 import org.junit.Assert;
@@ -13,6 +14,7 @@ import soot.jimple.spark.SparkTransformer;
 import soot.jimple.toolkits.callgraph.CHATransformer;
 import soot.options.Options;
 
+import java.io.FileWriter;
 import java.util.*;
 
 public class InterproceduralOverridingAssignmentAnalysisTest {
@@ -35,6 +37,40 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         analysis.configureEntryPoints();
 
         configurePackages().forEach(p -> PackManager.v().getPack(p).apply());
+
+        try {
+            exportResults(analysis.getConflicts());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void exportResults(Set<Conflict> conflicts) throws Exception {
+        final String out = "out.txt";
+        final FileWriter fw = new FileWriter(out);
+
+        if (conflicts.size() == 0) {
+            System.out.println(" Analysis results");
+            System.out.println("----------------------------");
+            System.out.println(" No conflicts detected");
+            System.out.println("----------------------------");
+            return;
+        }
+
+
+        conflicts.forEach(c -> {
+            try {
+                fw.write(c + "\n\n");
+            } catch (Exception e) {
+                System.out.println("error exporting the results " + e.getMessage());
+            }
+        });
+        fw.close();
+        System.out.println(" Analysis results");
+        System.out.println("----------------------------");
+        System.out.println(" Number of conflicts: " + conflicts.size());
+        System.out.println(" Results exported to " + out);
+        System.out.println("----------------------------");
     }
 
     private void configurePhaseOption() {
@@ -91,7 +127,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
     public void stacktraceConflictSample() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.StacktraceConflictSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
-                .definition(sampleClassPath, new int[]{12}, new int[]{13});
+                .definition(sampleClassPath, new int[]{10}, new int[]{11});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
         Assert.assertEquals(2, analysis.getConflicts().size());
