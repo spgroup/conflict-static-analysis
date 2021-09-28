@@ -15,16 +15,16 @@ import soot.jimple.StringConstant;
 
 public class PessimisticTaintedAnalysisAbstractionTest {
 
-    PessimisticTaintedAnalysisAbstraction instance = null;
+    private PessimisticTaintedAnalysisAbstraction instance = null;
 
-    Local local;
-    Local otherLocal;
-    InstanceFieldRef field;
-    InstanceFieldRef otherField;
-    AssignStmt assignUnit;
+    private Local local;
+    private Local otherLocal;
+    private InstanceFieldRef field;
+    private InstanceFieldRef otherField;
+    private AssignStmt assignUnit;
 
-    Statement emptyStatement;
-    Statement assignStatement;
+    private Statement emptyStatement;
+    private Statement assignStatement;
 
     @Before
     public void configure() {
