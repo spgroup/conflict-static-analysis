@@ -28,12 +28,12 @@ public class Conflict {
         this.sourceMethodName = source.getSootMethod().getName();
         this.sourceLineNumber = source.getSourceCodeLineNumber();
         this.sourceUnit = source.getUnit();
-        this.sourceTraversedLine = source.getStacktrace();
+        this.sourceTraversedLine = source.getTraversedLine();
         this.sinkClassName = sink.getSootClass().getName();
         this.sinkMethodName = sink.getSootMethod().getName();
         this.sinkLineNumber = sink.getSourceCodeLineNumber();
         this.sinkUnit = sink.getUnit();
-        this.sinkTraversedLine = sink.getStacktrace();
+        this.sinkTraversedLine = sink.getTraversedLine();
     }
 
     @Deprecated

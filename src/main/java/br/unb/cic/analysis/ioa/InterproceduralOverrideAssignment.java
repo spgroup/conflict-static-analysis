@@ -276,7 +276,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     private boolean isInLeftAndRightStatementFlow(Statement.Type flowChangeTag) {
-        return flowChangeTag.equals(Statement.Type.BOTH);
+        return flowChangeTag.equals(Statement.Type.SOURCE_SINK);
     }
 
     // TODO add depth to InstanceFieldRef and StaticFieldRef...
@@ -374,7 +374,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private Statement getStatementAssociatedWithUnit(SootMethod sootMethod, Unit u, Statement.Type flowChangeTag) {
         if (isLeftAndRightUnit(u) || isInLeftAndRightStatementFlow(flowChangeTag) || isBothUnitOrBothStatementFlow(u,
                 flowChangeTag)) {
-            return createStatement(sootMethod, u, Statement.Type.BOTH);
+            return createStatement(sootMethod, u, Statement.Type.SOURCE_SINK);
         } else if (isLeftUnit(u)) {
             return findLeftStatement(u);
         } else if (isRightUnit(u)) {
@@ -388,7 +388,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     private void setStackTraceInStmt(Statement stmt) {
-        stmt.setStacktrace(new ArrayList<TraversedLine>(this.stacktraceList));
+        stmt.setTraversedLine(new ArrayList<TraversedLine>(this.stacktraceList));
     }
 
     private void addStackTrace(TraversedLine traversedLine) {
@@ -445,6 +445,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     private boolean isLefAndRightStatement(Statement stmt) {
-        return stmt.getType().equals(Statement.Type.BOTH);
+        return stmt.getType().equals(Statement.Type.SOURCE_SINK);
     }
 }
