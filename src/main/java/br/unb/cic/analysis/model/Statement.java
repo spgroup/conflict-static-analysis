@@ -3,9 +3,9 @@ package br.unb.cic.analysis.model;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
+import soot.ValueBox;
+import soot.jimple.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -16,52 +16,42 @@ import java.util.Objects;
  */
 public class Statement {
 	public enum Type {
-		SOURCE,
+		SOURCE, 
 		SINK,
 		IN_BETWEEN,
-		BOTH;
+		SOURCE_SINK
 	}
 
 	private static StatementBuilder builder;
 
 	public static StatementBuilder builder() {
 		if(builder == null) {
-            builder = new StatementBuilder();
-        }
-        return builder;
-    }
+			builder = new StatementBuilder();
+		}
+		return builder;
+	}
 
-    private SootClass sootClass;
-    private SootMethod sootMethod;
-    private Unit unit;
-    private Type type;
-    private Integer sourceCodeLineNumber;
-    private List<TraversedLine> traversedLine;
+	private SootClass sootClass; 
+	private SootMethod sootMethod; 
+	private Unit unit; 
+	private Type type;
+	private Integer sourceCodeLineNumber;
+	
+	Statement(SootClass sootClass, SootMethod sootMethod, Unit unit, Type type, Integer sourceCodeLineNumber) {
+		this.sootClass = sootClass;
+		this.sootMethod = sootMethod;
+		this.unit = unit;
+		this.type = type;
+		this.sourceCodeLineNumber = sourceCodeLineNumber;
+	}
 
-    Statement(SootClass sootClass, SootMethod sootMethod, Unit unit, Type type, Integer sourceCodeLineNumber) {
-        this.sootClass = sootClass;
-        this.sootMethod = sootMethod;
-        this.unit = unit;
-        this.type = type;
-        this.sourceCodeLineNumber = sourceCodeLineNumber;
-        this.traversedLine = new ArrayList<>();
-    }
+	public SootClass getSootClass() {
+		return sootClass;
+	}
 
-    public List<TraversedLine> getStacktrace() {
-        return traversedLine;
-    }
-
-    public void setStacktrace(List<TraversedLine> traversedLine) {
-        this.traversedLine = traversedLine;
-    }
-
-    public SootClass getSootClass() {
-        return sootClass;
-    }
-
-    public SootMethod getSootMethod() {
-        return sootMethod;
-    }
+	public SootMethod getSootMethod() {
+		return sootMethod;
+	}
 
 	public Unit getUnit() {
 		return unit;
@@ -93,8 +83,40 @@ public class Statement {
 	}
 
 	public String toString() {
-
-		return String.format("stmt(%d, %s, %s)", sourceCodeLineNumber, unit,
-				type);
+		return unit.toString();
 	}
+
+	public boolean isSource() {
+		return type == Type.SOURCE || type == Type.SOURCE_SINK;
+	}
+
+	public boolean isSink() {
+		return type == Type.SINK || type == Type.SOURCE_SINK;
+	}
+
+	public boolean isAssign() {
+		return this.unit instanceof AssignStmt;
+	}
+
+	public boolean isInvoke() {
+		return getInvoke() != null;
+	}
+
+	public InstanceInvokeExpr getInvoke() {
+		if (this.unit instanceof InvokeStmt) {
+			InvokeStmt invoke = (InvokeStmt) this.unit;
+			InvokeExpr expr = invoke.getInvokeExpr();
+
+			if (expr instanceof InstanceInvokeExpr) {
+				return (InstanceInvokeExpr) expr;
+			}
+ 		}
+		for (ValueBox use : this.unit.getUseBoxes()) {
+			if (use.getValue() instanceof InstanceInvokeExpr) {
+				return (InstanceInvokeExpr) use.getValue();
+			}
+		}
+		return null;
+	}
+
 }
