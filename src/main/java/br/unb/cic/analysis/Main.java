@@ -97,9 +97,9 @@ public class Main {
         final String out = "out.txt"; 
         final FileWriter fw = new FileWriter(out);
         conflicts.forEach(c -> {
-    		try { 
-    			fw.write(c + "\n");
-    		}
+    		try {
+                fw.write(c + "\n\n");
+            }
     		catch(Exception e) {
     			System.out.println("error exporting the results " + e.getMessage());
     		}

@@ -76,7 +76,15 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         List<SootMethod> methods = Scene.v().getEntryPoints();
         methods.forEach(sootMethod -> traverse(new ArraySparseSet<>(), sootMethod, Statement.Type.IN_BETWEEN));
 
-        logger.log(Level.INFO, () -> String.format("%s", "CONFLICTS: " + getConflicts()));
+        Set<Conflict> conflictsFilter = new HashSet<>();
+        filterConflicts(getConflicts(), conflictsFilter);
+
+        logger.log(Level.INFO, () -> String.format("%s", "Number of conflicts filter: " + conflictsFilter.size()));
+        conflictsFilter.forEach(conflict -> {
+            logger.log(Level.INFO, conflict.toStringAbstract());
+        });
+
+        //logger.log(Level.INFO, () -> String.format("%s", "CONFLICTS: " + conflictsFilter));
 
         /* left.forEach(dataFlowAbstraction -> {
             String leftStmt = String.format("%s", "LEFT: " + dataFlowAbstraction.getStmt());
@@ -87,6 +95,19 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             String rightStmt = String.format("%s", "RIGHT: " + dataFlowAbstraction.getStmt());
             logger.log(Level.INFO, rightStmt);
         }); */
+    }
+
+    private void filterConflicts(Set<Conflict> conflictsResults, Set<Conflict> conflictsFilter) {
+        conflictsResults.forEach(conflict -> {
+            if (conflictsFilter.isEmpty()) {
+                conflictsFilter.add(conflict);
+            }
+            conflictsFilter.forEach(filter -> {
+                if ((!conflict.getSourceTraversedLine().get(0).equals(filter.getSourceTraversedLine().get(0))) && (!conflict.getSinkTraversedLine().get(0).equals(filter.getSinkTraversedLine().get(0)))) {
+                    conflictsFilter.add(conflict);
+                }
+            });
+        });
     }
 
     /**
