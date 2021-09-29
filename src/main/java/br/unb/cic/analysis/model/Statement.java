@@ -3,6 +3,8 @@ package br.unb.cic.analysis.model;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
+import soot.ValueBox;
+import soot.jimple.*;
 
 import java.util.Objects;
 
@@ -16,7 +18,8 @@ public class Statement {
 	public enum Type {
 		SOURCE, 
 		SINK,
-		IN_BETWEEN;
+		IN_BETWEEN,
+		SOURCE_SINK
 	}
 
 	private static StatementBuilder builder;
@@ -82,4 +85,38 @@ public class Statement {
 	public String toString() {
 		return unit.toString();
 	}
+
+	public boolean isSource() {
+		return type == Type.SOURCE || type == Type.SOURCE_SINK;
+	}
+
+	public boolean isSink() {
+		return type == Type.SINK || type == Type.SOURCE_SINK;
+	}
+
+	public boolean isAssign() {
+		return this.unit instanceof AssignStmt;
+	}
+
+	public boolean isInvoke() {
+		return getInvoke() != null;
+	}
+
+	public InstanceInvokeExpr getInvoke() {
+		if (this.unit instanceof InvokeStmt) {
+			InvokeStmt invoke = (InvokeStmt) this.unit;
+			InvokeExpr expr = invoke.getInvokeExpr();
+
+			if (expr instanceof InstanceInvokeExpr) {
+				return (InstanceInvokeExpr) expr;
+			}
+ 		}
+		for (ValueBox use : this.unit.getUseBoxes()) {
+			if (use.getValue() instanceof InstanceInvokeExpr) {
+				return (InstanceInvokeExpr) use.getValue();
+			}
+		}
+		return null;
+	}
+
 }

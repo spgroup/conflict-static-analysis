@@ -15,4 +15,26 @@ public class IntraproceduralIndirectSource {
     private int random() {
         return 0;
     }
+
+    public void a() {
+        MockClass mock = new MockClass();
+
+        mock.setA(1); // source
+
+        int y = mock.getA() + 1;
+
+        System.out.println(y); // sink
+    }
+}
+
+class MockClass {
+    public int a;
+
+    public void setA(int a) {
+        this.a = a;
+    }
+
+    public int getA() {
+        return a;
+    }
 }

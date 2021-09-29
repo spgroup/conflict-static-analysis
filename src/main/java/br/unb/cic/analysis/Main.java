@@ -1,9 +1,11 @@
 package br.unb.cic.analysis;
 
 import br.unb.cic.analysis.df.*;
+import br.unb.cic.analysis.df.pessimistic.PessimisticTaintedAnalysis;
 import br.unb.cic.analysis.io.DefaultReader;
 import br.unb.cic.analysis.io.MergeConflictReader;
 import br.unb.cic.analysis.ioa.InterproceduralOverrideAssignment;
+import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.analysis.reachability.ReachabilityAnalysis;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
@@ -122,7 +124,7 @@ public class Main {
 
         Option analysisOption = Option.builder("mode").argName("mode")
                 .hasArg().desc("analysis mode [data-flow, tainted, reachability, svfa-{interprocedural | intraprocedural}" +
-                        ", svfa-confluence-{interprocedural | intraprocedural}]")
+                        ", svfa-confluence-{interprocedural | intraprocedural}, pessimistic-dataflow]")
 
                 .build();
 
@@ -169,10 +171,38 @@ public class Main {
             case "overriding-interprocedural":
                 runInterproceduralOverrideAssignmentAnalysis(classpath);
                 break;
+            case "pessimistic-dataflow":
+                runPessimisticDataFlowAnalysis(classpath);
+                break;
             default:
                 runDataFlowAnalysis(classpath, mode);
         }
     }
+    
+    private void runPessimisticDataFlowAnalysis(String classpath) {
+        PackManager.v().getPack("jtp").add(
+                new Transform("jtp.analysis", new BodyTransformer() {
+                    @Override
+                    protected void internalTransform(Body body, String s, Map<String, String> map) {
+                        PessimisticTaintedAnalysis analysis = new PessimisticTaintedAnalysis(body, definition);
+
+                        conflicts.addAll(
+                                analysis
+                                        .getConflicts()
+                                        .stream()
+                                        .map(Conflict::toString)
+                                        .collect(Collectors.toList()));
+                    }
+                })
+        );
+        SootWrapper.builder()
+                .withClassPath(classpath)
+                .addClass(targetClasses.stream().collect(Collectors.joining(" ")))
+                .build()
+                .execute();
+
+    }
+    
 
     private void runDataFlowAnalysis(String classpath, String mode) {
         PackManager.v().getPack("jtp").add(
@@ -251,6 +281,7 @@ public class Main {
                 : new SVFAIntraProcedural(classpath, definition);
 
         analysis.buildSparseValueFlowGraph();
+
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflicts())
                 .stream()
                 .map(p -> p.toString())
