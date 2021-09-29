@@ -1,7 +1,7 @@
-package br.unb.cic.analysis.samples;
+package br.unb.cic.analysis.samples.ioa;
 
-// Conflict: [left, ObjectFieldConflict.m():17] --> [right, ObjectFieldConflict.bar():21]
-public class OverridingAssignmentObjectFieldConflictInterProceduralSample {
+// Conflict: [left, ObjectFieldConflict.foo():17] --> [right, ObjectFieldConflict.bar():21]
+public class ObjectFieldConflictSample {
     public void m() {
         ObjectFieldConflict c = new ObjectFieldConflict();
         c.foo(1); // left

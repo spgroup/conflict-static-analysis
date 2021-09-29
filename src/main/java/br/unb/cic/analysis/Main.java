@@ -15,10 +15,9 @@ import br.unb.cic.analysis.svfa.confluence.SVFAConfluenceAnalysis;
 import br.unb.cic.diffclass.DiffClass;
 import org.apache.commons.cli.*;
 import scala.collection.JavaConverters;
-import soot.Body;
-import soot.BodyTransformer;
-import soot.PackManager;
-import soot.Transform;
+import soot.*;
+import soot.jimple.spark.SparkTransformer;
+import soot.jimple.toolkits.callgraph.CHATransformer;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -100,9 +99,9 @@ public class Main {
         final String out = "out.txt"; 
         final FileWriter fw = new FileWriter(out);
         conflicts.forEach(c -> {
-    		try { 
-    			fw.write(c + "\n");
-    		}
+    		try {
+                fw.write(c + "\n\n");
+            }
     		catch(Exception e) {
     			System.out.println("error exporting the results " + e.getMessage());
     		}
@@ -237,19 +236,75 @@ public class Main {
     }
 
     private void runInterproceduralOverrideAssignmentAnalysis(String classpath) {
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        InterproceduralOverrideAssignment interproceduralOverrideAssignment =
+                new InterproceduralOverrideAssignment(definition);
 
-        PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
-        soot.options.Options.v().setPhaseOption("cg.spark", "on");
-        soot.options.Options.v().setPhaseOption("cg.spark", "verbose:true");
+        List<String> testClasses = Collections.singletonList(classpath);
+        PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", interproceduralOverrideAssignment));
 
-        SootWrapper.builder()
-                .withClassPath(classpath)
-                .addClass(targetClasses.stream().collect(Collectors.joining(" ")))
-                .build()
-                .execute();
+        configureSootOptions(testClasses);
+        configurePhaseOption();
 
-        conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
+        // Scene.v().addBasicClass("java.util.ArrayList",BODIES);
+        Scene.v().loadNecessaryClasses();
+
+        //enableCHACallGraph();
+        enableSparkCallGraph();
+
+        interproceduralOverrideAssignment.configureEntryPoints();
+
+        configurePackages().forEach(p -> PackManager.v().getPack(p).apply());
+
+        conflicts.addAll(interproceduralOverrideAssignment.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
+    }
+    private static void enableCHACallGraph() {
+        CHATransformer.v().transform();
+    }
+
+    private void configureSootOptions(List<String> classpath) {
+        soot.options.Options.v().set_no_bodies_for_excluded(true);
+        soot.options.Options.v().set_allow_phantom_refs(true);
+        soot.options.Options.v().set_output_format(soot.options.Options.output_format_jimple);
+        soot.options.Options.v().set_whole_program(true);
+        soot.options.Options.v().set_process_dir(classpath);
+        soot.options.Options.v().set_full_resolver(true);
+        soot.options.Options.v().set_keep_line_number(true);
+        soot.options.Options.v().set_prepend_classpath(false);
+        soot.options.Options.v().set_include(getIncludeList());
+    }
+
+    private void configurePhaseOption() {
+        //Options.v().setPhaseOption("cg.spark", "on");
+        //Options.v().setPhaseOption("cg.spark", "verbose:true");
+        soot.options.Options.v().setPhaseOption("cg.spark", "enabled:true");
+        soot.options.Options.v().setPhaseOption("jb", "use-original-names:true");
+    }
+
+    private List<String> configurePackages() {
+        List<String> packages = new ArrayList<String>();
+        packages.add("cg");
+        packages.add("wjtp");
+        return packages;
+    }
+
+    private List<String> getIncludeList() {
+        //"java.lang.*"
+        List<String> stringList = new ArrayList<String>(Arrays.asList("java.util.*")); //java.util.HashMap
+        return stringList;
+    }
+
+    private static void enableSparkCallGraph() {
+        //Enable Spark
+        HashMap<String, String> opt = new HashMap<String, String>();
+        //opt.put("propagator","worklist");
+        //opt.put("simple-edges-bidirectional","false");
+        opt.put("on-fly-cg", "true");
+        //opt.put("set-impl","double");
+        //opt.put("double-set-old","hybrid");
+        //opt.put("double-set-new","hybrid");
+        //opt.put("pre_jimplify", "true");
+        SparkTransformer.v().transform("", opt);
+        soot.options.Options.v().setPhaseOption("cg.spark", "enable:true");
     }
 
     /*
