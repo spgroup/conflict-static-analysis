@@ -135,7 +135,9 @@ public class PessimisticTaintedAnalysisAbstraction {
 
         // check if any of the value's fields are in the unmarked
         // map and remove them
-        for (Value unmarkedValue : this.unmarked.values())  {
+
+        Map<String, Value> temp = new HashMap<>(this.unmarked);
+        for (Value unmarkedValue : temp.values())  {
             if (unmarkedValue instanceof InstanceFieldRef) {
                 InstanceFieldRef fieldRef = (InstanceFieldRef) unmarkedValue;
 
