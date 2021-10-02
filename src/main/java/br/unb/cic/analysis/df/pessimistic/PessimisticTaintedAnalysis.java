@@ -4,16 +4,16 @@ import br.unb.cic.analysis.AbstractAnalysis;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
-import soot.Body;
-import soot.Unit;
-import soot.Value;
-import soot.ValueBox;
+import soot.*;
+import soot.jimple.InstanceFieldRef;
 import soot.jimple.InstanceInvokeExpr;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.scalar.ForwardFlowAnalysis;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Map;
 
 public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, PessimisticTaintedAnalysisAbstraction> implements AbstractAnalysis {
 
@@ -21,10 +21,13 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
     private Set<Conflict> conflicts;
     private AbstractMergeConflictDefinition definition;
 
+    private Map<Local, InstanceFieldRef> pointsTo;
+
     public PessimisticTaintedAnalysis(Body methodBody, AbstractMergeConflictDefinition definition) {
         super(new ExceptionalUnitGraph(methodBody));
         this.methodBody = methodBody;
         this.conflicts = new HashSet<>();
+        this.pointsTo = new HashMap<>();
         this.definition = definition;
         this.definition.loadSinkStatements();
         this.definition.loadSourceStatements();
@@ -39,6 +42,18 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
     @Override
     protected void flowThrough(PessimisticTaintedAnalysisAbstraction in, Unit unit, PessimisticTaintedAnalysisAbstraction out) {
         Statement statement = createStatement(unit);
+
+        if (statement.isAssign()) {
+            for (ValueBox valueBox : statement.getUnit().getUseBoxes()) {
+                if (valueBox.getValue() instanceof InstanceFieldRef) {
+                    InstanceFieldRef fieldRef = (InstanceFieldRef) valueBox.getValue();
+
+                    for (ValueBox defBox : statement.getUnit().getDefBoxes()) {
+                        pointsTo.put((Local) defBox.getValue(), fieldRef);
+                    }
+                }
+            }
+        }
         in.copy(out);
         detectConflicts(in, statement);
         kill(out, statement);
@@ -73,6 +88,11 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
                 Statement valueDefinitionStatement = in.getValueDefinitionStatement(value);
                 boolean isMarked = valueDefinitionStatement != null;
 
+                if (value instanceof  Local && pointsTo.containsKey(value)) {
+                    valueDefinitionStatement = in.getValueDefinitionStatement(pointsTo.get(value));
+                    isMarked = isMarked || valueDefinitionStatement != null;
+                }
+
                 if (isMarked) {
                     conflicts.add(new Conflict(in.getValueDefinitionStatement(use.getValue()), statement));
                 }
@@ -84,6 +104,11 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
                 Value baseValue = invokeExpr.getBase();
                 Statement valueFieldsDefinitionStatement = in.getValueFieldsDefinitionStatement(baseValue);
                 boolean hasMarkedFields = valueFieldsDefinitionStatement != null;
+
+                if (baseValue instanceof  Local && pointsTo.containsKey(baseValue)) {
+                    valueFieldsDefinitionStatement = in.getValueFieldsDefinitionStatement(pointsTo.get(baseValue));
+                    hasMarkedFields = hasMarkedFields || valueFieldsDefinitionStatement != null;
+                }
 
                 if (hasMarkedFields) {
                     conflicts.add(new Conflict(valueFieldsDefinitionStatement, statement));
@@ -104,6 +129,10 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
                 Value baseValue = invoke.getBase();
 
                 in.markFields(baseValue, statement);
+
+                if (baseValue instanceof Local && pointsTo.containsKey(baseValue)) {
+                    in.markFields(pointsTo.get(baseValue), statement);
+                }
             }
         }
     }
