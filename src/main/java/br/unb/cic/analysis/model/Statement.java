@@ -109,6 +109,18 @@ public class Statement {
 		return type == Type.SINK || type == Type.SOURCE_SINK;
 	}
 
+	public boolean isRightStatement() {
+		return this.type == Type.SINK || type == Type.SOURCE_SINK;
+	}
+
+	public boolean isLeftStatement() {
+		return this.type == Type.SOURCE || type == Type.SOURCE_SINK;
+	}
+
+	public boolean isLefAndRightStatement() {
+		return this.type == Type.SOURCE_SINK;
+	}
+
 	public boolean isAssign() {
 		return this.unit instanceof AssignStmt;
 	}

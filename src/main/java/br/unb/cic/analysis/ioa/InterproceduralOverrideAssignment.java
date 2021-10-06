@@ -125,7 +125,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
         this.traversedMethods.add(sootMethod);
 
-        Body body = retrieveActiveBodySafely(sootMethod);
+        Body body = definition.retrieveActiveBodySafely(sootMethod);
 
         if (body != null) {
             for (Unit unit : body.getUnits()) {
@@ -146,13 +146,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         return in;
     }
 
-    private Body retrieveActiveBodySafely(SootMethod sootMethod) {
-        try {
-            return sootMethod.retrieveActiveBody();
-        } catch (RuntimeException e) {
-            return null;
-        }
-    }
 
     private FlowSet<DataFlowAbstraction> runAnalysisWithTaggedUnit(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod,
                                                                    Statement.Type flowChangeTag, Unit unit) {
@@ -193,7 +186,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             separeteAbstraction(in);
             if (tagged) {
                 Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
-                setStackTraceInStmt(stmt);
+                stmt.setTraversedLine(new ArrayList<>(this.stacktraceList));
                 // logger.log(Level.INFO, () -> String.format("%s", "stmt: " + stmt.toString()));
                 gen(in, stmt);
             } else {
@@ -226,12 +219,12 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private void separeteAbstraction(FlowSet<DataFlowAbstraction> in) {
         in.forEach(item -> {
-            if (isLefAndRightStatement(item.getStmt())) {
+            if (item.getStmt().isLefAndRightStatement()) {
+                left.add(item);
                 right.add(item);
+            } else if (item.getStmt().isLeftStatement()) {
                 left.add(item);
-            } else if (isLeftStatement(item.getStmt())) {
-                left.add(item);
-            } else if (isRightStatement(item.getStmt())) {
+            } else if (item.getStmt().isRightStatement()) {
                 right.add(item);
             }
         });
@@ -281,13 +274,13 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     // TODO add depth to InstanceFieldRef and StaticFieldRef...
     // TODO rename Statement. (UnitWithExtraInformations)
     private void gen(FlowSet<DataFlowAbstraction> in, Statement stmt) {
-        if (isLeftStatement(stmt)) {
+        if (stmt.isLeftStatement()) {
             checkConflict(stmt, right);
 
-        } else if (isRightStatement(stmt)) {
+        } else if (stmt.isRightStatement()) {
             checkConflict(stmt, left);
 
-        } else if (isLefAndRightStatement(stmt)) {
+        } else if (stmt.isLefAndRightStatement()) {
             addConflict(stmt, stmt);
         }
         addStmtToList(stmt, in);
@@ -373,21 +366,17 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private Statement getStatementAssociatedWithUnit(SootMethod sootMethod, Unit u, Statement.Type flowChangeTag) {
         if (isLeftAndRightUnit(u) || isInLeftAndRightStatementFlow(flowChangeTag) || isBothUnitOrBothStatementFlow(u,
                 flowChangeTag)) {
-            return createStatement(sootMethod, u, Statement.Type.SOURCE_SINK);
+            return definition.createStatement(sootMethod, u, Statement.Type.SOURCE_SINK);
         } else if (isLeftUnit(u)) {
             return findLeftStatement(u);
         } else if (isRightUnit(u)) {
             return findRightStatement(u);
         } else if (isInLeftStatementFlow(flowChangeTag)) {
-            return createStatement(sootMethod, u, flowChangeTag);
+            return definition.createStatement(sootMethod, u, flowChangeTag);
         } else if (isInRightStatementFlow(flowChangeTag)) {
-            return createStatement(sootMethod, u, flowChangeTag);
+            return definition.createStatement(sootMethod, u, flowChangeTag);
         }
-        return createStatement(sootMethod, u, Statement.Type.IN_BETWEEN);
-    }
-
-    private void setStackTraceInStmt(Statement stmt) {
-        stmt.setTraversedLine(new ArrayList<>(this.stacktraceList));
+        return definition.createStatement(sootMethod, u, Statement.Type.IN_BETWEEN);
     }
 
     private void addStackTrace(TraversedLine traversedLine) {
@@ -424,21 +413,4 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
                 findFirst().get();
     }
 
-    private Statement createStatement(SootMethod sootMethod, Unit u, Statement.Type flowChangeTag) {
-        return Statement.builder().setClass(sootMethod.getDeclaringClass()).setMethod(sootMethod)
-                .setUnit(u).setType(flowChangeTag).setSourceCodeLineNumber(u.getJavaSourceStartLineNumber())
-                .build();
-    }
-
-    private boolean isRightStatement(Statement stmt) {
-        return stmt.getType().equals(Statement.Type.SINK);
-    }
-
-    private boolean isLeftStatement(Statement stmt) {
-        return stmt.getType().equals(Statement.Type.SOURCE);
-    }
-
-    private boolean isLefAndRightStatement(Statement stmt) {
-        return stmt.getType().equals(Statement.Type.SOURCE_SINK);
-    }
 }
