@@ -1,6 +1,7 @@
 package br.unb.cic.analysis.ioa;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+import br.unb.cic.analysis.SootWrapper;
 import br.unb.cic.analysis.model.Conflict;
 import br.unc.cic.analysis.test.DefinitionFactory;
 import br.unc.cic.analysis.test.MarkingClass;
@@ -8,14 +9,13 @@ import org.junit.Assert;
 import org.junit.Test;
 import soot.G;
 import soot.PackManager;
-import soot.Scene;
 import soot.Transform;
-import soot.jimple.spark.SparkTransformer;
-import soot.jimple.toolkits.callgraph.CHATransformer;
-import soot.options.Options;
 
 import java.io.FileWriter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 public class InterproceduralOverridingAssignmentAnalysisTest {
     private void configureTest(InterproceduralOverrideAssignment analysis) {
@@ -23,20 +23,12 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
 
         List<String> testClasses = Collections.singletonList("target/test-classes/");
 
-        PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
-
-        configureSootOptions(testClasses);
-        configurePhaseOption();
-
-        // Scene.v().addBasicClass("java.util.ArrayList",BODIES);
-        Scene.v().loadNecessaryClasses();
-
-        //enableCHACallGraph();
-        enableSparkCallGraph();
+        SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(testClasses);
 
         analysis.configureEntryPoints();
 
-        configurePackages().forEach(p -> PackManager.v().getPack(p).apply());
+        PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
+        SootWrapper.configurePackagesWithCallGraph().forEach(p -> PackManager.v().getPack(p).apply());
 
         try {
             exportResults(analysis.getConflicts());
@@ -71,55 +63,6 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         System.out.println(" Number of conflicts: " + conflicts.size());
         System.out.println(" Results exported to " + out);
         System.out.println("----------------------------");
-    }
-
-    private void configurePhaseOption() {
-        //Options.v().setPhaseOption("cg.spark", "on");
-        //Options.v().setPhaseOption("cg.spark", "verbose:true");
-        Options.v().setPhaseOption("cg.spark", "enabled:true");
-        Options.v().setPhaseOption("jb", "use-original-names:true");
-    }
-
-    private List<String> configurePackages() {
-        List<String> packages = new ArrayList<String>();
-        packages.add("cg");
-        packages.add("wjtp");
-        return packages;
-    }
-
-    private List<String> getIncludeList() {
-        // "java.lang.*"
-        List<String> stringList = new ArrayList<String>(Arrays.asList("java.util.*")); //java.util.HashMap
-        return stringList;
-    }
-
-    private static void enableSparkCallGraph() {
-        //Enable Spark
-        HashMap<String, String> opt = new HashMap<String, String>();
-        // opt.put("propagator", "worklist");
-        // opt.put("simple-edges-bidirectional", "false");
-        opt.put("on-fly-cg", "true");
-        // opt.put("set-impl", "double");
-        // opt.put("double-set-old", "hybrid");
-        // opt.put("double-set-new", "hybrid");
-        // opt.put("pre_jimplify", "true");
-        SparkTransformer.v().transform("", opt);
-    }
-
-    private static void enableCHACallGraph() {
-        CHATransformer.v().transform();
-    }
-
-    private void configureSootOptions(List<String> testClasses) {
-        Options.v().set_no_bodies_for_excluded(true);
-        Options.v().set_allow_phantom_refs(true);
-        Options.v().set_output_format(Options.output_format_jimple);
-        Options.v().set_whole_program(true);
-        Options.v().set_process_dir(testClasses);
-        Options.v().set_full_resolver(true);
-        Options.v().set_keep_line_number(true);
-        Options.v().set_prepend_classpath(false);
-        Options.v().set_include(getIncludeList());
     }
 
     @Test
