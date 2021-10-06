@@ -23,12 +23,12 @@ import java.util.stream.Collectors;
 // TODO Do not add anything when assignments are equal.
 public class InterproceduralOverrideAssignment extends SceneTransformer implements AbstractAnalysis {
 
-    private final Set<Conflict> conflicts;
-    private final PointsToAnalysis pointsToAnalysis;
-    private final List<SootMethod> traversedMethods;
-    private final AbstractMergeConflictDefinition definition;
-    private final FlowSet<DataFlowAbstraction> left;
-    private final FlowSet<DataFlowAbstraction> right;
+    private Set<Conflict> conflicts;
+    private PointsToAnalysis pointsToAnalysis;
+    private List<SootMethod> traversedMethods;
+    private AbstractMergeConflictDefinition definition;
+    private FlowSet<DataFlowAbstraction> left;
+    private FlowSet<DataFlowAbstraction> right;
     private List<TraversedLine> stacktraceList;
 
     private final Logger logger;
@@ -76,13 +76,8 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         List<SootMethod> methods = Scene.v().getEntryPoints();
         methods.forEach(sootMethod -> traverse(new ArraySparseSet<>(), sootMethod, Statement.Type.IN_BETWEEN));
 
-        Set<Conflict> conflictsFilter = new HashSet<>();
-        filterConflicts(getConflicts(), conflictsFilter);
-
-        logger.log(Level.INFO, () -> String.format("%s", "Number of conflicts filter: " + conflictsFilter.size()));
-        conflictsFilter.forEach(conflict -> {
-            logger.log(Level.INFO, conflict.toStringAbstract());
-        });
+        Set<Conflict> conflictsFilter = filterConflicts(getConflicts());
+        conflictsFilter.forEach(conflict -> logger.log(Level.INFO, conflict.toStringAbstract()));
 
         //logger.log(Level.INFO, () -> String.format("%s", "CONFLICTS: " + conflictsFilter));
 
@@ -97,7 +92,8 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         }); */
     }
 
-    private void filterConflicts(Set<Conflict> conflictsResults, Set<Conflict> conflictsFilter) {
+    private Set<Conflict> filterConflicts(Set<Conflict> conflictsResults) {
+        Set<Conflict> conflictsFilter = new HashSet<>();
         conflictsResults.forEach(conflict -> {
             if (conflictsFilter.isEmpty()) {
                 conflictsFilter.add(conflict);
@@ -108,6 +104,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
                 }
             });
         });
+        return conflictsFilter;
     }
 
     /**
@@ -190,7 +187,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             AssignStmt assignStmt = (AssignStmt) unit;
 
             if (assignStmt.containsInvokeExpr()) {
-                return executeCallGraph(in, flowChangeTag, unit, sootMethod);
+                return executeCallGraph(in, flowChangeTag, unit);
             }
 
             separeteAbstraction(in);
@@ -221,7 +218,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
               For builders, InvokeExpression is an instance of InvokeSpecial */
 
         } else if (unit instanceof InvokeStmt) {
-            return executeCallGraph(in, flowChangeTag, unit, sootMethod);
+            return executeCallGraph(in, flowChangeTag, unit);
         }
 
         return in;
@@ -241,11 +238,11 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     private FlowSet<DataFlowAbstraction> executeCallGraph(FlowSet<DataFlowAbstraction> in,
-                                                          Statement.Type flowChangeTag, Unit unit, SootMethod sootMethod) {
+                                                          Statement.Type flowChangeTag, Unit unit) {
         CallGraph callGraph = Scene.v().getCallGraph();
         Iterator<Edge> edges = callGraph.edgesOutOf(unit);
 
-        List<FlowSet<DataFlowAbstraction>> flowSetList = new ArrayList<FlowSet<DataFlowAbstraction>>();
+        List<FlowSet<DataFlowAbstraction>> flowSetList = new ArrayList<>();
 
         while (edges.hasNext()) {
             Edge e = edges.next();
@@ -258,7 +255,9 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         }
 
         FlowSet<DataFlowAbstraction> flowSetUnion = new ArraySparseSet<>();
-        flowSetList.forEach(flowSet -> flowSetUnion.union(flowSet));
+        for (FlowSet<DataFlowAbstraction> flowSet : flowSetList) {
+            flowSetUnion.union(flowSet);
+        }
 
         return flowSetUnion;
     }
@@ -388,7 +387,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     private void setStackTraceInStmt(Statement stmt) {
-        stmt.setTraversedLine(new ArrayList<TraversedLine>(this.stacktraceList));
+        stmt.setTraversedLine(new ArrayList<>(this.stacktraceList));
     }
 
     private void addStackTrace(TraversedLine traversedLine) {
@@ -400,12 +399,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     private boolean isBothUnitOrBothStatementFlow(Unit u, Statement.Type flowChangeTag) {
-        if (isRightUnit(u) && isInLeftStatementFlow(flowChangeTag)) {
-            return true;
-        } else if (isLeftUnit(u) && isInRightStatementFlow(flowChangeTag)) {
-            return true;
-        }
-        return false;
+        return (isRightUnit(u) && isInLeftStatementFlow(flowChangeTag)) || (isLeftUnit(u) && isInRightStatementFlow(flowChangeTag));
     }
 
     private boolean isLeftUnit(Unit u) {
