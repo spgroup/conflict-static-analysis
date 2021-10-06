@@ -1,6 +1,13 @@
 package br.unb.cic.analysis;
 
-import soot.PhaseOptions;
+import soot.Scene;
+import soot.jimple.spark.SparkTransformer;
+import soot.jimple.toolkits.callgraph.CHATransformer;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * A fluent API for executing the soot framework
@@ -22,14 +29,65 @@ public class SootWrapper {
     }
 
     public void execute() {
-        soot.Main.main(new String[] {"-w"                          // whole program mode
-                                    , "-allow-phantom-refs"        // allow phantom types
-                                    , "-f", "J"                    // Jimple format
-                                    , "-keep-line-number"          // keep line numbers
-                                    , "-p", "jb", "optimize:false" // disable the optimizer
-                                    , "-p", "jb", "use-original-names:true" // enable original names
-                                    , "-cp", classPath             // soot class path
-                                    , classes});                   // set of classes
+        soot.Main.main(new String[]{"-w"                          // whole program mode
+                , "-allow-phantom-refs"        // allow phantom types
+                , "-f", "J"                    // Jimple format
+                , "-keep-line-number"          // keep line numbers
+                , "-p", "jb", "optimize:false" // disable the optimizer
+                , "-p", "jb", "use-original-names:true" // enable original names
+                , "-cp", classPath             // soot class path
+                , classes});                   // set of classes
+    }
+
+    private static List<String> getIncludeList() {
+        //"java.lang.*"
+        List<String> stringList = new ArrayList<String>(Arrays.asList("java.util.*")); //java.util.HashMap
+        return stringList;
+    }
+
+    public static void configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(List<String> classpath) {
+        soot.options.Options.v().set_no_bodies_for_excluded(true);
+        soot.options.Options.v().set_allow_phantom_refs(true);
+        soot.options.Options.v().set_output_format(soot.options.Options.output_format_jimple);
+        soot.options.Options.v().set_whole_program(true);
+        soot.options.Options.v().set_process_dir(classpath);
+        soot.options.Options.v().set_full_resolver(true);
+        soot.options.Options.v().set_keep_line_number(true);
+        soot.options.Options.v().set_prepend_classpath(false);
+        soot.options.Options.v().set_include(getIncludeList());
+        //Options.v().setPhaseOption("cg.spark", "on");
+        //Options.v().setPhaseOption("cg.spark", "verbose:true");
+        soot.options.Options.v().setPhaseOption("cg.spark", "enabled:true");
+        soot.options.Options.v().setPhaseOption("jb", "use-original-names:true");
+
+        Scene.v().loadNecessaryClasses();
+
+        enableSparkCallGraph();
+    }
+
+    public static List<String> configurePackagesWithCallGraph() {
+        List<String> packages = new ArrayList<String>();
+        packages.add("cg");
+        packages.add("wjtp");
+        return packages;
+    }
+
+    public static void enableSparkCallGraph() {
+        //Enable Spark
+        HashMap<String, String> opt = new HashMap<String, String>();
+        //opt.put("propagator","worklist");
+        //opt.put("simple-edges-bidirectional","false");
+        opt.put("on-fly-cg", "true");
+        //opt.put("set-impl","double");
+        //opt.put("double-set-old","hybrid");
+        //opt.put("double-set-new","hybrid");
+        //opt.put("pre_jimplify", "true");
+        SparkTransformer.v().transform("", opt);
+        soot.options.Options.v().setPhaseOption("cg.spark", "enable:true");
+    }
+
+    public static void enableCHACallGraph() {
+        CHATransformer.v().transform();
     }
 
     public static class Builder {
