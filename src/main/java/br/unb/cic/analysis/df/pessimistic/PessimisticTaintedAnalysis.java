@@ -92,9 +92,9 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
                 Statement valueDefinitionStatement = in.getValueDefinitionStatement(value);
                 boolean isMarked = valueDefinitionStatement != null;
 
-                if (isLocalAndIsAssociatedToField(value)) {
+                if (!isMarked && isLocalAndIsAssociatedToField(value)) {
                     valueDefinitionStatement = in.getValueDefinitionStatement(fieldLocalAssociation.get(value));
-                    isMarked = isMarked || valueDefinitionStatement != null;
+                    isMarked = valueDefinitionStatement != null;
                 }
 
                 if (isMarked) {
@@ -109,9 +109,9 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
                 Statement valueFieldsDefinitionStatement = in.getValueFieldsDefinitionStatement(baseValue);
                 boolean hasMarkedFields = valueFieldsDefinitionStatement != null;
 
-                if (isLocalAndIsAssociatedToField(baseValue)) {
+                if (!hasMarkedFields && isLocalAndIsAssociatedToField(baseValue)) {
                     valueFieldsDefinitionStatement = in.getValueFieldsDefinitionStatement(fieldLocalAssociation.get(baseValue));
-                    hasMarkedFields = hasMarkedFields || valueFieldsDefinitionStatement != null;
+                    hasMarkedFields = valueFieldsDefinitionStatement != null;
                 }
 
                 if (hasMarkedFields) {
