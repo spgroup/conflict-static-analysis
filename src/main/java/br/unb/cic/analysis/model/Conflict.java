@@ -20,6 +20,7 @@ public class Conflict {
     protected String sinkMethodName;
     protected Integer sinkLineNumber;
     protected Unit sinkUnit;
+    // used when using stack trace of the conflict.
     protected List<TraversedLine> sinkTraversedLine;
 
 

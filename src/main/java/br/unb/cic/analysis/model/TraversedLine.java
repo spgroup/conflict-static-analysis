@@ -4,9 +4,9 @@ import soot.SootClass;
 import soot.SootMethod;
 
 public class TraversedLine {
-    protected SootClass sootClass;
-    protected SootMethod sootMethod;
-    protected Integer lineNumber;
+    private SootClass sootClass;
+    private SootMethod sootMethod;
+    private Integer lineNumber;
 
     public TraversedLine(SootClass sootClass, SootMethod sootMethod, Integer lineNumber) {
         this.sootClass = sootClass;
