@@ -100,9 +100,9 @@ public class Main {
         final String out = "out.txt"; 
         final FileWriter fw = new FileWriter(out);
         conflicts.forEach(c -> {
-    		try { 
-    			fw.write(c + "\n");
-    		}
+    		try {
+                fw.write(c + "\n\n");
+            }
     		catch(Exception e) {
     			System.out.println("error exporting the results " + e.getMessage());
     		}
@@ -237,19 +237,18 @@ public class Main {
     }
 
     private void runInterproceduralOverrideAssignmentAnalysis(String classpath) {
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        InterproceduralOverrideAssignment interproceduralOverrideAssignment =
+                new InterproceduralOverrideAssignment(definition);
 
-        PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
-        soot.options.Options.v().setPhaseOption("cg.spark", "on");
-        soot.options.Options.v().setPhaseOption("cg.spark", "verbose:true");
+        List<String> classes = Collections.singletonList(classpath);
+        SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classes);
 
-        SootWrapper.builder()
-                .withClassPath(classpath)
-                .addClass(targetClasses.stream().collect(Collectors.joining(" ")))
-                .build()
-                .execute();
+        interproceduralOverrideAssignment.configureEntryPoints();
 
-        conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
+        PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", interproceduralOverrideAssignment));
+        SootWrapper.configurePackagesWithCallGraph().forEach(p -> PackManager.v().getPack(p).apply());
+
+        conflicts.addAll(interproceduralOverrideAssignment.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
     }
 
     /*

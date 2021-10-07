@@ -1,18 +1,20 @@
-package br.unb.cic.analysis.samples;
+package br.unb.cic.analysis.samples.ioa;
 
 // Not Conflict
-public class OverridingAssignmentDifferentClassWithSameAttributeNotConflictInterProceduralSample {
+public class DifferentClassWithSameAttributeNotConflictSample {
     private ObjectExample objectExample;
     private ObjectExample2 objectExample2;
 
-    public OverridingAssignmentDifferentClassWithSameAttributeNotConflictInterProceduralSample() {
+    public DifferentClassWithSameAttributeNotConflictSample() {
         objectExample = new ObjectExample();
         objectExample2 = new ObjectExample2();
     }
 
-    public void m() {
-        objectExample.setFoo(1); // LEFT
-        objectExample2.setFoo(2); // RIGHT
+    public static void main(String[] args) {
+        DifferentClassWithSameAttributeNotConflictSample m = new DifferentClassWithSameAttributeNotConflictSample();
+
+        m.objectExample.setFoo(1); // LEFT
+        m.objectExample2.setFoo(2); // RIGHT
     }
 }
 

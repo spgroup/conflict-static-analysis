@@ -1,7 +1,7 @@
-package br.unb.cic.analysis.samples;
+package br.unb.cic.analysis.samples.ioa;
 
 // Not Conflict
-public class OverridingAssignmentObjectFieldNotConflictInterProceduralSample {
+public class ObjectFieldNotConflictSample {
     public void m() {
         ObjectFieldNotConflict objectFieldNotConflict = new ObjectFieldNotConflict();
         objectFieldNotConflict.foo(1); // left

@@ -4,8 +4,13 @@ import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
 import soot.ValueBox;
-import soot.jimple.*;
+import soot.jimple.AssignStmt;
+import soot.jimple.InstanceInvokeExpr;
+import soot.jimple.InvokeExpr;
+import soot.jimple.InvokeStmt;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -31,18 +36,20 @@ public class Statement {
 		return builder;
 	}
 
-	private SootClass sootClass; 
-	private SootMethod sootMethod; 
-	private Unit unit; 
+	private SootClass sootClass;
+	private SootMethod sootMethod;
+	private Unit unit;
 	private Type type;
 	private Integer sourceCodeLineNumber;
-	
+	private List<TraversedLine> traversedLine;
+
 	Statement(SootClass sootClass, SootMethod sootMethod, Unit unit, Type type, Integer sourceCodeLineNumber) {
 		this.sootClass = sootClass;
 		this.sootMethod = sootMethod;
 		this.unit = unit;
 		this.type = type;
 		this.sourceCodeLineNumber = sourceCodeLineNumber;
+		this.traversedLine = new ArrayList<>();
 	}
 
 	public SootClass getSootClass() {
@@ -63,6 +70,14 @@ public class Statement {
 
 	public Integer getSourceCodeLineNumber() {
 		return sourceCodeLineNumber;
+	}
+
+	public List<TraversedLine> getTraversedLine() {
+		return traversedLine;
+	}
+
+	public void setTraversedLine(List<TraversedLine> traversedLine) {
+		this.traversedLine = traversedLine;
 	}
 
 	@Override
@@ -92,6 +107,18 @@ public class Statement {
 
 	public boolean isSink() {
 		return type == Type.SINK || type == Type.SOURCE_SINK;
+	}
+
+	public boolean isRightStatement() {
+		return this.type == Type.SINK || type == Type.SOURCE_SINK;
+	}
+
+	public boolean isLeftStatement() {
+		return this.type == Type.SOURCE || type == Type.SOURCE_SINK;
+	}
+
+	public boolean isLefAndRightStatement() {
+		return this.type == Type.SOURCE_SINK;
 	}
 
 	public boolean isAssign() {
