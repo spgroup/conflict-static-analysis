@@ -22,6 +22,7 @@ public class PessimisticTaintedAnalysisTest {
     private static final String INTERPROCEDURAL_DATAFLOW_INTERFACE = getSampleFullName("InterproceduralDataflowUsingInterface");
     private static final String INTERPROCEDURAL_DATAFLOW_FIELD = getSampleFullName("InterproceduralDataflowField");
     private static final String INTRAPROCEDURAL_INDIRECT_DATAFLOW = getSampleFullName("IntraproceduralIndirectSource");
+    private static final String INTRAPROCEDURAL_DATAFLOW_SPECIAL_CASES = getSampleFullName("IntraproceduralDataflowFieldSpecialCases");
 
     static String getSampleFullName(String className) {
         return SAMPLES_PACKAGE + className;
@@ -108,6 +109,24 @@ public class PessimisticTaintedAnalysisTest {
     public void testIntraproceduralIndirectSourceMethodCall() {
         Set<Conflict> conflicts = executeAnalysis(INTRAPROCEDURAL_INDIRECT_DATAFLOW, new int[]{22}, new int[]{26});
         Assert.assertTrue(conflicts.size() == 1);
+    }
+
+    @Test
+    public void testIntraproceduralDataflowBothCallMethodField() {
+        Set<Conflict> conflicts = executeAnalysis(INTRAPROCEDURAL_DATAFLOW_SPECIAL_CASES, new int[]{12}, new int[]{14});
+        Assert.assertTrue(conflicts.size() == 1);
+    }
+
+    @Test
+    public void testIntraproceduralDataflowOneAssignAndOtherCallMethodField() {
+        Set<Conflict> conflicts = executeAnalysis(INTRAPROCEDURAL_DATAFLOW_SPECIAL_CASES, new int[]{18}, new int[]{20});
+        Assert.assertTrue(conflicts.size() >= 1);
+    }
+
+    @Test
+    public void testIntraproceduralDataflowBothCallMethodFieldIndirect() {
+        Set<Conflict> conflicts = executeAnalysis(INTRAPROCEDURAL_DATAFLOW_SPECIAL_CASES, new int[]{24}, new int[]{26});
+        Assert.assertTrue(conflicts.size() >= 1);
     }
 
 }

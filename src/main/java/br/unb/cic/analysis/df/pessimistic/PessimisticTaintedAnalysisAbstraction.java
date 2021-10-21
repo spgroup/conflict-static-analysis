@@ -24,6 +24,19 @@ class Definition {
     public Statement getStatement() {
         return statement;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Definition that = (Definition) o;
+        return Objects.equals(value, that.value) && Objects.equals(statement, that.statement);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value, statement);
+    }
 }
 
 /**
@@ -106,7 +119,9 @@ public class PessimisticTaintedAnalysisAbstraction {
 
         // adds it to the unmarked map, so that if it is a field in value that
         // has its fields marked, this specific field is unmarked
-        this.unmarked.put(valueKey, value);
+        if (value instanceof InstanceFieldRef) {
+            this.unmarked.put(valueKey, value);
+        }
     }
 
 
@@ -120,7 +135,9 @@ public class PessimisticTaintedAnalysisAbstraction {
 
         // check if any of the value's fields are in the unmarked
         // map and remove them
-        for (Value unmarkedValue : this.unmarked.values())  {
+
+        Map<String, Value> temp = new HashMap<>(this.unmarked);
+        for (Value unmarkedValue : temp.values())  {
             if (unmarkedValue instanceof InstanceFieldRef) {
                 InstanceFieldRef fieldRef = (InstanceFieldRef) unmarkedValue;
 
@@ -265,7 +282,11 @@ public class PessimisticTaintedAnalysisAbstraction {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PessimisticTaintedAnalysisAbstraction that = (PessimisticTaintedAnalysisAbstraction) o;
-        return Objects.equals(marked, that.marked) && Objects.equals(markedFields, that.markedFields);
+        return Objects.equals(marked, that.marked) && Objects.equals(markedFields, that.markedFields) && Objects.equals(unmarked, that.unmarked);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(marked, markedFields, unmarked);
+    }
 }

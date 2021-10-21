@@ -4,16 +4,17 @@ import br.unb.cic.analysis.AbstractAnalysis;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
-import soot.Body;
-import soot.Unit;
-import soot.Value;
-import soot.ValueBox;
+import soot.*;
+import soot.jimple.AssignStmt;
+import soot.jimple.InstanceFieldRef;
 import soot.jimple.InstanceInvokeExpr;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.scalar.ForwardFlowAnalysis;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Map;
 
 public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, PessimisticTaintedAnalysisAbstraction> implements AbstractAnalysis {
 
@@ -21,10 +22,13 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
     private Set<Conflict> conflicts;
     private AbstractMergeConflictDefinition definition;
 
+    private Map<Local, InstanceFieldRef> fieldLocalAssociation;
+
     public PessimisticTaintedAnalysis(Body methodBody, AbstractMergeConflictDefinition definition) {
         super(new ExceptionalUnitGraph(methodBody));
         this.methodBody = methodBody;
         this.conflicts = new HashSet<>();
+        this.fieldLocalAssociation = new HashMap<>();
         this.definition = definition;
         this.definition.loadSinkStatements();
         this.definition.loadSourceStatements();
@@ -39,10 +43,25 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
     @Override
     protected void flowThrough(PessimisticTaintedAnalysisAbstraction in, Unit unit, PessimisticTaintedAnalysisAbstraction out) {
         Statement statement = createStatement(unit);
+        if (statement.isAssign()) {
+            checkAndAssociateAssignedLocalToField(statement);
+        }
         in.copy(out);
         detectConflicts(in, statement);
         kill(out, statement);
         gen(out, statement);
+    }
+
+    private void checkAndAssociateAssignedLocalToField(Statement statement) {
+        AssignStmt assignUnit = (AssignStmt) statement.getUnit();
+        Value rightOpValue = assignUnit.getRightOp();
+        if (rightOpValue instanceof InstanceFieldRef) {
+            InstanceFieldRef fieldRef = (InstanceFieldRef) rightOpValue;
+
+            for (ValueBox defBox : statement.getUnit().getDefBoxes()) {
+                fieldLocalAssociation.put((Local) defBox.getValue(), fieldRef);
+            }
+        }
     }
 
     protected Statement createStatement(Unit d) {
@@ -73,6 +92,11 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
                 Statement valueDefinitionStatement = in.getValueDefinitionStatement(value);
                 boolean isMarked = valueDefinitionStatement != null;
 
+                if (!isMarked && isLocalAndIsAssociatedToField(value)) {
+                    valueDefinitionStatement = in.getValueDefinitionStatement(fieldLocalAssociation.get(value));
+                    isMarked = valueDefinitionStatement != null;
+                }
+
                 if (isMarked) {
                     conflicts.add(new Conflict(in.getValueDefinitionStatement(use.getValue()), statement));
                 }
@@ -85,11 +109,20 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
                 Statement valueFieldsDefinitionStatement = in.getValueFieldsDefinitionStatement(baseValue);
                 boolean hasMarkedFields = valueFieldsDefinitionStatement != null;
 
+                if (!hasMarkedFields && isLocalAndIsAssociatedToField(baseValue)) {
+                    valueFieldsDefinitionStatement = in.getValueFieldsDefinitionStatement(fieldLocalAssociation.get(baseValue));
+                    hasMarkedFields = valueFieldsDefinitionStatement != null;
+                }
+
                 if (hasMarkedFields) {
                     conflicts.add(new Conflict(valueFieldsDefinitionStatement, statement));
                 }
             }
         }
+    }
+
+    private boolean isLocalAndIsAssociatedToField(Value value) {
+        return value instanceof Local && fieldLocalAssociation.containsKey(value);
     }
 
     protected void gen(PessimisticTaintedAnalysisAbstraction in, Statement statement) {
@@ -104,6 +137,10 @@ public class PessimisticTaintedAnalysis extends ForwardFlowAnalysis<Unit, Pessim
                 Value baseValue = invoke.getBase();
 
                 in.markFields(baseValue, statement);
+
+                if (isLocalAndIsAssociatedToField(baseValue)) {
+                    in.markFields(fieldLocalAssociation.get(baseValue), statement);
+                }
             }
         }
     }
