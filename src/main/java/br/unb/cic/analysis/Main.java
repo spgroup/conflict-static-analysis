@@ -246,7 +246,7 @@ public class Main {
         interproceduralOverrideAssignment.configureEntryPoints();
 
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", interproceduralOverrideAssignment));
-        SootWrapper.configurePackagesWithCallGraph().forEach(p -> PackManager.v().getPack(p).apply());
+        SootWrapper.applyPackages();
 
         conflicts.addAll(interproceduralOverrideAssignment.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
     }

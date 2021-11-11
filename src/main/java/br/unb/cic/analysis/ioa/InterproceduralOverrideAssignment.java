@@ -57,21 +57,9 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         return conflicts;
     }
 
-    public void configureEntryPoints() {
-        definition.loadSourceStatements();
-        definition.loadSinkStatements();
-
-        List<SootMethod> entryPoints = new ArrayList<>();
-        definition.getSourceStatements().forEach(s -> {
-            if (!entryPoints.contains(s.getSootMethod())) {
-                entryPoints.add(s.getSootMethod());
-            }
-        });
-        Scene.v().setEntryPoints(entryPoints);
-    }
-
     @Override
     protected void internalTransform(String s, Map<String, String> map) {
+        long tempoInicial = System.currentTimeMillis();
 
         List<SootMethod> methods = Scene.v().getEntryPoints();
         methods.forEach(sootMethod -> traverse(new ArraySparseSet<>(), sootMethod, Statement.Type.IN_BETWEEN));
@@ -79,7 +67,10 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         Set<Conflict> conflictsFilter = filterConflicts(getConflicts());
         conflictsFilter.forEach(conflict -> logger.log(Level.INFO, conflict.toStringAbstract()));
 
-        //logger.log(Level.INFO, () -> String.format("%s", "CONFLICTS: " + conflictsFilter));
+        logger.log(Level.INFO, () -> String.format("%s", "CONFLICTS: " + conflictsFilter));
+
+        long tempoFinal = System.currentTimeMillis();
+        System.out.println("Tempo de execução de: " + ((tempoFinal - tempoInicial) / 1000d) + "s");
 
         /* left.forEach(dataFlowAbstraction -> {
             String leftStmt = String.format("%s", "LEFT: " + dataFlowAbstraction.getStmt());
@@ -92,18 +83,49 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         }); */
     }
 
+    public void configureEntryPoints() {
+        List<SootMethod> entryPoints = new ArrayList<>();
+
+        definition.loadSourceStatements();
+        definition.loadSinkStatements();
+
+        SootMethod sm = getTraversedMethod();
+
+        if (sm != null) {
+            entryPoints.add(sm);
+        } else {
+            definition.getSourceStatements().forEach(s -> {
+                if (!entryPoints.contains(s.getSootMethod())) {
+                    entryPoints.add(s.getSootMethod());
+                }
+            });
+        }
+        Scene.v().setEntryPoints(entryPoints);
+    }
+
+    private SootMethod getTraversedMethod() {
+        try {
+            SootClass sootClass = definition.getSourceStatements().get(0).getSootClass();
+            return sootClass.getMethodByName("callRealisticRun");
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
     private Set<Conflict> filterConflicts(Set<Conflict> conflictsResults) {
         Set<Conflict> conflictsFilter = new HashSet<>();
-        conflictsResults.forEach(conflict -> {
+        for (Conflict conflict : conflictsResults) {
             if (conflictsFilter.isEmpty()) {
                 conflictsFilter.add(conflict);
             }
-            conflictsFilter.forEach(filter -> {
+        }
+        for (Conflict conflict : conflictsResults) {
+            for (Conflict filter : conflictsFilter) {
                 if ((!conflict.getSourceTraversedLine().get(0).equals(filter.getSourceTraversedLine().get(0))) && (!conflict.getSinkTraversedLine().get(0).equals(filter.getSinkTraversedLine().get(0)))) {
                     conflictsFilter.add(conflict);
                 }
-            });
-        });
+            }
+        }
         return conflictsFilter;
     }
 
@@ -118,11 +140,12 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
      */
     private FlowSet<DataFlowAbstraction> traverse(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod,
                                                   Statement.Type flowChangeTag) {
-        //System.out.println(sootMethod);
-        if (this.traversedMethods.contains(sootMethod) || sootMethod.isPhantom()) {
+
+        if (this.traversedMethods.contains(sootMethod) || this.traversedMethods.size() > 10 || sootMethod.isPhantom()) {
             return in;
         }
 
+        System.out.println(sootMethod + " - " + this.traversedMethods.size());
         this.traversedMethods.add(sootMethod);
 
         Body body = definition.retrieveActiveBodySafely(sootMethod);
@@ -145,7 +168,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         this.traversedMethods.remove(sootMethod);
         return in;
     }
-
 
     private FlowSet<DataFlowAbstraction> runAnalysisWithTaggedUnit(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod,
                                                                    Statement.Type flowChangeTag, Unit unit) {
