@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 // TODO Do not add anything when assignments are equal.
 public class InterproceduralOverrideAssignment extends SceneTransformer implements AbstractAnalysis {
 
+    private int depthLimit;
     private Set<Conflict> conflicts;
     private PointsToAnalysis pointsToAnalysis;
     private List<SootMethod> traversedMethods;
@@ -34,11 +35,23 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private FlowSet<DataFlowAbstraction> right;
     private List<TraversedLine> stacktraceList;
 
-    private final Logger logger;
+    private Logger logger;
 
     public InterproceduralOverrideAssignment(AbstractMergeConflictDefinition definition) {
         this.definition = definition;
+        this.depthLimit = 10;
 
+        initDefaultFields();
+    }
+
+    public InterproceduralOverrideAssignment(AbstractMergeConflictDefinition definition, int depthLimit) {
+        this.definition = definition;
+        this.depthLimit = depthLimit;
+
+        initDefaultFields();
+    }
+
+    private void initDefaultFields() {
         this.conflicts = new HashSet<>();
         this.left = new ArraySparseSet<>();
         this.right = new ArraySparseSet<>();
@@ -136,7 +149,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private FlowSet<DataFlowAbstraction> traverse(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod,
                                                   Statement.Type flowChangeTag) {
 
-        if (this.traversedMethods.contains(sootMethod) || this.traversedMethods.size() > 2 || sootMethod.isPhantom()) {
+        if (this.traversedMethods.contains(sootMethod) || this.traversedMethods.size() > depthLimit || sootMethod.isPhantom()) {
             return in;
         }
 
