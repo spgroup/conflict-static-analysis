@@ -7,7 +7,7 @@ import soot.jimple.InstanceFieldRef;
 import soot.jimple.InvokeStmt;
 import soot.jimple.StaticFieldRef;
 
-import java.util.*;
+import java.util.Objects;
 
 /**
  * Information wee keep while traversing
@@ -98,5 +98,10 @@ public class DataFlowAbstraction {
     @Override
     public int hashCode() {
         return Objects.hash(local, stmt);
+    }
+
+    @Override
+    public String toString() {
+        return "DataFlowAbstraction{ " + stmt + "}";
     }
 }
