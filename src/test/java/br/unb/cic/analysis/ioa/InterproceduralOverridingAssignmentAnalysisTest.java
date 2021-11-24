@@ -66,6 +66,16 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
     }
 
     @Test
+    public void loggingTest() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.LoggingConflictSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{13}, new int[]{10});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    @Test
     public void defaultConstructorTest() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.DefaultConstructorConflictSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
