@@ -28,7 +28,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         analysis.configureEntryPoints();
 
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
-        SootWrapper.configurePackagesWithCallGraph().forEach(p -> PackManager.v().getPack(p).apply());
+        SootWrapper.applyPackages();
 
         try {
             exportResults(analysis.getConflicts());
@@ -66,10 +66,30 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
     }
 
     @Test
-    public void StringArraySample() {
+    public void loggingTest() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.LoggingConflictSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{13}, new int[]{10});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void defaultConstructorTest() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.DefaultConstructorConflictSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{12}, new int[]{14});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void StringArrayTest() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.StringArraySample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
-                .definition(sampleClassPath, new int[]{11}, new int[]{22});
+                .definition(sampleClassPath, new int[]{14}, new int[]{25});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());

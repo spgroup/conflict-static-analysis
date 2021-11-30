@@ -110,11 +110,17 @@ public class Conflict {
 
 
     public String toStringAbstract() {
-        return String.format("source(%s, %s, %d, %s, %s) => sink(%s, %s, %d, %s, %s)", sourceTraversedLine.get(0).getSootClass(),
-                sourceTraversedLine.get(0).getSootMethod(), sourceTraversedLine.get(0).getLineNumber(), sourceUnit,
+        if (!sourceTraversedLine.isEmpty() && !sinkTraversedLine.isEmpty()) {
+            return String.format("source(%s, %s, %d, %s, %s) => sink(%s, %s, %d, %s, %s)", sourceTraversedLine.get(0).getSootClass(),
+                    sourceTraversedLine.get(0).getSootMethod(), sourceTraversedLine.get(0).getLineNumber(), sourceUnit,
+                    sourceTraversedLine,
+                    sinkTraversedLine.get(0).getSootClass(), sinkTraversedLine.get(0).getSootMethod(),
+                    sinkTraversedLine.get(0).getLineNumber(), sinkUnit, sinkTraversedLine);
+        }
+        return String.format("source(%s, %s) => sink(%s, %s)", sourceUnit,
                 sourceTraversedLine,
-                sinkTraversedLine.get(0).getSootClass(), sinkTraversedLine.get(0).getSootMethod(),
-                sinkTraversedLine.get(0).getLineNumber(), sinkUnit, sinkTraversedLine);
+                sinkUnit, sinkTraversedLine);
+
     }
 
 

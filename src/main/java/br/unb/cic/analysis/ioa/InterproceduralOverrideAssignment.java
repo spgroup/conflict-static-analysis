@@ -9,10 +9,13 @@ import br.unb.cic.analysis.model.TraversedLine;
 import br.unb.cic.exceptions.ValueNotHandledException;
 import soot.*;
 import soot.jimple.*;
+import soot.jimple.internal.JAssignStmt;
+import soot.jimple.internal.JimpleLocal;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
 import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
+import soot.util.Chain;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -23,6 +26,7 @@ import java.util.stream.Collectors;
 // TODO Do not add anything when assignments are equal.
 public class InterproceduralOverrideAssignment extends SceneTransformer implements AbstractAnalysis {
 
+    private int depthLimit;
     private Set<Conflict> conflicts;
     private PointsToAnalysis pointsToAnalysis;
     private List<SootMethod> traversedMethods;
@@ -31,11 +35,23 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private FlowSet<DataFlowAbstraction> right;
     private List<TraversedLine> stacktraceList;
 
-    private final Logger logger;
+    private Logger logger;
 
     public InterproceduralOverrideAssignment(AbstractMergeConflictDefinition definition) {
         this.definition = definition;
+        this.depthLimit = 10;
 
+        initDefaultFields();
+    }
+
+    public InterproceduralOverrideAssignment(AbstractMergeConflictDefinition definition, int depthLimit) {
+        this.definition = definition;
+        this.depthLimit = depthLimit;
+
+        initDefaultFields();
+    }
+
+    private void initDefaultFields() {
         this.conflicts = new HashSet<>();
         this.left = new ArraySparseSet<>();
         this.right = new ArraySparseSet<>();
@@ -57,53 +73,67 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         return conflicts;
     }
 
-    public void configureEntryPoints() {
-        definition.loadSourceStatements();
-        definition.loadSinkStatements();
-
-        List<SootMethod> entryPoints = new ArrayList<>();
-        definition.getSourceStatements().forEach(s -> {
-            if (!entryPoints.contains(s.getSootMethod())) {
-                entryPoints.add(s.getSootMethod());
-            }
-        });
-        Scene.v().setEntryPoints(entryPoints);
-    }
-
     @Override
     protected void internalTransform(String s, Map<String, String> map) {
+        long startTime = System.currentTimeMillis();
 
         List<SootMethod> methods = Scene.v().getEntryPoints();
         methods.forEach(sootMethod -> traverse(new ArraySparseSet<>(), sootMethod, Statement.Type.IN_BETWEEN));
 
         Set<Conflict> conflictsFilter = filterConflicts(getConflicts());
-        conflictsFilter.forEach(conflict -> logger.log(Level.INFO, conflict.toStringAbstract()));
+        logger.log(Level.INFO, () -> String.format("%s", "CONFLICTS: " + conflictsFilter));
 
-        //logger.log(Level.INFO, () -> String.format("%s", "CONFLICTS: " + conflictsFilter));
+        long finalTime = System.currentTimeMillis();
+        System.out.println("Runtime: " + ((finalTime - startTime) / 1000d) + "s");
+    }
 
-        /* left.forEach(dataFlowAbstraction -> {
-            String leftStmt = String.format("%s", "LEFT: " + dataFlowAbstraction.getStmt());
-            logger.log(Level.INFO, leftStmt);
-        });
+    public void configureEntryPoints() {
+        List<SootMethod> entryPoints = new ArrayList<>();
 
-        right.forEach(dataFlowAbstraction -> {
-            String rightStmt = String.format("%s", "RIGHT: " + dataFlowAbstraction.getStmt());
-            logger.log(Level.INFO, rightStmt);
-        }); */
+        definition.loadSourceStatements();
+        definition.loadSinkStatements();
+
+        SootMethod sm = getTraversedMethod();
+
+        if (sm != null) {
+            entryPoints.add(sm);
+        } else {
+            definition.getSourceStatements().forEach(s -> {
+                if (!entryPoints.contains(s.getSootMethod())) {
+                    entryPoints.add(s.getSootMethod());
+                }
+            });
+        }
+        Scene.v().setEntryPoints(entryPoints);
+    }
+
+    private SootMethod getTraversedMethod() {
+        try {
+            SootClass sootClass = definition.getSourceStatements().get(0).getSootClass();
+            return sootClass.getMethodByName("callRealisticRun");
+        } catch (RuntimeException e) {
+            return null;
+        }
     }
 
     private Set<Conflict> filterConflicts(Set<Conflict> conflictsResults) {
         Set<Conflict> conflictsFilter = new HashSet<>();
-        conflictsResults.forEach(conflict -> {
+        for (Conflict conflict : conflictsResults) {
             if (conflictsFilter.isEmpty()) {
                 conflictsFilter.add(conflict);
             }
-            conflictsFilter.forEach(filter -> {
-                if ((!conflict.getSourceTraversedLine().get(0).equals(filter.getSourceTraversedLine().get(0))) && (!conflict.getSinkTraversedLine().get(0).equals(filter.getSinkTraversedLine().get(0)))) {
-                    conflictsFilter.add(conflict);
+        }
+        for (Conflict conflict : conflictsResults) {
+            for (Conflict filter : conflictsFilter) {
+                if (!conflict.getSourceTraversedLine().isEmpty() && !conflict.getSinkTraversedLine().isEmpty()) {
+                    if ((!conflict.getSourceTraversedLine().get(0).equals(filter.getSourceTraversedLine().get(0)))
+                            && (!conflict.getSinkTraversedLine().get(0).equals(filter.getSinkTraversedLine().get(0)))) {
+                        conflictsFilter.add(conflict);
+                    }
                 }
-            });
-        });
+
+            }
+        }
         return conflictsFilter;
     }
 
@@ -118,16 +148,18 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
      */
     private FlowSet<DataFlowAbstraction> traverse(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod,
                                                   Statement.Type flowChangeTag) {
-        //System.out.println(sootMethod);
-        if (this.traversedMethods.contains(sootMethod) || sootMethod.isPhantom()) {
+
+        if (this.traversedMethods.contains(sootMethod) || this.traversedMethods.size() > depthLimit || sootMethod.isPhantom()) {
             return in;
         }
 
+        System.out.println(sootMethod + " - " + this.traversedMethods.size());
         this.traversedMethods.add(sootMethod);
 
         Body body = definition.retrieveActiveBodySafely(sootMethod);
 
         if (body != null) {
+            handleConstructor(in, sootMethod, flowChangeTag);
             for (Unit unit : body.getUnits()) {
                 TraversedLine traversedLine = new TraversedLine(sootMethod, unit.getJavaSourceStartLineNumber());
 
@@ -146,6 +178,41 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         return in;
     }
 
+    private void handleConstructor(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod,
+                                   Statement.Type flowChangeTag) {
+        if (sootMethod.isConstructor()) {
+            Chain<SootField> sootFieldsInClass = sootMethod.getDeclaringClass().getFields();
+
+            sootFieldsInClass.forEach(sootField -> {
+                trasformFieldsIntoStatements(in, sootMethod, flowChangeTag, sootField);
+            });
+        }
+    }
+
+    private void trasformFieldsIntoStatements(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod, Statement.Type flowChangeTag, SootField sootField) {
+        String declaringClassShortName = sootField.getDeclaringClass().getShortName();
+        String formatName =
+                declaringClassShortName.substring(0, 1).toLowerCase() + declaringClassShortName.substring(1);
+
+        JimpleLocal base = new JimpleLocal(formatName, RefType.v(sootField.getDeclaringClass()));
+        SootFieldRef fieldRef = Scene.v().makeFieldRef(sootField.getDeclaringClass(),
+                sootField.getName(), sootField.getType(), sootField.isStatic());
+
+        Value value = getValue(base, fieldRef);
+        Unit unit = new JAssignStmt(value, NullConstant.v());
+        createAndAddStmt(in, sootMethod, flowChangeTag, unit);
+
+    }
+
+    private Value getValue(JimpleLocal base, SootFieldRef fieldRef) {
+        Value value;
+        if (fieldRef.isStatic()) {
+            value = Jimple.v().newStaticFieldRef(fieldRef);
+        } else {
+            value = Jimple.v().newInstanceFieldRef(base, fieldRef);
+        }
+        return value;
+    }
 
     private FlowSet<DataFlowAbstraction> runAnalysisWithTaggedUnit(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod,
                                                                    Statement.Type flowChangeTag, Unit unit) {
@@ -185,10 +252,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
             separeteAbstraction(in);
             if (tagged) {
-                Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
-                stmt.setTraversedLine(new ArrayList<>(this.stacktraceList));
-                // logger.log(Level.INFO, () -> String.format("%s", "stmt: " + stmt.toString()));
-                gen(in, stmt);
+                createAndAddStmt(in, sootMethod, flowChangeTag, unit);
             } else {
                 kill(in, unit);
             }
@@ -215,6 +279,12 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         }
 
         return in;
+    }
+
+    private void createAndAddStmt(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod, Statement.Type flowChangeTag, Unit unit) {
+        Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
+        stmt.setTraversedLine(new ArrayList<>(this.stacktraceList));
+        gen(in, stmt);
     }
 
     private void separeteAbstraction(FlowSet<DataFlowAbstraction> in) {
@@ -247,9 +317,14 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             flowSetList.add(traverseResult);
         }
 
+
         FlowSet<DataFlowAbstraction> flowSetUnion = new ArraySparseSet<>();
         for (FlowSet<DataFlowAbstraction> flowSet : flowSetList) {
             flowSetUnion.union(flowSet);
+        }
+
+        if (flowSetUnion.isEmpty()) {
+            return in;
         }
 
         return flowSetUnion;
@@ -326,11 +401,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         rightOrLeftList.forEach(dataFlowAbstraction -> {
             try {
                 if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
-                    rightOrLeftList.forEach(dt -> {
-                        if (dt.getStmt().getSourceCodeLineNumber().equals(dataFlowAbstraction.getStmt().getSourceCodeLineNumber())) {
-                            rightOrLeftList.remove(dt);
-                        }
-                    });
                     rightOrLeftList.remove(dataFlowAbstraction);
                 }
             } catch (ValueNotHandledException e) {
@@ -341,7 +411,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private boolean containsValue(DataFlowAbstraction dataFlowAbstraction, Value value) throws ValueNotHandledException {
         if (dataFlowAbstraction.getValue() instanceof InstanceFieldRef && value instanceof InstanceFieldRef) {
-            return ((InstanceFieldRef) dataFlowAbstraction.getValue()).getFieldRef().equals(((InstanceFieldRef) value).getFieldRef());
+            return ((InstanceFieldRef) dataFlowAbstraction.getValue()).getFieldRef().getSignature().equals(((InstanceFieldRef) value).getFieldRef().getSignature());
         }
         if (dataFlowAbstraction.getValue() instanceof Local && value instanceof Local) {
             return dataFlowAbstraction.getValue().equals(value);
@@ -350,7 +420,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             return dataFlowAbstraction.getValue().equals(value);
         }
         if (dataFlowAbstraction.getValue() instanceof StaticFieldRef && value instanceof StaticFieldRef) {
-            return ((StaticFieldRef) dataFlowAbstraction.getValue()).getField().getName().equals(((StaticFieldRef) value).getField().getName());
+            return ((StaticFieldRef) dataFlowAbstraction.getValue()).getFieldRef().getSignature().equals(((StaticFieldRef) value).getFieldRef().getSignature());
         }
         if (!dataFlowAbstraction.getValue().getClass().equals(value.getClass())) {
             return false;

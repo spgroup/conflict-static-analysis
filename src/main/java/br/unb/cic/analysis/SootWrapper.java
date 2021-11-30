@@ -1,5 +1,6 @@
 package br.unb.cic.analysis;
 
+import soot.PackManager;
 import soot.Scene;
 import soot.jimple.spark.SparkTransformer;
 import soot.jimple.toolkits.callgraph.CHATransformer;
@@ -40,7 +41,7 @@ public class SootWrapper {
     }
 
     private static List<String> getIncludeList() {
-        //"java.lang.*"
+        //"java.lang.*, java.util.*"
         List<String> stringList = new ArrayList<String>(Arrays.asList("java.util.*")); //java.util.HashMap
         return stringList;
     }
@@ -63,16 +64,10 @@ public class SootWrapper {
         Scene.v().loadNecessaryClasses();
 
         enableSparkCallGraph();
+        //enableCHACallGraph();
     }
 
-    public static List<String> configurePackagesWithCallGraph() {
-        List<String> packages = new ArrayList<String>();
-        packages.add("cg");
-        packages.add("wjtp");
-        return packages;
-    }
-
-    public static void enableSparkCallGraph() {
+    private static void enableSparkCallGraph() {
         //Enable Spark
         HashMap<String, String> opt = new HashMap<String, String>();
         //opt.put("propagator","worklist");
@@ -86,8 +81,21 @@ public class SootWrapper {
         soot.options.Options.v().setPhaseOption("cg.spark", "enable:true");
     }
 
-    public static void enableCHACallGraph() {
+    private static void enableCHACallGraph() {
         CHATransformer.v().transform();
+    }
+
+    private static List<String> configurePackagesWithCallGraph() {
+        List<String> packages = new ArrayList<String>();
+        packages.add("cg");
+        packages.add("wjtp");
+        return packages;
+    }
+
+    public static void applyPackages() {
+        configurePackagesWithCallGraph().forEach(p -> {
+            PackManager.v().getPack(p).apply();
+        });
     }
 
     public static class Builder {
