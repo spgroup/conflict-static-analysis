@@ -18,13 +18,19 @@
 	    <url>https://maven.pkg.github.com/rbonifacio/svfa-scala/</url>
 	  </repository>
 	</repositories>
-	
+
 	<dependencies>
 		<dependency>
-			<groupId>br.unb.cic</groupId>
-			<artifactId>svfa-scala_2.12</artifactId>
-			<version>0.0.9</version>
+			<groupId>br.ufpe.cin</groupId>
+			<artifactId>control-dependence-analysis_2.12</artifactId>
+			<version>0.1.7</version>
 		</dependency>
+		<dependency>
+			<groupId>br.ufpe.cin</groupId>
+			<artifactId>pdg-sdg_2.12</artifactId>
+			<version>0.1.4</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.jgrapht</groupId>
 			<artifactId>jgrapht-core</artifactId>

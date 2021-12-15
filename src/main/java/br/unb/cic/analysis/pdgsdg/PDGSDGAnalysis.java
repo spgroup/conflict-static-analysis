@@ -1,9 +1,10 @@
-package br.unb.cic.analysis.svfa;
+package br.unb.cic.analysis.pdgsdg;
 
+import br.ufpe.cin.soot.svfa.jimple.JSVFA;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Statement;
 import br.ufpe.cin.soot.graph.*;
-import br.ufpe.cin.soot.svfa.jimple.JSVFA;
+
 import scala.collection.JavaConverters;
 import soot.SootMethod;
 import soot.Unit;
@@ -15,18 +16,18 @@ import java.util.stream.Collectors;
  * An analysis wrapper around the Sparse value
  * flow analysis implementation.
  */
-public abstract class SVFAAnalysis extends JSVFA  {
+public abstract class PDGSDGAnalysis extends JSVFA {
 
     private String cp;
 
     private AbstractMergeConflictDefinition definition;
 
     /**
-     * SVFAAnalysis constructor
+     * PDGAAnalysis constructor
      * @param classPath a classpath to the software under analysis
      * @param definition a definition with the sources and sinks unities
      */
-    public SVFAAnalysis(String classPath, AbstractMergeConflictDefinition definition) {
+    public PDGSDGAnalysis(String classPath, AbstractMergeConflictDefinition definition) {
         this.cp = classPath;
         this.definition = definition;
     }
@@ -47,8 +48,8 @@ public abstract class SVFAAnalysis extends JSVFA  {
      * Computes the source-sink paths
      * @return a set with a list of nodes that together builds a source-sink path.
      */
-    public java.util.Set<java.util.List<LambdaNode>> findSourceSinkPaths() {
-        Set<java.util.List<LambdaNode>> paths = new HashSet<>();
+    public Set<List<LambdaNode>> findSourceSinkPaths() {
+        Set<List<LambdaNode>> paths = new HashSet<>();
 
         JavaConverters
                 .asJavaCollection(findConflictingPaths())

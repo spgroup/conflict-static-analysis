@@ -1,0 +1,6 @@
+.gradle/
+.idea/
+git-repo/
+out.txt
+sootOutput/
+target/

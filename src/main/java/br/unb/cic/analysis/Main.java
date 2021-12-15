@@ -1,10 +1,14 @@
 package br.unb.cic.analysis;
 
+import br.unb.cic.analysis.cda.CDAInterProcedural;
+import br.unb.cic.analysis.cda.CDAnalysis;
 import br.unb.cic.analysis.df.*;
 import br.unb.cic.analysis.io.DefaultReader;
 import br.unb.cic.analysis.io.MergeConflictReader;
 import br.unb.cic.analysis.ioa.InterproceduralOverrideAssignment;
 import br.unb.cic.analysis.model.Statement;
+import br.unb.cic.analysis.pdgsdg.PDGSDGAnalysis;
+import br.unb.cic.analysis.pdgsdg.PDGSDGInterProcedural;
 import br.unb.cic.analysis.reachability.ReachabilityAnalysis;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
 import br.unb.cic.analysis.svfa.SVFAInterProcedural;
@@ -32,8 +36,6 @@ public class Main {
     private List<String> conflicts = new ArrayList<>();
     private ReachDefinitionAnalysis analysis;
 
-
-
     public static void main(String args[]) {
         Main m = new Main();
         try {
@@ -41,9 +43,9 @@ public class Main {
 
             CommandLineParser parser = new DefaultParser();
             CommandLine cmd = parser.parse(m.options, args);
-            
-            String mode = "dataflow"; 
-            
+
+            String mode = "dataflow";
+
             if (cmd.hasOption("mode")) {
                 mode = cmd.getOptionValue("mode");
             }
@@ -56,9 +58,9 @@ public class Main {
                 m.loadDefinition(cmd.getOptionValue("csv"));
             }
             m.runAnalysis(mode, m.parseClassPath(cmd.getOptionValue("cp")));
-            
+
             m.exportResults();
-            
+
         }
         catch(ParseException e) {
             System.out.println("Error: " + e.getMessage());
@@ -87,18 +89,18 @@ public class Main {
     private void exportResults() throws Exception {
     	System.out.println(" Analysis results");
         System.out.println("----------------------------");
-        
+
         if(conflicts.size() == 0) {
         	System.out.println(" No conflicts detected");
         	System.out.println("----------------------------");
         	return;
         }
-    
+
         System.out.println(" Number of conflicts: " + conflicts.size());
-        final String out = "out.txt"; 
+        final String out = "out.txt";
         final FileWriter fw = new FileWriter(out);
         conflicts.forEach(c -> {
-    		try { 
+    		try {
     			fw.write(c + "\n");
     		}
     		catch(Exception e) {
@@ -109,7 +111,7 @@ public class Main {
         System.out.println(" Results exported to " + out);
         System.out.println("----------------------------");
     }
-    
+
     private void createOptions() {
         options = new Options();
         Option classPathOption = Option.builder("cp").argName("class-path")
@@ -148,7 +150,7 @@ public class Main {
         options.addOption(recursive);
     }
 
-    
+
     private void runAnalysis(String mode, String classpath) {
     	switch(mode) {
             case "svfa-interprocedural":
@@ -168,6 +170,12 @@ public class Main {
                 break;
             case "overriding-interprocedural":
                 runInterproceduralOverrideAssignmentAnalysis(classpath);
+                break;
+            case "control-dependence":
+                runCDAnalysis(classpath);
+                break;
+            case "pdg-sdg":
+                runPDGSDGAnalysis(classpath);
                 break;
             default:
                 runDataFlowAnalysis(classpath, mode);
@@ -244,6 +252,32 @@ public class Main {
         conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
     }
 
+    private void runCDAnalysis(String classpath) {
+        CDAnalysis analysis = new CDAInterProcedural(classpath, definition);
+
+        analysis.buildCDA();
+        System.out.println(analysis.svgToDotModel());
+        System.out.println(analysis.findSourceSinkPaths());
+        System.out.println(analysis.findConflictingPaths());
+        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflicts())
+                .stream()
+                .map(p -> p.toString())
+                .collect(Collectors.toList()));
+    }
+
+    private void runPDGSDGAnalysis(String classpath) {
+        PDGSDGAnalysis analysis = new PDGSDGInterProcedural(classpath, definition);
+
+        analysis.buildSparseValueFlowGraph();
+        System.out.println(analysis.svgcdToDotModel());
+        System.out.println(analysis.findSourceSinkPaths());
+        System.out.println(analysis.findConflictingPathsSVGCD());
+        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVGCD())
+                .stream()
+                .map(p -> p.toString())
+                .collect(Collectors.toList()));
+    }
+
     private void runSparseValueFlowAnalysis(String classpath, boolean interprocedural) {
         definition.setRecursiveMode(options.hasOption("recursive"));
         SVFAAnalysis analysis = interprocedural
@@ -260,7 +294,7 @@ public class Main {
     private void runSparseValueFlowConfluenceAnalysis(String classpath, boolean interprocedural) {
         definition.setRecursiveMode(options.hasOption("recursive"));
         SVFAConfluenceAnalysis analysis = new SVFAConfluenceAnalysis(classpath, this.definition,  interprocedural);
-        
+
         analysis.execute();
         conflicts.addAll(analysis.getConfluentConflicts()
                 .stream()
