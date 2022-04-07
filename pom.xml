@@ -22,13 +22,8 @@
 	<dependencies>
 		<dependency>
 			<groupId>br.ufpe.cin</groupId>
-			<artifactId>control-dependence-analysis_2.12</artifactId>
-			<version>0.1.7</version>
-		</dependency>
-		<dependency>
-			<groupId>br.ufpe.cin</groupId>
 			<artifactId>pdg-sdg_2.12</artifactId>
-			<version>0.1.4</version>
+			<version>0.2.3</version>
 		</dependency>
 
 		<dependency>
