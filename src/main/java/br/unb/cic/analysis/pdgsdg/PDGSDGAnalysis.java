@@ -60,7 +60,12 @@ public abstract class PDGSDGAnalysis extends JSVFA {
 
     @Override
     public final scala.collection.immutable.List<String> applicationClassPath() {
-        String[] array = cp.split(":");
+        String[] array = new String[100];
+        if (cp.contains(":/") || cp.contains(":\\")){ // Está com erro aqui!
+            array[0] = cp.toString();
+        }else{
+            array = cp.split(":");
+        }
         return JavaConverters.asScalaBuffer(Arrays.asList(array)).toList();
     }
 
