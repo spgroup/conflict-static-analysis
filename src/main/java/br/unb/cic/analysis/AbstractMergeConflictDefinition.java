@@ -21,6 +21,7 @@ public abstract class AbstractMergeConflictDefinition {
     protected List<Statement> sourceStatements;
     protected List<Statement> sinkStatements;
     private boolean recursive;
+    private int omitExceptingUnitEdges; //1 - true and 2-false
 
     public AbstractMergeConflictDefinition() {
         this(false);
@@ -30,6 +31,13 @@ public abstract class AbstractMergeConflictDefinition {
         sourceStatements = new ArrayList<>();
         sinkStatements = new ArrayList<>();
         this.recursive = recursive;
+    }
+
+    public AbstractMergeConflictDefinition(int omitExceptingUnitEdges) {
+        sourceStatements = new ArrayList<>();
+        sinkStatements = new ArrayList<>();
+        this.recursive = false;
+        this.omitExceptingUnitEdges = omitExceptingUnitEdges;
     }
 
     public void loadSourceStatements() {
