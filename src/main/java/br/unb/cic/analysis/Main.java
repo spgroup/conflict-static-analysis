@@ -1,7 +1,7 @@
 package br.unb.cic.analysis;
 
-import br.unb.cic.analysis.cda.CDAInterProcedural;
-import br.unb.cic.analysis.cda.CDAnalysis;
+//import br.unb.cic.analysis.cda.CDAInterProcedural;
+//import br.unb.cic.analysis.cda.CDAnalysis;
 import br.unb.cic.analysis.df.*;
 import br.unb.cic.analysis.df.pessimistic.PessimisticTaintedAnalysis;
 import br.unb.cic.analysis.io.DefaultReader;
@@ -9,6 +9,8 @@ import br.unb.cic.analysis.io.MergeConflictReader;
 import br.unb.cic.analysis.ioa.InterproceduralOverrideAssignment;
 import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
+//import br.unb.cic.analysis.pdgsdg.PDGSDGAnalysis;
+//import br.unb.cic.analysis.pdgsdg.PDGSDGInterProcedural;
 import br.unb.cic.analysis.pdgsdg.PDGSDGAnalysis;
 import br.unb.cic.analysis.pdgsdg.PDGSDGInterProcedural;
 import br.unb.cic.analysis.reachability.ReachabilityAnalysis;
@@ -26,6 +28,9 @@ import soot.Transform;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -38,6 +43,7 @@ public class Main {
     private Set<String> targetClasses;
     private List<String> conflicts = new ArrayList<>();
     private ReachDefinitionAnalysis analysis;
+    public static long time;
 
     public static void main(String args[]) {
         Main m = new Main();
@@ -180,14 +186,21 @@ public class Main {
             case "overriding-interprocedural":
                 runInterproceduralOverrideAssignmentAnalysis(classpath);
                 break;
-            case "control-dependence":
-                runCDAnalysis(classpath);
-                break;
+//            case "control-dependence":
+//                runCDAnalysis(classpath);
+//                break;
             case "pdg-sdg":
                 runPDGSDGAnalysis(classpath);
             case "pessimistic-dataflow":
                 runPessimisticDataFlowAnalysis(classpath);
                 break;
+            case "svg":
+                runSVGAnalysis(classpath);
+                break;
+            case "cd":
+                runCDAnalysis(classpath);
+                break;
+
             default:
                 runDataFlowAnalysis(classpath, mode);
         }
@@ -293,30 +306,100 @@ public class Main {
         conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
     }
 
-    private void runCDAnalysis(String classpath) {
-        CDAnalysis analysis = new CDAInterProcedural(classpath, definition);
-
-        analysis.buildCDA();
-        System.out.println(analysis.svgToDotModel());
-        System.out.println(analysis.findSourceSinkPaths());
-        System.out.println(analysis.findConflictingPaths());
-        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflicts())
-                .stream()
-                .map(p -> p.toString())
-                .collect(Collectors.toList()));
-    }
+//    private void runCDAnalysis(String classpath) {
+//        CDAnalysis analysis = new CDAInterProcedural(classpath, definition);
+//
+//        analysis.buildCDA();
+//        System.out.println(analysis.svgToDotModel());
+//        System.out.println(analysis.findSourceSinkPaths());
+//        System.out.println(analysis.findConflictingPaths());
+//        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflicts())
+//                .stream()
+//                .map(p -> p.toString())
+//                .collect(Collectors.toList()));
+//    }
 
     private void runPDGSDGAnalysis(String classpath) {
+        long start = System.currentTimeMillis();
         PDGSDGAnalysis analysis = new PDGSDGInterProcedural(classpath, definition);
 
         analysis.buildSparseValueFlowGraph();
-        System.out.println(analysis.svgcdToDotModel());
-        System.out.println(analysis.findSourceSinkPaths());
-        System.out.println(analysis.findConflictingPathsSVGCD());
+//        System.out.println(analysis.svgcdToDotModel());
+//        System.out.println(analysis.findSourceSinkPaths());
+//        System.out.println(analysis.findConflictingPathsSVGCD());
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVGCD())
                 .stream()
                 .map(p -> p.toString())
                 .collect(Collectors.toList()));
+        long end = System.currentTimeMillis();
+
+        NumberFormat formatter = new DecimalFormat("#0.00000");
+
+        time = (end - start);
+        try {
+            FileWriter myWriter = new FileWriter("time.txt", true);
+            myWriter.write(formatter.format(time/1000d)+"\n");
+//            System.out.println("Time:"+formatter.format(time/1000d));
+            myWriter.close();
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+    }
+
+    private void runSVGAnalysis(String classpath) {
+        long start = System.currentTimeMillis();
+        PDGSDGAnalysis analysis = new PDGSDGInterProcedural(classpath, definition);
+
+        analysis.buildSparseValueFlowGraph();
+
+        System.out.println(analysis.svgToDotModel());
+        System.out.println(analysis.findSourceSinkPaths());
+        System.out.println(analysis.findConflictingPathsSVG());
+        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
+                .stream()
+                .map(p -> p.toString())
+                .collect(Collectors.toList()));
+        long end = System.currentTimeMillis();
+
+        NumberFormat formatter = new DecimalFormat("#0.00000");
+        time = (end - start);
+        try {
+            FileWriter myWriter = new FileWriter("time.txt", true);
+            myWriter.write(formatter.format(time/1000d)+"\n");
+            System.out.println("Time:"+formatter.format(time/1000d));
+            myWriter.close();
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+    }
+
+    private void runCDAnalysis(String classpath) {
+        long start = System.currentTimeMillis();
+        PDGSDGAnalysis analysis = new PDGSDGInterProcedural(classpath, definition);
+
+        analysis.buildSparseValueFlowGraph();
+        System.out.println(analysis.cdToDotModel());
+        System.out.println(analysis.findSourceSinkPaths());
+        System.out.println(analysis.findConflictingPathsCD());
+        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsCD())
+                .stream()
+                .map(p -> p.toString())
+                .collect(Collectors.toList()));
+        long end = System.currentTimeMillis();
+
+        NumberFormat formatter = new DecimalFormat("#0.00000");
+        time = (end - start);
+        try {
+            FileWriter myWriter = new FileWriter("time.txt", true);
+            myWriter.write(formatter.format(time/1000d)+"\n");
+            System.out.println(formatter.format(time/1000d));
+            myWriter.close();
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
     }
 
     private void runSparseValueFlowAnalysis(String classpath, boolean interprocedural) {
