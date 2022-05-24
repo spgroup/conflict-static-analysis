@@ -1,5 +1,8 @@
 package br.unb.cic.analysis.model;
 
+import soot.Unit;
+
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -11,17 +14,27 @@ public class Conflict {
     protected String sourceClassName;
     protected String sourceMethodName;
     protected Integer sourceLineNumber;
+    protected Unit sourceUnit;
+    protected List<TraversedLine> sourceTraversedLine;
     protected String sinkClassName;
     protected String sinkMethodName;
     protected Integer sinkLineNumber;
+    protected Unit sinkUnit;
+    // used when using stack trace of the conflict.
+    protected List<TraversedLine> sinkTraversedLine;
+
 
     public Conflict(Statement source, Statement sink) {
         this.sourceClassName = source.getSootClass().getName();
         this.sourceMethodName = source.getSootMethod().getName();
         this.sourceLineNumber = source.getSourceCodeLineNumber();
+        this.sourceUnit = source.getUnit();
+        this.sourceTraversedLine = source.getTraversedLine();
         this.sinkClassName = sink.getSootClass().getName();
         this.sinkMethodName = sink.getSootMethod().getName();
         this.sinkLineNumber = sink.getSourceCodeLineNumber();
+        this.sinkUnit = sink.getUnit();
+        this.sinkTraversedLine = sink.getTraversedLine();
     }
 
     @Deprecated
@@ -33,6 +46,7 @@ public class Conflict {
         this.sinkMethodName = sinkMethodName;
         this.sinkLineNumber = sinkLineNumber;
     }
+
 
     public String getSourceClassName() {
         return sourceClassName;
@@ -58,6 +72,22 @@ public class Conflict {
         return sinkLineNumber;
     }
 
+    public List<TraversedLine> getSourceTraversedLine() {
+        return sourceTraversedLine;
+    }
+
+    public void setSourceTraversedLine(List<TraversedLine> sourceTraversedLine) {
+        this.sourceTraversedLine = sourceTraversedLine;
+    }
+
+    public List<TraversedLine> getSinkTraversedLine() {
+        return sinkTraversedLine;
+    }
+
+    public void setSinkTraversedLine(List<TraversedLine> sinkTraversedLine) {
+        this.sinkTraversedLine = sinkTraversedLine;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -66,9 +96,11 @@ public class Conflict {
         return Objects.equals(sourceClassName, conflict.sourceClassName) &&
                 Objects.equals(sourceMethodName, conflict.sourceMethodName) &&
                 Objects.equals(sourceLineNumber, conflict.sourceLineNumber) &&
+                Objects.equals(sourceUnit, conflict.sourceUnit) &&
                 Objects.equals(sinkClassName, conflict.sinkClassName) &&
                 Objects.equals(sinkMethodName, conflict.sinkMethodName) &&
-                Objects.equals(sinkLineNumber, conflict.sinkLineNumber);
+                Objects.equals(sinkLineNumber, conflict.sinkLineNumber) &&
+                Objects.equals(sinkUnit, conflict.sinkUnit);
     }
 
     @Override
@@ -76,9 +108,26 @@ public class Conflict {
         return Objects.hash(sourceClassName, sourceMethodName, sourceLineNumber, sinkClassName, sinkMethodName, sinkLineNumber);
     }
 
+
+    public String toStringAbstract() {
+        if (!sourceTraversedLine.isEmpty() && !sinkTraversedLine.isEmpty()) {
+            return String.format("source(%s, %s, %d, %s, %s) => sink(%s, %s, %d, %s, %s)", sourceTraversedLine.get(0).getSootClass(),
+                    sourceTraversedLine.get(0).getSootMethod(), sourceTraversedLine.get(0).getLineNumber(), sourceUnit,
+                    sourceTraversedLine,
+                    sinkTraversedLine.get(0).getSootClass(), sinkTraversedLine.get(0).getSootMethod(),
+                    sinkTraversedLine.get(0).getLineNumber(), sinkUnit, sinkTraversedLine);
+        }
+        return String.format("source(%s, %s) => sink(%s, %s)", sourceUnit,
+                sourceTraversedLine,
+                sinkUnit, sinkTraversedLine);
+
+    }
+
+
     @Override
     public String toString() {
-        return String.format("source(%s, %s, %d) => sink(%s, %s, %d)", sourceClassName, sourceMethodName, sourceLineNumber,
-                sinkClassName, sinkMethodName, sinkLineNumber);
+        return String.format("source(%s, %s, %d, %s, %s) => sink(%s, %s, %d, %s, %s)", sourceClassName,
+                sourceMethodName, sourceLineNumber, sourceUnit, sourceTraversedLine,
+                sinkClassName, sinkMethodName, sinkLineNumber, sinkUnit, sinkTraversedLine);
     }
 }

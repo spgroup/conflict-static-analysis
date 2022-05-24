@@ -3,7 +3,14 @@ package br.unb.cic.analysis.model;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
+import soot.ValueBox;
+import soot.jimple.AssignStmt;
+import soot.jimple.InstanceInvokeExpr;
+import soot.jimple.InvokeExpr;
+import soot.jimple.InvokeStmt;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -16,7 +23,8 @@ public class Statement {
 	public enum Type {
 		SOURCE, 
 		SINK,
-		IN_BETWEEN;
+		IN_BETWEEN,
+		SOURCE_SINK
 	}
 
 	private static StatementBuilder builder;
@@ -28,18 +36,20 @@ public class Statement {
 		return builder;
 	}
 
-	private SootClass sootClass; 
-	private SootMethod sootMethod; 
-	private Unit unit; 
+	private SootClass sootClass;
+	private SootMethod sootMethod;
+	private Unit unit;
 	private Type type;
 	private Integer sourceCodeLineNumber;
-	
+	private List<TraversedLine> traversedLine;
+
 	Statement(SootClass sootClass, SootMethod sootMethod, Unit unit, Type type, Integer sourceCodeLineNumber) {
 		this.sootClass = sootClass;
 		this.sootMethod = sootMethod;
 		this.unit = unit;
 		this.type = type;
 		this.sourceCodeLineNumber = sourceCodeLineNumber;
+		this.traversedLine = new ArrayList<>();
 	}
 
 	public SootClass getSootClass() {
@@ -62,6 +72,14 @@ public class Statement {
 		return sourceCodeLineNumber;
 	}
 
+	public List<TraversedLine> getTraversedLine() {
+		return traversedLine;
+	}
+
+	public void setTraversedLine(List<TraversedLine> traversedLine) {
+		this.traversedLine = traversedLine;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -82,4 +100,50 @@ public class Statement {
 	public String toString() {
 		return unit.toString();
 	}
+
+	public boolean isSource() {
+		return type == Type.SOURCE || type == Type.SOURCE_SINK;
+	}
+
+	public boolean isSink() {
+		return type == Type.SINK || type == Type.SOURCE_SINK;
+	}
+
+	public boolean isRightStatement() {
+		return this.type == Type.SINK || type == Type.SOURCE_SINK;
+	}
+
+	public boolean isLeftStatement() {
+		return this.type == Type.SOURCE || type == Type.SOURCE_SINK;
+	}
+
+	public boolean isLefAndRightStatement() {
+		return this.type == Type.SOURCE_SINK;
+	}
+
+	public boolean isAssign() {
+		return this.unit instanceof AssignStmt;
+	}
+
+	public boolean isInvoke() {
+		return getInvoke() != null;
+	}
+
+	public InstanceInvokeExpr getInvoke() {
+		if (this.unit instanceof InvokeStmt) {
+			InvokeStmt invoke = (InvokeStmt) this.unit;
+			InvokeExpr expr = invoke.getInvokeExpr();
+
+			if (expr instanceof InstanceInvokeExpr) {
+				return (InstanceInvokeExpr) expr;
+			}
+ 		}
+		for (ValueBox use : this.unit.getUseBoxes()) {
+			if (use.getValue() instanceof InstanceInvokeExpr) {
+				return (InstanceInvokeExpr) use.getValue();
+			}
+		}
+		return null;
+	}
+
 }

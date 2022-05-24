@@ -1,6 +1,10 @@
+<<<<<<< HEAD
 .gradle/
 .idea/
 git-repo/
 out.txt
 sootOutput/
 target/
+=======
+output
+>>>>>>> upstream/develop
