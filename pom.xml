@@ -23,7 +23,7 @@
 		<dependency>
 			<groupId>br.ufpe.cin</groupId>
 			<artifactId>pdg-sdg_2.12</artifactId>
-			<version>0.2.3</version>
+			<version>0.2.4</version>
 		</dependency>
 
 		<dependency>
