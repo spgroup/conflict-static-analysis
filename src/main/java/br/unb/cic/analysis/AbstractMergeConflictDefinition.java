@@ -6,10 +6,10 @@ import soot.jimple.AssignStmt;
 import soot.jimple.IdentityStmt;
 import soot.jimple.InvokeStmt;
 import soot.jimple.Stmt;
-import soot.jimple.internal.JAssignStmt;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This abstract class works as a contract. Whenever we
@@ -50,7 +50,6 @@ public abstract class AbstractMergeConflictDefinition {
         sinkStatements = loadStatements(sinkDefinitions, Statement.Type.SINK);
     }
 
-
     public List<Statement> getSourceStatements() {
         return sourceStatements;
     }
@@ -58,7 +57,6 @@ public abstract class AbstractMergeConflictDefinition {
     public List<Statement> getSinkStatements() {
         return sinkStatements;
     }
-
 
     /**
      * This method should return a list of pairs, where the
@@ -161,7 +159,7 @@ public abstract class AbstractMergeConflictDefinition {
         return res;
     }
 
-    private Statement createStatement(SootMethod sm, Unit u,  Statement.Type type) {
+    public Statement createStatement(SootMethod sm, Unit u, Statement.Type type) {
         return Statement.builder().setClass(sm.getDeclaringClass()).setMethod(sm)
                 .setUnit(u).setType(type).setSourceCodeLineNumber(u.getJavaSourceStartLineNumber())
                 .build();
@@ -207,11 +205,10 @@ public abstract class AbstractMergeConflictDefinition {
      * or not. So, in this implementation, we first try to retrieve
      * one. If an exception is thrown, we just return null.
      */
-    private Body retrieveActiveBodySafely(SootMethod method) {
+    public Body retrieveActiveBodySafely(SootMethod method) {
         try {
             return method.retrieveActiveBody();
-        }
-        catch(RuntimeException e) {
+        } catch (RuntimeException e) {
             return null;
         }
     }
@@ -241,4 +238,9 @@ public abstract class AbstractMergeConflictDefinition {
     public boolean isSourceStatement(Unit u) {
         return sourceStatements.stream().anyMatch(s -> s.getUnit().equals(u));
     }
+
+    public boolean isSinkStatement(Unit u) {
+        return sinkStatements.stream().anyMatch(s -> s.getUnit().equals(u));
+    }
+
 }

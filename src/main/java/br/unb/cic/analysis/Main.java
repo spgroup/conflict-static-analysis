@@ -3,9 +3,11 @@ package br.unb.cic.analysis;
 //import br.unb.cic.analysis.cda.CDAInterProcedural;
 //import br.unb.cic.analysis.cda.CDAnalysis;
 import br.unb.cic.analysis.df.*;
+import br.unb.cic.analysis.df.pessimistic.PessimisticTaintedAnalysis;
 import br.unb.cic.analysis.io.DefaultReader;
 import br.unb.cic.analysis.io.MergeConflictReader;
 import br.unb.cic.analysis.ioa.InterproceduralOverrideAssignment;
+import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
 //import br.unb.cic.analysis.pdgsdg.PDGSDGAnalysis;
 //import br.unb.cic.analysis.pdgsdg.PDGSDGInterProcedural;
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
 
 public class Main {
 
+    private static CommandLine cmd;
     private Options options;
     private AbstractMergeConflictDefinition definition;
     private Set<String> targetClasses;
@@ -49,6 +52,7 @@ public class Main {
 
             CommandLineParser parser = new DefaultParser();
             CommandLine cmd = parser.parse(m.options, args);
+            cmd = parser.parse(m.options, args);
 
             String mode = "dataflow";
 
@@ -67,13 +71,11 @@ public class Main {
 
             m.exportResults();
 
-        }
-        catch(ParseException e) {
+        } catch (ParseException e) {
             System.out.println("Error: " + e.getMessage());
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp( "java Main", m.options );
-        }
-        catch(Exception e) {
+            formatter.printHelp("java Main", m.options);
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -81,9 +83,9 @@ public class Main {
     private String parseClassPath(String cp) {
         File f = new File(cp);
         String res = cp;
-        if(f.exists() && f.isDirectory()) {
-            for(File file : f.listFiles()) {
-                if(file.getName().endsWith(".jar")) {
+        if (f.exists() && f.isDirectory()) {
+            for (File file : f.listFiles()) {
+                if (file.getName().endsWith(".jar")) {
                     res += ":";
                     res += file.getAbsolutePath();
                 }
@@ -93,26 +95,25 @@ public class Main {
     }
 
     private void exportResults() throws Exception {
-    	System.out.println(" Analysis results");
+        System.out.println(" Analysis results");
         System.out.println("----------------------------");
 
-        if(conflicts.size() == 0) {
-        	System.out.println(" No conflicts detected");
-        	System.out.println("----------------------------");
-        	return;
+        if (conflicts.size() == 0) {
+            System.out.println(" No conflicts detected");
+            System.out.println("----------------------------");
+            return;
         }
 
         System.out.println(" Number of conflicts: " + conflicts.size());
         final String out = "out.txt";
         final FileWriter fw = new FileWriter(out);
         conflicts.forEach(c -> {
-    		try {
-    			fw.write(c + "\n");
-    		}
-    		catch(Exception e) {
-    			System.out.println("error exporting the results " + e.getMessage());
-    		}
-    	});
+            try {
+                fw.write(c + "\n\n");
+            } catch (Exception e) {
+                System.out.println("error exporting the results " + e.getMessage());
+            }
+        });
         fw.close();
         System.out.println(" Results exported to " + out);
         System.out.println("----------------------------");
@@ -130,7 +131,7 @@ public class Main {
 
         Option analysisOption = Option.builder("mode").argName("mode")
                 .hasArg().desc("analysis mode [data-flow, tainted, reachability, svfa-{interprocedural | intraprocedural}" +
-                        ", svfa-confluence-{interprocedural | intraprocedural}]")
+                        ", svfa-confluence-{interprocedural | intraprocedural}, pessimistic-dataflow]")
 
                 .build();
 
@@ -142,9 +143,15 @@ public class Main {
                 .hasArg().desc("the commit merge to analysis")
                 .build();
 
-        Option verbose = Option.builder("verbose").argName("verbose").desc("run in the verbose mode").build();
-        Option recursive = Option.builder("recursive").argName("recursive")
+        Option verboseOption = Option.builder("verbose").argName("verbose").hasArg().desc("run in the verbose mode").build();
+
+        Option recursiveOption = Option.builder("recursive").argName("recursive").hasArg()
                 .desc("run using the recursive strategy for mapping sources and sinks")
+                .build();
+
+        Option oaDepthLimitOption = Option.builder("oaDepthLimit").argName("oaDepthLimit").hasArg()
+                .desc("sets the depth limit on accessing methods when performing Overriding Assignment " +
+                        "Interprocedural analysis")
                 .build();
 
         options.addOption(classPathOption);
@@ -152,13 +159,13 @@ public class Main {
         options.addOption(analysisOption);
         options.addOption(repoOption);
         options.addOption(commitOption);
-        options.addOption(verbose);
-        options.addOption(recursive);
+        options.addOption(verboseOption);
+        options.addOption(recursiveOption);
+        options.addOption(oaDepthLimitOption);
     }
 
-
     private void runAnalysis(String mode, String classpath) {
-    	switch(mode) {
+        switch (mode) {
             case "svfa-interprocedural":
                 runSparseValueFlowAnalysis(classpath, true);
                 break;
@@ -177,9 +184,6 @@ public class Main {
             case "overriding-interprocedural":
                 runInterproceduralOverrideAssignmentAnalysis(classpath);
                 break;
-//            case "control-dependence":
-//                runCDAnalysis(classpath);
-//                break;
             case "pdg-sdg":
                 runPDGSDGAnalysis(classpath);
                 break;
@@ -189,10 +193,36 @@ public class Main {
             case "cd":
                 runCDAnalysis(classpath);
                 break;
-
+            case "pessimistic-dataflow":
+                runPessimisticDataFlowAnalysis(classpath);
+                break;
             default:
                 runDataFlowAnalysis(classpath, mode);
         }
+    }
+
+    private void runPessimisticDataFlowAnalysis(String classpath) {
+        PackManager.v().getPack("jtp").add(
+                new Transform("jtp.analysis", new BodyTransformer() {
+                    @Override
+                    protected void internalTransform(Body body, String s, Map<String, String> map) {
+                        PessimisticTaintedAnalysis analysis = new PessimisticTaintedAnalysis(body, definition);
+
+                        conflicts.addAll(
+                                analysis
+                                        .getConflicts()
+                                        .stream()
+                                        .map(Conflict::toString)
+                                        .collect(Collectors.toList()));
+                    }
+                })
+        );
+        SootWrapper.builder()
+                .withClassPath(classpath)
+                .addClass(targetClasses.stream().collect(Collectors.joining(" ")))
+                .build()
+                .execute();
+
     }
 
     private void runDataFlowAnalysis(String classpath, String mode) {
@@ -200,10 +230,15 @@ public class Main {
                 new Transform("jtp.analysis", new BodyTransformer() {
                     @Override
                     protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-                        switch(mode) {
-                            case "dataflow"   : analysis = new ReachDefinitionAnalysis(body, definition); break;
-                            case "tainted"    : analysis = new TaintedAnalysis(body, definition);
-                            case "confluence" : analysis = new ConfluentAnalysis(body, definition); break;
+                        switch (mode) {
+                            case "dataflow":
+                                analysis = new ReachDefinitionAnalysis(body, definition);
+                                break;
+                            case "tainted":
+                                analysis = new TaintedAnalysis(body, definition);
+                            case "confluence":
+                                analysis = new ConfluentAnalysis(body, definition);
+                                break;
                             case "confluence-tainted":
                                 analysis = new ConfluentTaintedAnalysis(body, definition);
                                 break;
@@ -228,19 +263,20 @@ public class Main {
     }
 
     private void runInterproceduralOverrideAssignmentAnalysis(String classpath) {
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        int depthLimit = Integer.parseInt(cmd.getOptionValue("oaDepthLimit", "10"));
 
-        PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
-        soot.options.Options.v().setPhaseOption("cg.spark", "on");
-        soot.options.Options.v().setPhaseOption("cg.spark", "verbose:true");
+        InterproceduralOverrideAssignment interproceduralOverrideAssignment =
+                new InterproceduralOverrideAssignment(definition, depthLimit);
 
-        SootWrapper.builder()
-                .withClassPath(classpath)
-                .addClass(targetClasses.stream().collect(Collectors.joining(" ")))
-                .build()
-                .execute();
+        List<String> classes = Collections.singletonList(classpath);
+        SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classes);
 
-        conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
+        interproceduralOverrideAssignment.configureEntryPoints();
+
+        PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", interproceduralOverrideAssignment));
+        SootWrapper.applyPackages();
+
+        conflicts.addAll(interproceduralOverrideAssignment.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
     }
 
     /*
@@ -368,6 +404,7 @@ public class Main {
                 : new SVFAIntraProcedural(classpath, definition);
 
         analysis.buildSparseValueFlowGraph();
+
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflicts())
                 .stream()
                 .map(p -> p.toString())
@@ -376,7 +413,7 @@ public class Main {
 
     private void runSparseValueFlowConfluenceAnalysis(String classpath, boolean interprocedural) {
         definition.setRecursiveMode(options.hasOption("recursive"));
-        SVFAConfluenceAnalysis analysis = new SVFAConfluenceAnalysis(classpath, this.definition,  interprocedural);
+        SVFAConfluenceAnalysis analysis = new SVFAConfluenceAnalysis(classpath, this.definition, interprocedural);
 
         analysis.execute();
         conflicts.addAll(analysis.getConfluentConflicts()
@@ -391,11 +428,10 @@ public class Main {
         Map<String, List<Integer>> sourceDefs = new HashMap<>();
         Map<String, List<Integer>> sinkDefs = new HashMap<>();
         targetClasses = new HashSet<>();
-        for(ClassChangeDefinition change : changes) {
-            if(change.getType().equals(Statement.Type.SOURCE)) {
+        for (ClassChangeDefinition change : changes) {
+            if (change.getType().equals(Statement.Type.SOURCE)) {
                 addChange(sourceDefs, change);
-            }
-            else {
+            } else {
                 addChange(sinkDefs, change);
             }
             targetClasses.add(change.getClassName());
@@ -414,10 +450,9 @@ public class Main {
     }
 
     private void addChange(Map<String, List<Integer>> map, ClassChangeDefinition change) {
-        if(map.containsKey(change.getClassName())) {
+        if (map.containsKey(change.getClassName())) {
             map.get(change.getClassName()).add(change.getLineNumber());
-        }
-        else {
+        } else {
             List<Integer> lines = new ArrayList<>();
             lines.add(change.getLineNumber());
             map.put(change.getClassName(), lines);
@@ -453,17 +488,13 @@ public class Main {
     }
 
     private void addChangeFromDiffAnalysis(Map<String, List<Integer>> map, Entry<String, Integer> change) {
-        if(map.containsKey(change.getKey())) {
+        if (map.containsKey(change.getKey())) {
             map.get(change.getKey()).add(change.getValue());
-        }
-        else {
+        } else {
             List<Integer> lines = new ArrayList<>();
             lines.add(change.getValue());
             map.put(change.getKey(), lines);
         }
     }
-
-
-
 
 }
