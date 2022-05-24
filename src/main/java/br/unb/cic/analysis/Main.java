@@ -71,8 +71,7 @@ public class Main {
 
             m.exportResults();
 
-        }
-        catch(ParseException e) {
+        } catch (ParseException e) {
             System.out.println("Error: " + e.getMessage());
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("java Main", m.options);
@@ -99,23 +98,22 @@ public class Main {
         System.out.println(" Analysis results");
         System.out.println("----------------------------");
 
-        if(conflicts.size() == 0) {
-        	System.out.println(" No conflicts detected");
-        	System.out.println("----------------------------");
-        	return;
+        if (conflicts.size() == 0) {
+            System.out.println(" No conflicts detected");
+            System.out.println("----------------------------");
+            return;
         }
 
         System.out.println(" Number of conflicts: " + conflicts.size());
         final String out = "out.txt";
         final FileWriter fw = new FileWriter(out);
         conflicts.forEach(c -> {
-    		try {
-    			fw.write(c + "\n");
-    		}
-    		catch(Exception e) {
-    			System.out.println("error exporting the results " + e.getMessage());
-    		}
-    	});
+            try {
+                fw.write(c + "\n\n");
+            } catch (Exception e) {
+                System.out.println("error exporting the results " + e.getMessage());
+            }
+        });
         fw.close();
         System.out.println(" Results exported to " + out);
         System.out.println("----------------------------");
@@ -186,13 +184,8 @@ public class Main {
             case "overriding-interprocedural":
                 runInterproceduralOverrideAssignmentAnalysis(classpath);
                 break;
-//            case "control-dependence":
-//                runCDAnalysis(classpath);
-//                break;
             case "pdg-sdg":
                 runPDGSDGAnalysis(classpath);
-            case "pessimistic-dataflow":
-                runPessimisticDataFlowAnalysis(classpath);
                 break;
             case "svg":
                 runSVGAnalysis(classpath);
@@ -200,7 +193,9 @@ public class Main {
             case "cd":
                 runCDAnalysis(classpath);
                 break;
-
+            case "pessimistic-dataflow":
+                runPessimisticDataFlowAnalysis(classpath);
+                break;
             default:
                 runDataFlowAnalysis(classpath, mode);
         }
