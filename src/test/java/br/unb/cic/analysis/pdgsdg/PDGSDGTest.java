@@ -18,7 +18,7 @@ public class PDGSDGTest {
     @Test
     public void testSVFAnalysisIntraProceduralSameMethod() {
         PDGSDGAnalysis analysis = configureIntraTest(CLASS_NAME, new int[]{13, 15}, new int[]{5, 8, 18});
-        analysis.buildSparseValueFlowGraph();
+        analysis.buildFlowGraph();
 
         Assert.assertEquals(2, analysis.reportConflicts().size());
     }

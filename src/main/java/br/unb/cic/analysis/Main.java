@@ -318,7 +318,7 @@ public class Main {
         long start = System.currentTimeMillis();
         PDGSDGAnalysis analysis = new PDGSDGInterProcedural(classpath, definition);
 
-        analysis.buildSparseValueFlowGraph();
+        analysis.buildFlowGraph();
 //        System.out.println(analysis.svgcdToDotModel());
 //        System.out.println(analysis.findSourceSinkPaths());
 //        System.out.println(analysis.findConflictingPathsSVGCD());
@@ -346,7 +346,7 @@ public class Main {
         long start = System.currentTimeMillis();
         PDGSDGAnalysis analysis = new PDGSDGInterProcedural(classpath, definition);
 
-        analysis.buildSparseValueFlowGraph();
+        analysis.buildFlowGraph();
 
         System.out.println(analysis.svgToDotModel());
         System.out.println(analysis.findSourceSinkPaths());
@@ -374,7 +374,7 @@ public class Main {
         long start = System.currentTimeMillis();
         PDGSDGAnalysis analysis = new PDGSDGInterProcedural(classpath, definition);
 
-        analysis.buildSparseValueFlowGraph();
+        analysis.buildFlowGraph();
         System.out.println(analysis.cdToDotModel());
         System.out.println(analysis.findSourceSinkPaths());
         System.out.println(analysis.findConflictingPathsCD());
@@ -403,7 +403,7 @@ public class Main {
                 ? new SVFAInterProcedural(classpath, definition)
                 : new SVFAIntraProcedural(classpath, definition);
 
-        analysis.buildSparseValueFlowGraph();
+        analysis.buildFlowGraph();
 
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflicts())
                 .stream()
