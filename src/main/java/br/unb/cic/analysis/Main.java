@@ -51,7 +51,7 @@ public class Main {
             m.createOptions();
 
             CommandLineParser parser = new DefaultParser();
-            CommandLine cmd = parser.parse(m.options, args);
+//            CommandLine cmd = parser.parse(m.options, args);
             cmd = parser.parse(m.options, args);
 
             String mode = "dataflow";
