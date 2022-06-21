@@ -80,8 +80,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         List<SootMethod> methods = Scene.v().getEntryPoints();
         methods.forEach(sootMethod -> traverse(new ArraySparseSet<>(), sootMethod, Statement.Type.IN_BETWEEN));
 
-        Set<Conflict> conflictsFilter = filterConflicts(getConflicts());
-        logger.log(Level.INFO, () -> String.format("%s", "CONFLICTS: " + conflictsFilter));
+        logger.log(Level.INFO, () -> String.format("%s", "CONFLICTS: " + filterConflictsWithSameRoot(getConflicts())));
 
         long finalTime = System.currentTimeMillis();
         System.out.println("Runtime: " + ((finalTime - startTime) / 1000d) + "s");
@@ -116,24 +115,24 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         }
     }
 
-    private Set<Conflict> filterConflicts(Set<Conflict> conflictsResults) {
-        Set<Conflict> conflictsFilter = new HashSet<>();
-        for (Conflict conflict : conflictsResults) {
-            if (conflictsFilter.isEmpty()) {
-                conflictsFilter.add(conflict);
-            }
-        }
-        for (Conflict conflict : conflictsResults) {
-            for (Conflict filter : conflictsFilter) {
-                if (!conflict.getSourceTraversedLine().isEmpty() && !conflict.getSinkTraversedLine().isEmpty()) {
-                    if ((!conflict.getSourceTraversedLine().get(0).equals(filter.getSourceTraversedLine().get(0)))
-                            && (!conflict.getSinkTraversedLine().get(0).equals(filter.getSinkTraversedLine().get(0)))) {
-                        conflictsFilter.add(conflict);
-                    }
-                }
+    private  Set<Conflict> filterConflictsWithSameRoot(Set<Conflict> conflictsResults) {
 
-            }
-        }
+        Set<Conflict> conflictsFilter = new HashSet<>();
+
+        for(Conflict conflict: conflictsResults){
+            TraversedLine sourceTraversedLine = conflict.getSourceTraversedLine().get(0);
+            TraversedLine sinkTraversedLine = conflict.getSinkTraversedLine().get(0);
+
+            for(Conflict conflict1: conflictsResults) {
+                if(conflict1.getSourceTraversedLine().get(0).equals(sourceTraversedLine)
+                        && conflict1.getSinkTraversedLine().get(0).equals(sinkTraversedLine)){
+                    conflictsFilter.add(conflict1);
+                    break;
+                }
+            };
+
+        };
+
         return conflictsFilter;
     }
 
@@ -153,7 +152,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             return in;
         }
 
-        System.out.println(sootMethod + " - " + this.traversedMethods.size());
+        //System.out.println(sootMethod + " - " + this.traversedMethods.size());
         this.traversedMethods.add(sootMethod);
 
         Body body = definition.retrieveActiveBodySafely(sootMethod);
