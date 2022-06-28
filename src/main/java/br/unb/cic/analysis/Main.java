@@ -51,7 +51,6 @@ public class Main {
             m.createOptions();
 
             CommandLineParser parser = new DefaultParser();
-//            CommandLine cmd = parser.parse(m.options, args);
             cmd = parser.parse(m.options, args);
 
             String mode = "dataflow";
@@ -263,7 +262,7 @@ public class Main {
     }
 
     private void runInterproceduralOverrideAssignmentAnalysis(String classpath) {
-        int depthLimit = Integer.parseInt(cmd.getOptionValue("oaDepthLimit", "10"));
+        int depthLimit = Integer.parseInt(cmd.getOptionValue("oaDepthLimit", "5"));
 
         InterproceduralOverrideAssignment interproceduralOverrideAssignment =
                 new InterproceduralOverrideAssignment(definition, depthLimit);
@@ -300,19 +299,6 @@ public class Main {
 
         conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
     }
-
-//    private void runCDAnalysis(String classpath) {
-//        CDAnalysis analysis = new CDAInterProcedural(classpath, definition);
-//
-//        analysis.buildCDA();
-//        System.out.println(analysis.svgToDotModel());
-//        System.out.println(analysis.findSourceSinkPaths());
-//        System.out.println(analysis.findConflictingPaths());
-//        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflicts())
-//                .stream()
-//                .map(p -> p.toString())
-//                .collect(Collectors.toList()));
-//    }
 
     private void runPDGSDGAnalysis(String classpath) {
         long start = System.currentTimeMillis();
