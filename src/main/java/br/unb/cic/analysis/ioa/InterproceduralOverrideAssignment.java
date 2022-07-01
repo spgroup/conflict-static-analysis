@@ -115,25 +115,26 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         }
     }
 
-    private  Set<Conflict> filterConflictsWithSameRoot(Set<Conflict> conflictsResults) {
-
+    private Set<Conflict> filterConflictsWithSameRoot(Set<Conflict> conflictsResults) {
         Set<Conflict> conflictsFilter = new HashSet<>();
 
-        for(Conflict conflict: conflictsResults){
-            TraversedLine sourceTraversedLine = conflict.getSourceTraversedLine().get(0);
-            TraversedLine sinkTraversedLine = conflict.getSinkTraversedLine().get(0);
+        for (Conflict conflict : conflictsResults) {
 
-            for(Conflict conflict1: conflictsResults) {
-                if(conflict1.getSourceTraversedLine().get(0).equals(sourceTraversedLine)
-                        && conflict1.getSinkTraversedLine().get(0).equals(sinkTraversedLine)){
-                    conflictsFilter.add(conflict1);
-                    break;
-                }
-            };
-
-        };
-
+            if (!hasConflictWithSameSourceAndSinkRootTraversedLine(conflictsFilter, conflict)) {
+                conflictsFilter.add(conflict);
+            }
+        }
         return conflictsFilter;
+    }
+
+
+    private boolean hasConflictWithSameSourceAndSinkRootTraversedLine( Set<Conflict> conflictsFilter, Conflict conflict) {
+        for (Conflict c : conflictsFilter) {
+            if (c.conflictsHaveSameSourceAndSinkRootTraversedLine(conflict)){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
