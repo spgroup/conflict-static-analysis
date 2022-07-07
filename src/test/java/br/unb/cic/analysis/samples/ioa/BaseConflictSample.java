@@ -1,17 +1,21 @@
 package br.unb.cic.analysis.samples.ioa;
 
-// Conflict: [left, countDupWords():17] --> [right, countDupWhitespace():25]
+// Conflict: [left, countDupWords():22] --> [right, countDupWhitespace():30]
 public class BaseConflictSample {
 
     public String text;
-    public int fixes;
+    public int fixes, comments;
+
+    public void callRealisticRun() {
+        BaseConflictSample baseConflictSample = new BaseConflictSample();
+        baseConflictSample.countFixes();
+    }
 
     public int countFixes() {
-        BaseConflictSample baseConflictSample = new BaseConflictSample();
-        baseConflictSample.countDupWhitespace(); //RIGHT
-        baseConflictSample.countComments();
-        baseConflictSample.countDupWords(); // LEFT
-        return baseConflictSample.fixes;
+        countDupWhitespace(); //RIGHT
+        countComments();
+        countDupWords(); // LEFT
+        return fixes;
     }
 
     private void countDupWords() {
@@ -19,7 +23,7 @@ public class BaseConflictSample {
     }
 
     private void countComments() {
-
+        comments =  comments +1;
     }
 
     private void countDupWhitespace() {

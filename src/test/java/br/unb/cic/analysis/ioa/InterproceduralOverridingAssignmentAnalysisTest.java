@@ -109,7 +109,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
     public void baseConflictTest() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.BaseConflictSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
-                .definition(sampleClassPath, new int[]{11}, new int[]{13});
+                .definition(sampleClassPath, new int[]{15}, new int[]{17});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());
