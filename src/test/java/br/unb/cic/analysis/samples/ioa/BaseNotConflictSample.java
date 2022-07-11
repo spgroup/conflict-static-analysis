@@ -4,25 +4,27 @@ package br.unb.cic.analysis.samples.ioa;
 public class BaseNotConflictSample {
 
     public String text;
-    public int fixes;
 
-    public int countFixes() {
-        BaseNotConflictSample baseConflictSample = new BaseNotConflictSample();
-        baseConflictSample.countDupWhitespace(); //RIGHT
-        baseConflictSample.countComments();
-        baseConflictSample.countDupWords(); // LEFT
-        return baseConflictSample.fixes;
+    public void callRealisticRun() {
+        BaseNotConflictSample baseNotConflictSample = new BaseNotConflictSample();
+        baseNotConflictSample.cleanText();
     }
 
-    private void countDupWords() {
-        this.fixes = this.fixes + 2;
+    public void cleanText() {
+        normalizeWhitespaces(); //RIGHT
+        removeComments();
+        removeDuplicatedWords(); // LEFT
     }
 
-    private void countComments() {
-        this.fixes = 0;
+    private void removeDuplicatedWords() {
+        text = text + "removeDuplicatedWords";
     }
 
-    private void countDupWhitespace() {
-        this.fixes = this.fixes + 1;
+    private void removeComments() {
+        text = text + "removeComments";
+    }
+
+    private void normalizeWhitespaces() {
+        text = text + "normalizeWhitespaces";
     }
 }
