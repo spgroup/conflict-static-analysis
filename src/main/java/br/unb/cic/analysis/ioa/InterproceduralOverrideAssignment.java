@@ -398,15 +398,18 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     private void removeAll(ValueBox valueBox, FlowSet<DataFlowAbstraction> rightOrLeftList) {
+        FlowSet<DataFlowAbstraction> itemsToRemoved = new ArraySparseSet<>();
         rightOrLeftList.forEach(dataFlowAbstraction -> {
             try {
                 if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
-                    rightOrLeftList.remove(dataFlowAbstraction);
+                    itemsToRemoved.add(dataFlowAbstraction);
                 }
             } catch (ValueNotHandledException e) {
                 e.printStackTrace();
             }
         });
+
+        rightOrLeftList.difference(itemsToRemoved);
     }
 
     private boolean containsValue(DataFlowAbstraction dataFlowAbstraction, Value value) throws ValueNotHandledException {
