@@ -3,7 +3,7 @@ package br.unb.cic.analysis.svfa;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Statement;
 import br.ufpe.cin.soot.graph.*;
-import br.ufpe.cin.soot.svfa.jimple.JSVFA;
+import br.ufpe.cin.soot.analysis.jimple.JSVFA;
 import scala.collection.JavaConverters;
 import soot.SootMethod;
 import soot.Unit;
@@ -51,8 +51,8 @@ public abstract class SVFAAnalysis extends JSVFA  {
         Set<java.util.List<LambdaNode>> paths = new HashSet<>();
 
         JavaConverters
-                .asJavaCollection(findConflictingPaths())
-                .forEach(p -> paths.add(new ArrayList<>(JavaConverters.asJavaCollection(p))));
+                .asJavaCollection(svg().findConflictingPaths())
+                .forEach(p -> paths.add(new ArrayList(JavaConverters.asJavaCollection(p))));
 
        return paths;
     }

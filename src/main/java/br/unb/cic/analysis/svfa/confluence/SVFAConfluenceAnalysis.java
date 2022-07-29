@@ -35,11 +35,11 @@ public class SVFAConfluenceAnalysis {
      */
     public void execute() {
         SVFAAnalysis sourceBaseAnalysis = sourceBaseAnalysis(interprocedural);
-        sourceBaseAnalysis.buildFlowGraph();
+        sourceBaseAnalysis.buildSparseValueFlowGraph();
         Set<List<LambdaNode>> sourceBasePaths = sourceBaseAnalysis.findSourceSinkPaths();
 
         SVFAAnalysis sinkBaseAnalysis = sinkBaseAnalysis(interprocedural);
-        sinkBaseAnalysis.buildFlowGraph();
+        sinkBaseAnalysis.buildSparseValueFlowGraph();
         Set<List<LambdaNode>> sinkBasePaths = sinkBaseAnalysis.findSourceSinkPaths();
 
         confluentFlows = intersectPathsByLastNode(sourceBasePaths, sinkBasePaths);
@@ -112,6 +112,11 @@ public class SVFAConfluenceAnalysis {
             public boolean interprocedural() {
                 return interprocedural;
             }
+
+            @Override
+            public boolean propagateObjectTaint() {
+                return true;
+            }
         };
     }
 
@@ -146,6 +151,11 @@ public class SVFAConfluenceAnalysis {
             @Override
             public boolean interprocedural() {
                 return interprocedural;
+            }
+
+            @Override
+            public boolean propagateObjectTaint() {
+                return true;
             }
         };
     }

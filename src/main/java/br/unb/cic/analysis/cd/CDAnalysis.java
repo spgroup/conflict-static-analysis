@@ -1,11 +1,9 @@
-package br.unb.cic.analysis.pdgsdg;
+package br.unb.cic.analysis.cd;
 
-import br.ufpe.cin.soot.analysis.jimple.JPDG;
-import br.ufpe.cin.soot.analysis.jimple.JSVFA;
+import br.ufpe.cin.soot.analysis.jimple.JCD;
+import br.ufpe.cin.soot.graph.*;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Statement;
-import br.ufpe.cin.soot.graph.*;
-
 import scala.collection.JavaConverters;
 import soot.SootMethod;
 import soot.Unit;
@@ -17,7 +15,7 @@ import java.util.stream.Collectors;
  * An analysis wrapper around the Sparse value
  * flow analysis implementation.
  */
-public abstract class PDGSDGAnalysis extends JPDG {
+public abstract class CDAnalysis extends JCD {
 
     private String cp;
 
@@ -28,7 +26,7 @@ public abstract class PDGSDGAnalysis extends JPDG {
      * @param classPath a classpath to the software under analysis
      * @param definition a definition with the sources and sinks unities
      */
-    public PDGSDGAnalysis(String classPath, AbstractMergeConflictDefinition definition) {
+    public CDAnalysis(String classPath, AbstractMergeConflictDefinition definition) {
         this.cp = classPath;
         this.definition = definition;
     }
@@ -53,7 +51,7 @@ public abstract class PDGSDGAnalysis extends JPDG {
         Set<List<LambdaNode>> paths = new HashSet<>();
 
         JavaConverters
-                .asJavaCollection(svg().findConflictingPaths())
+                .asJavaCollection(cd().findConflictingPaths())
                 .forEach(p -> paths.add(new ArrayList(JavaConverters.asJavaCollection(p))));
 
        return paths;

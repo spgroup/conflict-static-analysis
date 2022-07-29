@@ -1,16 +1,16 @@
 package br.unb.cic.analysis;
 
-//import br.unb.cic.analysis.cda.CDAInterProcedural;
-//import br.unb.cic.analysis.cda.CDAnalysis;
+import br.unb.cic.analysis.cd.CDAnalysis;
+import br.unb.cic.analysis.cd.CDInterProcedural;
 import br.unb.cic.analysis.df.*;
 import br.unb.cic.analysis.df.pessimistic.PessimisticTaintedAnalysis;
+import br.unb.cic.analysis.dfp.DFPAnalysis;
+import br.unb.cic.analysis.dfp.DFPInterProcedural;
 import br.unb.cic.analysis.io.DefaultReader;
 import br.unb.cic.analysis.io.MergeConflictReader;
 import br.unb.cic.analysis.ioa.InterproceduralOverrideAssignment;
 import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
-//import br.unb.cic.analysis.pdgsdg.PDGSDGAnalysis;
-//import br.unb.cic.analysis.pdgsdg.PDGSDGInterProcedural;
 import br.unb.cic.analysis.pdgsdg.PDGSDGAnalysis;
 import br.unb.cic.analysis.pdgsdg.PDGSDGInterProcedural;
 import br.unb.cic.analysis.reachability.ReachabilityAnalysis;
@@ -186,8 +186,8 @@ public class Main {
             case "pdg-sdg":
                 runPDGSDGAnalysis(classpath);
                 break;
-            case "svg":
-                runSVGAnalysis(classpath);
+            case "dfp":
+                runDFPAnalysis(classpath);
                 break;
             case "cd":
                 runCDAnalysis(classpath);
@@ -303,12 +303,14 @@ public class Main {
     private void runPDGSDGAnalysis(String classpath) {
         long start = System.currentTimeMillis();
         PDGSDGAnalysis analysis = new PDGSDGInterProcedural(classpath, definition);
+        CDAnalysis cd = new CDInterProcedural(classpath, definition);
+        DFPAnalysis dfp = new DFPInterProcedural(classpath, definition);
 
-        analysis.buildFlowGraph();
-//        System.out.println(analysis.svgcdToDotModel());
-//        System.out.println(analysis.findSourceSinkPaths());
-//        System.out.println(analysis.findConflictingPathsSVGCD());
-        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVGCD())
+        analysis.buildPDG(cd, dfp);
+        System.out.println(analysis.pdg().toDotModel());
+        System.out.println(analysis.findSourceSinkPaths());
+        System.out.println(analysis.pdg().findConflictingPaths());
+        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsPDG())
                 .stream()
                 .map(p -> p.toString())
                 .collect(Collectors.toList()));
@@ -320,7 +322,7 @@ public class Main {
         try {
             FileWriter myWriter = new FileWriter("time.txt", true);
             myWriter.write(formatter.format(time/1000d)+"\n");
-//            System.out.println("Time:"+formatter.format(time/1000d));
+            System.out.println("Time:"+formatter.format(time/1000d));
             myWriter.close();
         } catch (IOException e) {
             System.out.println("An error occurred.");
@@ -328,16 +330,16 @@ public class Main {
         }
     }
 
-    private void runSVGAnalysis(String classpath) {
+    private void runDFPAnalysis(String classpath) {
         long start = System.currentTimeMillis();
-        PDGSDGAnalysis analysis = new PDGSDGInterProcedural(classpath, definition);
+        DFPAnalysis analysis = new DFPInterProcedural(classpath, definition);
 
-        analysis.buildFlowGraph();
+        analysis.buildDFP();
 
         System.out.println(analysis.svgToDotModel());
         System.out.println(analysis.findSourceSinkPaths());
-        System.out.println(analysis.findConflictingPathsSVG());
-        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
+        System.out.println(analysis.svg().findConflictingPaths());
+        conflicts.addAll(JavaConverters.asJavaCollection(analysis.svg().reportConflicts())
                 .stream()
                 .map(p -> p.toString())
                 .collect(Collectors.toList()));
@@ -358,13 +360,13 @@ public class Main {
 
     private void runCDAnalysis(String classpath) {
         long start = System.currentTimeMillis();
-        PDGSDGAnalysis analysis = new PDGSDGInterProcedural(classpath, definition);
+        CDAnalysis analysis = new CDInterProcedural(classpath, definition);
 
-        analysis.buildFlowGraph();
-        System.out.println(analysis.cdToDotModel());
+        analysis.buildCD();
+        System.out.println(analysis.cd().toDotModel());
         System.out.println(analysis.findSourceSinkPaths());
-        System.out.println(analysis.findConflictingPathsCD());
-        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsCD())
+        System.out.println(analysis.cd().findConflictingPaths());
+        conflicts.addAll(JavaConverters.asJavaCollection(analysis.cd().reportConflicts())
                 .stream()
                 .map(p -> p.toString())
                 .collect(Collectors.toList()));
@@ -389,9 +391,9 @@ public class Main {
                 ? new SVFAInterProcedural(classpath, definition)
                 : new SVFAIntraProcedural(classpath, definition);
 
-        analysis.buildFlowGraph();
+        analysis.buildSparseValueFlowGraph();
 
-        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflicts())
+        conflicts.addAll(JavaConverters.asJavaCollection(analysis.svg().reportConflicts())
                 .stream()
                 .map(p -> p.toString())
                 .collect(Collectors.toList()));
