@@ -184,7 +184,7 @@ public class Main {
                 runInterproceduralOverrideAssignmentAnalysis(classpath);
                 break;
             case "pdg-sdg":
-                runPDGSDGAnalysis(classpath);
+                runPDGAnalysis(classpath);
                 break;
             case "dfp":
                 runDFPAnalysis(classpath);
@@ -300,7 +300,7 @@ public class Main {
         conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
     }
 
-    private void runPDGSDGAnalysis(String classpath) {
+    private void runPDGAnalysis(String classpath) {
         long start = System.currentTimeMillis();
         PDGAnalysis analysis = new PDGIntraProcedural(classpath, definition);
         CDAnalysis cd = new CDIntraProcedural(classpath, definition);
