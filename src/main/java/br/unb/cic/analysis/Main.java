@@ -307,6 +307,9 @@ public class Main {
         DFPAnalysis dfp = new DFPIntraProcedural(classpath, definition);
 
         analysis.buildPDG(cd, dfp);
+
+        saveTimeExecution(start);
+
         System.out.println(analysis.pdg().toDotModel());
         System.out.println(analysis.findSourceSinkPaths());
         System.out.println(analysis.pdg().findConflictingPaths());
@@ -314,8 +317,6 @@ public class Main {
                 .stream()
                 .map(p -> p.toString())
                 .collect(Collectors.toList()));
-
-        saveTimeExecution(start);
     }
 
     private void runDFPAnalysis(String classpath) {
@@ -324,6 +325,8 @@ public class Main {
 
         analysis.buildDFP();
 
+        saveTimeExecution(start);
+
         System.out.println(analysis.svgToDotModel());
         System.out.println(analysis.findSourceSinkPaths());
         System.out.println(analysis.svg().findConflictingPaths());
@@ -331,7 +334,6 @@ public class Main {
                 .stream()
                 .map(p -> p.toString())
                 .collect(Collectors.toList()));
-        saveTimeExecution(start);
     }
 
     private void runCDAnalysis(String classpath) {
@@ -339,6 +341,9 @@ public class Main {
         CDAnalysis analysis = new CDIntraProcedural(classpath, definition);
 
         analysis.buildCD();
+
+        saveTimeExecution(start);
+
         System.out.println(analysis.cd().toDotModel());
         System.out.println(analysis.findSourceSinkPaths());
         System.out.println(analysis.cd().findConflictingPaths());
@@ -346,7 +351,6 @@ public class Main {
                 .stream()
                 .map(p -> p.toString())
                 .collect(Collectors.toList()));
-        saveTimeExecution(start);
     }
 
     public void saveTimeExecution(long start){
