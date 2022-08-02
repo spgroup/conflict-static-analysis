@@ -5,3 +5,8 @@ out.txt
 sootOutput/
 target/
 output
+time.txt
+.settings
+.classpath
+.project
+soot-analysis.iml

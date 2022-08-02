@@ -1,6 +1,6 @@
 package br.unb.cic.analysis.samples;
 
-public class PDGSDGSample {
+public class PDGSample {
     public static void main(){
         int x = 0; //sink
         while (x != 0){

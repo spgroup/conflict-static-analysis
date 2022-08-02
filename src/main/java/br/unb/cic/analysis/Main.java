@@ -1,18 +1,18 @@
 package br.unb.cic.analysis;
 
 import br.unb.cic.analysis.cd.CDAnalysis;
-import br.unb.cic.analysis.cd.CDInterProcedural;
+import br.unb.cic.analysis.cd.CDIntraProcedural;
 import br.unb.cic.analysis.df.*;
 import br.unb.cic.analysis.df.pessimistic.PessimisticTaintedAnalysis;
 import br.unb.cic.analysis.dfp.DFPAnalysis;
-import br.unb.cic.analysis.dfp.DFPInterProcedural;
+import br.unb.cic.analysis.dfp.DFPIntraProcedural;
 import br.unb.cic.analysis.io.DefaultReader;
 import br.unb.cic.analysis.io.MergeConflictReader;
 import br.unb.cic.analysis.ioa.InterproceduralOverrideAssignment;
 import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
-import br.unb.cic.analysis.pdgsdg.PDGSDGAnalysis;
-import br.unb.cic.analysis.pdgsdg.PDGSDGInterProcedural;
+import br.unb.cic.analysis.pdg.PDGAnalysis;
+import br.unb.cic.analysis.pdg.PDGIntraProcedural;
 import br.unb.cic.analysis.reachability.ReachabilityAnalysis;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
 import br.unb.cic.analysis.svfa.SVFAInterProcedural;
@@ -302,9 +302,9 @@ public class Main {
 
     private void runPDGSDGAnalysis(String classpath) {
         long start = System.currentTimeMillis();
-        PDGSDGAnalysis analysis = new PDGSDGInterProcedural(classpath, definition);
-        CDAnalysis cd = new CDInterProcedural(classpath, definition);
-        DFPAnalysis dfp = new DFPInterProcedural(classpath, definition);
+        PDGAnalysis analysis = new PDGIntraProcedural(classpath, definition);
+        CDAnalysis cd = new CDIntraProcedural(classpath, definition);
+        DFPAnalysis dfp = new DFPIntraProcedural(classpath, definition);
 
         analysis.buildPDG(cd, dfp);
         System.out.println(analysis.pdg().toDotModel());
@@ -332,7 +332,7 @@ public class Main {
 
     private void runDFPAnalysis(String classpath) {
         long start = System.currentTimeMillis();
-        DFPAnalysis analysis = new DFPInterProcedural(classpath, definition);
+        DFPAnalysis analysis = new DFPIntraProcedural(classpath, definition);
 
         analysis.buildDFP();
 
@@ -360,7 +360,7 @@ public class Main {
 
     private void runCDAnalysis(String classpath) {
         long start = System.currentTimeMillis();
-        CDAnalysis analysis = new CDInterProcedural(classpath, definition);
+        CDAnalysis analysis = new CDIntraProcedural(classpath, definition);
 
         analysis.buildCD();
         System.out.println(analysis.cd().toDotModel());

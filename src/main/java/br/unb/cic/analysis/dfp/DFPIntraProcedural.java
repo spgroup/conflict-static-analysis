@@ -3,12 +3,17 @@ package br.unb.cic.analysis.dfp;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 
-public class DFPInterProcedural extends DFPAnalysis {
-    public DFPInterProcedural(String classPath, AbstractMergeConflictDefinition definition) {
+public class DFPIntraProcedural extends DFPAnalysis {
+    public DFPIntraProcedural(String classPath, AbstractMergeConflictDefinition definition) {
         super(classPath, definition);
     }
     @Override
     public boolean interprocedural() {
+        return false;
+    }
+
+    @Override
+    public boolean intraprocedural() {
         return true;
     }
 

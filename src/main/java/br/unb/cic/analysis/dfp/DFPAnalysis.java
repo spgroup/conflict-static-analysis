@@ -112,6 +112,16 @@ public abstract class DFPAnalysis extends JDFP {
     }
 
     @Override
+    public boolean interprocedural() {
+        return false;
+    }
+
+    @Override
+    public boolean intraprocedural() {
+        return true;
+    }
+
+    @Override
     public final boolean isFieldSensitiveAnalysis() {
         return true;
     }
