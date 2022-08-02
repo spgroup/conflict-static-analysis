@@ -314,20 +314,8 @@ public class Main {
                 .stream()
                 .map(p -> p.toString())
                 .collect(Collectors.toList()));
-        long end = System.currentTimeMillis();
 
-        NumberFormat formatter = new DecimalFormat("#0.00000");
-
-        time = (end - start);
-        try {
-            FileWriter myWriter = new FileWriter("time.txt", true);
-            myWriter.write(formatter.format(time/1000d)+"\n");
-            System.out.println("Time:"+formatter.format(time/1000d));
-            myWriter.close();
-        } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-        }
+        saveTimeExecution(start);
     }
 
     private void runDFPAnalysis(String classpath) {
@@ -343,19 +331,7 @@ public class Main {
                 .stream()
                 .map(p -> p.toString())
                 .collect(Collectors.toList()));
-        long end = System.currentTimeMillis();
-
-        NumberFormat formatter = new DecimalFormat("#0.00000");
-        time = (end - start);
-        try {
-            FileWriter myWriter = new FileWriter("time.txt", true);
-            myWriter.write(formatter.format(time/1000d)+"\n");
-            System.out.println("Time:"+formatter.format(time/1000d));
-            myWriter.close();
-        } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-        }
+        saveTimeExecution(start);
     }
 
     private void runCDAnalysis(String classpath) {
@@ -370,14 +346,19 @@ public class Main {
                 .stream()
                 .map(p -> p.toString())
                 .collect(Collectors.toList()));
+        saveTimeExecution(start);
+    }
+
+    public void saveTimeExecution(long start){
         long end = System.currentTimeMillis();
 
         NumberFormat formatter = new DecimalFormat("#0.00000");
+
         time = (end - start);
         try {
             FileWriter myWriter = new FileWriter("time.txt", true);
             myWriter.write(formatter.format(time/1000d)+"\n");
-            System.out.println(formatter.format(time/1000d));
+            System.out.println("Time:"+formatter.format(time/1000d));
             myWriter.close();
         } catch (IOException e) {
             System.out.println("An error occurred.");
