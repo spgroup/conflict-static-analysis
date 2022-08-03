@@ -18,9 +18,13 @@ public class PDGIntraProcedural extends PDGAnalysis {
         return true;
     }
 
-
     @Override
     public boolean propagateObjectTaint() {
         return false;
+    }
+
+    @Override
+    public final boolean isFieldSensitiveAnalysis() {
+        return true;
     }
 }

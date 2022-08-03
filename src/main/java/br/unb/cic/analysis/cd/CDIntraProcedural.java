@@ -8,4 +8,18 @@ public class CDIntraProcedural extends CDAnalysis {
         super(classPath, definition);
     }
 
+    @Override
+    public boolean interprocedural() {
+        return false;
+    }
+
+    @Override
+    public boolean intraprocedural() {
+        return true;
+    }
+
+    @Override
+    public final boolean isFieldSensitiveAnalysis() {
+        return true;
+    }
 }

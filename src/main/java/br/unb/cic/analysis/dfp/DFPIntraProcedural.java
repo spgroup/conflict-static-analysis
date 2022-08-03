@@ -7,6 +7,7 @@ public class DFPIntraProcedural extends DFPAnalysis {
     public DFPIntraProcedural(String classPath, AbstractMergeConflictDefinition definition) {
         super(classPath, definition);
     }
+
     @Override
     public boolean interprocedural() {
         return false;
@@ -20,5 +21,10 @@ public class DFPIntraProcedural extends DFPAnalysis {
     @Override
     public boolean propagateObjectTaint() {
         return false;
+    }
+
+    @Override
+    public final boolean isFieldSensitiveAnalysis() {
+        return true;
     }
 }

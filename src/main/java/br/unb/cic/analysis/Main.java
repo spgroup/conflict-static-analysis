@@ -330,7 +330,7 @@ public class Main {
         System.out.println(analysis.svgToDotModel());
         System.out.println(analysis.findSourceSinkPaths());
         System.out.println(analysis.svg().findConflictingPaths());
-        conflicts.addAll(JavaConverters.asJavaCollection(analysis.svg().reportConflicts())
+        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
                 .stream()
                 .map(p -> p.toString())
                 .collect(Collectors.toList()));
@@ -347,7 +347,7 @@ public class Main {
         System.out.println(analysis.cd().toDotModel());
         System.out.println(analysis.findSourceSinkPaths());
         System.out.println(analysis.cd().findConflictingPaths());
-        conflicts.addAll(JavaConverters.asJavaCollection(analysis.cd().reportConflicts())
+        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsCD())
                 .stream()
                 .map(p -> p.toString())
                 .collect(Collectors.toList()));
@@ -378,7 +378,7 @@ public class Main {
 
         analysis.buildSparseValueFlowGraph();
 
-        conflicts.addAll(JavaConverters.asJavaCollection(analysis.svg().reportConflicts())
+        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
                 .stream()
                 .map(p -> p.toString())
                 .collect(Collectors.toList()));

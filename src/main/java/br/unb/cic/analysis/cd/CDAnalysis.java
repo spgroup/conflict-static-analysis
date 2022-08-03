@@ -60,7 +60,7 @@ public abstract class CDAnalysis extends JCD {
     @Override
     public final scala.collection.immutable.List<String> applicationClassPath() {
         String[] array = new String[100];
-        if (cp.contains(":/") || cp.contains(":\\")){ // Está com erro aqui!
+        if (cp.contains(":/") || cp.contains(":\\")){ // Windows class path error
             array[0] = cp.toString();
         }else{
             array = cp.split(":");
@@ -109,10 +109,5 @@ public abstract class CDAnalysis extends JCD {
 
     protected List<Statement> getSinkStatements() {
         return definition.getSinkStatements();
-    }
-
-    @Override
-    public final boolean isFieldSensitiveAnalysis() {
-        return true;
     }
 }

@@ -1,7 +1,6 @@
 package br.unb.cic.analysis.pdg;
 
 import br.ufpe.cin.soot.analysis.jimple.JPDG;
-import br.ufpe.cin.soot.analysis.jimple.JSVFA;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Statement;
 import br.ufpe.cin.soot.graph.*;
@@ -62,7 +61,7 @@ public abstract class PDGAnalysis extends JPDG {
     @Override
     public final scala.collection.immutable.List<String> applicationClassPath() {
         String[] array = new String[100];
-        if (cp.contains(":/") || cp.contains(":\\")){ // Está com erro aqui!
+        if (cp.contains(":/") || cp.contains(":\\")){ // Windows class path error
             array[0] = cp.toString();
         }else{
             array = cp.split(":");
@@ -113,8 +112,4 @@ public abstract class PDGAnalysis extends JPDG {
         return definition.getSinkStatements();
     }
 
-    @Override
-    public final boolean isFieldSensitiveAnalysis() {
-        return true;
-    }
 }

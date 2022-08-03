@@ -60,7 +60,7 @@ public abstract class DFPAnalysis extends JDFP {
     @Override
     public final scala.collection.immutable.List<String> applicationClassPath() {
         String[] array = new String[100];
-        if (cp.contains(":/") || cp.contains(":\\")){ // Está com erro aqui!
+        if (cp.contains(":/") || cp.contains(":\\")){ // Windows class path error
             array[0] = cp.toString();
         }else{
             array = cp.split(":");
@@ -111,18 +111,4 @@ public abstract class DFPAnalysis extends JDFP {
         return definition.getSinkStatements();
     }
 
-    @Override
-    public boolean interprocedural() {
-        return false;
-    }
-
-    @Override
-    public boolean intraprocedural() {
-        return true;
-    }
-
-    @Override
-    public final boolean isFieldSensitiveAnalysis() {
-        return true;
-    }
 }
