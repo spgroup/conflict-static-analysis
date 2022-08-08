@@ -445,34 +445,6 @@ public class Main {
         };
     }
 
-    private void loadDefinitionWithOmitExceptingUnitEdges(String filePath, int omitExceptingUnitEdges) throws Exception {
-        MergeConflictReader reader = new DefaultReader(filePath);
-        List<ClassChangeDefinition> changes = reader.read();
-        Map<String, List<Integer>> sourceDefs = new HashMap<>();
-        Map<String, List<Integer>> sinkDefs = new HashMap<>();
-        targetClasses = new HashSet<>();
-        for (ClassChangeDefinition change : changes) {
-            if (change.getType().equals(Statement.Type.SOURCE)) {
-                addChange(sourceDefs, change);
-            } else {
-                addChange(sinkDefs, change);
-            }
-            targetClasses.add(change.getClassName());
-        }
-        definition = new AbstractMergeConflictDefinition(omitExceptingUnitEdges) {
-            @Override
-            protected Map<String, List<Integer>> sourceDefinitions() {
-                return sourceDefs;
-            }
-
-            @Override
-            protected Map<String, List<Integer>> sinkDefinitions() {
-                return sinkDefs;
-            }
-        };
-    }
-
-
     private void addChange(Map<String, List<Integer>> map, ClassChangeDefinition change) {
         if (map.containsKey(change.getClassName())) {
             map.get(change.getClassName()).add(change.getLineNumber());
