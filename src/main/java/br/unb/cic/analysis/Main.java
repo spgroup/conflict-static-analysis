@@ -183,29 +183,20 @@ public class Main {
             case "overriding-interprocedural":
                 runInterproceduralOverrideAssignmentAnalysis(classpath);
                 break;
-            case "pdg-sdg":
-                omitExceptingUnitEdges();
-                runPDGAnalysis(classpath);
-                break;
             case "dfp":
-                omitExceptingUnitEdges();
                 runDFPAnalysis(classpath);
+                break;
+            case "pdg-sdg":
+                runPDGAnalysis(classpath, true);
                 break;
             case "cd":
-                omitExceptingUnitEdges();
-                runCDAnalysis(classpath);
+                runCDAnalysis(classpath, true);
                 break;
             case "pdg-sdg-e":
-                notOmitExceptingUnitEdges();
-                runPDGAnalysis(classpath);
-                break;
-            case "dfp-e":
-                notOmitExceptingUnitEdges();
-                runDFPAnalysis(classpath);
+                runPDGAnalysis(classpath, false);
                 break;
             case "cd-e":
-                notOmitExceptingUnitEdges();
-                runCDAnalysis(classpath);
+                runCDAnalysis(classpath, false);
                 break;
             case "pessimistic-dataflow":
                 runPessimisticDataFlowAnalysis(classpath);
@@ -213,14 +204,6 @@ public class Main {
             default:
                 runDataFlowAnalysis(classpath, mode);
         }
-    }
-
-    public void omitExceptingUnitEdges(){
-        definition.setOmitExceptingUnitEdges(1);
-    }
-
-    public void notOmitExceptingUnitEdges(){
-        definition.setOmitExceptingUnitEdges(2);
     }
 
     private void runPessimisticDataFlowAnalysis(String classpath) {
@@ -323,10 +306,11 @@ public class Main {
         conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
     }
 
-    private void runPDGAnalysis(String classpath) {
+    private void runPDGAnalysis(String classpath, Boolean omitExceptingUnitEdges) {
         long start = System.currentTimeMillis();
         PDGAnalysisSemanticConflicts analysis = new PDGIntraProcedural(classpath, definition);
         CDAnalysisSemanticConflicts cd = new CDIntraProcedural(classpath, definition);
+        cd.setOmitExceptingUnitEdges(omitExceptingUnitEdges);
         DFPAnalysisSemanticConflicts dfp = new DFPIntraProcedural(classpath, definition);
 
         analysis.buildPDG(cd, dfp);
@@ -359,9 +343,10 @@ public class Main {
                 .collect(Collectors.toList()));
     }
 
-    private void runCDAnalysis(String classpath) {
+    private void runCDAnalysis(String classpath, Boolean omitExceptingUnitEdges) {
         long start = System.currentTimeMillis();
         CDAnalysisSemanticConflicts analysis = new CDIntraProcedural(classpath, definition);
+        analysis.setOmitExceptingUnitEdges(omitExceptingUnitEdges);
 
         analysis.buildCD();
 

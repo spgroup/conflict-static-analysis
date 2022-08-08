@@ -32,7 +32,7 @@ public class PDGTest {
     }
 
     @Test
-    public void testSVFAnalysisIntraProceduralSameMethod() {
+    public void testPDGAnalysisIntraProcedural() {
         PDGAnalysisSemanticConflicts analysis = configureIntraTest(CLASS_NAME, new int[]{13, 15}, new int[]{5, 8, 18});
         CDAnalysisSemanticConflicts cd = configureIntraTestCD(CLASS_NAME, new int[]{13, 15}, new int[]{5, 8, 18});
         DFPAnalysisSemanticConflicts dfp = configureIntraTestDFP(CLASS_NAME, new int[]{13, 15}, new int[]{5, 8, 18});
