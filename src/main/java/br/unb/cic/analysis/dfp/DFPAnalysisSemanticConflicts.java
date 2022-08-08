@@ -1,6 +1,6 @@
-package br.unb.cic.analysis.cd;
+package br.unb.cic.analysis.dfp;
 
-import br.ufpe.cin.soot.analysis.jimple.JCD;
+import br.ufpe.cin.soot.analysis.jimple.JDFP;
 import br.ufpe.cin.soot.graph.*;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Statement;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * An analysis wrapper around the Sparse value
  * flow analysis implementation.
  */
-public abstract class CDAnalysis extends JCD {
+public abstract class DFPAnalysisSemanticConflicts extends JDFP {
 
     private String cp;
 
@@ -26,7 +26,7 @@ public abstract class CDAnalysis extends JCD {
      * @param classPath a classpath to the software under analysis
      * @param definition a definition with the sources and sinks unities
      */
-    public CDAnalysis(String classPath, AbstractMergeConflictDefinition definition) {
+    public DFPAnalysisSemanticConflicts(String classPath, AbstractMergeConflictDefinition definition) {
         this.cp = classPath;
         this.definition = definition;
     }
@@ -51,7 +51,7 @@ public abstract class CDAnalysis extends JCD {
         Set<List<LambdaNode>> paths = new HashSet<>();
 
         JavaConverters
-                .asJavaCollection(cd().findConflictingPaths())
+                .asJavaCollection(svg().findConflictingPaths())
                 .forEach(p -> paths.add(new ArrayList(JavaConverters.asJavaCollection(p))));
 
        return paths;
@@ -110,4 +110,5 @@ public abstract class CDAnalysis extends JCD {
     protected List<Statement> getSinkStatements() {
         return definition.getSinkStatements();
     }
+
 }

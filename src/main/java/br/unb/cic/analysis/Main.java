@@ -1,17 +1,17 @@
 package br.unb.cic.analysis;
 
-import br.unb.cic.analysis.cd.CDAnalysis;
+import br.unb.cic.analysis.cd.CDAnalysisSemanticConflicts;
 import br.unb.cic.analysis.cd.CDIntraProcedural;
 import br.unb.cic.analysis.df.*;
 import br.unb.cic.analysis.df.pessimistic.PessimisticTaintedAnalysis;
-import br.unb.cic.analysis.dfp.DFPAnalysis;
+import br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts;
 import br.unb.cic.analysis.dfp.DFPIntraProcedural;
 import br.unb.cic.analysis.io.DefaultReader;
 import br.unb.cic.analysis.io.MergeConflictReader;
 import br.unb.cic.analysis.ioa.InterproceduralOverrideAssignment;
 import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
-import br.unb.cic.analysis.pdg.PDGAnalysis;
+import br.unb.cic.analysis.pdg.PDGAnalysisSemanticConflicts;
 import br.unb.cic.analysis.pdg.PDGIntraProcedural;
 import br.unb.cic.analysis.reachability.ReachabilityAnalysis;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
@@ -184,12 +184,27 @@ public class Main {
                 runInterproceduralOverrideAssignmentAnalysis(classpath);
                 break;
             case "pdg-sdg":
+                omitExceptingUnitEdges();
                 runPDGAnalysis(classpath);
                 break;
             case "dfp":
+                omitExceptingUnitEdges();
                 runDFPAnalysis(classpath);
                 break;
             case "cd":
+                omitExceptingUnitEdges();
+                runCDAnalysis(classpath);
+                break;
+            case "pdg-sdg-e":
+                notOmitExceptingUnitEdges();
+                runPDGAnalysis(classpath);
+                break;
+            case "dfp-e":
+                notOmitExceptingUnitEdges();
+                runDFPAnalysis(classpath);
+                break;
+            case "cd-e":
+                notOmitExceptingUnitEdges();
                 runCDAnalysis(classpath);
                 break;
             case "pessimistic-dataflow":
@@ -198,6 +213,14 @@ public class Main {
             default:
                 runDataFlowAnalysis(classpath, mode);
         }
+    }
+
+    public void omitExceptingUnitEdges(){
+        definition.setOmitExceptingUnitEdges(1);
+    }
+
+    public void notOmitExceptingUnitEdges(){
+        definition.setOmitExceptingUnitEdges(2);
     }
 
     private void runPessimisticDataFlowAnalysis(String classpath) {
@@ -302,9 +325,9 @@ public class Main {
 
     private void runPDGAnalysis(String classpath) {
         long start = System.currentTimeMillis();
-        PDGAnalysis analysis = new PDGIntraProcedural(classpath, definition);
-        CDAnalysis cd = new CDIntraProcedural(classpath, definition);
-        DFPAnalysis dfp = new DFPIntraProcedural(classpath, definition);
+        PDGAnalysisSemanticConflicts analysis = new PDGIntraProcedural(classpath, definition);
+        CDAnalysisSemanticConflicts cd = new CDIntraProcedural(classpath, definition);
+        DFPAnalysisSemanticConflicts dfp = new DFPIntraProcedural(classpath, definition);
 
         analysis.buildPDG(cd, dfp);
 
@@ -321,7 +344,7 @@ public class Main {
 
     private void runDFPAnalysis(String classpath) {
         long start = System.currentTimeMillis();
-        DFPAnalysis analysis = new DFPIntraProcedural(classpath, definition);
+        DFPAnalysisSemanticConflicts analysis = new DFPIntraProcedural(classpath, definition);
 
         analysis.buildDFP();
 
@@ -338,7 +361,7 @@ public class Main {
 
     private void runCDAnalysis(String classpath) {
         long start = System.currentTimeMillis();
-        CDAnalysis analysis = new CDIntraProcedural(classpath, definition);
+        CDAnalysisSemanticConflicts analysis = new CDIntraProcedural(classpath, definition);
 
         analysis.buildCD();
 
@@ -421,6 +444,34 @@ public class Main {
             }
         };
     }
+
+    private void loadDefinitionWithOmitExceptingUnitEdges(String filePath, int omitExceptingUnitEdges) throws Exception {
+        MergeConflictReader reader = new DefaultReader(filePath);
+        List<ClassChangeDefinition> changes = reader.read();
+        Map<String, List<Integer>> sourceDefs = new HashMap<>();
+        Map<String, List<Integer>> sinkDefs = new HashMap<>();
+        targetClasses = new HashSet<>();
+        for (ClassChangeDefinition change : changes) {
+            if (change.getType().equals(Statement.Type.SOURCE)) {
+                addChange(sourceDefs, change);
+            } else {
+                addChange(sinkDefs, change);
+            }
+            targetClasses.add(change.getClassName());
+        }
+        definition = new AbstractMergeConflictDefinition(omitExceptingUnitEdges) {
+            @Override
+            protected Map<String, List<Integer>> sourceDefinitions() {
+                return sourceDefs;
+            }
+
+            @Override
+            protected Map<String, List<Integer>> sinkDefinitions() {
+                return sinkDefs;
+            }
+        };
+    }
+
 
     private void addChange(Map<String, List<Integer>> map, ClassChangeDefinition change) {
         if (map.containsKey(change.getClassName())) {

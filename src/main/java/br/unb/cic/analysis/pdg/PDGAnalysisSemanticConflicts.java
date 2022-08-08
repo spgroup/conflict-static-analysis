@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  * An analysis wrapper around the Sparse value
  * flow analysis implementation.
  */
-public abstract class PDGAnalysis extends JPDG {
+public abstract class PDGAnalysisSemanticConflicts extends JPDG {
 
     private String cp;
 
@@ -27,7 +27,7 @@ public abstract class PDGAnalysis extends JPDG {
      * @param classPath a classpath to the software under analysis
      * @param definition a definition with the sources and sinks unities
      */
-    public PDGAnalysis(String classPath, AbstractMergeConflictDefinition definition) {
+    public PDGAnalysisSemanticConflicts(String classPath, AbstractMergeConflictDefinition definition) {
         this.cp = classPath;
         this.definition = definition;
     }

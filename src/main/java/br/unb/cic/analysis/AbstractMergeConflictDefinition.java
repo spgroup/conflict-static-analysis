@@ -235,6 +235,10 @@ public abstract class AbstractMergeConflictDefinition {
         this.recursive = value;
     }
 
+    public void setOmitExceptingUnitEdges(int value) {
+        this.omitExceptingUnitEdges = value;
+    }
+
     public boolean isSourceStatement(Unit u) {
         return sourceStatements.stream().anyMatch(s -> s.getUnit().equals(u));
     }
