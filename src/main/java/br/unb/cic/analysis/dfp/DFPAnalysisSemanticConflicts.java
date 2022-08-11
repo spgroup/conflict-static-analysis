@@ -1,9 +1,9 @@
-package br.unb.cic.analysis.svfa;
+package br.unb.cic.analysis.dfp;
 
+import br.ufpe.cin.soot.analysis.jimple.JDFP;
+import br.ufpe.cin.soot.graph.*;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Statement;
-import br.ufpe.cin.soot.graph.*;
-import br.ufpe.cin.soot.analysis.jimple.JSVFA;
 import scala.collection.JavaConverters;
 import soot.SootMethod;
 import soot.Unit;
@@ -15,18 +15,18 @@ import java.util.stream.Collectors;
  * An analysis wrapper around the Sparse value
  * flow analysis implementation.
  */
-public abstract class SVFAAnalysis extends JSVFA  {
+public abstract class DFPAnalysisSemanticConflicts extends JDFP {
 
     private String cp;
 
     private AbstractMergeConflictDefinition definition;
 
     /**
-     * SVFAAnalysis constructor
+     * PDGAAnalysis constructor
      * @param classPath a classpath to the software under analysis
      * @param definition a definition with the sources and sinks unities
      */
-    public SVFAAnalysis(String classPath, AbstractMergeConflictDefinition definition) {
+    public DFPAnalysisSemanticConflicts(String classPath, AbstractMergeConflictDefinition definition) {
         this.cp = classPath;
         this.definition = definition;
     }
@@ -47,8 +47,8 @@ public abstract class SVFAAnalysis extends JSVFA  {
      * Computes the source-sink paths
      * @return a set with a list of nodes that together builds a source-sink path.
      */
-    public java.util.Set<java.util.List<LambdaNode>> findSourceSinkPaths() {
-        Set<java.util.List<LambdaNode>> paths = new HashSet<>();
+    public Set<List<LambdaNode>> findSourceSinkPaths() {
+        Set<List<LambdaNode>> paths = new HashSet<>();
 
         JavaConverters
                 .asJavaCollection(svg().findConflictingPaths())
@@ -59,7 +59,12 @@ public abstract class SVFAAnalysis extends JSVFA  {
 
     @Override
     public final scala.collection.immutable.List<String> applicationClassPath() {
-        String[] array = cp.split(":");
+        String[] array = new String[100];
+        if (cp.contains(":/") || cp.contains(":\\")){ // Windows class path error
+            array[0] = cp.toString();
+        }else{
+            array = cp.split(":");
+        }
         return JavaConverters.asScalaBuffer(Arrays.asList(array)).toList();
     }
 
@@ -67,11 +72,10 @@ public abstract class SVFAAnalysis extends JSVFA  {
     public final scala.collection.immutable.List<SootMethod> getEntryPoints() {
         definition.loadSourceStatements();
         definition.loadSinkStatements();
-        return JavaConverters.asScalaBuffer(
-            new ArrayList<>(
-                definition.getEntryMethods()
-            )        
-        ).toList();
+        return JavaConverters.asScalaBuffer(getSourceStatements()
+                .stream()
+                .map(Statement::getSootMethod)
+                .collect(Collectors.toList())).toList();
     }
 
     @Override
@@ -107,8 +111,4 @@ public abstract class SVFAAnalysis extends JSVFA  {
         return definition.getSinkStatements();
     }
 
-    @Override
-    public final boolean isFieldSensitiveAnalysis() {
-        return true;
-    }
 }

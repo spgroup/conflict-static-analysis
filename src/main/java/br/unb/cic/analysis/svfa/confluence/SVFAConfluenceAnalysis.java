@@ -3,7 +3,7 @@ package br.unb.cic.analysis.svfa.confluence;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
-import br.unb.cic.soot.graph.LambdaNode;
+import br.ufpe.cin.soot.graph.LambdaNode;
 import soot.Unit;
 
 import java.util.*;
@@ -112,6 +112,11 @@ public class SVFAConfluenceAnalysis {
             public boolean interprocedural() {
                 return interprocedural;
             }
+
+            @Override
+            public boolean propagateObjectTaint() {
+                return true;
+            }
         };
     }
 
@@ -146,6 +151,11 @@ public class SVFAConfluenceAnalysis {
             @Override
             public boolean interprocedural() {
                 return interprocedural;
+            }
+
+            @Override
+            public boolean propagateObjectTaint() {
+                return true;
             }
         };
     }

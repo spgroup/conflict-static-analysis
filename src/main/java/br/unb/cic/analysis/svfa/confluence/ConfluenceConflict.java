@@ -1,6 +1,6 @@
 package br.unb.cic.analysis.svfa.confluence;
 
-import br.unb.cic.soot.graph.LambdaNode;
+import br.ufpe.cin.soot.graph.LambdaNode;
 import java.util.List;
 import java.util.stream.Collectors;
 

@@ -11,4 +11,9 @@ public class SVFAIntraProcedural extends SVFAAnalysis {
     public boolean interprocedural() {
         return false;
     }
+
+    @Override
+    public boolean propagateObjectTaint() {
+        return false;
+    }
 }
