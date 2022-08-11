@@ -43,9 +43,7 @@ public class Main {
             CommandLineParser parser = new DefaultParser();
             m.cmd = parser.parse(m.options, args);
             CommandLine cmd = m.cmd;
-
             String mode = "dataflow"; 
-            
             if (cmd.hasOption("mode")) {
                 mode = cmd.getOptionValue("mode");
             }
@@ -58,16 +56,14 @@ public class Main {
                 m.loadDefinition(cmd.getOptionValue("csv"));
             }
             m.runAnalysis(mode, m.parseClassPath(cmd.getOptionValue("cp")));
-            
+
             m.exportResults();
-            
-        }
-        catch(ParseException e) {
+
+        } catch (ParseException e) {
             System.out.println("Error: " + e.getMessage());
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp( "java Main", m.options );
-        }
-        catch(Exception e) {
+            formatter.printHelp("java Main", m.options);
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -75,9 +71,9 @@ public class Main {
     private String parseClassPath(String cp) {
         File f = new File(cp);
         String res = cp;
-        if(f.exists() && f.isDirectory()) {
-            for(File file : f.listFiles()) {
-                if(file.getName().endsWith(".jar")) {
+        if (f.exists() && f.isDirectory()) {
+            for (File file : f.listFiles()) {
+                if (file.getName().endsWith(".jar")) {
                     res += ":";
                     res += file.getAbsolutePath();
                 }
@@ -87,31 +83,30 @@ public class Main {
     }
 
     private void exportResults() throws Exception {
-    	System.out.println(" Analysis results");
+        System.out.println(" Analysis results");
         System.out.println("----------------------------");
-        
-        if(conflicts.size() == 0) {
-        	System.out.println(" No conflicts detected");
-        	System.out.println("----------------------------");
-        	return;
+
+        if (conflicts.size() == 0) {
+            System.out.println(" No conflicts detected");
+            System.out.println("----------------------------");
+            return;
         }
-    
+
         System.out.println(" Number of conflicts: " + conflicts.size());
-        final String out = "out.txt"; 
+        final String out = "out.txt";
         final FileWriter fw = new FileWriter(out);
         conflicts.forEach(c -> {
-    		try {
+            try {
                 fw.write(c + "\n\n");
+            } catch (Exception e) {
+                System.out.println("error exporting the results " + e.getMessage());
             }
-    		catch(Exception e) {
-    			System.out.println("error exporting the results " + e.getMessage());
-    		}
-    	});
+        });
         fw.close();
         System.out.println(" Results exported to " + out);
         System.out.println("----------------------------");
     }
-    
+
     private void createOptions() {
         options = new Options();
         Option classPathOption = Option.builder("cp").argName("class-path")
@@ -136,9 +131,15 @@ public class Main {
                 .hasArg().desc("the commit merge to analysis")
                 .build();
 
-        Option verbose = Option.builder("verbose").argName("verbose").desc("run in the verbose mode").build();
-        Option recursive = Option.builder("recursive").argName("recursive")
+        Option verboseOption = Option.builder("verbose").argName("verbose").hasArg().desc("run in the verbose mode").build();
+
+        Option recursiveOption = Option.builder("recursive").argName("recursive").hasArg()
                 .desc("run using the recursive strategy for mapping sources and sinks")
+                .build();
+
+        Option oaDepthLimitOption = Option.builder("oaDepthLimit").argName("oaDepthLimit").hasArg()
+                .desc("sets the depth limit on accessing methods when performing Overriding Assignment " +
+                        "Interprocedural analysis")
                 .build();
 
         options.addOption(classPathOption);
@@ -146,13 +147,13 @@ public class Main {
         options.addOption(analysisOption);
         options.addOption(repoOption);
         options.addOption(commitOption);
-        options.addOption(verbose);
-        options.addOption(recursive);
+        options.addOption(verboseOption);
+        options.addOption(recursiveOption);
+        options.addOption(oaDepthLimitOption);
     }
 
-    
     private void runAnalysis(String mode, String classpath) {
-    	switch(mode) {
+        switch (mode) {
             case "svfa-interprocedural":
                 runSparseValueFlowAnalysis(classpath, true);
                 break;
@@ -178,7 +179,7 @@ public class Main {
                 runDataFlowAnalysis(classpath, mode);
         }
     }
-    
+
     private void runPessimisticDataFlowAnalysis(String classpath) {
         PackManager.v().getPack("jtp").add(
                 new Transform("jtp.analysis", new BodyTransformer() {
@@ -202,17 +203,21 @@ public class Main {
                 .execute();
 
     }
-    
 
     private void runDataFlowAnalysis(String classpath, String mode) {
         PackManager.v().getPack("jtp").add(
                 new Transform("jtp.analysis", new BodyTransformer() {
                     @Override
                     protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-                        switch(mode) {
-                            case "dataflow"   : analysis = new ReachDefinitionAnalysis(body, definition); break;
-                            case "tainted"    : analysis = new TaintedAnalysis(body, definition);
-                            case "confluence" : analysis = new ConfluentAnalysis(body, definition); break;
+                        switch (mode) {
+                            case "dataflow":
+                                analysis = new ReachDefinitionAnalysis(body, definition);
+                                break;
+                            case "tainted":
+                                analysis = new TaintedAnalysis(body, definition);
+                            case "confluence":
+                                analysis = new ConfluentAnalysis(body, definition);
+                                break;
                             case "confluence-tainted":
                                 analysis = new ConfluentTaintedAnalysis(body, definition);
                                 break;
@@ -237,8 +242,10 @@ public class Main {
     }
 
     private void runInterproceduralOverrideAssignmentAnalysis(String classpath) {
+        int depthLimit = Integer.parseInt(cmd.getOptionValue("oaDepthLimit", "10"));
+
         InterproceduralOverrideAssignment interproceduralOverrideAssignment =
-                new InterproceduralOverrideAssignment(definition);
+                new InterproceduralOverrideAssignment(definition, depthLimit);
 
         List<String> classes = Collections.singletonList(classpath);
         SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classes);
@@ -246,7 +253,7 @@ public class Main {
         interproceduralOverrideAssignment.configureEntryPoints();
 
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", interproceduralOverrideAssignment));
-        SootWrapper.configurePackagesWithCallGraph().forEach(p -> PackManager.v().getPack(p).apply());
+        SootWrapper.applyPackages();
 
         conflicts.addAll(interproceduralOverrideAssignment.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
     }
@@ -291,7 +298,6 @@ public class Main {
     private void runSparseValueFlowConfluenceAnalysis(String classpath, boolean interprocedural) {
         definition.setRecursiveMode(cmd.hasOption("recursive"));
         SVFAConfluenceAnalysis analysis = new SVFAConfluenceAnalysis(classpath, this.definition,  interprocedural);
-        
         analysis.execute();
         conflicts.addAll(analysis.getConfluentConflicts()
                 .stream()
@@ -305,11 +311,10 @@ public class Main {
         Map<String, List<Integer>> sourceDefs = new HashMap<>();
         Map<String, List<Integer>> sinkDefs = new HashMap<>();
         targetClasses = new HashSet<>();
-        for(ClassChangeDefinition change : changes) {
-            if(change.getType().equals(Statement.Type.SOURCE)) {
+        for (ClassChangeDefinition change : changes) {
+            if (change.getType().equals(Statement.Type.SOURCE)) {
                 addChange(sourceDefs, change);
-            }
-            else {
+            } else {
                 addChange(sinkDefs, change);
             }
             targetClasses.add(change.getClassName());
@@ -328,10 +333,9 @@ public class Main {
     }
 
     private void addChange(Map<String, List<Integer>> map, ClassChangeDefinition change) {
-        if(map.containsKey(change.getClassName())) {
+        if (map.containsKey(change.getClassName())) {
             map.get(change.getClassName()).add(change.getLineNumber());
-        }
-        else {
+        } else {
             List<Integer> lines = new ArrayList<>();
             lines.add(change.getLineNumber());
             map.put(change.getClassName(), lines);
@@ -367,17 +371,13 @@ public class Main {
     }
 
     private void addChangeFromDiffAnalysis(Map<String, List<Integer>> map, Entry<String, Integer> change) {
-        if(map.containsKey(change.getKey())) {
+        if (map.containsKey(change.getKey())) {
             map.get(change.getKey()).add(change.getValue());
-        }
-        else {
+        } else {
             List<Integer> lines = new ArrayList<>();
             lines.add(change.getValue());
             map.put(change.getKey(), lines);
         }
     }
-
-
-
 
 }

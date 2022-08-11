@@ -107,13 +107,20 @@ Remember, you need to compile the project under analysis. This parameters is req
 The input csv files with the list of changes. You must provider either this parameter or the ```-commit``` parameter.
 
 #### -commit
+
 the merge commit hash. See the comment above regarding the -csv parameter.
 
 #### -mode
+
 Analysis mode: dataflow, reachability, svfa or tainted.
 
 #### -repo
+
 The folder path or URL of the git project under analysis.
+
+#### -oaDepthLimit
+
+Sets the depth limit on accessing methods when performing Overriding Assignment Interprocedural analysis. Default = 10.
 
 Usage example of a Java project, with a .csv file.
 
