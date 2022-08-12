@@ -1,12 +1,18 @@
 package br.unb.cic.analysis;
 
+import br.unb.cic.analysis.cd.CDAnalysisSemanticConflicts;
+import br.unb.cic.analysis.cd.CDIntraProcedural;
 import br.unb.cic.analysis.df.*;
 import br.unb.cic.analysis.df.pessimistic.PessimisticTaintedAnalysis;
+import br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts;
+import br.unb.cic.analysis.dfp.DFPIntraProcedural;
 import br.unb.cic.analysis.io.DefaultReader;
 import br.unb.cic.analysis.io.MergeConflictReader;
 import br.unb.cic.analysis.ioa.InterproceduralOverrideAssignment;
 import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
+import br.unb.cic.analysis.pdg.PDGAnalysisSemanticConflicts;
+import br.unb.cic.analysis.pdg.PDGIntraProcedural;
 import br.unb.cic.analysis.reachability.ReachabilityAnalysis;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
 import br.unb.cic.analysis.svfa.SVFAInterProcedural;
@@ -22,6 +28,9 @@ import soot.Transform;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -34,6 +43,7 @@ public class Main {
     private Set<String> targetClasses;
     private List<String> conflicts = new ArrayList<>();
     private ReachDefinitionAnalysis analysis;
+    public static long time;
 
     public static void main(String args[]) {
         Main m = new Main();
@@ -172,6 +182,21 @@ public class Main {
             case "overriding-interprocedural":
                 runInterproceduralOverrideAssignmentAnalysis(classpath);
                 break;
+            case "dfp":
+                runDFPAnalysis(classpath);
+                break;
+            case "pdg-sdg":
+                runPDGAnalysis(classpath, true);
+                break;
+            case "cd":
+                runCDAnalysis(classpath, true);
+                break;
+            case "pdg-sdg-e":
+                runPDGAnalysis(classpath, false);
+                break;
+            case "cd-e":
+                runCDAnalysis(classpath, false);
+                break;
             case "pessimistic-dataflow":
                 runPessimisticDataFlowAnalysis(classpath);
                 break;
@@ -242,7 +267,7 @@ public class Main {
     }
 
     private void runInterproceduralOverrideAssignmentAnalysis(String classpath) {
-        int depthLimit = Integer.parseInt(cmd.getOptionValue("oaDepthLimit", "10"));
+        int depthLimit = Integer.parseInt(cmd.getOptionValue("oaDepthLimit", "5"));
 
         InterproceduralOverrideAssignment interproceduralOverrideAssignment =
                 new InterproceduralOverrideAssignment(definition, depthLimit);
@@ -280,6 +305,78 @@ public class Main {
         conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
     }
 
+    private void runPDGAnalysis(String classpath, Boolean omitExceptingUnitEdges) {
+        long start = System.currentTimeMillis();
+        PDGAnalysisSemanticConflicts analysis = new PDGIntraProcedural(classpath, definition);
+        CDAnalysisSemanticConflicts cd = new CDIntraProcedural(classpath, definition);
+        cd.setOmitExceptingUnitEdges(omitExceptingUnitEdges);
+        DFPAnalysisSemanticConflicts dfp = new DFPIntraProcedural(classpath, definition);
+
+        analysis.buildPDG(cd, dfp);
+
+        saveTimeExecution(start);
+
+        System.out.println(analysis.pdg().toDotModel());
+        System.out.println(analysis.findSourceSinkPaths());
+        System.out.println(analysis.pdg().findConflictingPaths());
+        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsPDG())
+                .stream()
+                .map(p -> p.toString())
+                .collect(Collectors.toList()));
+    }
+
+    private void runDFPAnalysis(String classpath) {
+        long start = System.currentTimeMillis();
+        DFPAnalysisSemanticConflicts analysis = new DFPIntraProcedural(classpath, definition);
+
+        analysis.buildDFP();
+
+        saveTimeExecution(start);
+
+        System.out.println(analysis.svgToDotModel());
+        System.out.println(analysis.findSourceSinkPaths());
+        System.out.println(analysis.svg().findConflictingPaths());
+        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
+                .stream()
+                .map(p -> p.toString())
+                .collect(Collectors.toList()));
+    }
+
+    private void runCDAnalysis(String classpath, Boolean omitExceptingUnitEdges) {
+        long start = System.currentTimeMillis();
+        CDAnalysisSemanticConflicts analysis = new CDIntraProcedural(classpath, definition);
+        analysis.setOmitExceptingUnitEdges(omitExceptingUnitEdges);
+
+        analysis.buildCD();
+
+        saveTimeExecution(start);
+
+        System.out.println(analysis.cd().toDotModel());
+        System.out.println(analysis.findSourceSinkPaths());
+        System.out.println(analysis.cd().findConflictingPaths());
+        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsCD())
+                .stream()
+                .map(p -> p.toString())
+                .collect(Collectors.toList()));
+    }
+
+    public void saveTimeExecution(long start){
+        long end = System.currentTimeMillis();
+
+        NumberFormat formatter = new DecimalFormat("#0.00000");
+
+        time = (end - start);
+        try {
+            FileWriter myWriter = new FileWriter("time.txt", true);
+            myWriter.write(formatter.format(time/1000d)+"\n");
+            System.out.println("Time:"+formatter.format(time/1000d));
+            myWriter.close();
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+    }
+
     private void runSparseValueFlowAnalysis(String classpath, boolean interprocedural) {
         definition.setRecursiveMode(cmd.hasOption("recursive"));
         
@@ -289,7 +386,7 @@ public class Main {
 
         analysis.buildSparseValueFlowGraph();
 
-        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflicts())
+        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
                 .stream()
                 .map(p -> p.toString())
                 .collect(Collectors.toList()));

@@ -1,8 +1,9 @@
 package br.unb.cic.analysis.svfa;
 
+
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
-import br.unb.cic.soot.graph.Graph;
-import br.unb.cic.soot.graph.LambdaNode;
+import br.ufpe.cin.soot.graph.Graph;
+import br.ufpe.cin.soot.graph.LambdaNode;
 import br.unc.cic.analysis.test.DefinitionFactory;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -74,7 +75,7 @@ public class SVFATest {
         analysis.buildSparseValueFlowGraph();
         Graph g = analysis.svg();
         Assert.assertEquals(5, g.nodes().size());
-        Assert.assertEquals(1, analysis.reportConflicts().size());
+        Assert.assertEquals(1, analysis.svg().reportConflicts().size());
         Assert.assertEquals(1, analysis.findSourceSinkPaths().size());
     }
 
@@ -85,21 +86,21 @@ public class SVFATest {
         for (List<LambdaNode> paths : analysis.findSourceSinkPaths()) {
             System.out.println(String.join("-> ", paths.stream().map(n -> n.show()).collect(Collectors.toList())));
         }
-        Assert.assertEquals(1, analysis.reportConflicts().size());
+        Assert.assertEquals(1, analysis.svg().reportConflicts().size());
     }
 
     @Test
     public void testSVFAnalysisIntraProceduralSameMethod() {
         SVFAAnalysis analysis = configureIntraTest(CLASS_NAME_INTRAPROCEDURAL, new int[]{6}, new int[]{11});
         analysis.buildSparseValueFlowGraph();
-        Assert.assertEquals(1, analysis.reportConflicts().size());
+        Assert.assertEquals(1, analysis.svg().reportConflicts().size());
     }
 
     @Test
     public void testSVFAnalysisIntraProceduralDifferentMethod() {
         SVFAAnalysis analysis = configureIntraTest(CLASS_NAME_INTERPROCEDURAL, new int[]{9}, new int[]{19});
         analysis.buildSparseValueFlowGraph();
-        Assert.assertEquals(0, analysis.reportConflicts().size());
+        Assert.assertEquals(0, analysis.svg().reportConflicts().size());
     }
 
     @Test
@@ -107,21 +108,21 @@ public class SVFATest {
         SVFAAnalysis analysis = configureInterProceduralRecursiveDefinition01();
 
         analysis.buildSparseValueFlowGraph();
-        Assert.assertEquals(2, analysis.reportConflicts().size());
+        Assert.assertEquals(2, analysis.svg().reportConflicts().size());
     }
 
     @Test
     public void testSVFAnalysisInterProceduralRecursiveDefinition02() {
         SVFAAnalysis analysis = configureInterProceduralRecursiveDefinition02();
         analysis.buildSparseValueFlowGraph();
-        Assert.assertEquals(2, analysis.reportConflicts().size());
+        Assert.assertEquals(2, analysis.svg().reportConflicts().size());
     }
 
 //    @Test
 //    public void testSVFAnalysisInterProceduralRecursiveDefinition03() {
 //        SVFAAnalysis analysis = configureInterProceduralRecursiveDefinition03();
 //        analysis.buildSparseValueFlowGraph();
-//        Assert.assertEquals(1, analysis.reportConflicts().size());
+//        Assert.assertEquals(1, analysis.svg().reportConflicts().size());
 //    }
 
 
@@ -129,91 +130,91 @@ public class SVFATest {
     public void testSVFAnalysisInterProceduralRecursiveMethodParamOneConflictDefinition() {
         SVFAAnalysis analysis = configureRecursiveTest(CLASS_NAME_RECURSIVE_METHOD_PARAM_ONE_CONFLICT_DEFINITION, new int[]{5}, new int[]{10}, true);
         analysis.buildSparseValueFlowGraph();
-        Assert.assertEquals(1, analysis.reportConflicts().size());
-        System.out.println(analysis.reportConflicts().size());
+        Assert.assertEquals(1, analysis.svg().reportConflicts().size());
+        System.out.println(analysis.svg().reportConflicts().size());
     }
 
     @Test
     public void testSVFAnalysisInterProceduralRecursiveMethodParamTwoConflicts2Definition() {
         SVFAAnalysis analysis = configureRecursiveTest(CLASS_NAME_RECURSIVE_METHOD_PARAM_TWO_CONFLICTS2_DEFINITION, new int[]{5}, new int[]{6}, true);
         analysis.buildSparseValueFlowGraph();
-        Assert.assertTrue(analysis.reportConflicts().size()>0);
+        Assert.assertTrue(analysis.svg().reportConflicts().size()>0);
     }
 
     @Test
     public void testSVFAnalysisInterProceduralRecursiveMethodParamTwoConflictsDefinition() {
         SVFAAnalysis analysis = configureRecursiveTest(CLASS_NAME_RECURSIVE_METHOD_PARAM_TWO_CONFLICTS_DEFINITION, new int[]{5}, new int[]{6, 10}, true);
         analysis.buildSparseValueFlowGraph();
-        Assert.assertTrue(analysis.reportConflicts().size()>0);
+        Assert.assertTrue(analysis.svg().reportConflicts().size()>0);
     }
 
     @Ignore
     public void testSVFAnalysisInterProceduralRecursiveClassAttributeOneConflictDefinition() {
         SVFAAnalysis analysis = configureRecursiveTest(CLASS_NAME_RECURSIVE_CLASS_ATTRIBUTE_ONE_CONFLICT_DEFINITION, new int[]{6}, new int[]{7}, true);
         analysis.buildSparseValueFlowGraph();
-        Assert.assertTrue(analysis.reportConflicts().size()>0);
+        Assert.assertTrue(analysis.svg().reportConflicts().size()>0);
     }
 
     @Test
     public void testSVFAnalysisIntraProceduralFieldOneConflictDefinition() {
         SVFAAnalysis analysis = configureRecursiveTest(CLASS_NAME_INTRAPROCEDURAL_FIELD_SAMPLE, new int[]{7}, new int[]{8}, false);
         analysis.buildSparseValueFlowGraph();
-        Assert.assertTrue(analysis.reportConflicts().size()>0);
+        Assert.assertTrue(analysis.svg().reportConflicts().size()>0);
     }
 //
 //    @Test
 //    public void testSVFAnalysisInterProceduralRecursiveClassAttributeOneConflict2Definition() {
 //        SVFAAnalysis analysis = configureRecursiveTest(CLASS_NAME_RECURSIVE_CLASS_ATTRIBUTE_ONE_CONFLICT2_DEFINITION, new int[]{6}, new int[]{7}, true);
 //        analysis.buildSparseValueFlowGraph();
-//        Assert.assertTrue(analysis.reportConflicts().size()>0);
+//        Assert.assertTrue(analysis.svg().reportConflicts().size()>0);
 //    }
 //
 //    @Test
 //    public void testSVFAnalysisInterProceduralRecursiveClassAttributeOneConflict3Definition() {
 //        SVFAAnalysis analysis = configureRecursiveTest(CLASS_NAME_RECURSIVE_CLASS_ATTRIBUTE_ONE_CONFLICT3_DEFINITION, new int[]{6}, new int[]{7}, true);
 //        analysis.buildSparseValueFlowGraph();
-//        Assert.assertTrue(analysis.reportConflicts().size()>0);
+//        Assert.assertTrue(analysis.svg().reportConflicts().size()>0);
 //    }
 //
 //    @Test
 //    public void testSVFAnalysisInterProceduralRecursiveClassAttributeOneConflictTwoLevelsDefinition() {
 //        SVFAAnalysis analysis = configureRecursiveTest(CLASS_NAME_RECURSIVE_CLASS_ATTRIBUTE_ONE_CONFLICT_TWO_LEVELS_DEFINITION, new int[]{6}, new int[]{7}, true);
 //        analysis.buildSparseValueFlowGraph();
-//        Assert.assertTrue(analysis.reportConflicts().size()>0);
+//        Assert.assertTrue(analysis.svg().reportConflicts().size()>0);
 //    }
 //
 //    @Test
 //    public void testSVFAnalysisInterProceduralRecursiveClassAttributeOneConflictTwoLevels2Definition() {
 //        SVFAAnalysis analysis = configureRecursiveTest(CLASS_NAME_RECURSIVE_CLASS_ATTRIBUTE_ONE_CONFLICT_TWO_LEVELS2_DEFINITION, new int[]{10}, new int[]{13}, true);
 //        analysis.buildSparseValueFlowGraph();
-//        Assert.assertTrue(analysis.reportConflicts().size()>0);
+//        Assert.assertTrue(analysis.svg().reportConflicts().size()>0);
 //    }
 
 
     public void testSVFAnalysisInterProceduralRecursiveClassAttributeOneConflict2Definition() {
         SVFAAnalysis analysis = configureRecursiveTest(CLASS_NAME_RECURSIVE_CLASS_ATTRIBUTE_ONE_CONFLICT2_DEFINITION, new int[]{6}, new int[]{7}, true);
         analysis.buildSparseValueFlowGraph();
-        Assert.assertTrue(analysis.reportConflicts().size()>0);
+        Assert.assertTrue(analysis.svg().reportConflicts().size()>0);
     }
 
     @Ignore
     public void testSVFAnalysisInterProceduralRecursiveClassAttributeOneConflict3Definition() {
         SVFAAnalysis analysis = configureRecursiveTest(CLASS_NAME_RECURSIVE_CLASS_ATTRIBUTE_ONE_CONFLICT3_DEFINITION, new int[]{6}, new int[]{7}, true);
         analysis.buildSparseValueFlowGraph();
-        Assert.assertTrue(analysis.reportConflicts().size()>0);
+        Assert.assertTrue(analysis.svg().reportConflicts().size()>0);
     }
 
     @Ignore
     public void testSVFAnalysisInterProceduralRecursiveClassAttributeOneConflictTwoLevelsDefinition() {
         SVFAAnalysis analysis = configureRecursiveTest(CLASS_NAME_RECURSIVE_CLASS_ATTRIBUTE_ONE_CONFLICT_TWO_LEVELS_DEFINITION, new int[]{6}, new int[]{7}, true);
         analysis.buildSparseValueFlowGraph();
-        Assert.assertTrue(analysis.reportConflicts().size()>0);
+        Assert.assertTrue(analysis.svg().reportConflicts().size()>0);
     }
 
     @Ignore
     public void testSVFAnalysisInterProceduralRecursiveClassAttributeOneConflictTwoLevels2Definition() {
         SVFAAnalysis analysis = configureRecursiveTest(CLASS_NAME_RECURSIVE_CLASS_ATTRIBUTE_ONE_CONFLICT_TWO_LEVELS2_DEFINITION, new int[]{10}, new int[]{13}, true);
         analysis.buildSparseValueFlowGraph();
-        Assert.assertTrue(analysis.reportConflicts().size()>0);
+        Assert.assertTrue(analysis.svg().reportConflicts().size()>0);
     }
 }
