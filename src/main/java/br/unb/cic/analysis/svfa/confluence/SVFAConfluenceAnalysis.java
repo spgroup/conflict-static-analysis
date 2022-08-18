@@ -1,6 +1,7 @@
 package br.unb.cic.analysis.svfa.confluence;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+import br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts;
 import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
 import br.ufpe.cin.soot.graph.LambdaNode;
@@ -34,11 +35,11 @@ public class SVFAConfluenceAnalysis {
      * the confluentFlows attribute with the results
      */
     public void execute() {
-        SVFAAnalysis sourceBaseAnalysis = sourceBaseAnalysis(interprocedural);
-        sourceBaseAnalysis.buildSparseValueFlowGraph();
+        DFPAnalysisSemanticConflicts sourceBaseAnalysis = sourceBaseAnalysis(interprocedural);
+        sourceBaseAnalysis.buildDFP();
         Set<List<LambdaNode>> sourceBasePaths = sourceBaseAnalysis.findSourceSinkPaths();
 
-        SVFAAnalysis sinkBaseAnalysis = sinkBaseAnalysis(interprocedural);
+        DFPAnalysisSemanticConflicts sinkBaseAnalysis = sinkBaseAnalysis(interprocedural);
         sinkBaseAnalysis.buildSparseValueFlowGraph();
         Set<List<LambdaNode>> sinkBasePaths = sinkBaseAnalysis.findSourceSinkPaths();
 
@@ -83,8 +84,8 @@ public class SVFAConfluenceAnalysis {
     /**
      * @return A instance of a child class of the SVFAAnalysis class that redefine source and sink as source and base
      */
-    private SVFAAnalysis sourceBaseAnalysis(boolean interprocedural) {
-        return new SVFAAnalysis(this.cp, this.definition) {
+    private DFPAnalysisSemanticConflicts sourceBaseAnalysis(boolean interprocedural) {
+        return new DFPAnalysisSemanticConflicts(this.cp, this.definition) {
 
             /**
              * Here we define the list of source statements for the SVFA analysis as the confluence analysis source statements,
@@ -117,14 +118,19 @@ public class SVFAConfluenceAnalysis {
             public boolean propagateObjectTaint() {
                 return true;
             }
+
+            @Override
+            public final boolean isFieldSensitiveAnalysis() {
+                return true;
+            }
         };
     }
 
     /**
      * @return A instance of a child class of the SVFAAnalysis class that redefine source and sink as source and base
      */
-    private SVFAAnalysis sinkBaseAnalysis(boolean interprocedural) {
-        return new SVFAAnalysis(this.cp, this.definition) {
+    private DFPAnalysisSemanticConflicts sinkBaseAnalysis(boolean interprocedural) {
+        return new DFPAnalysisSemanticConflicts(this.cp, this.definition) {
 
             /**
              * Here we define the list of source statements for the SVFA analysis as the confluence analysis sink statements,
@@ -155,6 +161,11 @@ public class SVFAConfluenceAnalysis {
 
             @Override
             public boolean propagateObjectTaint() {
+                return true;
+            }
+
+            @Override
+            public final boolean isFieldSensitiveAnalysis() {
                 return true;
             }
         };

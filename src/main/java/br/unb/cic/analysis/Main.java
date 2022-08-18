@@ -328,6 +328,7 @@ public class Main {
 
     private void runDFPAnalysis(String classpath) {
         long start = System.currentTimeMillis();
+        definition.setRecursiveMode(options.hasOption("recursive"));
         DFPAnalysisSemanticConflicts analysis = new DFPIntraProcedural(classpath, definition);
 
         analysis.buildDFP();
