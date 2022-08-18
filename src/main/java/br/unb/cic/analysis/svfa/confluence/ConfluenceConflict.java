@@ -1,14 +1,14 @@
 package br.unb.cic.analysis.svfa.confluence;
 
-import br.ufpe.cin.soot.graph.LambdaNode;
+import br.ufpe.cin.soot.graph.StatementNode;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ConfluenceConflict {
-    private List<LambdaNode> sourceNodePath;
-    private List<LambdaNode> sinkNodePath;
+    private List<StatementNode> sourceNodePath;
+    private List<StatementNode> sinkNodePath;
 
-    ConfluenceConflict(List<LambdaNode> sourceNodePath, List<LambdaNode> sinkNodePath) {
+    ConfluenceConflict(List<StatementNode> sourceNodePath, List<StatementNode> sinkNodePath) {
         // assume that flows have at least one source and one sink
         assert sourceNodePath.size() > 1;
         assert sinkNodePath.size() > 1;
@@ -23,7 +23,7 @@ public class ConfluenceConflict {
                 "SINK=>BASE: " + pathToString(sinkNodePath);
     }
 
-    private String pathToString(List<LambdaNode> nodePath) {
+    private String pathToString(List<StatementNode> nodePath) {
         List<String> hashSet = nodePath.stream()
                 .map(node -> nodeToString(node))
                 .distinct()
@@ -32,7 +32,7 @@ public class ConfluenceConflict {
         return String.join(" => ", hashSet);
     }
 
-    private String nodeToString(LambdaNode node) {
+    private String nodeToString(StatementNode node) {
         return "(" +
                 node.show()
                 + ")";

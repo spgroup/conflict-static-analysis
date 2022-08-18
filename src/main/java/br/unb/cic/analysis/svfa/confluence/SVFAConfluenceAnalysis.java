@@ -1,10 +1,8 @@
 package br.unb.cic.analysis.svfa.confluence;
-
+import br.ufpe.cin.soot.graph.StatementNode;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts;
 import br.unb.cic.analysis.model.Statement;
-import br.unb.cic.analysis.svfa.SVFAAnalysis;
-import br.ufpe.cin.soot.graph.LambdaNode;
 import soot.Unit;
 
 import java.util.*;
@@ -37,11 +35,11 @@ public class SVFAConfluenceAnalysis {
     public void execute() {
         DFPAnalysisSemanticConflicts sourceBaseAnalysis = sourceBaseAnalysis(interprocedural);
         sourceBaseAnalysis.buildDFP();
-        Set<List<LambdaNode>> sourceBasePaths = sourceBaseAnalysis.findSourceSinkPaths();
+        Set<List<StatementNode>> sourceBasePaths = sourceBaseAnalysis.findSourceSinkPaths();
 
         DFPAnalysisSemanticConflicts sinkBaseAnalysis = sinkBaseAnalysis(interprocedural);
         sinkBaseAnalysis.buildSparseValueFlowGraph();
-        Set<List<LambdaNode>> sinkBasePaths = sinkBaseAnalysis.findSourceSinkPaths();
+        Set<List<StatementNode>> sinkBasePaths = sinkBaseAnalysis.findSourceSinkPaths();
 
         confluentFlows = intersectPathsByLastNode(sourceBasePaths, sinkBasePaths);
     }
@@ -53,16 +51,16 @@ public class SVFAConfluenceAnalysis {
      * @param paths1 A set of lists of nodes with at least 2 nodes
      * @return A set of confluence conflicts
      */
-    private Set<ConfluenceConflict> intersectPathsByLastNode(Set<List<LambdaNode>> paths1, Set<List<LambdaNode>> paths2) {
-        Map<LambdaNode, List<LambdaNode>> pathEndHash = new HashMap<>();
+    private Set<ConfluenceConflict> intersectPathsByLastNode(Set<List<StatementNode>> paths1, Set<List<StatementNode>> paths2) {
+        Map<StatementNode, List<StatementNode>> pathEndHash = new HashMap<>();
 
-        for (List<LambdaNode> path: paths1) {
+        for (List<StatementNode> path: paths1) {
             pathEndHash.put(getLastNode(path), path);
         }
 
         Set<ConfluenceConflict> result = new HashSet<>();
-        for (List<LambdaNode> path : paths2) {
-            LambdaNode lastNode = getLastNode(path);
+        for (List<StatementNode> path : paths2) {
+            StatementNode lastNode = getLastNode(path);
             if (pathEndHash.containsKey(lastNode)) {
                 result.add(new ConfluenceConflict(pathEndHash.get(lastNode), path));
             }
@@ -75,7 +73,7 @@ public class SVFAConfluenceAnalysis {
      * @param path A list of nodes with at least 2 nodes
      * @return The last node of the list
      */
-    private LambdaNode getLastNode(List<LambdaNode> path) {
+    private StatementNode getLastNode(List<StatementNode> path) {
         int pathSize = path.size();
         assert pathSize > 1; // assume that all paths have at least one source and one sink
         return path.get(pathSize - 1);
