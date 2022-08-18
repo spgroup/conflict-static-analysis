@@ -38,7 +38,7 @@ public class SVFAConfluenceAnalysis {
         Set<List<StatementNode>> sourceBasePaths = sourceBaseAnalysis.findSourceSinkPaths();
 
         DFPAnalysisSemanticConflicts sinkBaseAnalysis = sinkBaseAnalysis(interprocedural);
-        sinkBaseAnalysis.buildSparseValueFlowGraph();
+        sinkBaseAnalysis.buildDFP();
         Set<List<StatementNode>> sinkBasePaths = sinkBaseAnalysis.findSourceSinkPaths();
 
         confluentFlows = intersectPathsByLastNode(sourceBasePaths, sinkBasePaths);
@@ -61,8 +61,10 @@ public class SVFAConfluenceAnalysis {
         Set<ConfluenceConflict> result = new HashSet<>();
         for (List<StatementNode> path : paths2) {
             StatementNode lastNode = getLastNode(path);
-            if (pathEndHash.containsKey(lastNode)) {
-                result.add(new ConfluenceConflict(pathEndHash.get(lastNode), path));
+            for (StatementNode stm: pathEndHash.keySet()){
+                if (lastNode.equals(stm)){
+                    result.add(new ConfluenceConflict(pathEndHash.get(stm), path));
+                }
             }
         }
 
