@@ -5,6 +5,7 @@ import br.unb.cic.analysis.cd.CDIntraProcedural;
 import br.unb.cic.analysis.df.*;
 import br.unb.cic.analysis.df.pessimistic.PessimisticTaintedAnalysis;
 import br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts;
+import br.unb.cic.analysis.dfp.DFPInterProcedural;
 import br.unb.cic.analysis.dfp.DFPIntraProcedural;
 import br.unb.cic.analysis.io.DefaultReader;
 import br.unb.cic.analysis.io.MergeConflictReader;
@@ -183,8 +184,11 @@ public class Main {
             case "overriding-interprocedural":
                 runInterproceduralOverrideAssignmentAnalysis(classpath);
                 break;
-            case "dfp":
-                runDFPAnalysis(classpath);
+            case "dfp-intra":
+                runDFPAnalysis(classpath, false);
+                break;
+            case "dfp-inter":
+                runDFPAnalysis(classpath, true);
                 break;
             case "pdg-sdg":
                 runPDGAnalysis(classpath, true);
@@ -326,10 +330,12 @@ public class Main {
                 .collect(Collectors.toList()));
     }
 
-    private void runDFPAnalysis(String classpath) {
+    private void runDFPAnalysis(String classpath, Boolean interprocedural) {
         long start = System.currentTimeMillis();
         definition.setRecursiveMode(options.hasOption("recursive"));
-        DFPAnalysisSemanticConflicts analysis = new DFPIntraProcedural(classpath, definition);
+        DFPAnalysisSemanticConflicts analysis = interprocedural
+                ? new DFPInterProcedural(classpath, definition)
+                : new DFPIntraProcedural(classpath, definition);
 
         analysis.buildDFP();
 
