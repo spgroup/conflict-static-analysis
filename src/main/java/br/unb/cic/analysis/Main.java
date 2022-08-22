@@ -18,7 +18,7 @@ import br.unb.cic.analysis.reachability.ReachabilityAnalysis;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
 import br.unb.cic.analysis.svfa.SVFAInterProcedural;
 import br.unb.cic.analysis.svfa.SVFAIntraProcedural;
-import br.unb.cic.analysis.svfa.confluence.SVFAConfluenceAnalysis;
+import br.unb.cic.analysis.svfa.confluence.DFPConfluenceAnalysis;
 import br.unb.cic.diffclass.DiffClass;
 import org.apache.commons.cli.*;
 import scala.collection.JavaConverters;
@@ -401,7 +401,7 @@ public class Main {
 
     private void runSparseValueFlowConfluenceAnalysis(String classpath, boolean interprocedural) {
         definition.setRecursiveMode(options.hasOption("recursive"));
-        SVFAConfluenceAnalysis analysis = new SVFAConfluenceAnalysis(classpath, this.definition, interprocedural);
+        DFPConfluenceAnalysis analysis = new DFPConfluenceAnalysis(classpath, this.definition, interprocedural);
 
         analysis.execute();
         conflicts.addAll(analysis.getConfluentConflicts()

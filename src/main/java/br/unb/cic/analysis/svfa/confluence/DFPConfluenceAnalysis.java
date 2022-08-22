@@ -7,14 +7,14 @@ import soot.Unit;
 
 import java.util.*;
 
-public class SVFAConfluenceAnalysis {
+public class DFPConfluenceAnalysis {
 
     private String cp;
     private boolean interprocedural;
     private AbstractMergeConflictDefinition definition;
     private Set<ConfluenceConflict> confluentFlows = new HashSet<>();
 
-    public SVFAConfluenceAnalysis(String classPath, AbstractMergeConflictDefinition definition, boolean interprocedural) {
+    public DFPConfluenceAnalysis(String classPath, AbstractMergeConflictDefinition definition, boolean interprocedural) {
         this.cp = classPath;
         this.definition = definition;
         this.interprocedural = interprocedural;
@@ -61,14 +61,19 @@ public class SVFAConfluenceAnalysis {
         Set<ConfluenceConflict> result = new HashSet<>();
         for (List<StatementNode> path : paths2) {
             StatementNode lastNode = getLastNode(path);
-            for (StatementNode stm: pathEndHash.keySet()){
-                if (lastNode.equals(stm)){
-                    result.add(new ConfluenceConflict(pathEndHash.get(stm), path));
+            for (StatementNode stmt: pathEndHash.keySet()){
+                if (containsKey(lastNode, stmt)) {
+                    result.add(new ConfluenceConflict(pathEndHash.get(stmt), path));
                 }
             }
         }
 
         return result;
+    }
+
+
+    public boolean containsKey(StatementNode lastNode, StatementNode stmt){
+        return lastNode.equals(stmt);
     }
 
     /**
