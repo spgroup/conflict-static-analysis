@@ -5,7 +5,7 @@ public class RecursiveCallConflictSample {
 
     public static void main(String[] args) {
         RecursiveCallConflictSample recursiveCallConflictSample = new RecursiveCallConflictSample();
-        recursiveCallConflictSample.foo(1); // LEFT
+        recursiveCallConflictSample.foo(2); // LEFT
     }
 
     private int foo(int n) {

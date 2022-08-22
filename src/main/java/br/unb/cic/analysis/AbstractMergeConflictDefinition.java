@@ -10,6 +10,8 @@ import soot.jimple.Stmt;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * This abstract class works as a contract. Whenever we
@@ -20,6 +22,7 @@ import java.util.Map;
 public abstract class AbstractMergeConflictDefinition {
     protected List<Statement> sourceStatements;
     protected List<Statement> sinkStatements;
+    private Set<SootMethod> entryMethods;
     private boolean recursive;
     private int omitExceptingUnitEdges; //1 - true and 2-false
 
@@ -30,6 +33,7 @@ public abstract class AbstractMergeConflictDefinition {
     public AbstractMergeConflictDefinition(boolean recursive) {
         sourceStatements = new ArrayList<>();
         sinkStatements = new ArrayList<>();
+        entryMethods = new HashSet<>();
         this.recursive = recursive;
     }
 
@@ -95,8 +99,11 @@ public abstract class AbstractMergeConflictDefinition {
                 if(body == null) continue;
                 for(Unit u: body.getUnits()) {
                     if(definitions.get(className).contains(u.getJavaSourceStartLineNumber())) {
-                        Statement stmt = createStatement(m, u, type);
+                        Statement stmt = createStatement(m, u, type); 
                         statements.add(stmt);
+                        if (stmt.isSource()) {
+                            entryMethods.add(m);
+                        }
                     }
                 }
             }
@@ -245,6 +252,10 @@ public abstract class AbstractMergeConflictDefinition {
 
     public boolean isSinkStatement(Unit u) {
         return sinkStatements.stream().anyMatch(s -> s.getUnit().equals(u));
+    }
+
+    public Set<SootMethod> getEntryMethods() {
+        return entryMethods;
     }
 
 }

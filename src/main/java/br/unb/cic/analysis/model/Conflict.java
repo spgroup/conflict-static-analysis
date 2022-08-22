@@ -88,6 +88,19 @@ public class Conflict {
         this.sinkTraversedLine = sinkTraversedLine;
     }
 
+    public boolean conflictsHaveSameSourceAndSinkRootTraversedLine(Conflict conflict) {
+        return    this.getSourceRootTraversedLine().equals(conflict.getSourceRootTraversedLine())
+                && this.getSinkRootTraversedLine().equals(conflict.getSinkRootTraversedLine());
+    }
+
+    private TraversedLine getSourceRootTraversedLine() {
+        return this.getSourceTraversedLine().get(0);
+    }
+
+    private TraversedLine getSinkRootTraversedLine() {
+        return this.getSinkTraversedLine().get(0);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

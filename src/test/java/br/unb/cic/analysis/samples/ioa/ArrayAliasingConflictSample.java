@@ -2,13 +2,13 @@ package br.unb.cic.analysis.samples.ioa;
 
 // Conflict: [left, foo():17] --> [right, bar():21]
 public class ArrayAliasingConflictSample {
-    private int[] arr, barr;
+    private int[] arr, bar;
 
     public static void main(String[] args) {
         ArrayAliasingConflictSample m =
                 new ArrayAliasingConflictSample();
         m.arr = new int[]{0, 0, 0, 0, 0};
-        m.barr = m.arr;
+        m.bar = m.arr;
         m.foo(); // LEFT
         m.bar(); // RIGHT
     }
@@ -18,8 +18,6 @@ public class ArrayAliasingConflictSample {
     }
 
     private void bar() {
-        barr[1] = 2;
+        bar[1] = 2;
     }
-
-
 }

@@ -67,10 +67,11 @@ public abstract class SVFAAnalysis extends JSVFA  {
     public final scala.collection.immutable.List<SootMethod> getEntryPoints() {
         definition.loadSourceStatements();
         definition.loadSinkStatements();
-        return JavaConverters.asScalaBuffer(getSourceStatements()
-                .stream()
-                .map(Statement::getSootMethod)
-                .collect(Collectors.toList())).toList();
+        return JavaConverters.asScalaBuffer(
+            new ArrayList<>(
+                definition.getEntryMethods()
+            )        
+        ).toList();
     }
 
     @Override

@@ -38,8 +38,8 @@ import java.util.stream.Collectors;
 
 public class Main {
 
-    private static CommandLine cmd;
     private Options options;
+    private CommandLine cmd;
     private AbstractMergeConflictDefinition definition;
     private Set<String> targetClasses;
     private List<String> conflicts = new ArrayList<>();
@@ -52,10 +52,9 @@ public class Main {
             m.createOptions();
 
             CommandLineParser parser = new DefaultParser();
-            cmd = parser.parse(m.options, args);
-
-            String mode = "dataflow";
-
+            m.cmd = parser.parse(m.options, args);
+            CommandLine cmd = m.cmd;
+            String mode = "dataflow"; 
             if (cmd.hasOption("mode")) {
                 mode = cmd.getOptionValue("mode");
             }
@@ -386,7 +385,8 @@ public class Main {
     }
 
     private void runSparseValueFlowAnalysis(String classpath, boolean interprocedural) {
-        definition.setRecursiveMode(options.hasOption("recursive"));
+        definition.setRecursiveMode(cmd.hasOption("recursive"));
+        
         SVFAAnalysis analysis = interprocedural
                 ? new SVFAInterProcedural(classpath, definition)
                 : new SVFAIntraProcedural(classpath, definition);

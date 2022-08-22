@@ -80,8 +80,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         List<SootMethod> methods = Scene.v().getEntryPoints();
         methods.forEach(sootMethod -> traverse(new ArraySparseSet<>(), sootMethod, Statement.Type.IN_BETWEEN));
 
-        Set<Conflict> conflictsFilter = filterConflicts(getConflicts());
-        logger.log(Level.INFO, () -> String.format("%s", "CONFLICTS: " + conflictsFilter));
+        logger.log(Level.INFO, () -> String.format("%s", "CONFLICTS: " + filterConflictsWithSameRoot(getConflicts())));
 
         long finalTime = System.currentTimeMillis();
         System.out.println("Runtime: " + ((finalTime - startTime) / 1000d) + "s");
@@ -116,25 +115,26 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         }
     }
 
-    private Set<Conflict> filterConflicts(Set<Conflict> conflictsResults) {
+    private Set<Conflict> filterConflictsWithSameRoot(Set<Conflict> conflictsResults) {
         Set<Conflict> conflictsFilter = new HashSet<>();
+
         for (Conflict conflict : conflictsResults) {
-            if (conflictsFilter.isEmpty()) {
+
+            if (!hasConflictWithSameSourceAndSinkRootTraversedLine(conflictsFilter, conflict)) {
                 conflictsFilter.add(conflict);
             }
         }
-        for (Conflict conflict : conflictsResults) {
-            for (Conflict filter : conflictsFilter) {
-                if (!conflict.getSourceTraversedLine().isEmpty() && !conflict.getSinkTraversedLine().isEmpty()) {
-                    if ((!conflict.getSourceTraversedLine().get(0).equals(filter.getSourceTraversedLine().get(0)))
-                            && (!conflict.getSinkTraversedLine().get(0).equals(filter.getSinkTraversedLine().get(0)))) {
-                        conflictsFilter.add(conflict);
-                    }
-                }
+        return conflictsFilter;
+    }
 
+
+    private boolean hasConflictWithSameSourceAndSinkRootTraversedLine( Set<Conflict> conflictsFilter, Conflict conflict) {
+        for (Conflict c : conflictsFilter) {
+            if (c.conflictsHaveSameSourceAndSinkRootTraversedLine(conflict)){
+                return true;
             }
         }
-        return conflictsFilter;
+        return false;
     }
 
     /**
@@ -153,7 +153,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             return in;
         }
 
-        System.out.println(sootMethod + " - " + this.traversedMethods.size());
+        //System.out.println(sootMethod + " - " + this.traversedMethods.size());
         this.traversedMethods.add(sootMethod);
 
         Body body = definition.retrieveActiveBodySafely(sootMethod);
@@ -398,15 +398,18 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     private void removeAll(ValueBox valueBox, FlowSet<DataFlowAbstraction> rightOrLeftList) {
+        FlowSet<DataFlowAbstraction> itemsToRemoved = new ArraySparseSet<>();
         rightOrLeftList.forEach(dataFlowAbstraction -> {
             try {
                 if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
-                    rightOrLeftList.remove(dataFlowAbstraction);
+                    itemsToRemoved.add(dataFlowAbstraction);
                 }
             } catch (ValueNotHandledException e) {
                 e.printStackTrace();
             }
         });
+
+        rightOrLeftList.difference(itemsToRemoved);
     }
 
     private boolean containsValue(DataFlowAbstraction dataFlowAbstraction, Value value) throws ValueNotHandledException {
