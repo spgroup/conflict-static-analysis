@@ -172,10 +172,10 @@ public class Main {
                 runSparseValueFlowAnalysis(classpath, false);
                 break;
             case "svfa-confluence-interprocedural":
-                runSparseValueFlowConfluenceAnalysis(classpath, true);
+                runDFPConfluenceAnalysis(classpath, true);
                 break;
             case "svfa-confluence-intraprocedural":
-                runSparseValueFlowConfluenceAnalysis(classpath, false);
+                runDFPConfluenceAnalysis(classpath, false);
                 break;
             case "reachability":
                 runReachabilityAnalysis(classpath);
@@ -399,7 +399,7 @@ public class Main {
                 .collect(Collectors.toList()));
     }
 
-    private void runSparseValueFlowConfluenceAnalysis(String classpath, boolean interprocedural) {
+    private void runDFPConfluenceAnalysis(String classpath, boolean interprocedural) {
         definition.setRecursiveMode(options.hasOption("recursive"));
         DFPConfluenceAnalysis analysis = new DFPConfluenceAnalysis(classpath, this.definition, interprocedural);
 
