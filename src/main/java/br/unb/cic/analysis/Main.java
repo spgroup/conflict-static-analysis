@@ -171,10 +171,10 @@ public class Main {
             case "svfa-intraprocedural":
                 runSparseValueFlowAnalysis(classpath, false);
                 break;
-            case "svfa-confluence-interprocedural":
+            case "dfp-confluence-interprocedural":
                 runDFPConfluenceAnalysis(classpath, true);
                 break;
-            case "svfa-confluence-intraprocedural":
+            case "dfp-confluence-intraprocedural":
                 runDFPConfluenceAnalysis(classpath, false);
                 break;
             case "reachability":
