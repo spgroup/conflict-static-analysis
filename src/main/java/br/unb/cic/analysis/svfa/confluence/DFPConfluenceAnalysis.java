@@ -61,10 +61,9 @@ public class DFPConfluenceAnalysis {
         Set<ConfluenceConflict> result = new HashSet<>();
         for (List<StatementNode> path : paths2) {
             StatementNode lastNode = getLastNode(path);
-            for (StatementNode stmt: pathEndHash.keySet()){
-                if (containsKey(lastNode, stmt)) {
-                    result.add(new ConfluenceConflict(pathEndHash.get(stmt), path));
-                }
+
+            if (containsKey(pathEndHash, lastNode)) {
+                result.add(new ConfluenceConflict(pathEndHash.get(lastNode), path));
             }
         }
 
@@ -72,8 +71,13 @@ public class DFPConfluenceAnalysis {
     }
 
 
-    public boolean containsKey(StatementNode lastNode, StatementNode stmt){
-        return lastNode.equals(stmt);
+    public boolean containsKey(Map<StatementNode, List<StatementNode>> pathEndHash, StatementNode lastNode){
+        for (StatementNode stmt: pathEndHash.keySet()){
+            if (lastNode.equals(stmt)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -87,10 +91,10 @@ public class DFPConfluenceAnalysis {
     }
 
     /**
-     * @return A instance of a child class of the SVFAAnalysis class that redefine source and sink as source and base
+     * @return A instance of a child class of the JDFPAnalysis class that redefine source and sink as source and base
      */
-    private DFPAnalysisSemanticConflicts sourceBaseAnalysis(boolean interprocedural) {
-        return new DFPAnalysisSemanticConflicts(this.cp, this.definition) {
+    private br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts sourceBaseAnalysis(boolean interprocedural) {
+        return new br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts(this.cp, this.definition) {
 
             /**
              * Here we define the list of source statements for the SVFA analysis as the confluence analysis source statements,

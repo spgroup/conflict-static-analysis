@@ -33,11 +33,11 @@ public class DFPConfluenceAnalysisTest {
         };
 
         String cp = "target/test-classes";
-        analysis = new DFPConfluenceAnalysis(cp, definition, true);
+        analysis = new DFPConfluenceAnalysis(cp, definition, false);
     }
 
     @Test
-    public void testSVFAConfluentAnalysisExpectingOneConflict() {
+    public void testDFPConfluentAnalysisExpectingTwoConflicts() {
         analysis.execute();
         Set<ConfluenceConflict> conflicts = analysis.getConfluentConflicts();
         Assert.assertEquals(2, conflicts.size());
