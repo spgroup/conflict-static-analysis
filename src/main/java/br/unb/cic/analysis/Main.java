@@ -5,6 +5,7 @@ import br.unb.cic.analysis.cd.CDIntraProcedural;
 import br.unb.cic.analysis.df.*;
 import br.unb.cic.analysis.df.pessimistic.PessimisticTaintedAnalysis;
 import br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts;
+import br.unb.cic.analysis.dfp.DFPInterProcedural;
 import br.unb.cic.analysis.dfp.DFPIntraProcedural;
 import br.unb.cic.analysis.io.DefaultReader;
 import br.unb.cic.analysis.io.MergeConflictReader;
@@ -17,7 +18,7 @@ import br.unb.cic.analysis.reachability.ReachabilityAnalysis;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
 import br.unb.cic.analysis.svfa.SVFAInterProcedural;
 import br.unb.cic.analysis.svfa.SVFAIntraProcedural;
-import br.unb.cic.analysis.svfa.confluence.SVFAConfluenceAnalysis;
+import br.unb.cic.analysis.svfa.confluence.DFPConfluenceAnalysis;
 import br.unb.cic.diffclass.DiffClass;
 import org.apache.commons.cli.*;
 import scala.collection.JavaConverters;
@@ -170,11 +171,11 @@ public class Main {
             case "svfa-intraprocedural":
                 runSparseValueFlowAnalysis(classpath, false);
                 break;
-            case "svfa-confluence-interprocedural":
-                runSparseValueFlowConfluenceAnalysis(classpath, true);
+            case "dfp-confluence-interprocedural":
+                runDFPConfluenceAnalysis(classpath, true);
                 break;
-            case "svfa-confluence-intraprocedural":
-                runSparseValueFlowConfluenceAnalysis(classpath, false);
+            case "dfp-confluence-intraprocedural":
+                runDFPConfluenceAnalysis(classpath, false);
                 break;
             case "reachability":
                 runReachabilityAnalysis(classpath);
@@ -182,8 +183,11 @@ public class Main {
             case "overriding-interprocedural":
                 runInterproceduralOverrideAssignmentAnalysis(classpath);
                 break;
-            case "dfp":
-                runDFPAnalysis(classpath);
+            case "dfp-intra":
+                runDFPAnalysis(classpath, false);
+                break;
+            case "dfp-inter":
+                runDFPAnalysis(classpath, true);
                 break;
             case "pdg-sdg":
                 runPDGAnalysis(classpath, true);
@@ -325,9 +329,12 @@ public class Main {
                 .collect(Collectors.toList()));
     }
 
-    private void runDFPAnalysis(String classpath) {
+    private void runDFPAnalysis(String classpath, Boolean interprocedural) {
         long start = System.currentTimeMillis();
-        DFPAnalysisSemanticConflicts analysis = new DFPIntraProcedural(classpath, definition);
+        definition.setRecursiveMode(options.hasOption("recursive"));
+        DFPAnalysisSemanticConflicts analysis = interprocedural
+                ? new DFPInterProcedural(classpath, definition)
+                : new DFPIntraProcedural(classpath, definition);
 
         analysis.buildDFP();
 
@@ -392,9 +399,10 @@ public class Main {
                 .collect(Collectors.toList()));
     }
 
-    private void runSparseValueFlowConfluenceAnalysis(String classpath, boolean interprocedural) {
-        definition.setRecursiveMode(cmd.hasOption("recursive"));
-        SVFAConfluenceAnalysis analysis = new SVFAConfluenceAnalysis(classpath, this.definition,  interprocedural);
+    private void runDFPConfluenceAnalysis(String classpath, boolean interprocedural) {
+        definition.setRecursiveMode(options.hasOption("recursive"));
+        DFPConfluenceAnalysis analysis = new DFPConfluenceAnalysis(classpath, this.definition, interprocedural);
+
         analysis.execute();
         conflicts.addAll(analysis.getConfluentConflicts()
                 .stream()

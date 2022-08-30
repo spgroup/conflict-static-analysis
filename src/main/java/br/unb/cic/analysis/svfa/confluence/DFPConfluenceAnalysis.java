@@ -1,21 +1,20 @@
 package br.unb.cic.analysis.svfa.confluence;
-
+import br.ufpe.cin.soot.graph.StatementNode;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+import br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts;
 import br.unb.cic.analysis.model.Statement;
-import br.unb.cic.analysis.svfa.SVFAAnalysis;
-import br.ufpe.cin.soot.graph.LambdaNode;
 import soot.Unit;
 
 import java.util.*;
 
-public class SVFAConfluenceAnalysis {
+public class DFPConfluenceAnalysis {
 
     private String cp;
     private boolean interprocedural;
     private AbstractMergeConflictDefinition definition;
     private Set<ConfluenceConflict> confluentFlows = new HashSet<>();
 
-    public SVFAConfluenceAnalysis(String classPath, AbstractMergeConflictDefinition definition, boolean interprocedural) {
+    public DFPConfluenceAnalysis(String classPath, AbstractMergeConflictDefinition definition, boolean interprocedural) {
         this.cp = classPath;
         this.definition = definition;
         this.interprocedural = interprocedural;
@@ -34,13 +33,13 @@ public class SVFAConfluenceAnalysis {
      * the confluentFlows attribute with the results
      */
     public void execute() {
-        SVFAAnalysis sourceBaseAnalysis = sourceBaseAnalysis(interprocedural);
-        sourceBaseAnalysis.buildSparseValueFlowGraph();
-        Set<List<LambdaNode>> sourceBasePaths = sourceBaseAnalysis.findSourceSinkPaths();
+        DFPAnalysisSemanticConflicts sourceBaseAnalysis = sourceBaseAnalysis(interprocedural);
+        sourceBaseAnalysis.buildDFP();
+        Set<List<StatementNode>> sourceBasePaths = sourceBaseAnalysis.findSourceSinkPaths();
 
-        SVFAAnalysis sinkBaseAnalysis = sinkBaseAnalysis(interprocedural);
-        sinkBaseAnalysis.buildSparseValueFlowGraph();
-        Set<List<LambdaNode>> sinkBasePaths = sinkBaseAnalysis.findSourceSinkPaths();
+        DFPAnalysisSemanticConflicts sinkBaseAnalysis = sinkBaseAnalysis(interprocedural);
+        sinkBaseAnalysis.buildDFP();
+        Set<List<StatementNode>> sinkBasePaths = sinkBaseAnalysis.findSourceSinkPaths();
 
         confluentFlows = intersectPathsByLastNode(sourceBasePaths, sinkBasePaths);
     }
@@ -52,17 +51,18 @@ public class SVFAConfluenceAnalysis {
      * @param paths1 A set of lists of nodes with at least 2 nodes
      * @return A set of confluence conflicts
      */
-    private Set<ConfluenceConflict> intersectPathsByLastNode(Set<List<LambdaNode>> paths1, Set<List<LambdaNode>> paths2) {
-        Map<LambdaNode, List<LambdaNode>> pathEndHash = new HashMap<>();
+    private Set<ConfluenceConflict> intersectPathsByLastNode(Set<List<StatementNode>> paths1, Set<List<StatementNode>> paths2) {
+        Map<StatementNode, List<StatementNode>> pathEndHash = new HashMap<>();
 
-        for (List<LambdaNode> path: paths1) {
+        for (List<StatementNode> path: paths1) {
             pathEndHash.put(getLastNode(path), path);
         }
 
         Set<ConfluenceConflict> result = new HashSet<>();
-        for (List<LambdaNode> path : paths2) {
-            LambdaNode lastNode = getLastNode(path);
-            if (pathEndHash.containsKey(lastNode)) {
+        for (List<StatementNode> path : paths2) {
+            StatementNode lastNode = getLastNode(path);
+
+            if (containsKey(pathEndHash, lastNode)) {
                 result.add(new ConfluenceConflict(pathEndHash.get(lastNode), path));
             }
         }
@@ -70,21 +70,31 @@ public class SVFAConfluenceAnalysis {
         return result;
     }
 
+
+    public boolean containsKey(Map<StatementNode, List<StatementNode>> pathEndHash, StatementNode lastNode){
+        for (StatementNode stmt: pathEndHash.keySet()){
+            if (lastNode.equals(stmt)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @param path A list of nodes with at least 2 nodes
      * @return The last node of the list
      */
-    private LambdaNode getLastNode(List<LambdaNode> path) {
+    private StatementNode getLastNode(List<StatementNode> path) {
         int pathSize = path.size();
         assert pathSize > 1; // assume that all paths have at least one source and one sink
         return path.get(pathSize - 1);
     }
 
     /**
-     * @return A instance of a child class of the SVFAAnalysis class that redefine source and sink as source and base
+     * @return A instance of a child class of the JDFPAnalysis class that redefine source and sink as source and base
      */
-    private SVFAAnalysis sourceBaseAnalysis(boolean interprocedural) {
-        return new SVFAAnalysis(this.cp, this.definition) {
+    private br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts sourceBaseAnalysis(boolean interprocedural) {
+        return new br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts(this.cp, this.definition) {
 
             /**
              * Here we define the list of source statements for the SVFA analysis as the confluence analysis source statements,
@@ -117,14 +127,19 @@ public class SVFAConfluenceAnalysis {
             public boolean propagateObjectTaint() {
                 return true;
             }
+
+            @Override
+            public final boolean isFieldSensitiveAnalysis() {
+                return true;
+            }
         };
     }
 
     /**
      * @return A instance of a child class of the SVFAAnalysis class that redefine source and sink as source and base
      */
-    private SVFAAnalysis sinkBaseAnalysis(boolean interprocedural) {
-        return new SVFAAnalysis(this.cp, this.definition) {
+    private DFPAnalysisSemanticConflicts sinkBaseAnalysis(boolean interprocedural) {
+        return new DFPAnalysisSemanticConflicts(this.cp, this.definition) {
 
             /**
              * Here we define the list of source statements for the SVFA analysis as the confluence analysis sink statements,
@@ -155,6 +170,11 @@ public class SVFAConfluenceAnalysis {
 
             @Override
             public boolean propagateObjectTaint() {
+                return true;
+            }
+
+            @Override
+            public final boolean isFieldSensitiveAnalysis() {
                 return true;
             }
         };

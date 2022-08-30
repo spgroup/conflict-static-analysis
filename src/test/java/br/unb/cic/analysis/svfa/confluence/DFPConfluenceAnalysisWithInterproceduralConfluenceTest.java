@@ -4,13 +4,12 @@ import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
-import org.junit.Test;
 
 import java.util.*;
 
-public class SVFAConfluenceAnalysisWithInterproceduralConfluenceTest {
+public class DFPConfluenceAnalysisWithInterproceduralConfluenceTest {
 
-    private SVFAConfluenceAnalysis analysis;
+    private DFPConfluenceAnalysis analysis;
     @Before
     public void configure() {
         AbstractMergeConflictDefinition definition = new AbstractMergeConflictDefinition() {
@@ -34,7 +33,7 @@ public class SVFAConfluenceAnalysisWithInterproceduralConfluenceTest {
         };
 
         String cp = "target/test-classes";
-        analysis = new SVFAConfluenceAnalysis(cp, definition, true);
+        analysis = new DFPConfluenceAnalysis(cp, definition, true);
     }
 
     @Ignore

@@ -7,9 +7,9 @@ import org.junit.Test;
 
 import java.util.*;
 
-public class SVFAConfluenceAnalysisTest {
+public class DFPConfluenceAnalysisTest {
 
-    private SVFAConfluenceAnalysis analysis;
+    private DFPConfluenceAnalysis analysis;
     @Before
     public void configure() {
         AbstractMergeConflictDefinition definition = new AbstractMergeConflictDefinition() {
@@ -33,11 +33,11 @@ public class SVFAConfluenceAnalysisTest {
         };
 
         String cp = "target/test-classes";
-        analysis = new SVFAConfluenceAnalysis(cp, definition, true);
+        analysis = new DFPConfluenceAnalysis(cp, definition, false);
     }
 
     @Test
-    public void testSVFAConfluentAnalysisExpectingOneConflict() {
+    public void testDFPConfluentAnalysisExpectingTwoConflicts() {
         analysis.execute();
         Set<ConfluenceConflict> conflicts = analysis.getConfluentConflicts();
         Assert.assertEquals(2, conflicts.size());

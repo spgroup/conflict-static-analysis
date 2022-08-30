@@ -47,8 +47,8 @@ public abstract class SVFAAnalysis extends JSVFA  {
      * Computes the source-sink paths
      * @return a set with a list of nodes that together builds a source-sink path.
      */
-    public java.util.Set<java.util.List<LambdaNode>> findSourceSinkPaths() {
-        Set<java.util.List<LambdaNode>> paths = new HashSet<>();
+    public java.util.Set<java.util.List<StatementNode>> findSourceSinkPaths() {
+        Set<java.util.List<StatementNode>> paths = new HashSet<>();
 
         JavaConverters
                 .asJavaCollection(svg().findConflictingPaths())
