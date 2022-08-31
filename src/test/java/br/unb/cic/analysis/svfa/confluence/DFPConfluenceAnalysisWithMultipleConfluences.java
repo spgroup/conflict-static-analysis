@@ -8,9 +8,9 @@ import org.junit.Test;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class SVFAConfluenceAnalysisWithMultipleConfluences {
+public class DFPConfluenceAnalysisWithMultipleConfluences {
 
-    private SVFAConfluenceAnalysis analysis;
+    private DFPConfluenceAnalysis analysis;
     @Before
     public void configure() {
         AbstractMergeConflictDefinition definition = new AbstractMergeConflictDefinition() {
@@ -35,7 +35,7 @@ public class SVFAConfluenceAnalysisWithMultipleConfluences {
         };
 
         String cp = "target/test-classes";
-        analysis = new SVFAConfluenceAnalysis(cp, definition, true);
+        analysis = new DFPConfluenceAnalysis(cp, definition, true);
     }
 
     @Test

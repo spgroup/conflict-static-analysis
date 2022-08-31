@@ -1,9 +1,9 @@
 package br.unb.cic.analysis.svfa;
 
 
+import br.ufpe.cin.soot.graph.StatementNode;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.ufpe.cin.soot.graph.Graph;
-import br.ufpe.cin.soot.graph.LambdaNode;
 import br.unc.cic.analysis.test.DefinitionFactory;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -83,7 +83,7 @@ public class SVFATest {
     public void testSVFAnalysisInterProcedural2() {
         SVFAAnalysis analysis = configureInterTest(CLASS_NAME_INTERPROCEDURAL, new int[]{9}, new int[]{19});
         analysis.buildSparseValueFlowGraph();
-        for (List<LambdaNode> paths : analysis.findSourceSinkPaths()) {
+        for (List<StatementNode> paths : analysis.findSourceSinkPaths()) {
             System.out.println(String.join("-> ", paths.stream().map(n -> n.show()).collect(Collectors.toList())));
         }
         Assert.assertEquals(1, analysis.svg().reportConflicts().size());

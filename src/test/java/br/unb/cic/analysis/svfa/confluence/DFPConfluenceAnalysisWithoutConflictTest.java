@@ -7,9 +7,9 @@ import org.junit.Test;
 
 import java.util.*;
 
-public class SVFAConfluenceAnalysisWithoutConflictTest {
+public class DFPConfluenceAnalysisWithoutConflictTest {
 
-    private SVFAConfluenceAnalysis analysis;
+    private DFPConfluenceAnalysis analysis;
     @Before
     public void configure() {
         AbstractMergeConflictDefinition definition = new AbstractMergeConflictDefinition() {
@@ -33,7 +33,7 @@ public class SVFAConfluenceAnalysisWithoutConflictTest {
         };
 
         String cp = "target/test-classes";
-        analysis = new SVFAConfluenceAnalysis(cp, definition, true);
+        analysis = new DFPConfluenceAnalysis(cp, definition, true);
     }
 
     @Test

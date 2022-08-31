@@ -47,8 +47,8 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
      * Computes the source-sink paths
      * @return a set with a list of nodes that together builds a source-sink path.
      */
-    public Set<List<LambdaNode>> findSourceSinkPaths() {
-        Set<List<LambdaNode>> paths = new HashSet<>();
+    public Set<List<StatementNode>> findSourceSinkPaths() {
+        Set<List<StatementNode>> paths = new HashSet<>();
 
         JavaConverters
                 .asJavaCollection(svg().findConflictingPaths())
