@@ -7,9 +7,9 @@ import org.junit.Test;
 
 import java.util.*;
 
-public class SVFAConfluenceAnalysisBaseTest2 {
+public class DFPConfluenceAnalysisBaseTest {
 
-    private SVFAConfluenceAnalysis analysis;
+    private DFPConfluenceAnalysis analysis;
     @Before
     public void configure() {
         AbstractMergeConflictDefinition definition = new AbstractMergeConflictDefinition(true) {
@@ -17,8 +17,8 @@ public class SVFAConfluenceAnalysisBaseTest2 {
             protected Map<String, List<Integer>> sourceDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(6);
-                res.put("br.unb.cic.analysis.samples.ConfluenceBaseSample2", lines);
+                lines.add(9);
+                res.put("br.unb.cic.analysis.samples.ConfluenceBaseSample", lines);
                 return res;
             }
 
@@ -26,14 +26,14 @@ public class SVFAConfluenceAnalysisBaseTest2 {
             protected Map<String, List<Integer>> sinkDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(8);
-                res.put("br.unb.cic.analysis.samples.ConfluenceBaseSample2", lines);
+                lines.add(11);
+                res.put("br.unb.cic.analysis.samples.ConfluenceBaseSample", lines);
                 return res;
             }
         };
 
         String cp = "target/test-classes";
-        analysis = new SVFAConfluenceAnalysis(cp, definition, true);
+        analysis = new DFPConfluenceAnalysis(cp, definition, true);
     }
 
     @Test
