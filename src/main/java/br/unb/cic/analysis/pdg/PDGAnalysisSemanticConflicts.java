@@ -3,12 +3,10 @@ package br.unb.cic.analysis.pdg;
 import br.ufpe.cin.soot.analysis.jimple.JPDG;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Statement;
-import br.ufpe.cin.soot.graph.*;
-
+import br.unb.cic.soot.graph.*;
 import scala.collection.JavaConverters;
 import soot.SootMethod;
 import soot.Unit;
-
 import java.util.*;
 import java.util.stream.Collectors;
 

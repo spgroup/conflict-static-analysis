@@ -1,9 +1,8 @@
 package br.unb.cic.analysis.svfa;
 
-
-import br.ufpe.cin.soot.graph.StatementNode;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
-import br.ufpe.cin.soot.graph.Graph;
+import br.unb.cic.soot.graph.Graph;
+import br.unb.cic.soot.graph.StatementNode;
 import br.unc.cic.analysis.test.DefinitionFactory;
 import org.junit.Assert;
 import org.junit.Ignore;
