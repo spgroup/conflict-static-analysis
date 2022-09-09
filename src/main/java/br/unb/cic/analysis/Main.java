@@ -189,13 +189,13 @@ public class Main {
             case "dfp-inter":
                 runDFPAnalysis(classpath, true);
                 break;
-            case "pdg-sdg":
+            case "pdg":
                 runPDGAnalysis(classpath, true);
                 break;
             case "cd":
                 runCDAnalysis(classpath, true);
                 break;
-            case "pdg-sdg-e":
+            case "pdg-e":
                 runPDGAnalysis(classpath, false);
                 break;
             case "cd-e":
