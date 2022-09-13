@@ -4,6 +4,7 @@ import br.ufpe.cin.soot.analysis.jimple.JCD;
 import br.ufpe.cin.soot.graph.*;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Statement;
+import br.unb.cic.soot.graph.*;
 import scala.collection.JavaConverters;
 import soot.SootMethod;
 import soot.Unit;

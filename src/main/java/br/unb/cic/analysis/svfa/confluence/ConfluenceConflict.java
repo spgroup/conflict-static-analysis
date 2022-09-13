@@ -1,6 +1,7 @@
 package br.unb.cic.analysis.svfa.confluence;
 
-import br.ufpe.cin.soot.graph.StatementNode;
+import br.unb.cic.soot.graph.StatementNode;
+
 import java.util.List;
 import java.util.stream.Collectors;
 

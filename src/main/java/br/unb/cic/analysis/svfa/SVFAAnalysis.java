@@ -2,20 +2,18 @@ package br.unb.cic.analysis.svfa;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Statement;
-import br.ufpe.cin.soot.graph.*;
-import br.ufpe.cin.soot.analysis.jimple.JSVFA;
+import br.unb.cic.soot.graph.*;
+import br.unb.cic.soot.svfa.jimple.JSVFA;
 import scala.collection.JavaConverters;
 import soot.SootMethod;
 import soot.Unit;
-
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * An analysis wrapper around the Sparse value
  * flow analysis implementation.
  */
-public abstract class SVFAAnalysis extends JSVFA  {
+public abstract class SVFAAnalysis extends JSVFA {
 
     private String cp;
 

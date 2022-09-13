@@ -189,13 +189,13 @@ public class Main {
             case "dfp-inter":
                 runDFPAnalysis(classpath, true);
                 break;
-            case "pdg-sdg":
+            case "pdg":
                 runPDGAnalysis(classpath, true);
                 break;
             case "cd":
                 runCDAnalysis(classpath, true);
                 break;
-            case "pdg-sdg-e":
+            case "pdg-e":
                 runPDGAnalysis(classpath, false);
                 break;
             case "cd-e":
@@ -320,7 +320,6 @@ public class Main {
 
         saveTimeExecution(start);
 
-        System.out.println(analysis.pdg().toDotModel());
         System.out.println(analysis.findSourceSinkPaths());
         System.out.println(analysis.pdg().findConflictingPaths());
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsPDG())
@@ -340,7 +339,6 @@ public class Main {
 
         saveTimeExecution(start);
 
-        System.out.println(analysis.svgToDotModel());
         System.out.println(analysis.findSourceSinkPaths());
         System.out.println(analysis.svg().findConflictingPaths());
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
@@ -358,7 +356,6 @@ public class Main {
 
         saveTimeExecution(start);
 
-        System.out.println(analysis.cd().toDotModel());
         System.out.println(analysis.findSourceSinkPaths());
         System.out.println(analysis.cd().findConflictingPaths());
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsCD())
