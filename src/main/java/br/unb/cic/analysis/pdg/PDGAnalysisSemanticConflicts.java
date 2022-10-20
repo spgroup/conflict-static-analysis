@@ -38,7 +38,7 @@ public abstract class PDGAnalysisSemanticConflicts extends JPDG {
 
     @Override
     public scala.collection.immutable.List<String> getIncludeList() {
-        return JavaConverters.asScalaBuffer(Arrays.asList("java.util.*", "java.lang.*")).toList();
+        return JavaConverters.asScalaBuffer(Arrays.asList("java.util.*")).toList();
     }
 
     /**
