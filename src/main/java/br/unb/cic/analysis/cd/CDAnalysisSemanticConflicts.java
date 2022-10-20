@@ -35,13 +35,12 @@ public abstract class CDAnalysisSemanticConflicts extends JCD {
     @Override
     public String sootClassPath() {
         //TODO: what is the role of soot classPath here??
-        return "";
+        return cp;
     }
 
     @Override
     public scala.collection.immutable.List<String> getIncludeList() {
-        String[] array = new String[0];
-        return JavaConverters.asScalaBuffer(Arrays.asList(array)).toList();
+        return JavaConverters.asScalaBuffer(Arrays.asList("java.util.*", "java.lang.*")).toList();
     }
 
     /**
@@ -110,5 +109,11 @@ public abstract class CDAnalysisSemanticConflicts extends JCD {
 
     protected List<Statement> getSinkStatements() {
         return definition.getSinkStatements();
+    }
+
+
+    @Override
+    public final boolean isFieldSensitiveAnalysis() {
+        return true;
     }
 }
