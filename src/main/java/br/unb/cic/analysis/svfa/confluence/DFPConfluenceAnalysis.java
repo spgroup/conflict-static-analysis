@@ -38,6 +38,8 @@ public class DFPConfluenceAnalysis {
         sourceBaseAnalysis.buildDFP();
         Set<List<StatementNode>> sourceBasePaths = sourceBaseAnalysis.findSourceSinkPaths();
 
+        System.out.println(sourceBaseAnalysis.svgToDotModel());
+
         DFPAnalysisSemanticConflicts sinkBaseAnalysis = sinkBaseAnalysis(interprocedural);
         sinkBaseAnalysis.buildDFP();
         Set<List<StatementNode>> sinkBasePaths = sinkBaseAnalysis.findSourceSinkPaths();
