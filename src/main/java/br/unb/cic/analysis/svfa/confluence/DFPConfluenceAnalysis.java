@@ -38,6 +38,8 @@ public class DFPConfluenceAnalysis {
         sourceBaseAnalysis.buildDFP();
         Set<List<StatementNode>> sourceBasePaths = sourceBaseAnalysis.findSourceSinkPaths();
 
+        System.out.println(sourceBaseAnalysis.svgToDotModel());
+
         DFPAnalysisSemanticConflicts sinkBaseAnalysis = sinkBaseAnalysis(interprocedural);
         sinkBaseAnalysis.buildDFP();
         Set<List<StatementNode>> sinkBasePaths = sinkBaseAnalysis.findSourceSinkPaths();
@@ -125,15 +127,6 @@ public class DFPConfluenceAnalysis {
                 return interprocedural;
             }
 
-            @Override
-            public boolean propagateObjectTaint() {
-                return true;
-            }
-
-            @Override
-            public final boolean isFieldSensitiveAnalysis() {
-                return true;
-            }
         };
     }
 
@@ -170,15 +163,7 @@ public class DFPConfluenceAnalysis {
                 return interprocedural;
             }
 
-            @Override
-            public boolean propagateObjectTaint() {
-                return true;
-            }
 
-            @Override
-            public final boolean isFieldSensitiveAnalysis() {
-                return true;
-            }
         };
     }
 

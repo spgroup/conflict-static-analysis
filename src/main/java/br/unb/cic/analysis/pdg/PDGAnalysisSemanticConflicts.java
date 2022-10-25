@@ -33,13 +33,12 @@ public abstract class PDGAnalysisSemanticConflicts extends JPDG {
     @Override
     public String sootClassPath() {
         //TODO: what is the role of soot classPath here??
-        return "";
+        return cp;
     }
 
     @Override
     public scala.collection.immutable.List<String> getIncludeList() {
-        String[] array = new String[0];
-        return JavaConverters.asScalaBuffer(Arrays.asList(array)).toList();
+        return JavaConverters.asScalaBuffer(Arrays.asList("java.util.*")).toList();
     }
 
     /**
@@ -108,6 +107,16 @@ public abstract class PDGAnalysisSemanticConflicts extends JPDG {
 
     protected List<Statement> getSinkStatements() {
         return definition.getSinkStatements();
+    }
+
+    @Override
+    public boolean propagateObjectTaint() {
+        return true;
+    }
+
+    @Override
+    public final boolean isFieldSensitiveAnalysis() {
+        return true;
     }
 
 }

@@ -1,6 +1,5 @@
 package br.unb.cic.analysis.pdg;
 
-
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 
 public class PDGIntraProcedural extends PDGAnalysisSemanticConflicts {
@@ -13,18 +12,4 @@ public class PDGIntraProcedural extends PDGAnalysisSemanticConflicts {
         return false;
     }
 
-    @Override
-    public boolean intraprocedural() {
-        return true;
-    }
-
-    @Override
-    public boolean propagateObjectTaint() {
-        return false;
-    }
-
-    @Override
-    public final boolean isFieldSensitiveAnalysis() {
-        return true;
-    }
 }

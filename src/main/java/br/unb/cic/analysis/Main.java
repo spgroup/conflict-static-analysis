@@ -319,7 +319,7 @@ public class Main {
         analysis.buildPDG(cd, dfp);
 
         saveTimeExecution(start);
-
+        System.out.println(analysis.pdgToDotModel());
         System.out.println(analysis.findSourceSinkPaths());
         System.out.println(analysis.pdg().findConflictingPaths());
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsPDG())
@@ -338,7 +338,7 @@ public class Main {
         analysis.buildDFP();
 
         saveTimeExecution(start);
-
+        System.out.println(analysis.svgToDotModel());
         System.out.println(analysis.findSourceSinkPaths());
         System.out.println(analysis.svg().findConflictingPaths());
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
@@ -355,7 +355,7 @@ public class Main {
         analysis.buildCD();
 
         saveTimeExecution(start);
-
+        System.out.println(analysis.cdToDotModel());
         System.out.println(analysis.findSourceSinkPaths());
         System.out.println(analysis.cd().findConflictingPaths());
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsCD())
@@ -401,6 +401,7 @@ public class Main {
         DFPConfluenceAnalysis analysis = new DFPConfluenceAnalysis(classpath, this.definition, interprocedural);
 
         analysis.execute();
+
         conflicts.addAll(analysis.getConfluentConflicts()
                 .stream()
                 .map(p -> p.toString())
