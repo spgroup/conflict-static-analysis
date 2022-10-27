@@ -327,6 +327,16 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
     }
 
     @Test
+    public void pointsToConflict() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{11}, new int[]{13});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(0, analysis.getConflicts().size());
+    }
+
+    @Test
     public void changeInstanceAttributeConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.ChangeInstanceAttributeConflictSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
