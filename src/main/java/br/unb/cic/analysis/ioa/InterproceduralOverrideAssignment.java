@@ -28,13 +28,11 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private int depthLimit;
     private Set<Conflict> conflicts;
-    private PointsToAnalysis pointsToAnalysis;
     private List<SootMethod> traversedMethods;
     private AbstractMergeConflictDefinition definition;
     private FlowSet<DataFlowAbstraction> left;
     private FlowSet<DataFlowAbstraction> right;
     private List<TraversedLine> stacktraceList;
-
     private Logger logger;
 
     public InterproceduralOverrideAssignment(AbstractMergeConflictDefinition definition) {
@@ -56,9 +54,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         this.left = new ArraySparseSet<>();
         this.right = new ArraySparseSet<>();
         this.traversedMethods = new ArrayList<>();
-        this.pointsToAnalysis = Scene.v().getPointsToAnalysis();
         this.stacktraceList = new ArrayList<>();
-
         this.logger = Logger.getLogger(
                 InterproceduralOverrideAssignment.class.getName());
     }
@@ -413,8 +409,12 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     private boolean containsValue(DataFlowAbstraction dataFlowAbstraction, Value value) throws ValueNotHandledException {
+
         if (dataFlowAbstraction.getValue() instanceof InstanceFieldRef && value instanceof InstanceFieldRef) {
-            return ((InstanceFieldRef) dataFlowAbstraction.getValue()).getFieldRef().getSignature().equals(((InstanceFieldRef) value).getFieldRef().getSignature());
+            InstanceFieldRef fromDataFlowAbstraction = (InstanceFieldRef) dataFlowAbstraction.getValue();
+            InstanceFieldRef fromValue = (InstanceFieldRef) value;
+            return compareSignature(fromDataFlowAbstraction.getFieldRef(), fromValue.getFieldRef())
+                    && comparePointsToHasNonEmptyIntersection(fromDataFlowAbstraction, fromValue);
         }
         if (dataFlowAbstraction.getValue() instanceof Local && value instanceof Local) {
             return dataFlowAbstraction.getValue().equals(value);
@@ -423,13 +423,26 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             return dataFlowAbstraction.getValue().equals(value);
         }
         if (dataFlowAbstraction.getValue() instanceof StaticFieldRef && value instanceof StaticFieldRef) {
-            return ((StaticFieldRef) dataFlowAbstraction.getValue()).getFieldRef().getSignature().equals(((StaticFieldRef) value).getFieldRef().getSignature());
+            StaticFieldRef fromDataFlowAbstraction = (StaticFieldRef) dataFlowAbstraction.getValue();
+            StaticFieldRef fromValue = (StaticFieldRef) value;
+            return compareSignature(fromDataFlowAbstraction.getFieldRef(), fromValue.getFieldRef());
         }
         if (!dataFlowAbstraction.getValue().getClass().equals(value.getClass())) {
             return false;
         }
 
         throw new ValueNotHandledException("Value Not Handled");
+    }
+
+    private boolean compareSignature(SootFieldRef fromDataFlowAbstraction, SootFieldRef fromValue) {
+        return fromDataFlowAbstraction.getSignature()
+                .equals(fromValue.getSignature());
+    }
+
+    private boolean comparePointsToHasNonEmptyIntersection(InstanceFieldRef fromDataFlowAbstraction, InstanceFieldRef fromValue) {
+        PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
+        return pointsToAnalysis.reachingObjects((Local) fromDataFlowAbstraction.getBase())
+                .hasNonEmptyIntersection(pointsToAnalysis.reachingObjects((Local) fromValue.getBase()));
     }
 
     private String getArrayRefName(ArrayRef arrayRef) {
