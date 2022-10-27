@@ -184,12 +184,12 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             Chain<SootField> sootFieldsInClass = sootMethod.getDeclaringClass().getFields();
 
             sootFieldsInClass.forEach(sootField -> {
-                trasformFieldsIntoStatements(in, sootMethod, flowChangeTag, sootField);
+                transformFieldsIntoStatements(in, sootMethod, flowChangeTag, sootField);
             });
         }
     }
 
-    private void trasformFieldsIntoStatements(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod, Statement.Type flowChangeTag, SootField sootField) {
+    private void transformFieldsIntoStatements(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod, Statement.Type flowChangeTag, SootField sootField) {
         String declaringClassShortName = sootField.getDeclaringClass().getShortName();
         String formatName =
                 declaringClassShortName.substring(0, 1).toLowerCase() + declaringClassShortName.substring(1);

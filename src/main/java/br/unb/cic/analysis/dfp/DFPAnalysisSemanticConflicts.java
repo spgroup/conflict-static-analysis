@@ -1,9 +1,9 @@
 package br.unb.cic.analysis.dfp;
 
 import br.ufpe.cin.soot.analysis.jimple.JDFP;
-import br.ufpe.cin.soot.graph.*;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Statement;
+import br.unb.cic.soot.graph.*;
 import scala.collection.JavaConverters;
 import soot.SootMethod;
 import soot.Unit;
@@ -34,13 +34,12 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
     @Override
     public String sootClassPath() {
         //TODO: what is the role of soot classPath here??
-        return "";
+        return cp;
     }
 
     @Override
     public scala.collection.immutable.List<String> getIncludeList() {
-        String[] array = new String[0];
-        return JavaConverters.asScalaBuffer(Arrays.asList(array)).toList();
+        return JavaConverters.asScalaBuffer(Arrays.asList("java.util.*")).toList();
     }
 
     /**
@@ -111,4 +110,13 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
         return definition.getSinkStatements();
     }
 
+    @Override
+    public boolean propagateObjectTaint() {
+        return true;
+    }
+
+    @Override
+    public final boolean isFieldSensitiveAnalysis() {
+        return true;
+    }
 }

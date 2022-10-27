@@ -1,8 +1,9 @@
 package br.unb.cic.analysis.svfa.confluence;
-import br.ufpe.cin.soot.graph.StatementNode;
+
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts;
 import br.unb.cic.analysis.model.Statement;
+import br.unb.cic.soot.graph.StatementNode;
 import soot.Unit;
 
 import java.util.*;
@@ -37,6 +38,8 @@ public class DFPConfluenceAnalysis {
         sourceBaseAnalysis.buildDFP();
         Set<List<StatementNode>> sourceBasePaths = sourceBaseAnalysis.findSourceSinkPaths();
 
+        System.out.println(sourceBaseAnalysis.svgToDotModel());
+
         DFPAnalysisSemanticConflicts sinkBaseAnalysis = sinkBaseAnalysis(interprocedural);
         sinkBaseAnalysis.buildDFP();
         Set<List<StatementNode>> sinkBasePaths = sinkBaseAnalysis.findSourceSinkPaths();
@@ -62,8 +65,9 @@ public class DFPConfluenceAnalysis {
         for (List<StatementNode> path : paths2) {
             StatementNode lastNode = getLastNode(path);
 
-            if (containsKey(pathEndHash, lastNode)) {
-                result.add(new ConfluenceConflict(pathEndHash.get(lastNode), path));
+            StatementNode stmt = containsKey(pathEndHash, lastNode);
+            if (stmt!= null) {
+                result.add(new ConfluenceConflict(pathEndHash.get(stmt), path));
             }
         }
 
@@ -71,13 +75,13 @@ public class DFPConfluenceAnalysis {
     }
 
 
-    public boolean containsKey(Map<StatementNode, List<StatementNode>> pathEndHash, StatementNode lastNode){
+    public StatementNode containsKey(Map<StatementNode, List<StatementNode>> pathEndHash, StatementNode lastNode){
         for (StatementNode stmt: pathEndHash.keySet()){
             if (lastNode.equals(stmt)) {
-                return true;
+                return stmt;
             }
         }
-        return false;
+        return null;
     }
 
     /**
@@ -123,15 +127,6 @@ public class DFPConfluenceAnalysis {
                 return interprocedural;
             }
 
-            @Override
-            public boolean propagateObjectTaint() {
-                return true;
-            }
-
-            @Override
-            public final boolean isFieldSensitiveAnalysis() {
-                return true;
-            }
         };
     }
 
@@ -168,15 +163,7 @@ public class DFPConfluenceAnalysis {
                 return interprocedural;
             }
 
-            @Override
-            public boolean propagateObjectTaint() {
-                return true;
-            }
 
-            @Override
-            public final boolean isFieldSensitiveAnalysis() {
-                return true;
-            }
         };
     }
 

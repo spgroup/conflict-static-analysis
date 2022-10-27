@@ -4,6 +4,7 @@ import br.ufpe.cin.soot.analysis.jimple.JCD;
 import br.ufpe.cin.soot.graph.*;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Statement;
+import br.unb.cic.soot.graph.*;
 import scala.collection.JavaConverters;
 import soot.SootMethod;
 import soot.Unit;
@@ -34,13 +35,12 @@ public abstract class CDAnalysisSemanticConflicts extends JCD {
     @Override
     public String sootClassPath() {
         //TODO: what is the role of soot classPath here??
-        return "";
+        return cp;
     }
 
     @Override
     public scala.collection.immutable.List<String> getIncludeList() {
-        String[] array = new String[0];
-        return JavaConverters.asScalaBuffer(Arrays.asList(array)).toList();
+        return JavaConverters.asScalaBuffer(Arrays.asList("java.util.*")).toList();
     }
 
     /**
@@ -109,5 +109,11 @@ public abstract class CDAnalysisSemanticConflicts extends JCD {
 
     protected List<Statement> getSinkStatements() {
         return definition.getSinkStatements();
+    }
+
+
+    @Override
+    public final boolean isFieldSensitiveAnalysis() {
+        return true;
     }
 }
