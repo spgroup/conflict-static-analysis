@@ -324,7 +324,7 @@ public class Main {
         System.out.println(analysis.pdg().findConflictingPaths());
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsPDG())
                 .stream()
-                .map(p -> p.toString())
+                .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
     }
 
@@ -343,7 +343,7 @@ public class Main {
         System.out.println(analysis.svg().findConflictingPaths());
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
                 .stream()
-                .map(p -> p.toString())
+                .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
     }
 
@@ -360,7 +360,7 @@ public class Main {
         System.out.println(analysis.cd().findConflictingPaths());
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsCD())
                 .stream()
-                .map(p -> p.toString())
+                .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
     }
 
@@ -392,7 +392,7 @@ public class Main {
 
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
                 .stream()
-                .map(p -> p.toString())
+                .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
     }
 
@@ -404,7 +404,7 @@ public class Main {
 
         conflicts.addAll(analysis.getConfluentConflicts()
                 .stream()
-                .map(p -> p.toString())
+                .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
     }
 
@@ -483,4 +483,7 @@ public class Main {
         }
     }
 
+    public String formatConflict(String p){
+        return p.replace("), Node", ") => Node");
+    }
 }
