@@ -5,13 +5,10 @@ import br.unb.cic.analysis.SootWrapper;
 import br.unc.cic.analysis.test.DefinitionFactory;
 import org.junit.Assert;
 import org.junit.Test;
-import scala.collection.JavaConverters;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class DFPTest{
 
@@ -29,7 +26,7 @@ public class DFPTest{
 
     @Test
     public void testDFPAnalysisInterProcedural() {
-        DFPAnalysisSemanticConflicts analysis = configureInterTestDFP(CLASS_NAME, new int[]{10}, new int[]{12});
+        DFPAnalysisSemanticConflicts analysis = configureInterTestDFP(CLASS_NAME, new int[]{8}, new int[]{10});
 
         analysis.buildDFP();
 

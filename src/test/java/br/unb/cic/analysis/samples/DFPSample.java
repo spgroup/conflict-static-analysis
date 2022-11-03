@@ -1,8 +1,6 @@
 package br.unb.cic.analysis.samples;
 
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 
 public class DFPSample {
     public static void main(){
