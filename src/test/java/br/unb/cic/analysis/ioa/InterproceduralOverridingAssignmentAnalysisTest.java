@@ -327,6 +327,46 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
     }
 
     @Test
+    public void pointsToSameArray() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToSameArraySample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{8}, new int[]{10});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void pointsToSameArrayIndex() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToSameArrayDifferentIndexSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{8}, new int[]{10});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void pointsToSameArrayIndexSample() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToSameArrayIndexSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{8}, new int[]{10});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void pointsToOnlyOneObjectFromParametersWithMain() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToOnlyOneObjectFromParametersWithMainSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{12}, new int[]{14});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    @Test
     public void pointsToConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToSameObjectSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
@@ -344,6 +384,76 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
         Assert.assertEquals(0, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void pointsToDifferentObjectFromParameters() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToDifferentObjectFromParametersSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{7}, new int[]{9});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(0, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void pointsToDifferentObjectFromParametersWithMain() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToDifferentObjectFromParametersWithMainSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{11}, new int[]{13});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(0, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void pointsToSameObjectFromParametersWithMain() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToSameObjectFromParametersWithMainSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{11}, new int[]{13});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void pointsToSameObjectFromParameters() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToSameObjectFromParametersSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{7}, new int[]{9});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void pointsToSameObjectFromParameters2() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToSameObjectFromParametersSample2";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{7}, new int[]{9});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(0, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void pointsToSameObjectFromParameters3() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToSameObjectFromParametersSample3";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{7}, new int[]{9});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(0, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void pointsToSameObjectFromParameters4() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToSameObjectFromParametersSample4";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{7}, new int[]{9});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
     @Test

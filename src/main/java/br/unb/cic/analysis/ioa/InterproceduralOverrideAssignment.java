@@ -116,7 +116,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
         for (Conflict conflict : conflictsResults) {
 
-            if (!hasConflictWithSameSourceAndSinkRootTraversedLine(conflictsFilter, conflict)) {
+            if (!hasConflictWithSameSourceAndSinkRootTraversedLine(conflictsFilter, conflict) && !conflict.getSourceClassName().contains("java.lang.Integer")) {
                 conflictsFilter.add(conflict);
             }
         }
@@ -419,16 +419,13 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private boolean containsValue(DataFlowAbstraction dataFlowAbstraction, Value value) throws ValueNotHandledException {
 
         if (dataFlowAbstraction.getValue() instanceof InstanceFieldRef && value instanceof InstanceFieldRef) {
-            InstanceFieldRef fromDataFlowAbstraction = (InstanceFieldRef) dataFlowAbstraction.getValue();
-            InstanceFieldRef fromValue = (InstanceFieldRef) value;
-            return compareSignature(fromDataFlowAbstraction.getFieldRef(), fromValue.getFieldRef())
-                    && comparePointsToHasNonEmptyIntersection(fromDataFlowAbstraction, fromValue);
+            return compareInstanceFieldRef(dataFlowAbstraction, value);
         }
         if (dataFlowAbstraction.getValue() instanceof Local && value instanceof Local) {
             return dataFlowAbstraction.getValue().equals(value);
         }
         if (dataFlowAbstraction.getValue() instanceof ArrayRef && value instanceof ArrayRef) {
-            return dataFlowAbstraction.getValue().equals(value);
+            return compareArrayRef(dataFlowAbstraction, value);
         }
         if (dataFlowAbstraction.getValue() instanceof StaticFieldRef && value instanceof StaticFieldRef) {
             StaticFieldRef fromDataFlowAbstraction = (StaticFieldRef) dataFlowAbstraction.getValue();
@@ -440,6 +437,25 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         }
 
         throw new ValueNotHandledException("Value Not Handled");
+    }
+
+    private boolean compareInstanceFieldRef(DataFlowAbstraction dataFlowAbstraction, Value value) {
+        InstanceFieldRef fromDataFlowAbstraction = (InstanceFieldRef) dataFlowAbstraction.getValue();
+        InstanceFieldRef fromValue = (InstanceFieldRef) value;
+        return fromDataFlowAbstraction.toString().equals(fromValue.toString())
+                || (compareSignature(fromDataFlowAbstraction.getFieldRef(), fromValue.getFieldRef())
+                && comparePointsToHasNonEmptyIntersection((Local) fromDataFlowAbstraction.getBase(),
+                (Local) fromValue.getBase()));
+    }
+
+    /**
+     * Compare whether arrays have the same reference using pointsToAnalysis and ignoring the index
+     */
+    private boolean compareArrayRef(DataFlowAbstraction dataFlowAbstraction, Value value) {
+        ArrayRef fromDataFlowAbstraction = (ArrayRef) dataFlowAbstraction.getValue();
+        ArrayRef fromValue = (ArrayRef) value;
+        return comparePointsToHasNonEmptyIntersection((Local) fromDataFlowAbstraction.getBase(),
+                (Local) fromValue.getBase());
     }
 
     /**
@@ -462,10 +478,10 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
      * @param fromValue               InstanceFieldRef coming from the analyzed variable
      * @return true if an intersection exists
      */
-    private boolean comparePointsToHasNonEmptyIntersection(InstanceFieldRef fromDataFlowAbstraction, InstanceFieldRef fromValue) {
+    private boolean comparePointsToHasNonEmptyIntersection(Local fromDataFlowAbstraction, Local fromValue) {
         PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
-        return pointsToAnalysis.reachingObjects((Local) fromDataFlowAbstraction.getBase())
-                .hasNonEmptyIntersection(pointsToAnalysis.reachingObjects((Local) fromValue.getBase()));
+        return pointsToAnalysis.reachingObjects(fromDataFlowAbstraction)
+                .hasNonEmptyIntersection(pointsToAnalysis.reachingObjects(fromValue));
     }
 
     private String getArrayRefName(ArrayRef arrayRef) {
