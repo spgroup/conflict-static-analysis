@@ -28,13 +28,11 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private int depthLimit;
     private Set<Conflict> conflicts;
-    private PointsToAnalysis pointsToAnalysis;
     private List<SootMethod> traversedMethods;
     private AbstractMergeConflictDefinition definition;
     private FlowSet<DataFlowAbstraction> left;
     private FlowSet<DataFlowAbstraction> right;
     private List<TraversedLine> stacktraceList;
-
     private Logger logger;
 
     public InterproceduralOverrideAssignment(AbstractMergeConflictDefinition definition) {
@@ -56,9 +54,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         this.left = new ArraySparseSet<>();
         this.right = new ArraySparseSet<>();
         this.traversedMethods = new ArrayList<>();
-        this.pointsToAnalysis = Scene.v().getPointsToAnalysis();
         this.stacktraceList = new ArrayList<>();
-
         this.logger = Logger.getLogger(
                 InterproceduralOverrideAssignment.class.getName());
     }
@@ -120,7 +116,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
         for (Conflict conflict : conflictsResults) {
 
-            if (!hasConflictWithSameSourceAndSinkRootTraversedLine(conflictsFilter, conflict)) {
+            if (!hasConflictWithSameSourceAndSinkRootTraversedLine(conflictsFilter, conflict) && !conflict.getSourceClassName().contains("java.lang.Integer")) {
                 conflictsFilter.add(conflict);
             }
         }
@@ -128,9 +124,9 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
 
-    private boolean hasConflictWithSameSourceAndSinkRootTraversedLine( Set<Conflict> conflictsFilter, Conflict conflict) {
+    private boolean hasConflictWithSameSourceAndSinkRootTraversedLine(Set<Conflict> conflictsFilter, Conflict conflict) {
         for (Conflict c : conflictsFilter) {
-            if (c.conflictsHaveSameSourceAndSinkRootTraversedLine(conflict)){
+            if (c.conflictsHaveSameSourceAndSinkRootTraversedLine(conflict)) {
                 return true;
             }
         }
@@ -412,24 +408,80 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         rightOrLeftList.difference(itemsToRemoved);
     }
 
+    /**
+     * This method checks for each type of variable analyzed if it exists within the abstraction.
+     *
+     * @param dataFlowAbstraction One of the items contained in the abstraction
+     * @param value               Variable to be analyzed.
+     * @return true if the variable exists in the abstraction and false if it does not.
+     * @throws ValueNotHandledException Exception thrown when variable type is not cataloged.
+     */
     private boolean containsValue(DataFlowAbstraction dataFlowAbstraction, Value value) throws ValueNotHandledException {
+
         if (dataFlowAbstraction.getValue() instanceof InstanceFieldRef && value instanceof InstanceFieldRef) {
-            return ((InstanceFieldRef) dataFlowAbstraction.getValue()).getFieldRef().getSignature().equals(((InstanceFieldRef) value).getFieldRef().getSignature());
+            return compareInstanceFieldRef(dataFlowAbstraction, value);
         }
         if (dataFlowAbstraction.getValue() instanceof Local && value instanceof Local) {
             return dataFlowAbstraction.getValue().equals(value);
         }
         if (dataFlowAbstraction.getValue() instanceof ArrayRef && value instanceof ArrayRef) {
-            return dataFlowAbstraction.getValue().equals(value);
+            return compareArrayRef(dataFlowAbstraction, value);
         }
         if (dataFlowAbstraction.getValue() instanceof StaticFieldRef && value instanceof StaticFieldRef) {
-            return ((StaticFieldRef) dataFlowAbstraction.getValue()).getFieldRef().getSignature().equals(((StaticFieldRef) value).getFieldRef().getSignature());
+            StaticFieldRef fromDataFlowAbstraction = (StaticFieldRef) dataFlowAbstraction.getValue();
+            StaticFieldRef fromValue = (StaticFieldRef) value;
+            return compareSignature(fromDataFlowAbstraction.getFieldRef(), fromValue.getFieldRef());
         }
         if (!dataFlowAbstraction.getValue().getClass().equals(value.getClass())) {
             return false;
         }
 
         throw new ValueNotHandledException("Value Not Handled");
+    }
+
+    private boolean compareInstanceFieldRef(DataFlowAbstraction dataFlowAbstraction, Value value) {
+        InstanceFieldRef fromDataFlowAbstraction = (InstanceFieldRef) dataFlowAbstraction.getValue();
+        InstanceFieldRef fromValue = (InstanceFieldRef) value;
+        return fromDataFlowAbstraction.toString().equals(fromValue.toString())
+                || (compareSignature(fromDataFlowAbstraction.getFieldRef(), fromValue.getFieldRef())
+                && comparePointsToHasNonEmptyIntersection((Local) fromDataFlowAbstraction.getBase(),
+                (Local) fromValue.getBase()));
+    }
+
+    /**
+     * Compare whether arrays have the same reference using pointsToAnalysis and ignoring the index
+     */
+    private boolean compareArrayRef(DataFlowAbstraction dataFlowAbstraction, Value value) {
+        ArrayRef fromDataFlowAbstraction = (ArrayRef) dataFlowAbstraction.getValue();
+        ArrayRef fromValue = (ArrayRef) value;
+        return comparePointsToHasNonEmptyIntersection((Local) fromDataFlowAbstraction.getBase(),
+                (Local) fromValue.getBase());
+    }
+
+    /**
+     * This method compares the FieldRef (Ex: <Object: java.lang.Integer x>) signature textually.
+     *
+     * @param fromDataFlowAbstraction SootFieldRef coming from abstraction
+     * @param fromValue               SootFieldRef coming from the analyzed variable
+     * @return true if the signature is the same and false if it is different
+     */
+    private boolean compareSignature(SootFieldRef fromDataFlowAbstraction, SootFieldRef fromValue) {
+        return fromDataFlowAbstraction.getSignature()
+                .equals(fromValue.getSignature());
+    }
+
+    /**
+     * This method compares whether two objects can point to the same memory address using pointsToAnalysis.
+     * This method uses only the InstanceFieldRef base. Ex: in an expression o.x, o is the base.
+     *
+     * @param fromDataFlowAbstraction InstanceFieldRef coming from abstraction
+     * @param fromValue               InstanceFieldRef coming from the analyzed variable
+     * @return true if an intersection exists
+     */
+    private boolean comparePointsToHasNonEmptyIntersection(Local fromDataFlowAbstraction, Local fromValue) {
+        PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
+        return pointsToAnalysis.reachingObjects(fromDataFlowAbstraction)
+                .hasNonEmptyIntersection(pointsToAnalysis.reachingObjects(fromValue));
     }
 
     private String getArrayRefName(ArrayRef arrayRef) {
