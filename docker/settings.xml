@@ -1,0 +1,51 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+    <activeProfiles>
+        <activeProfile>github</activeProfile>
+    </activeProfiles>
+
+    <profiles>
+        <profile>
+            <id>github</id>
+            <repositories>
+                <repository>
+                    <id>central</id>
+                    <url>https://repo1.maven.org/maven2</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+                <repository>
+                    <id>spg</id>
+                    <name>spgroup</name>
+                    <url>https://maven.pkg.github.com/spgroup/soot</url>
+                </repository>
+                <repository>
+                    <id>svfa</id>
+                    <name>svfa repository</name>
+                    <url>https://maven.pkg.github.com/rbonifacio/svfa-scala</url>
+                </repository>
+
+            </repositories>
+        </profile>
+    </profiles>
+
+    <servers>
+        <server>
+            <id>spg</id>
+            <username>barbosamaatheus</username>
+            <password>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</password>
+        </server>
+        <server>
+            <id>svfa</id>
+            <username>barbosamaatheus</username>
+            <password>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</password>
+        </server>
+    </servers>
+</settings>
