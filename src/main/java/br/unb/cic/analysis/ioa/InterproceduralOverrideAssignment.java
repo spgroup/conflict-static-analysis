@@ -363,7 +363,11 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     private void addStmtToList(Statement stmt, FlowSet<DataFlowAbstraction> rightOrLeftList) {
-        stmt.getUnit().getDefBoxes().forEach(valueBox -> rightOrLeftList.add(new DataFlowAbstraction(valueBox.getValue(), stmt)));
+        this.map.put(stmt.getUnit().getUseAndDefBoxes().get(0).getValue(), stmt.getUnit().getUseAndDefBoxes().get(1).getValue());
+        stmt.getUnit().getDefBoxes().forEach(valueBox -> {
+            rightOrLeftList.add(new DataFlowAbstraction(valueBox.getValue(), stmt));
+        });
+
     }
 
     /*
@@ -442,6 +446,12 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             return comparePointsToHasNonEmptyIntersection((Local) dataFlowAbstraction.getValue(),
                     (Local) ((InstanceFieldRef) value).getBase());
         }
+
+        if (dataFlowAbstraction.getValue() instanceof Local && value instanceof InstanceFieldRef) {
+            return comparePointsToHasNonEmptyIntersection((Local) dataFlowAbstraction.getValue(),
+                    (Local) ((InstanceFieldRef) value).getBase());
+        }
+
         if (!dataFlowAbstraction.getValue().getClass().equals(value.getClass())) {
             return false;
         }
@@ -450,8 +460,19 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     private boolean compareInstanceFieldRef(DataFlowAbstraction dataFlowAbstraction, Value value) {
+        PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
         InstanceFieldRef fromDataFlowAbstraction = (InstanceFieldRef) dataFlowAbstraction.getValue();
         InstanceFieldRef fromValue = (InstanceFieldRef) value;
+
+        if (this.map.get(fromValue.getBase()) != null) {
+            return pointsToAnalysis.reachingObjects(
+                            (Local) ((InstanceFieldRef) this.map.get(fromValue.getBase())).getBase(),
+                            ((InstanceFieldRef) this.map.get(fromValue.getBase())).getField())
+                    .hasNonEmptyIntersection(
+                            pointsToAnalysis.reachingObjects(
+                                    (Local) fromDataFlowAbstraction.getBase(),
+                                    fromDataFlowAbstraction.getField()));
+        }
         return fromDataFlowAbstraction.toString().equals(fromValue.toString())
                 || comparePointsToHasNonEmptyIntersection((Local) fromDataFlowAbstraction.getBase(),
                 (Local) fromValue.getBase())
