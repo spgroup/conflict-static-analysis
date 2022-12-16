@@ -318,7 +318,7 @@ public class Main {
 
         analysis.buildPDG(cd, dfp);
 
-        saveTimeExecution(start);
+        saveExecutionTime(start);
 
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsPDG())
                 .stream()
@@ -338,7 +338,7 @@ public class Main {
 
         analysis.buildDFP();
 
-        saveTimeExecution(start);
+        saveExecutionTime(start);
 
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
                 .stream()
@@ -356,7 +356,7 @@ public class Main {
 
         analysis.buildCD();
 
-        saveTimeExecution(start);
+        saveExecutionTime(start);
 
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsCD())
                 .stream()
@@ -472,7 +472,7 @@ public class Main {
             map.put(change.getKey(), lines);
         }
     }
-    public void saveTimeExecution(long start){
+    public void saveExecutionTime(long start){
         long end = System.currentTimeMillis();
 
         NumberFormat formatter = new DecimalFormat("#0.00000");
