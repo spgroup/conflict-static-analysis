@@ -45,6 +45,8 @@ public class DFPConfluenceAnalysis {
         Set<List<StatementNode>> sinkBasePaths = sinkBaseAnalysis.findSourceSinkPaths();
 
         confluentFlows = intersectPathsByLastNode(sourceBasePaths, sinkBasePaths);
+
+        System.out.println(confluentFlows.toString());
     }
 
     /**

@@ -318,14 +318,15 @@ public class Main {
 
         analysis.buildPDG(cd, dfp);
 
-        saveTimeExecution(start);
-        System.out.println(analysis.pdgToDotModel());
-        System.out.println(analysis.findSourceSinkPaths());
-        System.out.println(analysis.pdg().findConflictingPaths());
+        saveExecutionTime(start);
+
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsPDG())
                 .stream()
-                .map(p -> p.toString())
+                .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
+        System.out.println(conflicts.toString());
+
+        System.out.println(analysis.pdgToDotModel());
     }
 
     private void runDFPAnalysis(String classpath, Boolean interprocedural) {
@@ -337,14 +338,15 @@ public class Main {
 
         analysis.buildDFP();
 
-        saveTimeExecution(start);
-        System.out.println(analysis.svgToDotModel());
-        System.out.println(analysis.findSourceSinkPaths());
-        System.out.println(analysis.svg().findConflictingPaths());
+        saveExecutionTime(start);
+
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
                 .stream()
-                .map(p -> p.toString())
+                .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
+        System.out.println(conflicts.toString());
+
+        System.out.println(analysis.svgToDotModel());
     }
 
     private void runCDAnalysis(String classpath, Boolean omitExceptingUnitEdges) {
@@ -354,31 +356,15 @@ public class Main {
 
         analysis.buildCD();
 
-        saveTimeExecution(start);
-        System.out.println(analysis.cdToDotModel());
-        System.out.println(analysis.findSourceSinkPaths());
-        System.out.println(analysis.cd().findConflictingPaths());
+        saveExecutionTime(start);
+
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsCD())
                 .stream()
-                .map(p -> p.toString())
+                .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
-    }
+        System.out.println(conflicts.toString());
 
-    public void saveTimeExecution(long start){
-        long end = System.currentTimeMillis();
-
-        NumberFormat formatter = new DecimalFormat("#0.00000");
-
-        time = (end - start);
-        try {
-            FileWriter myWriter = new FileWriter("time.txt", true);
-            myWriter.write(formatter.format(time/1000d)+"\n");
-            System.out.println("Time:"+formatter.format(time/1000d));
-            myWriter.close();
-        } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-        }
+        System.out.println(analysis.cdToDotModel());
     }
 
     private void runSparseValueFlowAnalysis(String classpath, boolean interprocedural) {
@@ -392,8 +378,11 @@ public class Main {
 
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
                 .stream()
-                .map(p -> p.toString())
+                .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
+        System.out.println(conflicts.toString());
+
+        System.out.println(analysis.svgToDotModel());
     }
 
     private void runDFPConfluenceAnalysis(String classpath, boolean interprocedural) {
@@ -404,8 +393,9 @@ public class Main {
 
         conflicts.addAll(analysis.getConfluentConflicts()
                 .stream()
-                .map(p -> p.toString())
+                .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
+        System.out.println(conflicts.toString());
     }
 
     private void loadDefinition(String filePath) throws Exception {
@@ -482,5 +472,24 @@ public class Main {
             map.put(change.getKey(), lines);
         }
     }
+    public void saveExecutionTime(long start){
+        long end = System.currentTimeMillis();
 
+        NumberFormat formatter = new DecimalFormat("#0.00000");
+
+        time = (end - start);
+        try {
+            FileWriter myWriter = new FileWriter("time.txt", true);
+            myWriter.write(formatter.format(time/1000d)+"\n");
+            System.out.println("Time:"+formatter.format(time/1000d));
+            myWriter.close();
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+    }
+
+    public String formatConflict(String p){
+        return p.replace("), Node", ") => Node");
+    }
 }

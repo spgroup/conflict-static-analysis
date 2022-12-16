@@ -1,34 +1,40 @@
 package br.unb.cic.analysis.dfp;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
-import br.unb.cic.analysis.cd.CDAnalysisSemanticConflicts;
-import br.unb.cic.analysis.cd.CDIntraProcedural;
-import br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts;
-import br.unb.cic.analysis.dfp.DFPIntraProcedural;
-import br.unb.cic.analysis.pdg.PDGAnalysisSemanticConflicts;
-import br.unb.cic.analysis.pdg.PDGIntraProcedural;
+import br.unb.cic.analysis.SootWrapper;
 import br.unc.cic.analysis.test.DefinitionFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class DFPTest {
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class DFPTest{
 
     public static final String CLASS_NAME = "br.unb.cic.analysis.samples.DFPSample";
 
-    public DFPAnalysisSemanticConflicts configureIntraTestDFP(String classpath, int[] leftchangedlines, int[] rightchangedlines) {
-        AbstractMergeConflictDefinition definition = DefinitionFactory.definition(classpath, leftchangedlines, rightchangedlines);
+    public DFPAnalysisSemanticConflicts configureInterTestDFP(String classpath, int[] leftchangedlines, int[] rightchangedlines) {
+        AbstractMergeConflictDefinition definition = DefinitionFactory.definition(classpath, leftchangedlines, rightchangedlines, true);
         String cp = "target/test-classes";
+        List<String> classes = Collections.singletonList(cp);
+        SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classes);
+
         return new DFPIntraProcedural(cp, definition);
     }
+    private List<String> conflicts = new ArrayList<>();
 
     @Test
-    public void testDFPAnalysisIntraProcedural() {
-        DFPAnalysisSemanticConflicts analysis = configureIntraTestDFP(CLASS_NAME, new int[]{9}, new int[]{11, 13, 16});
+    public void testDFPAnalysisInterProcedural() {
+        DFPAnalysisSemanticConflicts analysis = configureInterTestDFP(CLASS_NAME, new int[]{8}, new int[]{10});
 
         analysis.buildDFP();
 
         System.out.println(analysis.svgToDotModel());
-        Assert.assertEquals(4, analysis.svg().reportConflicts().size());
+        System.out.println(analysis.findSourceSinkPaths());
+        System.out.println(analysis.svg().findConflictingPaths());
+
+        Assert.assertTrue(analysis.svg().reportConflicts().size() > 1);
     }
 
 }
