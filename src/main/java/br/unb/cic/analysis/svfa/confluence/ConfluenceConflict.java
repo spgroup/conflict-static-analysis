@@ -34,9 +34,11 @@ public class ConfluenceConflict {
     }
 
     private String nodeToString(StatementNode node) {
-        return "(" +
-                node.show()
-                + ")";
+        return formatConflict(node.toString());
+    }
+
+    public String formatConflict(String p){
+        return p.replace("), Node", ") => Node");
     }
 
     @Override
