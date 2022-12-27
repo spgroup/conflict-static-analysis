@@ -39,7 +39,7 @@
     <servers>
         <server>
             <id>spg</id>
-            <username><GIT_HUB_USER></username>
+            <username>GIT_HUB_USER</username>
             <password>GIT_HUB_TOKEN</password>
         </server>
         <server>
