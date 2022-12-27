@@ -5,6 +5,8 @@
 1. Make sure docker is installed and updated on the target machine. Run `docker -v`.
 2. Copy `Dockerfile` and `settings.xml` to target machine.
 3. Update **username** and **password** in servers context in `settings.xml` file.
+4. update **TAG_BRANCH_OR_COMMIT_REFS** on line 61, 63 and 65 in `Dockerfile`. To specify the version you want the build
+   to be performed on.
 
 ## Build the app’s container image
 
@@ -18,11 +20,12 @@ This command used the Dockerfile to build a new container image.
 
 ## Start an app container
 
-Start your container using the docker run command and specify the name of the image we just created:
+Change the entrypoint to an interactive shell Start your container using the docker run command and specify the name of
+the image we just created:
 
-Run `docker run -dp 3000:3000 getting-started`
+Run `docker run --entrypoint /bin/sh -itd getting-started:latest`
 
-> Remember the -d and -p flags? We’re running the new container in “detached” mode (in the background) and creating a mapping between the host’s port 3000 to the container’s port 3000. Without the port mapping, we wouldn’t be able to access the application.
+> This is useful if you want to use a container like a virtual machine, and keep it running in the background when you’re not using it. If you override the entrypoint to the container with a shell, like sh or bash, and run the container with the -itd switches, Docker will run the container, detach it (run it in the background), and attach an interactive terminal. Note that this won’t run the container’s default entrypoint script, but run a shell instead. Effectively, you will have a container that stays running permanently.
 
 ## Accessing Docker Containers
 

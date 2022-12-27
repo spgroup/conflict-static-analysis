@@ -46,7 +46,7 @@ RUN apt-get -y install git && \
 
 # Install vim
 RUN apt-get -y install vim && \
-    apt-get clean;    
+    apt-get clean;
 
 # Clone repos
 RUN git clone --recursive https://github.com/spgroup/miningframework /home/miningframework
@@ -56,14 +56,22 @@ RUN git clone https://github.com/spgroup/conflict-static-analysis.git /home/conf
 # Add settings.xml
 ADD ./settings.xml $USER_HOME_DIR/.m2/
 
+# Choose versions to build
+## 1 - Choose conflict-static-analysis version
+RUN cd /home/conflict-static-analysis && git checkout TAG_BRANCH_OR_COMMIT_REFS # EG: git checkout develop
+## 2 - Choose miningframework version
+RUN cd /home/miningframework && git checkout TAG_BRANCH_OR_COMMIT_REFS # EG: git checkout develop
+## 3 - Choose mergedataset version
+RUN cd /home/miningframework/output/files && git checkout TAG_BRANCH_OR_COMMIT_REFS # EG: git checkout develop
+
 #Build conflict-static-analysis
 RUN cd /home/conflict-static-analysis && mvn clean install -DskipTests
 RUN cd /home/conflict-static-analysis && mvn compile assembly:single
 
 # Copy files
 RUN cd /home/miningframework/output && mkdir data
-RUN cp /home/miningframework/results-with-build-information.csv /home/miningframework/output/data/results-with-build-information.csv 
+RUN cp /home/miningframework/results-with-build-information.csv /home/miningframework/output/data/results-with-build-information.csv
 
-RUN cp /home/conflict-static-analysis/target/soot-analysis-0.2.1-SNAPSHOT-jar-with-dependencies.jar /home/miningframework/dependencies/soot-analysis-0.2.1-SNAPSHOT-jar-with-dependencies.jar
+RUN cp /home/conflict-static-analysis/target/*.jar /home/miningframework/dependencies/
 
 EXPOSE 3000
