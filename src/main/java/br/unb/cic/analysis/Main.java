@@ -326,7 +326,7 @@ public class Main {
                 .collect(Collectors.toList()));
         System.out.println(conflicts.toString());
 
-        System.out.println(analysis.pdgToDotModel());
+//        System.out.println(analysis.pdgToDotModel());
     }
 
     private void runDFPAnalysis(String classpath, Boolean interprocedural) {
@@ -346,7 +346,7 @@ public class Main {
                 .collect(Collectors.toList()));
         System.out.println(conflicts.toString());
 
-        System.out.println(analysis.svgToDotModel());
+//        System.out.println(analysis.svgToDotModel());
     }
 
     private void runCDAnalysis(String classpath, Boolean omitExceptingUnitEdges) {
@@ -364,7 +364,7 @@ public class Main {
                 .collect(Collectors.toList()));
         System.out.println(conflicts.toString());
 
-        System.out.println(analysis.cdToDotModel());
+//        System.out.println(analysis.cdToDotModel());
     }
 
     private void runSparseValueFlowAnalysis(String classpath, boolean interprocedural) {
@@ -382,7 +382,7 @@ public class Main {
                 .collect(Collectors.toList()));
         System.out.println(conflicts.toString());
 
-        System.out.println(analysis.svgToDotModel());
+//        System.out.println(analysis.svgToDotModel());
     }
 
     private void runDFPConfluenceAnalysis(String classpath, boolean interprocedural) {
