@@ -34,7 +34,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private FlowSet<DataFlowAbstraction> right;
     private List<TraversedLine> stacktraceList;
     private Logger logger;
-    private HashMap map = new HashMap<>();
 
     public InterproceduralOverrideAssignment(AbstractMergeConflictDefinition definition) {
         this.definition = definition;
@@ -95,12 +94,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             entryPoints.add(sm);
         } else {
             definition.getSourceStatements().forEach(s -> {
-                if (!entryPoints.contains(s.getSootMethod())) {
-                    entryPoints.add(s.getSootMethod());
-                }
-            });
-
-            definition.getSinkStatements().forEach(s -> {
                 if (!entryPoints.contains(s.getSootMethod())) {
                     entryPoints.add(s.getSootMethod());
                 }
@@ -266,9 +259,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
             /* Check treatment in case 'for'
             - Jimple does not exist for. The command is done using the goto.
-
             - The variables of the force are marked as IN_BETWEEN so they do not enter the abstraction.
-
             - The goto instructions have the following format "if i0> = 1 goto label2;" in this case,
             they are treated as "IfStmt" and do not enter either the "if(unit instanceof AssignStmt)" nor the "else if(unit instanceof InvokeStmt)".
              */
@@ -349,6 +340,8 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         return flowChangeTag.equals(Statement.Type.SOURCE_SINK);
     }
 
+    // TODO add depth to InstanceFieldRef and StaticFieldRef...
+    // TODO rename Statement. (UnitWithExtraInformations)
     private void gen(FlowSet<DataFlowAbstraction> in, Statement stmt) {
         if (stmt.isLeftStatement()) {
             checkConflict(stmt, right);
@@ -363,11 +356,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     private void addStmtToList(Statement stmt, FlowSet<DataFlowAbstraction> rightOrLeftList) {
-        this.map.put(stmt.getUnit().getUseAndDefBoxes().get(0).getValue(), stmt.getUnit().getUseAndDefBoxes().get(1).getValue());
-        stmt.getUnit().getDefBoxes().forEach(valueBox -> {
-            rightOrLeftList.add(new DataFlowAbstraction(valueBox.getValue(), stmt));
-        });
-
+        stmt.getUnit().getDefBoxes().forEach(valueBox -> rightOrLeftList.add(new DataFlowAbstraction(valueBox.getValue(), stmt)));
     }
 
     /*
@@ -376,7 +365,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private void checkConflict(Statement stmt, FlowSet<DataFlowAbstraction> rightOrLeftList) {
         rightOrLeftList.forEach(dataFlowAbstraction -> stmt.getUnit().getDefBoxes().forEach(valueBox -> {
             try {
-                if (containsValue(dataFlowAbstraction, valueBox)) {
+                if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
                     addConflict(stmt, dataFlowAbstraction.getStmt());
                     rightOrLeftList.remove(dataFlowAbstraction);
                 }
@@ -406,7 +395,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         FlowSet<DataFlowAbstraction> itemsToRemoved = new ArraySparseSet<>();
         rightOrLeftList.forEach(dataFlowAbstraction -> {
             try {
-                if (containsValue(dataFlowAbstraction, valueBox)) {
+                if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
                     itemsToRemoved.add(dataFlowAbstraction);
                 }
             } catch (ValueNotHandledException e) {
@@ -421,12 +410,11 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
      * This method checks for each type of variable analyzed if it exists within the abstraction.
      *
      * @param dataFlowAbstraction One of the items contained in the abstraction
-     * @param valueBox            Variable to be analyzed.
+     * @param value               Variable to be analyzed.
      * @return true if the variable exists in the abstraction and false if it does not.
      * @throws ValueNotHandledException Exception thrown when variable type is not cataloged.
      */
-    private boolean containsValue(DataFlowAbstraction dataFlowAbstraction, ValueBox valueBox) throws ValueNotHandledException {
-        Value value = valueBox.getValue();
+    private boolean containsValue(DataFlowAbstraction dataFlowAbstraction, Value value) throws ValueNotHandledException {
 
         if (dataFlowAbstraction.getValue() instanceof InstanceFieldRef && value instanceof InstanceFieldRef) {
             return compareInstanceFieldRef(dataFlowAbstraction, value);
@@ -440,18 +428,8 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         if (dataFlowAbstraction.getValue() instanceof StaticFieldRef && value instanceof StaticFieldRef) {
             StaticFieldRef fromDataFlowAbstraction = (StaticFieldRef) dataFlowAbstraction.getValue();
             StaticFieldRef fromValue = (StaticFieldRef) value;
-            return false; //compareSignature(fromDataFlowAbstraction.getFieldRef(), fromValue.getFieldRef());
+            return compareSignature(fromDataFlowAbstraction.getFieldRef(), fromValue.getFieldRef());
         }
-        if (dataFlowAbstraction.getValue() instanceof Local && value instanceof InstanceFieldRef) {
-            return comparePointsToHasNonEmptyIntersection((Local) dataFlowAbstraction.getValue(),
-                    (Local) ((InstanceFieldRef) value).getBase());
-        }
-
-        if (dataFlowAbstraction.getValue() instanceof Local && value instanceof InstanceFieldRef) {
-            return comparePointsToHasNonEmptyIntersection((Local) dataFlowAbstraction.getValue(),
-                    (Local) ((InstanceFieldRef) value).getBase());
-        }
-
         if (!dataFlowAbstraction.getValue().getClass().equals(value.getClass())) {
             return false;
         }
@@ -460,23 +438,12 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     private boolean compareInstanceFieldRef(DataFlowAbstraction dataFlowAbstraction, Value value) {
-        PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
         InstanceFieldRef fromDataFlowAbstraction = (InstanceFieldRef) dataFlowAbstraction.getValue();
         InstanceFieldRef fromValue = (InstanceFieldRef) value;
-
-        if (this.map.get(fromValue.getBase()) != null) {
-            return pointsToAnalysis.reachingObjects(
-                            (Local) ((InstanceFieldRef) this.map.get(fromValue.getBase())).getBase(),
-                            ((InstanceFieldRef) this.map.get(fromValue.getBase())).getField())
-                    .hasNonEmptyIntersection(
-                            pointsToAnalysis.reachingObjects(
-                                    (Local) fromDataFlowAbstraction.getBase(),
-                                    fromDataFlowAbstraction.getField()));
-        }
         return fromDataFlowAbstraction.toString().equals(fromValue.toString())
-                || comparePointsToHasNonEmptyIntersection((Local) fromDataFlowAbstraction.getBase(),
-                (Local) fromValue.getBase())
-                && (compareSignature(fromDataFlowAbstraction.getFieldRef(), fromValue.getFieldRef()));
+                || (compareSignature(fromDataFlowAbstraction.getFieldRef(), fromValue.getFieldRef())
+                && comparePointsToHasNonEmptyIntersection((Local) fromDataFlowAbstraction.getBase(),
+                (Local) fromValue.getBase()));
     }
 
     /**
