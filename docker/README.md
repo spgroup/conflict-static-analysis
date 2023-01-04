@@ -5,8 +5,7 @@
 1. Make sure docker is installed and updated on the target machine. Run `docker -v`.
 2. Copy `Dockerfile` and `settings.xml` to target machine.
 3. Update **username** and **password** in servers context in `settings.xml` file.
-4. update **TAG_BRANCH_OR_COMMIT_REFS** on line 61, 63 and 65 in `Dockerfile`. To specify the version you want the build
-   to be performed on.
+4. Between lines 60 and 65 of the `Dockerfile` you can choose the target version you want to run the experiment on.
 
 ## Build the app’s container image
 
