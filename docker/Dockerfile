@@ -49,9 +49,10 @@ RUN apt-get -y install vim && \
     apt-get clean;
 
 # Clone repos
-RUN git clone --recursive https://github.com/spgroup/miningframework /home/miningframework
-RUN git clone https://github.com/spgroup/mergedataset.git /home/miningframework/output/files
 RUN git clone https://github.com/spgroup/conflict-static-analysis.git /home/conflict-static-analysis
+RUN git clone --recursive https://github.com/spgroup/miningframework /home/miningframework
+# clone mergedataset to miningframework/output/file
+RUN git clone https://github.com/spgroup/mergedataset.git /home/miningframework/output/file
 
 # Add settings.xml
 ADD ./settings.xml $USER_HOME_DIR/.m2/
@@ -61,7 +62,7 @@ ADD ./settings.xml $USER_HOME_DIR/.m2/
 RUN cd /home/conflict-static-analysis && git checkout article2023
 ## 2 - Choose miningframework version
 RUN cd /home/miningframework && git checkout article2023
-## 3 - Choose mergedataset version
+## 3 - Choose mergedataset version (output/files is where the mergedataset was cloned)
 RUN cd /home/miningframework/output/files && git checkout article2023
 
 #Build conflict-static-analysis
