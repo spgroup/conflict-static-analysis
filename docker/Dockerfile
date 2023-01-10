@@ -49,29 +49,28 @@ RUN apt-get -y install vim && \
     apt-get clean;
 
 # Clone repos
-RUN git clone --recursive https://github.com/spgroup/miningframework /home/miningframework
-RUN git clone https://github.com/spgroup/mergedataset.git /home/miningframework/output/files
 RUN git clone https://github.com/spgroup/conflict-static-analysis.git /home/conflict-static-analysis
+RUN git clone --recursive https://github.com/spgroup/miningframework /home/miningframework
+# clone mergedataset to miningframework/output/file
+RUN git clone https://github.com/spgroup/mergedataset.git /home/miningframework/output/file
 
 # Add settings.xml
 ADD ./settings.xml $USER_HOME_DIR/.m2/
 
 # Choose versions to build
 ## 1 - Choose conflict-static-analysis version
-RUN cd /home/conflict-static-analysis && git checkout TAG_BRANCH_OR_COMMIT_REFS # EG: git checkout develop
+RUN cd /home/conflict-static-analysis && git checkout article2023
 ## 2 - Choose miningframework version
-RUN cd /home/miningframework && git checkout TAG_BRANCH_OR_COMMIT_REFS # EG: git checkout develop
-## 3 - Choose mergedataset version
-RUN cd /home/miningframework/output/files && git checkout TAG_BRANCH_OR_COMMIT_REFS # EG: git checkout develop
+RUN cd /home/miningframework && git checkout article2023
+## 3 - Choose mergedataset version (output/files is where the mergedataset was cloned)
+RUN cd /home/miningframework/output/files && git checkout article2023
 
 #Build conflict-static-analysis
-RUN cd /home/conflict-static-analysis && mvn clean install -DskipTests
-RUN cd /home/conflict-static-analysis && mvn compile assembly:single
+#RUN cd /home/conflict-static-analysis && mvn clean install -DskipTests
+#RUN cd /home/conflict-static-analysis && mvn compile assembly:single
 
 # Copy files
 RUN cd /home/miningframework/output && mkdir data
 RUN cp /home/miningframework/results-with-build-information.csv /home/miningframework/output/data/results-with-build-information.csv
 
-RUN cp /home/conflict-static-analysis/target/*.jar /home/miningframework/dependencies/
-
-EXPOSE 3000
+#RUN cp /home/conflict-static-analysis/target/*.jar /home/miningframework/dependencies/
