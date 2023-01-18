@@ -5,7 +5,7 @@
 1. Make sure docker is installed and updated on the target machine. Run `docker -v`.
 2. Copy `Dockerfile` and `settings.xml` to target machine.
 3. Update **username** and **password** in servers context in `settings.xml` file.
-4. Between lines 60 and 65 of the `Dockerfile` you can choose the target version you want to run the experiment on.
+4. Between lines 50 and 58 of the `Dockerfile` you can choose the target version you want to run the experiment on. Check the comments
 
 ## Build the app’s container image
 

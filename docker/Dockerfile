@@ -49,21 +49,15 @@ RUN apt-get -y install vim && \
     apt-get clean;
 
 # Clone repos
-RUN git clone https://github.com/spgroup/conflict-static-analysis.git /home/conflict-static-analysis
-RUN git clone --recursive https://github.com/spgroup/miningframework /home/miningframework
+# We use --branch <tag_name> to define the tag we want to work on. You can use the name of the tag or a specific branch.
+# --depth 1 is optional but if you only need the state at that one revision, you probably want to skip downloading all the history up to that revision.
+RUN git clone --branch article2023 --depth 1 https://github.com/spgroup/conflict-static-analysis.git /home/conflict-static-analysis
+RUN git clone --recursive  --branch article2023 --depth 1 https://github.com/spgroup/miningframework /home/miningframework
 # clone mergedataset to miningframework/output/file
-RUN git clone https://github.com/spgroup/mergedataset.git /home/miningframework/output/file
+RUN git clone --branch article2023 --depth 1 https://github.com/spgroup/mergedataset.git /home/miningframework/output/file
 
 # Add settings.xml
 ADD ./settings.xml $USER_HOME_DIR/.m2/
-
-# Choose versions to build
-## 1 - Choose conflict-static-analysis version
-RUN cd /home/conflict-static-analysis && git checkout article2023
-## 2 - Choose miningframework version
-RUN cd /home/miningframework && git checkout article2023
-## 3 - Choose mergedataset version (output/files is where the mergedataset was cloned)
-RUN cd /home/miningframework/output/files && git checkout article2023
 
 #Build conflict-static-analysis
 #RUN cd /home/conflict-static-analysis && mvn clean install -DskipTests
