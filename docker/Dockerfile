@@ -70,6 +70,9 @@ ADD ./settings.xml $USER_HOME_DIR/.m2/
 # Intall Requeriments
 RUN cd /home/miningframework && pip install -r requirements.txt
 
+# Run Build Union Script
+RUN cd /home/miningframework/output/files && ./prepareDataset.sh
+
 # Copy files
 RUN cd /home/miningframework/output && mkdir data
 RUN cp /home/miningframework/results-with-build-information.csv /home/miningframework/output/data/results-with-build-information.csv
