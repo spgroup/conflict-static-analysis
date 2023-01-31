@@ -5,7 +5,7 @@
 1. Make sure docker is installed and updated on the target machine. Run `docker -v`.
 2. Copy `Dockerfile` and `settings.xml` to target machine.
 3. Update **username** and **password** in servers context in `settings.xml` file.
-4. Between lines 50 and 58 of the `Dockerfile` you can choose the target version you want to run the experiment on. Check the comments
+4. Between lines 57 and 61 of the `Dockerfile` you can choose the target version you want to run the experiment on. Check the comments
 
 ## Build the app’s container image
 
@@ -19,8 +19,8 @@ This command used the Dockerfile to build a new container image.
 
 ## Start an app container
 
-Change the entrypoint to an interactive shell Start your container using the docker run command and specify the name of
-the image we just created:
+Change the entrypoint to an interactive shell
+Start your container using the docker run command and specify the name of the image we just created:
 
 Run `docker run --entrypoint /bin/sh -itd getting-started:latest`
 
@@ -36,7 +36,7 @@ Run the Docker list command to get a list of all Docker containers running on th
 
 For remote access, run:
 
-`docker exec –it <container name> /bin/bash`
+`docker exec -it <container name> /bin/bash`
 
 ## Closing Docker Containers
 

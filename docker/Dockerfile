@@ -13,13 +13,19 @@ RUN apt-get update && \
     apt-get clean && \
     update-ca-certificates -f;
 
+# Install Python
+RUN apt-get update && \
+   apt-get install python3 && \
+   apt-get install python3-pip -y  && \
+   apt-get clean;
+
 # Setup JAVA_HOME -- useful for docker commandline
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
 RUN export JAVA_HOME
 
 # Downloading and installing Maven
 ## 1- Define a constant with the version of maven you want to install
-ARG MAVEN_VERSION=3.8.6        
+ARG MAVEN_VERSION=3.8.7        
 
 ## 2- Define a constant with the working directory
 ARG USER_HOME_DIR="/root"
@@ -49,12 +55,10 @@ RUN apt-get -y install vim && \
     apt-get clean;
 
 # Clone repos
-# We use --branch <tag_name> to define the tag we want to work on. You can use the name of the tag or a specific branch.
-# --depth 1 is optional but if you only need the state at that one revision, you probably want to skip downloading all the history up to that revision.
 RUN git clone --branch article2023 --depth 1 https://github.com/spgroup/conflict-static-analysis.git /home/conflict-static-analysis
 RUN git clone --recursive  --branch article2023 --depth 1 https://github.com/spgroup/miningframework /home/miningframework
 # clone mergedataset to miningframework/output/file
-RUN git clone --branch article2023 --depth 1 https://github.com/spgroup/mergedataset.git /home/miningframework/output/file
+RUN git clone --branch article2023 --depth 1 https://github.com/spgroup/mergedataset.git /home/miningframework/output/files
 
 # Add settings.xml
 ADD ./settings.xml $USER_HOME_DIR/.m2/
@@ -62,6 +66,15 @@ ADD ./settings.xml $USER_HOME_DIR/.m2/
 #Build conflict-static-analysis
 #RUN cd /home/conflict-static-analysis && mvn clean install -DskipTests
 #RUN cd /home/conflict-static-analysis && mvn compile assembly:single
+
+# Install Requeriments in miningframework project
+# Install dependencies for Python scripts
+RUN cd /home/miningframework && pip install -r requirements.txt
+
+# Run Build Union Script in mergedaset project
+# Some build files are larger than 100 MB, not supported by Github, so they were separated using split, to union them, 
+# run the script located at the root with the following command:
+RUN cd /home/miningframework/output/files && ./prepareDataset.sh
 
 # Copy files
 RUN cd /home/miningframework/output && mkdir data
