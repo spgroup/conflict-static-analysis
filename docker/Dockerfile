@@ -67,10 +67,13 @@ ADD ./settings.xml $USER_HOME_DIR/.m2/
 #RUN cd /home/conflict-static-analysis && mvn clean install -DskipTests
 #RUN cd /home/conflict-static-analysis && mvn compile assembly:single
 
-# Intall Requeriments
+# Install Requeriments in miningframework project
+# Install dependencies for Python scripts
 RUN cd /home/miningframework && pip install -r requirements.txt
 
-# Run Build Union Script
+# Run Build Union Script in mergedaset project
+# Some build files are larger than 100 MB, not supported by Github, so they were separated using split, to union them, 
+# run the script located at the root with the following command:
 RUN cd /home/miningframework/output/files && ./prepareDataset.sh
 
 # Copy files
