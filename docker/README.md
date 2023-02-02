@@ -36,7 +36,16 @@ Run the Docker list command to get a list of all Docker containers running on th
 
 For remote access, run:
 
-`docker exec -it <container name> /bin/bash`
+`docker exec -it <container-id> /bin/bash`
+
+## Access the project folder
+
+`cd /home/miningframework`
+
+Run the following command to run the experiment:
+
+`./gradlew run -DmainClass="services.outputProcessors.soot.Main" --args="-icf -ioa -idfp -pdg -report"`
+
 
 ## Closing Docker Containers
 
