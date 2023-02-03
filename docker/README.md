@@ -48,11 +48,11 @@ Run the following command to run the experiment:
 
 ## To copy the files results:
 
-`docker cp <container-id>:/home/miningframework/out.csv <yourpath>
-docker cp <container-id>:/home/miningframework/outConsole.csv <yourpath>
-docker cp <container-id>:/home/miningframework/time.csv <yourpath>
-docker cp <container-id>:/home/miningframework/output/data/soot-results.csv <yourpath>
-docker cp <container-id>:/home/miningframework//output/data/results.pdf <yourpath>`
+`docker cp <container-id>:/home/miningframework/out.csv <your-path>
+docker cp <container-id>:/home/miningframework/outConsole.csv <your-path>
+docker cp <container-id>:/home/miningframework/time.csv <your-path>
+docker cp <container-id>:/home/miningframework/output/data/soot-results.csv <your-path>
+docker cp <container-id>:/home/miningframework//output/data/results.pdf <your-path>`
 
 
 ## Closing Docker Containers
