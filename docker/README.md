@@ -46,9 +46,17 @@ Run the following command to run the experiment:
 
 `./gradlew run -DmainClass="services.outputProcessors.soot.Main" --args="-icf -ioa -idfp -pdg -report"`
 
+## To copy the files results:
+
+`docker cp <container-id>:/home/miningframework/out.csv <yourpath>
+docker cp <container-id>:/home/miningframework/outConsole.csv <yourpath>
+docker cp <container-id>:/home/miningframework/time.csv <yourpath>
+docker cp <container-id>:/home/miningframework/output/data/soot-results.csv <yourpath>
+docker cp <container-id>:/home/miningframework//output/data/results.pdf <yourpath>`
+
 
 ## Closing Docker Containers
 
 To stop and remove a docker container, run the following command:
 
-`docker stop <container name>`
+`docker stop <container-id>`
