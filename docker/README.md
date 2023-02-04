@@ -48,9 +48,9 @@ Run the following command to run the experiment:
 
 ## To copy the files results:
 
-`docker cp <container-id>:/home/miningframework/out.csv <your-path>
-docker cp <container-id>:/home/miningframework/outConsole.csv <your-path>
-docker cp <container-id>:/home/miningframework/time.csv <your-path>
+`docker cp <container-id>:/home/miningframework/out.txt <your-path>
+docker cp <container-id>:/home/miningframework/outConsole.txt <your-path>
+docker cp <container-id>:/home/miningframework/time.txt <your-path>
 docker cp <container-id>:/home/miningframework/output/data/soot-results.csv <your-path>
 docker cp <container-id>:/home/miningframework//output/data/results.pdf <your-path>`
 
