@@ -52,8 +52,7 @@ Run the following command to run the experiment:
 docker cp <container-id>:/home/miningframework/outConsole.txt <your-path>
 docker cp <container-id>:/home/miningframework/time.txt <your-path>
 docker cp <container-id>:/home/miningframework/output/data/soot-results.csv <your-path>
-docker cp <container-id>:/home/miningframework//output/data/results.pdf <your-path>`
-
+docker cp <container-id>:/home/miningframework/output/data/results.pdf <your-path>`
 
 ## Closing Docker Containers
 
