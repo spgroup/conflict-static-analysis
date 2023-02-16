@@ -51,11 +51,11 @@ public class DFPConfluenceAnalysis {
         DFPAnalysisSemanticConflicts sinkBaseAnalysis = sinkBaseAnalysis(interprocedural);
         sinkBaseAnalysis.buildDFP();
 
-        m.saveExecutionTime("Time to perform Confluence");
-
         Set<List<StatementNode>> sinkBasePaths = sinkBaseAnalysis.findSourceSinkPaths();
 
         confluentFlows = intersectPathsByLastNode(sourceBasePaths, sinkBasePaths);
+
+        m.saveExecutionTime("Time to perform Confluence");
 
         System.out.println(confluentFlows.toString());
     }

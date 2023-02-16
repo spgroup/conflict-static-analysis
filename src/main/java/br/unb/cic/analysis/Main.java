@@ -289,9 +289,8 @@ public class Main {
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", interproceduralOverrideAssignment));
         SootWrapper.applyPackages();
 
-        saveExecutionTime("Time to perform OA Inter");
-
         conflicts.addAll(interproceduralOverrideAssignment.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
+        saveExecutionTime("Time to perform OA Inter");
     }
 
     /*
@@ -330,14 +329,14 @@ public class Main {
 
         analysis.buildPDG(cd, dfp);
 
-        saveExecutionTime("Time to perform PDG");
-
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsPDG())
                 .stream()
                 .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
-        System.out.println(conflicts.toString());
 
+        saveExecutionTime("Time to perform PDG");
+
+        System.out.println(conflicts.toString());
     }
 
     private void runDFPAnalysis(String classpath, Boolean interprocedural) {
@@ -354,14 +353,14 @@ public class Main {
 
         analysis.buildDFP();
 
-        saveExecutionTime("Time to perform DFP");
-
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
                 .stream()
                 .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
-        System.out.println(conflicts.toString());
 
+        saveExecutionTime("Time to perform DFP");
+
+        System.out.println(conflicts.toString());
     }
 
     private void runCDAnalysis(String classpath, Boolean omitExceptingUnitEdges) {
@@ -376,14 +375,14 @@ public class Main {
 
         analysis.buildCD();
 
-        saveExecutionTime("Time to perform CD");
-
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsCD())
                 .stream()
                 .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
-        System.out.println(conflicts.toString());
 
+        saveExecutionTime("Time to perform CD");
+
+        System.out.println(conflicts.toString());
     }
 
     private void runSparseValueFlowAnalysis(String classpath, boolean interprocedural) {
@@ -402,12 +401,13 @@ public class Main {
 
         analysis.buildSparseValueFlowGraph();
 
-        saveExecutionTime("Time to perform SVFA");
-
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
                 .stream()
                 .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
+
+        saveExecutionTime("Time to perform SVFA");
+
         System.out.println(conflicts.toString());
     }
 
