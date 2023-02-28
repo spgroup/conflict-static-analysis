@@ -285,8 +285,10 @@ public class Main {
 
         interproceduralOverrideAssignment.configureEntryPoints();
 
-        saveExecutionTime("Configure Soot OA Inter");
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", interproceduralOverrideAssignment));
+
+        saveExecutionTime("Configure Soot OA Inter");
+
         SootWrapper.applyPackages();
 
         conflicts.addAll(interproceduralOverrideAssignment.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
@@ -406,7 +408,7 @@ public class Main {
                 .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
 
-        saveExecutionTime("Time to perform SVFA");
+        saveExecutionTime("Time to perform DF");
 
         System.out.println(conflicts.toString());
     }
