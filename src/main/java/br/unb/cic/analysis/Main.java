@@ -20,6 +20,7 @@ import br.unb.cic.analysis.svfa.SVFAInterProcedural;
 import br.unb.cic.analysis.svfa.SVFAIntraProcedural;
 import br.unb.cic.analysis.svfa.confluence.DFPConfluenceAnalysis;
 import br.unb.cic.diffclass.DiffClass;
+import com.google.common.base.Stopwatch;
 import org.apache.commons.cli.*;
 import scala.collection.JavaConverters;
 import soot.Body;
@@ -34,6 +35,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -44,7 +46,7 @@ public class Main {
     private Set<String> targetClasses;
     private List<String> conflicts = new ArrayList<>();
     private ReachDefinitionAnalysis analysis;
-    public static long time;
+    public static Stopwatch stopwatch;
 
     public static void main(String args[]) {
         Main m = new Main();
@@ -273,6 +275,8 @@ public class Main {
     private void runInterproceduralOverrideAssignmentAnalysis(String classpath) {
         int depthLimit = Integer.parseInt(cmd.getOptionValue("oaDepthLimit", "5"));
 
+        stopwatch = Stopwatch.createStarted();
+
         InterproceduralOverrideAssignment interproceduralOverrideAssignment =
                 new InterproceduralOverrideAssignment(definition, depthLimit);
 
@@ -282,9 +286,13 @@ public class Main {
         interproceduralOverrideAssignment.configureEntryPoints();
 
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", interproceduralOverrideAssignment));
+
+        saveExecutionTime("Configure Soot OA Inter");
+
         SootWrapper.applyPackages();
 
         conflicts.addAll(interproceduralOverrideAssignment.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
+        saveExecutionTime("Time to perform OA Inter");
     }
 
     /*
@@ -310,61 +318,73 @@ public class Main {
     }
 
     private void runPDGAnalysis(String classpath, Boolean omitExceptingUnitEdges) {
-        long start = System.currentTimeMillis();
         PDGAnalysisSemanticConflicts analysis = new PDGIntraProcedural(classpath, definition);
         CDAnalysisSemanticConflicts cd = new CDIntraProcedural(classpath, definition);
         cd.setOmitExceptingUnitEdges(omitExceptingUnitEdges);
         DFPAnalysisSemanticConflicts dfp = new DFPIntraProcedural(classpath, definition);
 
-        analysis.buildPDG(cd, dfp);
+        stopwatch = Stopwatch.createStarted();
+        analysis.configureSoot();
+        saveExecutionTime("Configure Soot");
 
-        saveExecutionTime(start);
+        stopwatch = Stopwatch.createStarted();
+
+        analysis.buildPDG(cd, dfp);
 
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsPDG())
                 .stream()
                 .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
-        System.out.println(conflicts.toString());
 
-//        System.out.println(analysis.pdgToDotModel());
+        saveExecutionTime("Time to perform PDG");
+
+        System.out.println(conflicts.toString());
     }
 
     private void runDFPAnalysis(String classpath, Boolean interprocedural) {
-        long start = System.currentTimeMillis();
         definition.setRecursiveMode(options.hasOption("recursive"));
         DFPAnalysisSemanticConflicts analysis = interprocedural
                 ? new DFPInterProcedural(classpath, definition)
                 : new DFPIntraProcedural(classpath, definition);
 
-        analysis.buildDFP();
+        stopwatch = Stopwatch.createStarted();
+        analysis.configureSoot();
+        saveExecutionTime("Configure Soot");
 
-        saveExecutionTime(start);
+        stopwatch = Stopwatch.createStarted();
+
+        analysis.buildDFP();
 
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
                 .stream()
                 .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
-        System.out.println(conflicts.toString());
 
-//        System.out.println(analysis.svgToDotModel());
+        saveExecutionTime("Time to perform DFP");
+
+        System.out.println(conflicts.toString());
     }
 
     private void runCDAnalysis(String classpath, Boolean omitExceptingUnitEdges) {
-        long start = System.currentTimeMillis();
+
         CDAnalysisSemanticConflicts analysis = new CDIntraProcedural(classpath, definition);
         analysis.setOmitExceptingUnitEdges(omitExceptingUnitEdges);
+        stopwatch = Stopwatch.createStarted();
+        analysis.configureSoot();
+        saveExecutionTime("Configure Soot");
+
+        stopwatch = Stopwatch.createStarted();
 
         analysis.buildCD();
-
-        saveExecutionTime(start);
 
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsCD())
                 .stream()
                 .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
-        System.out.println(conflicts.toString());
 
-//        System.out.println(analysis.cdToDotModel());
+        saveExecutionTime("Time to perform CD");
+
+        System.out.println(conflicts.toString());
     }
 
     private void runSparseValueFlowAnalysis(String classpath, boolean interprocedural) {
@@ -374,15 +394,23 @@ public class Main {
                 ? new SVFAInterProcedural(classpath, definition)
                 : new SVFAIntraProcedural(classpath, definition);
 
+
+        stopwatch = Stopwatch.createStarted();
+        analysis.configureSoot();
+        saveExecutionTime("Configure Soot");
+
+        stopwatch = Stopwatch.createStarted();
+
         analysis.buildSparseValueFlowGraph();
 
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
                 .stream()
                 .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
-        System.out.println(conflicts.toString());
 
-//        System.out.println(analysis.svgToDotModel());
+        saveExecutionTime("Time to perform DF");
+
+        System.out.println(conflicts.toString());
     }
 
     private void runDFPConfluenceAnalysis(String classpath, boolean interprocedural) {
@@ -472,16 +500,16 @@ public class Main {
             map.put(change.getKey(), lines);
         }
     }
-    public void saveExecutionTime(long start){
-        long end = System.currentTimeMillis();
+
+    public void saveExecutionTime(String description){
 
         NumberFormat formatter = new DecimalFormat("#0.00000");
 
-        time = (end - start);
+        long time = stopwatch.elapsed(TimeUnit.MILLISECONDS);
         try {
             FileWriter myWriter = new FileWriter("time.txt", true);
-            myWriter.write(formatter.format(time/1000d)+"\n");
-            System.out.println("Time:"+formatter.format(time/1000d));
+            myWriter.write(description+" "+formatter.format(time/1000d)+"s\n");
+            System.out.println(description+" "+formatter.format(time/1000d));
             myWriter.close();
         } catch (IOException e) {
             System.out.println("An error occurred.");

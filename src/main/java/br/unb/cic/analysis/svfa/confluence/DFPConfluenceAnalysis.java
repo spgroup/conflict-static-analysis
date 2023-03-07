@@ -1,9 +1,11 @@
 package br.unb.cic.analysis.svfa.confluence;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+import br.unb.cic.analysis.Main;
 import br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts;
 import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.soot.graph.StatementNode;
+import com.google.common.base.Stopwatch;
 import soot.Unit;
 
 import java.util.*;
@@ -35,16 +37,25 @@ public class DFPConfluenceAnalysis {
      */
     public void execute() {
         DFPAnalysisSemanticConflicts sourceBaseAnalysis = sourceBaseAnalysis(interprocedural);
+        Main m = new Main();
+        m.stopwatch = Stopwatch.createStarted();
+
+        sourceBaseAnalysis.configureSoot();
+        m.saveExecutionTime("Configure Soot Confluence");
+
+        m.stopwatch = Stopwatch.createStarted();
+
         sourceBaseAnalysis.buildDFP();
         Set<List<StatementNode>> sourceBasePaths = sourceBaseAnalysis.findSourceSinkPaths();
 
-//        System.out.println(sourceBaseAnalysis.svgToDotModel());
-
         DFPAnalysisSemanticConflicts sinkBaseAnalysis = sinkBaseAnalysis(interprocedural);
         sinkBaseAnalysis.buildDFP();
+
         Set<List<StatementNode>> sinkBasePaths = sinkBaseAnalysis.findSourceSinkPaths();
 
         confluentFlows = intersectPathsByLastNode(sourceBasePaths, sinkBasePaths);
+
+        m.saveExecutionTime("Time to perform Confluence");
 
         System.out.println(confluentFlows.toString());
     }
