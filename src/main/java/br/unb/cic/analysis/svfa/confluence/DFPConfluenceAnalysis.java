@@ -6,6 +6,9 @@ import br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts;
 import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.soot.graph.StatementNode;
 import com.google.common.base.Stopwatch;
+import soot.AbstractSootFieldRef;
+import soot.G;
+import soot.Scene;
 import soot.Unit;
 
 import java.util.*;
@@ -41,14 +44,26 @@ public class DFPConfluenceAnalysis {
         m.stopwatch = Stopwatch.createStarted();
 
         sourceBaseAnalysis.configureSoot();
-        m.saveExecutionTime("Configure Soot Confluence");
+        m.saveExecutionTime("Configure Soot Confluence 1");
 
         m.stopwatch = Stopwatch.createStarted();
 
         sourceBaseAnalysis.buildDFP();
         Set<List<StatementNode>> sourceBasePaths = sourceBaseAnalysis.findSourceSinkPaths();
 
+        m.saveExecutionTime("Time to perform Confluence 1");
+
+        m.stopwatch = Stopwatch.createStarted();
+
+        G.v().reset();
+
         DFPAnalysisSemanticConflicts sinkBaseAnalysis = sinkBaseAnalysis(interprocedural);
+        sinkBaseAnalysis.configureSoot();
+
+        m.saveExecutionTime("Configure Soot Confluence 2");
+
+        m.stopwatch = Stopwatch.createStarted();
+
         sinkBaseAnalysis.buildDFP();
 
         Set<List<StatementNode>> sinkBasePaths = sinkBaseAnalysis.findSourceSinkPaths();
