@@ -40,7 +40,7 @@ public abstract class CDAnalysisSemanticConflicts extends JCD {
 
     @Override
     public scala.collection.immutable.List<String> getIncludeList() {
-        return JavaConverters.asScalaBuffer(Arrays.asList("java.util.*")).toList();
+        return JavaConverters.asScalaBuffer(Arrays.asList("")).toList();
     }
 
     /**
