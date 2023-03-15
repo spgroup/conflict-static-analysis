@@ -70,7 +70,7 @@ public class DFPConfluenceAnalysis {
 
         confluentFlows = intersectPathsByLastNode(sourceBasePaths, sinkBasePaths);
 
-        m.saveExecutionTime("Time to perform Confluence");
+        m.saveExecutionTime("Time to perform Confluence 2");
 
         System.out.println(confluentFlows.toString());
     }
