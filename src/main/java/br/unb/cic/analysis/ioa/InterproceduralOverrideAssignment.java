@@ -145,7 +145,9 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private FlowSet<DataFlowAbstraction> traverse(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod,
                                                   Statement.Type flowChangeTag) {
 
-        if (this.traversedMethods.contains(sootMethod) || this.traversedMethods.size() > depthLimit || sootMethod.isPhantom()) {
+        //this.traversedMethods.contains(sootMethod)
+        // containsMethod(sootMethod)
+        if (containsMethod(sootMethod) || this.traversedMethods.size() > depthLimit || sootMethod.isPhantom()) {
             return in;
         }
 
@@ -172,6 +174,70 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
         this.traversedMethods.remove(sootMethod);
         return in;
+    }
+
+    private boolean containsMethod(SootMethod method) {
+        return verifySameSuperclass(method);
+    }
+
+    public boolean haveSameSuperclass(SootMethod method1, SootMethod method2) {
+        Set<SootClass> ancestors1 = getAncestors(method1);
+        Set<SootClass> ancestors2 = getAncestors(method2);
+
+        for (SootClass ancestor1 : ancestors1) {
+            for (SootClass ancestor2 : ancestors2) {
+                SootMethod ancestorMethod1 = ancestor1.getMethod(method1.getName(), method1.getParameterTypes());
+                SootMethod ancestorMethod2 = ancestor2.getMethod(method2.getName(), method2.getParameterTypes());
+                if (ancestorMethod1 == ancestorMethod2) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private Set<SootClass> getAncestors(SootMethod method) {
+        Set<SootClass> ancestors = new HashSet<>();
+        SootClass sootClass = method.getDeclaringClass();
+        ancestors.add(sootClass);
+
+        while (sootClass.hasSuperclass()) {
+            sootClass = sootClass.getSuperclass();
+            ancestors.add(sootClass);
+        }
+
+        Set<SootClass> newAncestors = new HashSet<>();
+        for (SootClass interfaceClass : ancestors) {
+            for (SootClass interfaceAncestor : interfaceClass.getInterfaces()) {
+                newAncestors.add(interfaceAncestor);
+            }
+        }
+
+        ancestors.addAll(newAncestors);
+
+        Set<SootClass> ancestorsWithMethod = new HashSet<>();
+        for (SootClass ancestor : ancestors) {
+            try {
+                SootMethod ancestorMethod = ancestor.getMethod(method.getName(), method.getParameterTypes());
+                if (ancestorMethod != null) {
+                    ancestorsWithMethod.add(ancestor);
+                }
+            } catch (RuntimeException e) {
+                // Ignore
+            }
+        }
+
+        return ancestorsWithMethod;
+    }
+
+    private boolean verifySameSuperclass(SootMethod method) {
+        for (SootMethod traversedMethod : this.traversedMethods) {
+            if (haveSameSuperclass(method, traversedMethod)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void handleConstructor(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod,
