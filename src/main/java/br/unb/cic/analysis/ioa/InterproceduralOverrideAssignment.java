@@ -199,19 +199,22 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private Set<SootClass> getAncestors(SootMethod method) {
         Set<SootClass> ancestors = new HashSet<>();
-        SootClass clazz = method.getDeclaringClass();
-        ancestors.add(clazz);
+        SootClass sootClass = method.getDeclaringClass();
+        ancestors.add(sootClass);
 
-        while (clazz.hasSuperclass()) {
-            clazz = clazz.getSuperclass();
-            ancestors.add(clazz);
+        while (sootClass.hasSuperclass()) {
+            sootClass = sootClass.getSuperclass();
+            ancestors.add(sootClass);
         }
 
-        for (SootClass interfaceClazz : ancestors) {
-            for (SootClass interfaceAncestor : interfaceClazz.getInterfaces()) {
-                ancestors.add(interfaceAncestor);
+        Set<SootClass> newAncestors = new HashSet<>();
+        for (SootClass interfaceClass : ancestors) {
+            for (SootClass interfaceAncestor : interfaceClass.getInterfaces()) {
+                newAncestors.add(interfaceAncestor);
             }
         }
+
+        ancestors.addAll(newAncestors);
 
         Set<SootClass> ancestorsWithMethod = new HashSet<>();
         for (SootClass ancestor : ancestors) {
