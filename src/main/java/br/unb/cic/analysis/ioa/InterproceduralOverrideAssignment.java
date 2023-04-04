@@ -149,7 +149,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             return in;
         }
 
-        System.out.println(sootMethod + " - " + this.traversedMethodsWrapper.size());
+        //System.out.println(sootMethod + " - " + this.traversedMethodsWrapper.size());
         this.traversedMethodsWrapper.add(sootMethod);
 
         Body body = definition.retrieveActiveBodySafely(sootMethod);
