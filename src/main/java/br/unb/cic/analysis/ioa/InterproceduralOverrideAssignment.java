@@ -28,7 +28,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private int depthLimit;
     private Set<Conflict> conflicts;
-    private List<SootMethod> traversedMethods;
+    private TraversedMethodsWrapper<SootMethod> traversedMethodsWrapper;
     private AbstractMergeConflictDefinition definition;
     private FlowSet<DataFlowAbstraction> left;
     private FlowSet<DataFlowAbstraction> right;
@@ -53,7 +53,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         this.conflicts = new HashSet<>();
         this.left = new ArraySparseSet<>();
         this.right = new ArraySparseSet<>();
-        this.traversedMethods = new ArrayList<>();
+        this.traversedMethodsWrapper = new TraversedMethodsWrapper<SootMethod>();
         this.stacktraceList = new ArrayList<>();
         this.logger = Logger.getLogger(
                 InterproceduralOverrideAssignment.class.getName());
@@ -145,14 +145,12 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private FlowSet<DataFlowAbstraction> traverse(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod,
                                                   Statement.Type flowChangeTag) {
 
-        //this.traversedMethods.contains(sootMethod)
-        // containsMethod(sootMethod)
-        if (containsMethod(sootMethod) || this.traversedMethods.size() > depthLimit || sootMethod.isPhantom()) {
+        if (shouldSkip(sootMethod)) {
             return in;
         }
 
-        //System.out.println(sootMethod + " - " + this.traversedMethods.size());
-        this.traversedMethods.add(sootMethod);
+        System.out.println(sootMethod + " - " + this.traversedMethodsWrapper.size());
+        this.traversedMethodsWrapper.add(sootMethod);
 
         Body body = definition.retrieveActiveBodySafely(sootMethod);
 
@@ -172,72 +170,16 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             }
         }
 
-        this.traversedMethods.remove(sootMethod);
+        this.traversedMethodsWrapper.remove(sootMethod);
         return in;
     }
 
-    private boolean containsMethod(SootMethod method) {
-        return verifySameSuperclass(method);
-    }
+    private boolean shouldSkip(SootMethod sootMethod) {
+        boolean hasRelativeBeenTraversed = this.traversedMethodsWrapper.hasRelativeBeenTraversed(sootMethod);
+        boolean isSizeGreaterThanDepthLimit = this.traversedMethodsWrapper.size() > this.depthLimit;
+        boolean isPhantom = sootMethod.isPhantom();
 
-    public boolean haveSameSuperclass(SootMethod method1, SootMethod method2) {
-        Set<SootClass> ancestors1 = getAncestors(method1);
-        Set<SootClass> ancestors2 = getAncestors(method2);
-
-        for (SootClass ancestor1 : ancestors1) {
-            for (SootClass ancestor2 : ancestors2) {
-                SootMethod ancestorMethod1 = ancestor1.getMethod(method1.getName(), method1.getParameterTypes());
-                SootMethod ancestorMethod2 = ancestor2.getMethod(method2.getName(), method2.getParameterTypes());
-                if (ancestorMethod1 == ancestorMethod2) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    private Set<SootClass> getAncestors(SootMethod method) {
-        Set<SootClass> ancestors = new HashSet<>();
-        SootClass sootClass = method.getDeclaringClass();
-        ancestors.add(sootClass);
-
-        while (sootClass.hasSuperclass()) {
-            sootClass = sootClass.getSuperclass();
-            ancestors.add(sootClass);
-        }
-
-        Set<SootClass> newAncestors = new HashSet<>();
-        for (SootClass interfaceClass : ancestors) {
-            for (SootClass interfaceAncestor : interfaceClass.getInterfaces()) {
-                newAncestors.add(interfaceAncestor);
-            }
-        }
-
-        ancestors.addAll(newAncestors);
-
-        Set<SootClass> ancestorsWithMethod = new HashSet<>();
-        for (SootClass ancestor : ancestors) {
-            try {
-                SootMethod ancestorMethod = ancestor.getMethod(method.getName(), method.getParameterTypes());
-                if (ancestorMethod != null) {
-                    ancestorsWithMethod.add(ancestor);
-                }
-            } catch (RuntimeException e) {
-                // Ignore
-            }
-        }
-
-        return ancestorsWithMethod;
-    }
-
-    private boolean verifySameSuperclass(SootMethod method) {
-        for (SootMethod traversedMethod : this.traversedMethods) {
-            if (haveSameSuperclass(method, traversedMethod)) {
-                return true;
-            }
-        }
-        return false;
+        return hasRelativeBeenTraversed || isSizeGreaterThanDepthLimit || isPhantom;
     }
 
     private void handleConstructor(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod,
