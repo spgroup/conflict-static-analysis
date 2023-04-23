@@ -26,10 +26,10 @@ import java.util.stream.Collectors;
 // TODO Do not add anything when assignments are equal.
 public class InterproceduralOverrideAssignment extends SceneTransformer implements AbstractAnalysis {
 
-    private int depthLimit;
+    private final int depthLimit;
     private Set<Conflict> conflicts;
     private TraversedMethodsWrapper<SootMethod> traversedMethodsWrapper;
-    private AbstractMergeConflictDefinition definition;
+    private final AbstractMergeConflictDefinition definition;
     private FlowSet<DataFlowAbstraction> left;
     private FlowSet<DataFlowAbstraction> right;
     private List<TraversedLine> stacktraceList;
@@ -53,7 +53,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         this.conflicts = new HashSet<>();
         this.left = new ArraySparseSet<>();
         this.right = new ArraySparseSet<>();
-        this.traversedMethodsWrapper = new TraversedMethodsWrapper<SootMethod>();
+        this.traversedMethodsWrapper = new TraversedMethodsWrapper<>();
         this.stacktraceList = new ArrayList<>();
         this.logger = Logger.getLogger(
                 InterproceduralOverrideAssignment.class.getName());
@@ -149,23 +149,24 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             return in;
         }
 
-        //System.out.println(sootMethod + " - " + this.traversedMethodsWrapper.size());
         this.traversedMethodsWrapper.add(sootMethod);
 
+        //System.out.println( sootMethod + " - " + this.traversedMethodsWrapper.size());
         Body body = definition.retrieveActiveBodySafely(sootMethod);
 
         if (body != null) {
-            handleConstructor(in, sootMethod, flowChangeTag);
+            int countUnits = 1;
             for (Unit unit : body.getUnits()) {
                 TraversedLine traversedLine = new TraversedLine(sootMethod, unit.getJavaSourceStartLineNumber());
 
                 if (isTagged(flowChangeTag, unit)) {
+                    handleConstructor(in, sootMethod, flowChangeTag, countUnits);
                     addStackTrace(traversedLine);
                     in = runAnalysisWithTaggedUnit(in, sootMethod, flowChangeTag, unit);
                 } else {
                     in = runAnalysisWithBaseUnit(in, sootMethod, flowChangeTag, unit);
                 }
-
+                countUnits++;
                 removeStackTrace(traversedLine);
             }
         }
@@ -183,22 +184,29 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     private void handleConstructor(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod,
-                                   Statement.Type flowChangeTag) {
-        if (sootMethod.isConstructor()) {
+                                   Statement.Type flowChangeTag, int numConstructorsAnalyzed) {
+        // This code checks whether a Soot method is a constructor and has not been analyzed yet.
+        if (sootMethod.isConstructor() && numConstructorsAnalyzed <= 1) {
             Chain<SootField> sootFieldsInClass = sootMethod.getDeclaringClass().getFields();
-
-            sootFieldsInClass.forEach(sootField -> {
-                transformFieldsIntoStatements(in, sootMethod, flowChangeTag, sootField);
-            });
+            // Attributes declared as final in Java can only have a single assignment, which means that their value cannot be changed after they are defined during their initialization.
+            List<SootField> nonFinalFields = filterNonFinalFieldsInClass(sootFieldsInClass);
+            nonFinalFields.forEach(sootField -> transformFieldsIntoStatements(in, sootMethod, flowChangeTag, sootField));
         }
+    }
+
+    private static List<SootField> filterNonFinalFieldsInClass(Chain<SootField> sootFieldsInClass) {
+        List<SootField> nonFinalFields = new ArrayList<>();
+        for (SootField field : sootFieldsInClass) {
+            if (!field.isFinal()) {
+                nonFinalFields.add(field);
+            }
+        }
+        return nonFinalFields;
     }
 
     private void transformFieldsIntoStatements(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod, Statement.Type flowChangeTag, SootField sootField) {
         String declaringClassShortName = sootField.getDeclaringClass().getShortName();
-        String formatName =
-                declaringClassShortName.substring(0, 1).toLowerCase() + declaringClassShortName.substring(1);
-
-        JimpleLocal base = new JimpleLocal(formatName, RefType.v(sootField.getDeclaringClass()));
+        JimpleLocal base = new JimpleLocal(declaringClassShortName, RefType.v(sootField.getDeclaringClass()));
         SootFieldRef fieldRef = Scene.v().makeFieldRef(sootField.getDeclaringClass(),
                 sootField.getName(), sootField.getType(), sootField.isStatic());
 
@@ -246,7 +254,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
         if (unit instanceof AssignStmt) {
             /* Does AssignStmt check contain objects, arrays or other types?
-             Yes, AssignStmt handles assignments and they can be of any type as long as they follow the structure: variable = value
+             Yes, AssignStmt handles assignments, and they can be of any type as long as they follow the structure: variable = value
              */
             AssignStmt assignStmt = (AssignStmt) unit;
 
@@ -267,7 +275,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
             /* Check treatment in case 'for'
             - Jimple does not exist for. The command is done using the goto.
-            - The variables of the force are marked as IN_BETWEEN so they do not enter the abstraction.
+            - The variables of the force are marked as IN_BETWEEN, so they do not enter the abstraction.
             - The goto instructions have the following format "if i0> = 1 goto label2;" in this case,
             they are treated as "IfStmt" and do not enter either the "if(unit instanceof AssignStmt)" nor the "else if(unit instanceof InvokeStmt)".
              */
