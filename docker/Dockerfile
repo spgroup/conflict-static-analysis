@@ -25,7 +25,7 @@ RUN export JAVA_HOME
 
 # Downloading and installing Maven
 ## 1- Define a constant with the version of maven you want to install
-ARG MAVEN_VERSION=3.8.7        
+ARG MAVEN_VERSION=3.8.8
 
 ## 2- Define a constant with the working directory
 ARG USER_HOME_DIR="/root"
