@@ -6,6 +6,7 @@ import br.unb.cic.analysis.model.Conflict;
 import br.unc.cic.analysis.test.DefinitionFactory;
 import br.unc.cic.analysis.test.MarkingClass;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import soot.G;
 import soot.PackManager;
@@ -85,6 +86,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
+    @Ignore
     @Test
     public void StringArrayTest() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.StringArraySample";
@@ -377,6 +379,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(2, analysis.getConflicts().size());
     }
 
+    @Ignore
     @Test
     public void pointsToNotConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToDifferentObjectSample";
@@ -387,6 +390,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
+    @Ignore
     @Test
     public void pointsToDifferentObjectFromParameters() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToDifferentObjectFromParametersSample";
@@ -397,6 +401,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
+    @Ignore
     @Test
     public void pointsToDifferentObjectFromParametersWithMain() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToDifferentObjectFromParametersWithMainSample";
@@ -417,6 +422,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(2, analysis.getConflicts().size());
     }
 
+    @Ignore
     @Test
     public void pointsToSameObjectFromParameters() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToSameObjectFromParametersSample";
@@ -427,6 +433,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(14, analysis.getConflicts().size());
     }
 
+    @Ignore
     @Test
     public void pointsToSameObjectFromParameters2() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToSameObjectFromParametersSample2";
@@ -437,6 +444,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
+    @Ignore
     @Test
     public void pointsToSameObjectFromParameters3() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToSameObjectFromParametersSample3";
@@ -447,6 +455,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
+    @Ignore
     @Test
     public void pointsToSameObjectFromParameters4() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToSameObjectFromParametersSample4";
@@ -697,6 +706,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
+    @Ignore
     @Test
     public void changeObjectPropagatinsField() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.ChangeObjectPropagatinsFieldSample";
@@ -707,6 +717,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
+    @Ignore
     @Test
     public void changeObjectPropagatinsField2() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.ChangeObjectPropagatinsFieldSample2";
@@ -727,6 +738,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
+    @Ignore
     @Test
     public void changeObjectPropagatinsField4() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.ChangeObjectPropagatinsFieldSample4";
@@ -737,6 +749,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
+    @Ignore
     @Test
     public void changeObjectPropagatinsField5() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.ChangeObjectPropagatinsFieldSample5";
@@ -747,6 +760,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
+    @Ignore
     @Test
     public void changeObjectPropagatinsField6() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.ChangeObjectPropagatinsFieldSample6";

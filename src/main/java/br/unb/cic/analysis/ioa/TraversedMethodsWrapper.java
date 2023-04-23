@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class TraversedMethodsWrapper<E> {
 
-    private List<E> traversedMethods;
+    private final List<E> traversedMethods;
 
     public TraversedMethodsWrapper() {
         this.traversedMethods = new ArrayList<>();

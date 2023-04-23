@@ -7,7 +7,7 @@ public class ClassFieldNotConflictSample {
     public static void main(String[] args) {
         ClassFieldNotConflictSample m = new ClassFieldNotConflictSample();
 
-        m.x = 0; // LEFT
+        m.x = 1; // LEFT
         m.base();
         m.foo(); // RIGHT
     }
@@ -17,7 +17,7 @@ public class ClassFieldNotConflictSample {
     }
 
     private void foo() {
-        x = 1;
+        x = 2;
     }
 
 }
