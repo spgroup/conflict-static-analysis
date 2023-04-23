@@ -333,10 +333,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             flowSetUnion.union(flowSet);
         }
 
-        if (flowSetUnion.isEmpty()) {
-            return in;
-        }
-
         return flowSetUnion;
     }
 
@@ -359,14 +355,12 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     // TODO add depth to InstanceFieldRef and StaticFieldRef...
     // TODO rename Statement. (UnitWithExtraInformations)
     private void gen(FlowSet<DataFlowAbstraction> in, Statement stmt) {
-        if (stmt.isLeftStatement()) {
+        if (stmt.isLefAndRightStatement()) {
+            addConflict(stmt, stmt);
+        } else if (stmt.isLeftStatement()) {
             checkConflict(stmt, right);
-
         } else if (stmt.isRightStatement()) {
             checkConflict(stmt, left);
-
-        } else if (stmt.isLefAndRightStatement()) {
-            addConflict(stmt, stmt);
         }
         addStmtToList(stmt, in);
     }
