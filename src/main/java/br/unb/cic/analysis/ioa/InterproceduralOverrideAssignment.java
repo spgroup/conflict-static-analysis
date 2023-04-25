@@ -152,18 +152,15 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         Body body = definition.retrieveActiveBodySafely(sootMethod);
 
         if (body != null) {
-            int countUnits = 1;
             for (Unit unit : body.getUnits()) {
                 TraversedLine traversedLine = new TraversedLine(sootMethod, unit.getJavaSourceStartLineNumber());
 
                 if (isTagged(flowChangeTag, unit)) {
-                    handleConstructor(in, sootMethod, flowChangeTag, countUnits);
                     addStackTrace(traversedLine);
                     in = runAnalysisWithTaggedUnit(in, sootMethod, flowChangeTag, unit);
                 } else {
                     in = runAnalysisWithBaseUnit(in, sootMethod, flowChangeTag, unit);
                 }
-                countUnits++;
                 removeStackTrace(traversedLine);
             }
         }
@@ -180,14 +177,11 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         return hasRelativeBeenTraversed || isSizeGreaterThanDepthLimit || isPhantom;
     }
 
-    private void handleConstructor(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod, Statement.Type flowChangeTag, int numConstructorsAnalyzed) {
-        // This code checks whether a Soot method is a constructor and has not been analyzed yet.
-        if (sootMethod.isConstructor() && numConstructorsAnalyzed <= 1) {
-            Chain<SootField> sootFieldsInClass = sootMethod.getDeclaringClass().getFields();
-            // Attributes declared as final in Java can only have a single assignment, which means that their value cannot be changed after they are defined during their initialization.
-            List<SootField> nonFinalFields = filterNonFinalFieldsInClass(sootFieldsInClass);
-            nonFinalFields.forEach(sootField -> transformFieldsIntoStatements(in, sootMethod, flowChangeTag, sootField));
-        }
+    private void handleConstructor(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod, Statement.Type flowChangeTag) {
+        Chain<SootField> sootFieldsInClass = sootMethod.getDeclaringClass().getFields();
+        // Attributes declared as final in Java can only have a single assignment, which means that their value cannot be changed after they are defined during their initialization.
+        List<SootField> nonFinalFields = filterNonFinalFieldsInClass(sootFieldsInClass);
+        nonFinalFields.forEach(sootField -> transformFieldsIntoStatements(in, sootMethod, flowChangeTag, sootField));
     }
 
     private List<SootField> filterNonFinalFieldsInClass(Chain<SootField> sootFieldsInClass) {
@@ -276,6 +270,11 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
               For builders, InvokeExpression is an instance of InvokeSpecial */
 
         } else if (unit instanceof InvokeStmt) {
+            SootMethod sm = ((InvokeStmt) unit).getInvokeExpr().getMethod();
+            Statement statement = getStatementAssociatedWithUnit(sm, unit, flowChangeTag);
+            if (tagged && sm.isConstructor()) {
+                handleConstructor(in, sm, statement.getType());
+            }
             return executeCallGraph(in, flowChangeTag, unit);
         }
 
@@ -316,7 +315,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             FlowSet<DataFlowAbstraction> traverseResult = traverse(in.clone(), method, stmt.getType());
             flowSetList.add(traverseResult);
         }
-
 
         FlowSet<DataFlowAbstraction> flowSetUnion = new ArraySparseSet<>();
         for (FlowSet<DataFlowAbstraction> flowSet : flowSetList) {
