@@ -7,12 +7,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class TraversedMethodsWrapper<E> {
 
-    private List<E> traversedMethods;
+    private final List<E> traversedMethods;
 
     public TraversedMethodsWrapper() {
         this.traversedMethods = new ArrayList<>();
@@ -102,8 +100,7 @@ public class TraversedMethodsWrapper<E> {
                     ancestorsWithMethod.add(ancestor);
                 }
             } catch (RuntimeException e) {
-                Logger.getLogger(
-                        TraversedMethodsWrapper.class.getName()).log(Level.INFO, e.getMessage());
+                //ignore
             }
         }
         return ancestorsWithMethod;
