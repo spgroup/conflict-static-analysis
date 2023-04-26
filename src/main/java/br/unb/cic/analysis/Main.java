@@ -325,7 +325,7 @@ public class Main {
 
         stopwatch = Stopwatch.createStarted();
         analysis.configureSoot();
-        saveExecutionTime("Configure Soot");
+        saveExecutionTime("Configure Soot PDG");
 
         stopwatch = Stopwatch.createStarted();
 
@@ -349,7 +349,7 @@ public class Main {
 
         stopwatch = Stopwatch.createStarted();
         analysis.configureSoot();
-        saveExecutionTime("Configure Soot");
+        saveExecutionTime("Configure Soot DFP");
 
         stopwatch = Stopwatch.createStarted();
 
@@ -371,7 +371,7 @@ public class Main {
         analysis.setOmitExceptingUnitEdges(omitExceptingUnitEdges);
         stopwatch = Stopwatch.createStarted();
         analysis.configureSoot();
-        saveExecutionTime("Configure Soot");
+        saveExecutionTime("Configure Soot CD");
 
         stopwatch = Stopwatch.createStarted();
 
@@ -397,7 +397,7 @@ public class Main {
 
         stopwatch = Stopwatch.createStarted();
         analysis.configureSoot();
-        saveExecutionTime("Configure Soot");
+        saveExecutionTime("Configure Soot DF");
 
         stopwatch = Stopwatch.createStarted();
 

@@ -39,7 +39,7 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
 
     @Override
     public scala.collection.immutable.List<String> getIncludeList() {
-        return JavaConverters.asScalaBuffer(Arrays.asList("java.util.*")).toList();
+        return JavaConverters.asScalaBuffer(Arrays.asList("")).toList();
     }
 
     /**
