@@ -64,5 +64,5 @@ To stop and remove a docker container, run the following command:
 
 To run the experiment 10 times, use the following commands::
 
-`chmod +x script.sh
-./run_experiment.sh`
+`chmod +x scripts/run_experiment.sh
+./scripts/run_experiment.sh`
