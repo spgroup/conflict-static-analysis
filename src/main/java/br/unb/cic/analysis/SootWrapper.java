@@ -42,7 +42,7 @@ public class SootWrapper {
 
     private static List<String> getIncludeList() {
         //"java.lang.*, java.util.*"
-        List<String> stringList = new ArrayList<String>(Arrays.asList("java.util.*")); // java.util.* java.util.HashMap
+        List<String> stringList = new ArrayList<String>(Arrays.asList("")); // java.util.* java.util.HashMap
         return stringList;
     }
 
