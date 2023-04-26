@@ -60,7 +60,7 @@ To stop and remove a docker container, run the following command:
 
 `docker stop <container-id>`
 
-## Running the experiment 10 (ten) times
+## Running the experiment n times
 
 To run the experiment, use the following commands:
 
