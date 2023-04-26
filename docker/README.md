@@ -59,3 +59,10 @@ docker cp <container-id>:/home/miningframework/output/data/results.pdf <your-pat
 To stop and remove a docker container, run the following command:
 
 `docker stop <container-id>`
+
+## Running the experiment 10 (ten) times
+
+To run the experiment 10 times, use the following commands::
+
+`chmod +x script.sh
+./run_experiment.sh`
