@@ -202,7 +202,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
                 .definition(sampleClassPath, new int[]{13}, new int[]{12});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
-        Assert.assertEquals(981, analysis.getConflicts().size());
+        Assert.assertEquals(3, analysis.getConflicts().size());
     }
 
     @Test
@@ -259,12 +259,12 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
     public void classFieldWithParameterNotConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.ClassFieldWithParameterNotConflictSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
-                .definition(sampleClassPath, new int[]{11}, new int[]{12});
+                .definition(sampleClassPath, new int[]{11}, new int[]{13});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
 
         // Not Conflict - Not implemented yet. You will need constant propagation.
-        // Currently detected as conflict: [left, m():9] --> [right, foo():14]
+        // Currently detected as conflict: [left, m():11] --> [right, foo():116]
         Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
@@ -390,7 +390,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
-    @Ignore
+
     @Test
     public void pointsToDifferentObjectFromParameters() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToDifferentObjectFromParametersSample";
@@ -500,7 +500,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
     public void localArraysRecursiveNotConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.LocalArrayRecursiveNotConflictSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
-                .definition(sampleClassPath, new int[]{8}, new int[]{9});
+                .definition(sampleClassPath, new int[]{8}, new int[]{10});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
         Assert.assertEquals(0, analysis.getConflicts().size());
@@ -776,6 +776,16 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.InnerClassRecursiveNotConflictSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{24}, new int[]{5});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        configureTest(analysis);
+        Assert.assertEquals(0, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void twoSameObjectTest() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.TwoSameObjectSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{7}, new int[]{9});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
         Assert.assertEquals(0, analysis.getConflicts().size());
