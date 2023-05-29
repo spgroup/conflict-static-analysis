@@ -67,7 +67,7 @@ public class SootWrapper {
         //enableCHACallGraph();
     }
 
-    private static void enableSparkCallGraph() {
+    public static void enableSparkCallGraph() {
         //Enable Spark
         HashMap<String, String> opt = new HashMap<String, String>();
         //opt.put("propagator","worklist");

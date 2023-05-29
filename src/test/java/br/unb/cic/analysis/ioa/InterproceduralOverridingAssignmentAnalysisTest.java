@@ -6,17 +6,16 @@ import br.unb.cic.analysis.model.Conflict;
 import br.unc.cic.analysis.test.DefinitionFactory;
 import br.unc.cic.analysis.test.MarkingClass;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import soot.G;
 import soot.PackManager;
+import soot.Scene;
 import soot.Transform;
 
 import java.io.FileWriter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
+import static br.unb.cic.analysis.SootWrapper.enableSparkCallGraph;
 
 public class InterproceduralOverridingAssignmentAnalysisTest {
     private void configureTest(InterproceduralOverrideAssignment analysis) {
@@ -86,7 +85,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
-    @Ignore
+
     @Test
     public void StringArrayTest() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.StringArraySample";
@@ -299,24 +298,112 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
     }
 
     @Test
-    public void additionToArrayConflict() {
+    public void additionToArrayWithJavaUtilConflict() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.AdditionToArrayConflictSample";
+        List<String> stringList = new ArrayList<String>(Arrays.asList("java.util.*")); // java.util.* java.util.HashMap
+
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{11}, new int[]{13});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+
+        G.reset();
+
+        List<String> testClasses = Collections.singletonList("target/test-classes/");
+
+        soot.options.Options.v().set_no_bodies_for_excluded(true);
+        soot.options.Options.v().set_allow_phantom_refs(true);
+        soot.options.Options.v().set_output_format(soot.options.Options.output_format_jimple);
+        soot.options.Options.v().set_whole_program(true);
+        soot.options.Options.v().set_process_dir(testClasses);
+        soot.options.Options.v().set_full_resolver(true);
+        soot.options.Options.v().set_keep_line_number(true);
+        soot.options.Options.v().set_prepend_classpath(false);
+        soot.options.Options.v().set_include(stringList);
+        //Options.v().setPhaseOption("cg.spark", "on");
+        //Options.v().setPhaseOption("cg.spark", "verbose:true");
+        soot.options.Options.v().setPhaseOption("cg.spark", "enabled:true");
+        soot.options.Options.v().setPhaseOption("jb", "use-original-names:true");
+
+        Scene.v().loadNecessaryClasses();
+
+        enableSparkCallGraph();
+
+        analysis.configureEntryPoints();
+
+        PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
+        SootWrapper.applyPackages();
+
+        try {
+            exportResults(analysis.getConflicts());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Assert.assertEquals(49, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void additionToArrayWithoutJavaUtilNotConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.AdditionToArrayConflictSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{11}, new int[]{13});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
-        Assert.assertEquals(49, analysis.getConflicts().size());
+        Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
     @Test
-    public void hashmapConflict() {
+    public void hashmapWithJavaUtilConflict() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.HashmapConflictSample";
+        List<String> stringList = new ArrayList<String>(Arrays.asList("java.util.HashMap")); // java.util.* java.util.HashMap
+
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{11}, new int[]{12});
+        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
+        G.reset();
+
+        List<String> testClasses = Collections.singletonList("target/test-classes/");
+
+        soot.options.Options.v().set_no_bodies_for_excluded(true);
+        soot.options.Options.v().set_allow_phantom_refs(true);
+        soot.options.Options.v().set_output_format(soot.options.Options.output_format_jimple);
+        soot.options.Options.v().set_whole_program(true);
+        soot.options.Options.v().set_process_dir(testClasses);
+        soot.options.Options.v().set_full_resolver(true);
+        soot.options.Options.v().set_keep_line_number(true);
+        soot.options.Options.v().set_prepend_classpath(false);
+        soot.options.Options.v().set_include(stringList);
+        //Options.v().setPhaseOption("cg.spark", "on");
+        //Options.v().setPhaseOption("cg.spark", "verbose:true");
+        soot.options.Options.v().setPhaseOption("cg.spark", "enabled:true");
+        soot.options.Options.v().setPhaseOption("jb", "use-original-names:true");
+
+        Scene.v().loadNecessaryClasses();
+
+        enableSparkCallGraph();
+
+        analysis.configureEntryPoints();
+
+        PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
+        SootWrapper.applyPackages();
+
+        try {
+            exportResults(analysis.getConflicts());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Assert.assertEquals(274, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void hashmapWithoutJavaUtilNotConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.HashmapConflictSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{11}, new int[]{12});
         InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition);
         configureTest(analysis);
         //with java.util.*
-        Assert.assertEquals(625, analysis.getConflicts().size());
+        Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
     @Test
@@ -379,7 +466,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(2, analysis.getConflicts().size());
     }
 
-    @Ignore
+
     @Test
     public void pointsToNotConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToDifferentObjectSample";
@@ -401,7 +488,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
-    @Ignore
+
     @Test
     public void pointsToDifferentObjectFromParametersWithMain() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToDifferentObjectFromParametersWithMainSample";
@@ -422,7 +509,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(2, analysis.getConflicts().size());
     }
 
-    @Ignore
+
     @Test
     public void pointsToSameObjectFromParameters() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToSameObjectFromParametersSample";
@@ -433,7 +520,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(14, analysis.getConflicts().size());
     }
 
-    @Ignore
+
     @Test
     public void pointsToSameObjectFromParameters2() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToSameObjectFromParametersSample2";
@@ -444,7 +531,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
-    @Ignore
+
     @Test
     public void pointsToSameObjectFromParameters3() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToSameObjectFromParametersSample3";
@@ -455,7 +542,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
-    @Ignore
+
     @Test
     public void pointsToSameObjectFromParameters4() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToSameObjectFromParametersSample4";
@@ -706,7 +793,6 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
-    @Ignore
     @Test
     public void changeObjectPropagatinsField() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.ChangeObjectPropagatinsFieldSample";
@@ -717,7 +803,6 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
-    @Ignore
     @Test
     public void changeObjectPropagatinsField2() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.ChangeObjectPropagatinsFieldSample2";
@@ -738,7 +823,6 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
-    @Ignore
     @Test
     public void changeObjectPropagatinsField4() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.ChangeObjectPropagatinsFieldSample4";
@@ -749,7 +833,6 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
-    @Ignore
     @Test
     public void changeObjectPropagatinsField5() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.ChangeObjectPropagatinsFieldSample5";
@@ -760,7 +843,6 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
-    @Ignore
     @Test
     public void changeObjectPropagatinsField6() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.ChangeObjectPropagatinsFieldSample6";
