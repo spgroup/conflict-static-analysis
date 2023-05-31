@@ -9,7 +9,7 @@
 
 ## Build the app’s container image
 
-Run `docker build -t getting-started .`
+Run `docker build --no-cache -t run-experiment .`
 
 This command used the Dockerfile to build a new container image.
 
