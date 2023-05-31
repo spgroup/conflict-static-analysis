@@ -357,7 +357,6 @@ public class Main {
 
         stopwatch = Stopwatch.createStarted();
         analysis.configureSoot();
-        soot.options.Options.v().set_ignore_resolution_errors(true);
 
         saveExecutionTime("Configure Soot DFP");
 
