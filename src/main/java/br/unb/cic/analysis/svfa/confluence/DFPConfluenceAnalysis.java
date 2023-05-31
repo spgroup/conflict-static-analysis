@@ -10,6 +10,7 @@ import soot.AbstractSootFieldRef;
 import soot.G;
 import soot.Scene;
 import soot.Unit;
+import soot.options.Options;
 
 import java.util.*;
 
@@ -44,6 +45,7 @@ public class DFPConfluenceAnalysis {
         m.stopwatch = Stopwatch.createStarted();
 
         sourceBaseAnalysis.configureSoot();
+        Options.v().ignore_resolution_errors();
         m.saveExecutionTime("Configure Soot Confluence 1");
 
         m.stopwatch = Stopwatch.createStarted();

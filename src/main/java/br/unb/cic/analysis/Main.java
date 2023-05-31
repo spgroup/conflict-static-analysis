@@ -155,6 +155,10 @@ public class Main {
                         "Interprocedural analysis")
                 .build();
 
+        Option depthMethodsVisitedSVFAOption = Option.builder("printDepthSVFA").argName("printDepthSVFA").hasArg()
+                .desc("sets depthMethodsVisited from SVFA")
+                .build();
+
         options.addOption(classPathOption);
         options.addOption(inputFileOption);
         options.addOption(analysisOption);
@@ -163,6 +167,7 @@ public class Main {
         options.addOption(verboseOption);
         options.addOption(recursiveOption);
         options.addOption(oaDepthLimitOption);
+        options.addOption(depthMethodsVisitedSVFAOption);
     }
 
     private void runAnalysis(String mode, String classpath) {
@@ -347,8 +352,13 @@ public class Main {
                 ? new DFPInterProcedural(classpath, definition)
                 : new DFPIntraProcedural(classpath, definition);
 
+        boolean depthMethodsVisited = Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
+        analysis.setPrintDepthVisitedMethods(depthMethodsVisited);
+
         stopwatch = Stopwatch.createStarted();
         analysis.configureSoot();
+        soot.options.Options.v().set_ignore_resolution_errors(true);
+
         saveExecutionTime("Configure Soot DFP");
 
         stopwatch = Stopwatch.createStarted();
@@ -394,6 +404,8 @@ public class Main {
                 ? new SVFAInterProcedural(classpath, definition)
                 : new SVFAIntraProcedural(classpath, definition);
 
+        boolean depthMethodsVisited = Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
+        analysis.setPrintDepthVisitedMethods(depthMethodsVisited);
 
         stopwatch = Stopwatch.createStarted();
         analysis.configureSoot();
