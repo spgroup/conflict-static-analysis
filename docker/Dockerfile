@@ -1,7 +1,7 @@
 FROM ubuntu
 
 # Install OpenJDK-8
-RUN apt-get update && \
+RUN apt-get update --fix-missing && \
     apt-get install -y openjdk-8-jdk && \
     apt-get install -y ant && \
     apt-get install -y curl && \

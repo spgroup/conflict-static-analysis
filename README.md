@@ -124,6 +124,11 @@ Sets the depth limit on accessing methods when performing Overriding Assignment 
 
 Usage example of a Java project, with a .csv file.
 
+
+#### -printDepthSVFA
+
+Configures (true or false) the printing of the visited method depths in SVFA.
+
 ```SHELL
 mvn exec:java -Dexec.mainClass="br.unb.cic.analysis.Main" \
 -Dexec.args="-csv /path/of/csv/file.csv -cp /path/of/class/files/folder"
