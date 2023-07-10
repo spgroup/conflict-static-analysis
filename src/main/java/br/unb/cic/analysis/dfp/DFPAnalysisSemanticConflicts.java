@@ -119,4 +119,9 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
     public final boolean isFieldSensitiveAnalysis() {
         return true;
     }
+
+    @Override
+    public int maxDepth() {
+        return 10;
+    }
 }
