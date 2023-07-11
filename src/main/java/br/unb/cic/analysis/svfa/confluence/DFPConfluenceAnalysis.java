@@ -20,11 +20,20 @@ public class DFPConfluenceAnalysis {
     private boolean interprocedural;
     private AbstractMergeConflictDefinition definition;
     private Set<ConfluenceConflict> confluentFlows = new HashSet<>();
+    private int depthLimit;
 
     public DFPConfluenceAnalysis(String classPath, AbstractMergeConflictDefinition definition, boolean interprocedural) {
         this.cp = classPath;
         this.definition = definition;
         this.interprocedural = interprocedural;
+        this.depthLimit = 5;
+    }
+
+    public DFPConfluenceAnalysis(String classPath, AbstractMergeConflictDefinition definition, boolean interprocedural, int depthLimit) {
+        this.cp = classPath;
+        this.definition = definition;
+        this.interprocedural = interprocedural;
+        this.depthLimit = depthLimit;
     }
 
     /**
@@ -128,7 +137,7 @@ public class DFPConfluenceAnalysis {
      * @return A instance of a child class of the JDFPAnalysis class that redefine source and sink as source and base
      */
     private br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts sourceBaseAnalysis(boolean interprocedural) {
-        return new br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts(this.cp, this.definition) {
+        return new br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts(this.cp, this.definition, depthLimit) {
 
             /**
              * Here we define the list of source statements for the SVFA analysis as the confluence analysis source statements,
@@ -164,7 +173,7 @@ public class DFPConfluenceAnalysis {
      * @return A instance of a child class of the SVFAAnalysis class that redefine source and sink as source and base
      */
     private DFPAnalysisSemanticConflicts sinkBaseAnalysis(boolean interprocedural) {
-        return new DFPAnalysisSemanticConflicts(this.cp, this.definition) {
+        return new DFPAnalysisSemanticConflicts(this.cp, this.definition, depthLimit) {
 
             /**
              * Here we define the list of source statements for the SVFA analysis as the confluence analysis sink statements,

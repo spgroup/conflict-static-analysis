@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public abstract class DFPAnalysisSemanticConflicts extends JDFP {
 
     private String cp;
+    private final int depthLimit;
 
     private AbstractMergeConflictDefinition definition;
 
@@ -29,6 +30,13 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
     public DFPAnalysisSemanticConflicts(String classPath, AbstractMergeConflictDefinition definition) {
         this.cp = classPath;
         this.definition = definition;
+        this.depthLimit = 5;
+    }
+
+    public DFPAnalysisSemanticConflicts(String classPath, AbstractMergeConflictDefinition definition, int depthLimit) {
+        this.cp = classPath;
+        this.definition = definition;
+        this.depthLimit = depthLimit;
     }
 
     @Override
@@ -122,6 +130,6 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
 
     @Override
     public int maxDepth() {
-        return 10;
+        return this.depthLimit;
     }
 }

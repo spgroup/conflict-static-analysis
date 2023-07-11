@@ -37,7 +37,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     public InterproceduralOverrideAssignment(AbstractMergeConflictDefinition definition) {
         this.definition = definition;
-        this.depthLimit = 10;
+        this.depthLimit = 5;
 
         initDefaultFields();
     }
