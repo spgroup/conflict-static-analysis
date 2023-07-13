@@ -602,17 +602,19 @@ public class Main {
                 String aux = end_stmt.value().stmt();
 
                 if (stmt.toString().equals(aux)){
-                    int actual_line = stmt.getTraversedLine().get(0).getLineNumber();
-                    if (last_line != actual_line){
-                        System.out.println("\nPath Statements: ");
-                        conflicts_string.add("Path Statements: ");
-                        for (TraversedLine line: stmt.getTraversedLine()){
-                            conflicts_string.add(line+ " => ");
-                            System.out.print(line+ " => ");
+                    if (stmt.getTraversedLine().size()>0){
+                        int actual_line = stmt.getTraversedLine().get(0).getLineNumber();
+                        if (last_line != actual_line){
+                            System.out.println("\nPath Statements: ");
+                            conflicts_string.add("Path Statements: ");
+                            for (TraversedLine line: stmt.getTraversedLine()){
+                                conflicts_string.add(line+ " => ");
+                                System.out.print(line+ " => ");
+                            }
+                            conflicts_string.add(end_stmt.value().toString());
+                            System.out.println(end_stmt.value());
+                            last_line = actual_line;
                         }
-                        conflicts_string.add(end_stmt.value().toString());
-                        System.out.println(end_stmt.value());
-                        last_line = actual_line;
                     }
                 }
             }
