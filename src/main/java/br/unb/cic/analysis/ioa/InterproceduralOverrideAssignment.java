@@ -172,7 +172,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private boolean shouldSkip(SootMethod sootMethod) {
         boolean hasRelativeBeenTraversed = this.traversedMethodsWrapper.hasRelativeBeenTraversed(sootMethod);
-        boolean isSizeGreaterThanDepthLimit = this.traversedMethodsWrapper.size() > this.depthLimit;
+        boolean isSizeGreaterThanDepthLimit = this.traversedMethodsWrapper.size() >= this.depthLimit;
         boolean isPhantom = sootMethod.isPhantom();
 
         return hasRelativeBeenTraversed || isSizeGreaterThanDepthLimit || isPhantom;
