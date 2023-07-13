@@ -12,6 +12,7 @@ import br.unb.cic.analysis.io.MergeConflictReader;
 import br.unb.cic.analysis.ioa.InterproceduralOverrideAssignment;
 import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
+import br.unb.cic.analysis.model.TraversedLine;
 import br.unb.cic.analysis.pdg.PDGAnalysisSemanticConflicts;
 import br.unb.cic.analysis.pdg.PDGIntraProcedural;
 import br.unb.cic.analysis.reachability.ReachabilityAnalysis;
@@ -20,6 +21,7 @@ import br.unb.cic.analysis.svfa.SVFAInterProcedural;
 import br.unb.cic.analysis.svfa.SVFAIntraProcedural;
 import br.unb.cic.analysis.svfa.confluence.DFPConfluenceAnalysis;
 import br.unb.cic.diffclass.DiffClass;
+import br.unb.cic.soot.graph.StatementNode;
 import com.google.common.base.Stopwatch;
 import org.apache.commons.cli.*;
 import scala.collection.JavaConverters;
@@ -298,6 +300,13 @@ public class Main {
 
         conflicts.addAll(interproceduralOverrideAssignment.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
         saveExecutionTime("Time to perform OA Inter");
+
+        System.out.println("Visited methods: "+ interproceduralOverrideAssignment.getVisitedMethods());
+
+        saveVisitedMethods("OA", interproceduralOverrideAssignment.getVisitedMethods());
+
+        saveConflictsLog("OA", conflicts.toString());
+
     }
 
     /*
@@ -343,7 +352,9 @@ public class Main {
 
         saveExecutionTime("Time to perform PDG");
 
-        System.out.println(conflicts.toString());
+        System.out.println("CONFLICTS: "+conflicts.toString());
+
+        saveConflictsLog("PDG", conflicts.toString());
     }
 
     private void runDFPAnalysis(String classpath, Boolean interprocedural) {
@@ -367,8 +378,6 @@ public class Main {
 
         analysis.buildDFP();
 
-        System.out.println("Total de métodos visitados:"+ analysis.getNumberVisitedMethods());
-
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
                 .stream()
                 .map(p -> formatConflict(p.toString()))
@@ -376,7 +385,19 @@ public class Main {
 
         saveExecutionTime("Time to perform DFP");
 
+        System.out.print("CONFLICTS: ");
+
+        List<String> conflicts_string = generateDFPReportConflict(analysis);
+
+        conflicts_string.add(conflicts.toString());
+
         System.out.println(conflicts.toString());
+
+        System.out.println("Visited methods: "+ analysis.getNumberVisitedMethods());
+        saveVisitedMethods("DFP", analysis.getNumberVisitedMethods());
+
+        saveConflictsLog("DFP", conflicts_string.toString());
+
     }
 
     private void runCDAnalysis(String classpath, Boolean omitExceptingUnitEdges) {
@@ -441,7 +462,11 @@ public class Main {
                 .stream()
                 .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
-        System.out.println(conflicts.toString());
+
+        System.out.println("CONFLICTS: "+conflicts.toString());
+        saveVisitedMethods("Confluence", analysis.getVisitedMethods());
+
+        saveConflictsLog("Confluence", conflicts.toString());
     }
 
     private void loadDefinition(String filePath) throws Exception {
@@ -535,7 +560,64 @@ public class Main {
         }
     }
 
+    public void saveVisitedMethods(String description, Integer visited_methods){
+        try {
+            FileWriter myWriter = new FileWriter("visited_methods.txt", true);
+            myWriter.write(description+" "+visited_methods+"\n");
+            myWriter.close();
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+    }
+
+    public void saveConflictsLog(String description, String log_message){
+        try {
+            FileWriter myWriter = new FileWriter("conflicts_log.txt", true);
+            myWriter.write(description+" "+log_message+"\n");
+            myWriter.close();
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+    }
+
     public String formatConflict(String p){
         return p.replace("), Node", ") => Node");
+    }
+
+    public List<String> generateDFPReportConflict(DFPAnalysisSemanticConflicts analysis){
+        List<String> conflicts_string = new ArrayList<>();
+        for (List<StatementNode> stmt_list: analysis.findSourceSinkPaths()){
+            System.out.println(stmt_list);
+            StatementNode begin_stmt = stmt_list.get(0);
+            StatementNode end_stmt = stmt_list.get(stmt_list.size()-1);
+            System.out.println("\nBegin Statement:"+begin_stmt);
+            conflicts_string.add("Begin Statement:"+begin_stmt);
+            System.out.println("\nEnd Statement: "+end_stmt.value());
+            conflicts_string.add("End Statement: "+end_stmt.value());
+            int last_line = -1;
+
+            for (Statement stmt: definition.sinkStatements){
+                String aux = end_stmt.value().stmt();
+
+                if (stmt.toString().equals(aux)){
+                    int actual_line = stmt.getTraversedLine().get(0).getLineNumber();
+                    if (last_line != actual_line){
+                        System.out.println("\nPath Statements: ");
+                        conflicts_string.add("Path Statements: ");
+                        for (TraversedLine line: stmt.getTraversedLine()){
+                            conflicts_string.add(line+ " => ");
+                            System.out.print(line+ " => ");
+                        }
+                        conflicts_string.add(end_stmt.value().toString());
+                        System.out.println(end_stmt.value());
+                        last_line = actual_line;
+                    }
+                }
+            }
+        }
+
+        return conflicts_string;
     }
 }

@@ -4,6 +4,7 @@ import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.Main;
 import br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts;
 import br.unb.cic.analysis.model.Statement;
+import br.unb.cic.analysis.model.TraversedLine;
 import br.unb.cic.soot.graph.StatementNode;
 import com.google.common.base.Stopwatch;
 import soot.AbstractSootFieldRef;
@@ -21,6 +22,8 @@ public class DFPConfluenceAnalysis {
     private AbstractMergeConflictDefinition definition;
     private Set<ConfluenceConflict> confluentFlows = new HashSet<>();
     private int depthLimit;
+
+    private int visitedMethods;
 
     public DFPConfluenceAnalysis(String classPath, AbstractMergeConflictDefinition definition, boolean interprocedural) {
         this.cp = classPath;
@@ -83,7 +86,8 @@ public class DFPConfluenceAnalysis {
 
         m.saveExecutionTime("Time to perform Confluence 2");
 
-        System.out.println(confluentFlows.toString());
+        System.out.println("Visited methods: "+ (sourceBaseAnalysis.getNumberVisitedMethods()+sinkBaseAnalysis.getNumberVisitedMethods()));
+        setVisitedMethods(sourceBaseAnalysis.getNumberVisitedMethods()+sinkBaseAnalysis.getNumberVisitedMethods());
     }
 
     /**
@@ -220,5 +224,13 @@ public class DFPConfluenceAnalysis {
 
     private boolean unitIsNotOnList(List<Statement> statements, Unit unit) {
         return statements.stream().map(stmt -> stmt.getUnit()).noneMatch(u -> u.equals(unit));
+    }
+
+    public int getVisitedMethods() {
+        return visitedMethods;
+    }
+
+    public void setVisitedMethods(int visitedMethods) {
+        this.visitedMethods = visitedMethods;
     }
 }

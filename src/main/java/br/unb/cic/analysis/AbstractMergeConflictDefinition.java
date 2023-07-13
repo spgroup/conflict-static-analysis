@@ -1,6 +1,7 @@
 package br.unb.cic.analysis;
 
 import br.unb.cic.analysis.model.Statement;
+import br.unb.cic.analysis.model.TraversedLine;
 import soot.*;
 import soot.jimple.AssignStmt;
 import soot.jimple.IdentityStmt;
@@ -99,8 +100,9 @@ public abstract class AbstractMergeConflictDefinition {
                 if(body == null) continue;
                 for(Unit u: body.getUnits()) {
                     if(definitions.get(className).contains(u.getJavaSourceStartLineNumber())) {
-                        Statement stmt = createStatement(m, u, type); 
+                        Statement stmt = createStatement(m, u, type);
                         statements.add(stmt);
+
                         if (stmt.isSource()) {
                             entryMethods.add(m);
                         }
@@ -111,12 +113,23 @@ public abstract class AbstractMergeConflictDefinition {
         if(recursive) {
             List<Statement> recursiveStatements = new ArrayList<>();
             List<SootMethod> traversedMethods = new ArrayList<>();
+
             for(Statement s: statements) {
                 if(s.getUnit() instanceof Stmt) {
                     Stmt stmt = (Stmt)s.getUnit();
                     if(stmt.containsInvokeExpr()) {
+
+                        SootMethod aux_m = s.getSootMethod();
+                        Statement aux = createStatement(aux_m, stmt, type);
+                        TraversedLine aux_l = new TraversedLine(s.getSootMethod().getDeclaringClass(), s.getSootMethod().method(), stmt.getJavaSourceStartLineNumber());
+                        List<TraversedLine> aux_traversedLine =new ArrayList<>();
+                        aux_traversedLine.add(aux_l);
+                        aux.setTraversedLine(aux_traversedLine);
+
+                        recursiveStatements.add(aux);
+
                         SootMethod sm = stmt.getInvokeExpr().getMethod();
-                        recursiveStatements.addAll(traverse(sm, traversedMethods, type, 1));
+                        recursiveStatements.addAll(traverse(sm, traversedMethods, aux_traversedLine, type, 1));
                     }
                 }
             }
@@ -125,7 +138,7 @@ public abstract class AbstractMergeConflictDefinition {
         return statements;
     }
 
-    public List<Statement> traverse(SootMethod sm, List<SootMethod> traversed, Statement.Type type, int level) {
+    public List<Statement> traverse(SootMethod sm, List<SootMethod> traversed, List<TraversedLine> traversedLine, Statement.Type type, int level) {
         Body body = retrieveActiveBodySafely(sm);
         if(traversed.contains(sm) || level > 5 || (!sm.getDeclaringClass().isApplicationClass()) || (body == null)) {
             return new ArrayList<>();
@@ -142,25 +155,55 @@ public abstract class AbstractMergeConflictDefinition {
 
             if(type.equals(Statement.Type.SOURCE) && u instanceof AssignStmt) {
                 AssignStmt assignStmt = (AssignStmt) u;
-                res.add(createStatement(sm, u, type));
+                Statement aux = createStatement(sm, u, type);
+
+                aux.setTraversedLine(traversedLine);
+
+                res.add(aux);
 
                 if(assignStmt.containsInvokeExpr()) {
-                    res.addAll(traverse(assignStmt.getInvokeExpr().getMethod(), traversed, type, level));
+
+                    SootMethod sm_aux = assignStmt.getInvokeExpr().getMethod();
+                    List<TraversedLine> aux_traversedLine = new ArrayList<>();
+                    aux_traversedLine.addAll(traversedLine);
+
+                    TraversedLine aux_l = new TraversedLine(sm_aux.getDeclaringClass(), sm_aux.method(), assignStmt.getJavaSourceStartLineNumber());
+                    aux_traversedLine.add(aux_l);
+
+                    res.addAll(traverse(assignStmt.getInvokeExpr().getMethod(), traversed, aux_traversedLine, type, level));
                 }
             }
             else if(type.equals(Statement.Type.SINK) && u.getUseBoxes().size() > 0) {
-                res.add(createStatement(sm, u, type));
+                Statement aux = createStatement(sm, u, type);
+
+                aux.setTraversedLine(traversedLine);
+
+                res.add(aux);
 
                 if(u instanceof Stmt) {
                     Stmt stmt = (Stmt)u;
                     if(stmt.containsInvokeExpr()) {
-                        res.addAll(traverse(stmt.getInvokeExpr().getMethod(), traversed, type, level));
+                        SootMethod sm_aux = stmt.getInvokeExpr().getMethod();
+                        List<TraversedLine> aux_traversedLine =new ArrayList<>();
+                        aux_traversedLine.addAll(traversedLine);
+
+                        TraversedLine aux_l = new TraversedLine(sm_aux.getDeclaringClass(), sm_aux.method(), stmt.getJavaSourceStartLineNumber());
+                        aux_traversedLine.add(aux_l);
+
+                        res.addAll(traverse(stmt.getInvokeExpr().getMethod(), traversed, aux_traversedLine, type, level));
                     }
                 }
             }
             else if(u instanceof InvokeStmt) {
                 InvokeStmt invokeStmt = (InvokeStmt)u;
-                res.addAll(traverse(invokeStmt.getInvokeExpr().getMethod(), traversed, type, level));
+                SootMethod sm_aux = invokeStmt.getInvokeExpr().getMethod();
+                List<TraversedLine> aux_traversedLine =new ArrayList<>();
+                aux_traversedLine.addAll(traversedLine);
+
+                TraversedLine aux_l = new TraversedLine(sm_aux.getDeclaringClass(), sm_aux.method(), invokeStmt.getJavaSourceStartLineNumber());
+                aux_traversedLine.add(aux_l);
+
+                res.addAll(traverse(invokeStmt.getInvokeExpr().getMethod(), traversed, aux_traversedLine, type, level));
             }
         }
         return res;
