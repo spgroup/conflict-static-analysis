@@ -574,7 +574,7 @@ public class Main {
     public void saveConflictsLog(String description, String log_message){
         try {
             FileWriter myWriter = new FileWriter("conflicts_log.txt", true);
-            myWriter.write(description+" "+log_message+"\n");
+            myWriter.write(description+": "+log_message+"\n");
             myWriter.close();
         } catch (IOException e) {
             System.out.println("An error occurred.");
