@@ -303,7 +303,7 @@ public class Main {
 
         System.out.println("Visited methods: "+ interproceduralOverrideAssignment.getVisitedMethods());
 
-        saveVisitedMethods("OA", interproceduralOverrideAssignment.getVisitedMethods());
+        saveVisitedMethods("OA", (interproceduralOverrideAssignment.getVisitedMethods()+""));
 
         saveConflictsLog("OA", conflicts.toString());
 
@@ -394,7 +394,7 @@ public class Main {
         System.out.println(conflicts.toString());
 
         System.out.println("Visited methods: "+ analysis.getNumberVisitedMethods());
-        saveVisitedMethods("DFP", analysis.getNumberVisitedMethods());
+        saveVisitedMethods("DFP", (analysis.getNumberVisitedMethods()+","+analysis.svg().graph().size()+","+analysis.svg().edges().size()));
 
         saveConflictsLog("DFP", conflicts_string.toString());
 
@@ -464,9 +464,9 @@ public class Main {
                 .collect(Collectors.toList()));
 
         System.out.println("CONFLICTS: "+conflicts.toString());
-        saveVisitedMethods("Confluence", analysis.getVisitedMethods());
+        saveVisitedMethods("Confluence", (analysis.getVisitedMethods()+","+analysis.getGraphSize()));
 
-        saveConflictsLog("Confluence", conflicts.toString());
+        saveConflictsLog("Confluence", conflicts.toString().replace("\n", ""));
     }
 
     private void loadDefinition(String filePath) throws Exception {
@@ -560,7 +560,7 @@ public class Main {
         }
     }
 
-    public void saveVisitedMethods(String description, Integer visited_methods){
+    public void saveVisitedMethods(String description, String visited_methods){
         try {
             FileWriter myWriter = new FileWriter("visited_methods.txt", true);
             myWriter.write(description+" "+visited_methods+"\n");

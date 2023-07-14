@@ -22,6 +22,7 @@ public class DFPConfluenceAnalysis {
     private AbstractMergeConflictDefinition definition;
     private Set<ConfluenceConflict> confluentFlows = new HashSet<>();
     private int depthLimit;
+    private String getGraphSize;
 
     private int visitedMethods;
 
@@ -88,6 +89,7 @@ public class DFPConfluenceAnalysis {
 
         System.out.println("Visited methods: "+ (sourceBaseAnalysis.getNumberVisitedMethods()+sinkBaseAnalysis.getNumberVisitedMethods()));
         setVisitedMethods(sourceBaseAnalysis.getNumberVisitedMethods()+sinkBaseAnalysis.getNumberVisitedMethods());
+        setGraphSize(sourceBaseAnalysis, sinkBaseAnalysis);
     }
 
     /**
@@ -228,6 +230,14 @@ public class DFPConfluenceAnalysis {
 
     public int getVisitedMethods() {
         return visitedMethods;
+    }
+
+    public void setGraphSize(DFPAnalysisSemanticConflicts source, DFPAnalysisSemanticConflicts sink){
+        this.getGraphSize = (source.svg().graph().size()+","+source.svg().edges().size()+","+sink.svg().graph().size()+","+sink.svg().edges().size());
+    }
+
+    public String getGraphSize(){
+        return this.getGraphSize;
     }
 
     public void setVisitedMethods(int visitedMethods) {
