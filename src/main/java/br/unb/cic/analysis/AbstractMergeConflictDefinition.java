@@ -163,29 +163,59 @@ public abstract class AbstractMergeConflictDefinition {
             }
 
             // if the unit is is an AssignStmt, create a statement with your traversedLine list
-            if(u instanceof AssignStmt) {
+            if(type.equals(Statement.Type.SOURCE) && u instanceof AssignStmt) {
                 AssignStmt assignStmt = (AssignStmt) u;
-                Statement statement = createStatement(sm, u, type);
-                statement.setTraversedLine(traversedLine);
-                res.add(statement);
+                Statement actual_statement = createStatement(sm, u, type);
+
+                actual_statement.setTraversedLine(traversedLine);
+
+                res.add(actual_statement);
 
                 // If it is an invokeExp, there is a new call to the method, so call a new traverse
                 // passing your currently traversed line list
                 if(assignStmt.containsInvokeExpr()) {
 
-                    SootMethod actual_method = assignStmt.getInvokeExpr().getMethod();
-                    List<TraversedLine> traversedLine_list = new ArrayList<>();
+                    SootMethod invoked_method = assignStmt.getInvokeExpr().getMethod();
+                    List<TraversedLine> actual_traversedLine = new ArrayList<>();
 
                     // add all elements from the current traverse line list
-                    traversedLine_list.addAll(traversedLine);
+                    actual_traversedLine.addAll(traversedLine);
 
-                    TraversedLine traversedLine_from_stmt = new TraversedLine(actual_method.getDeclaringClass(), actual_method.method(), assignStmt.getJavaSourceStartLineNumber());
+                    TraversedLine traversedLine_from_invoked_method = new TraversedLine(invoked_method.getDeclaringClass(), invoked_method.method(), assignStmt.getJavaSourceStartLineNumber());
 
                     // add an element from the current statement
-                    traversedLine_list.add(traversedLine_from_stmt);
+                    actual_traversedLine.add(traversedLine_from_invoked_method);
 
                     //call traverse passing currently travesed line list
-                    res.addAll(traverse(assignStmt.getInvokeExpr().getMethod(), traversed, traversedLine_list, type, level));
+                    res.addAll(traverse(assignStmt.getInvokeExpr().getMethod(), traversed, actual_traversedLine, type, level));
+                }
+            }
+            // if the unit is is a stmt and SINK, create a statement with your traversedLine list
+            else if(type.equals(Statement.Type.SINK) && u.getUseBoxes().size() > 0) {
+                Statement statement = createStatement(sm, u, type);
+
+                statement.setTraversedLine(traversedLine);
+
+                res.add(statement);
+
+                if(u instanceof Stmt) {
+                    Stmt stmt_from_unit = (Stmt) u;
+
+                    // If it is an invokeExp, there is a new call to the method, so call a new traverse
+                    // passing your currently traversed line list
+                    if(stmt_from_unit.containsInvokeExpr()) {
+                        SootMethod method_from_invoked_exp = stmt_from_unit.getInvokeExpr().getMethod();
+                        List<TraversedLine> actual_traversedLine =new ArrayList<>();
+                        // add all elements from the current traverse line list
+                        actual_traversedLine.addAll(traversedLine);
+
+                        TraversedLine aux_l = new TraversedLine(method_from_invoked_exp.getDeclaringClass(), method_from_invoked_exp.method(), stmt_from_unit.getJavaSourceStartLineNumber());
+                        // add an element from the current statement
+                        actual_traversedLine.add(aux_l);
+
+                        //call traverse passing currently travesed line list
+                        res.addAll(traverse(stmt_from_unit.getInvokeExpr().getMethod(), traversed, actual_traversedLine, type, level));
+                    }
                 }
             }
             // if the unit is an Invoke Stmt, create a statement with your traversedLine list
