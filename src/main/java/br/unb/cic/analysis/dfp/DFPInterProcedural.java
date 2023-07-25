@@ -6,6 +6,11 @@ import scala.collection.JavaConverters;
 import java.util.Arrays;
 
 public class DFPInterProcedural extends DFPAnalysisSemanticConflicts{
+
+    public DFPInterProcedural(String classPath, AbstractMergeConflictDefinition definition, int depthLimit) {
+        super(classPath, definition, depthLimit);
+    }
+
     public DFPInterProcedural(String classPath, AbstractMergeConflictDefinition definition) {
         super(classPath, definition);
     }
