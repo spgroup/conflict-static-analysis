@@ -114,28 +114,37 @@ public abstract class AbstractMergeConflictDefinition {
             List<Statement> recursiveStatements = new ArrayList<>();
             List<SootMethod> traversedMethods = new ArrayList<>();
 
-            for(Statement s: statements) {
-                if(s.getUnit() instanceof Stmt) {
-                    Stmt stmt = (Stmt)s.getUnit();
-                    if(stmt.containsInvokeExpr()) {
+            for(Statement actual_stmt: statements) {
+                if(actual_stmt.getUnit() instanceof Stmt) {
+                    Stmt unit_from_stmt = (Stmt) actual_stmt.getUnit();
 
-                        SootMethod aux_m = s.getSootMethod();
-                        Statement aux = createStatement(aux_m, stmt, type);
-                        TraversedLine aux_l = new TraversedLine(s.getSootMethod().getDeclaringClass(), s.getSootMethod().method(), stmt.getJavaSourceStartLineNumber());
-                        List<TraversedLine> aux_traversedLine =new ArrayList<>();
-                        aux_traversedLine.add(aux_l);
-                        aux.setTraversedLine(aux_traversedLine);
+                    if(unit_from_stmt.containsInvokeExpr()) {
 
-                        recursiveStatements.add(aux);
+                        Statement statement = getGeneratedStatementFromUnitWithTraversedLine(actual_stmt, unit_from_stmt, type);
 
-                        SootMethod sm = stmt.getInvokeExpr().getMethod();
-                        recursiveStatements.addAll(traverse(sm, traversedMethods, aux_traversedLine, type, 1));
+                        // add statement with TraversedLine list
+                        recursiveStatements.add(statement);
+
+                        SootMethod invoked_method = unit_from_stmt.getInvokeExpr().getMethod();
+
+                        //call traverse passing currently travesed line list
+                        recursiveStatements.addAll(traverse(invoked_method, traversedMethods, statement.getTraversedLine(), type, 1));
                     }
                 }
             }
             statements.addAll(recursiveStatements);
         }
         return statements;
+    }
+
+    private Statement getGeneratedStatementFromUnitWithTraversedLine(Statement  actual_stmt, Stmt unit_from_stmt, Statement.Type type){
+        SootMethod actual_method = actual_stmt.getSootMethod();
+        Statement statement = createStatement(actual_method, unit_from_stmt, type);
+        TraversedLine actual_traversed_line = new TraversedLine(actual_stmt.getSootMethod().getDeclaringClass(), actual_stmt.getSootMethod().method(), unit_from_stmt.getJavaSourceStartLineNumber());
+        List<TraversedLine> traversedLine_list = new ArrayList<>();
+        traversedLine_list.add(actual_traversed_line);
+        statement.setTraversedLine(traversedLine_list);
+        return statement;
     }
 
     public List<Statement> traverse(SootMethod sm, List<SootMethod> traversed, List<TraversedLine> traversedLine, Statement.Type type, int level) {
@@ -153,57 +162,47 @@ public abstract class AbstractMergeConflictDefinition {
                 continue;
             }
 
-            if(type.equals(Statement.Type.SOURCE) && u instanceof AssignStmt) {
+            // if the unit is is an AssignStmt, create a statement with your traversedLine list
+            if(u instanceof AssignStmt) {
                 AssignStmt assignStmt = (AssignStmt) u;
-                Statement aux = createStatement(sm, u, type);
+                Statement statement = createStatement(sm, u, type);
+                statement.setTraversedLine(traversedLine);
+                res.add(statement);
 
-                aux.setTraversedLine(traversedLine);
-
-                res.add(aux);
-
+                // If it is an invokeExp, there is a new call to the method, so call a new traverse
+                // passing your currently traversed line list
                 if(assignStmt.containsInvokeExpr()) {
 
-                    SootMethod sm_aux = assignStmt.getInvokeExpr().getMethod();
-                    List<TraversedLine> aux_traversedLine = new ArrayList<>();
-                    aux_traversedLine.addAll(traversedLine);
+                    SootMethod actual_method = assignStmt.getInvokeExpr().getMethod();
+                    List<TraversedLine> traversedLine_list = new ArrayList<>();
 
-                    TraversedLine aux_l = new TraversedLine(sm_aux.getDeclaringClass(), sm_aux.method(), assignStmt.getJavaSourceStartLineNumber());
-                    aux_traversedLine.add(aux_l);
+                    // add all elements from the current traverse line list
+                    traversedLine_list.addAll(traversedLine);
 
-                    res.addAll(traverse(assignStmt.getInvokeExpr().getMethod(), traversed, aux_traversedLine, type, level));
+                    TraversedLine traversedLine_from_stmt = new TraversedLine(actual_method.getDeclaringClass(), actual_method.method(), assignStmt.getJavaSourceStartLineNumber());
+
+                    // add an element from the current statement
+                    traversedLine_list.add(traversedLine_from_stmt);
+
+                    //call traverse passing currently travesed line list
+                    res.addAll(traverse(assignStmt.getInvokeExpr().getMethod(), traversed, traversedLine_list, type, level));
                 }
             }
-            else if(type.equals(Statement.Type.SINK) && u.getUseBoxes().size() > 0) {
-                Statement aux = createStatement(sm, u, type);
-
-                aux.setTraversedLine(traversedLine);
-
-                res.add(aux);
-
-                if(u instanceof Stmt) {
-                    Stmt stmt = (Stmt)u;
-                    if(stmt.containsInvokeExpr()) {
-                        SootMethod sm_aux = stmt.getInvokeExpr().getMethod();
-                        List<TraversedLine> aux_traversedLine =new ArrayList<>();
-                        aux_traversedLine.addAll(traversedLine);
-
-                        TraversedLine aux_l = new TraversedLine(sm_aux.getDeclaringClass(), sm_aux.method(), stmt.getJavaSourceStartLineNumber());
-                        aux_traversedLine.add(aux_l);
-
-                        res.addAll(traverse(stmt.getInvokeExpr().getMethod(), traversed, aux_traversedLine, type, level));
-                    }
-                }
-            }
+            // if the unit is an Invoke Stmt, create a statement with your traversedLine list
             else if(u instanceof InvokeStmt) {
-                InvokeStmt invokeStmt = (InvokeStmt)u;
-                SootMethod sm_aux = invokeStmt.getInvokeExpr().getMethod();
-                List<TraversedLine> aux_traversedLine =new ArrayList<>();
-                aux_traversedLine.addAll(traversedLine);
+                InvokeStmt invokeStmt = (InvokeStmt) u;
+                SootMethod actual_method = invokeStmt.getInvokeExpr().getMethod();
+                List<TraversedLine> traversedLine_list =new ArrayList<>();
+                // add all elements from the current traverse line list
+                traversedLine_list.addAll(traversedLine);
 
-                TraversedLine aux_l = new TraversedLine(sm_aux.getDeclaringClass(), sm_aux.method(), invokeStmt.getJavaSourceStartLineNumber());
-                aux_traversedLine.add(aux_l);
+                TraversedLine traversedLine_from_invokeStmt = new TraversedLine(actual_method.getDeclaringClass(), actual_method.method(), invokeStmt.getJavaSourceStartLineNumber());
 
-                res.addAll(traverse(invokeStmt.getInvokeExpr().getMethod(), traversed, aux_traversedLine, type, level));
+                // add an element from the current statement
+                traversedLine_list.add(traversedLine_from_invokeStmt);
+
+                //call traverse passing currently travesed line list
+                res.addAll(traverse(invokeStmt.getInvokeExpr().getMethod(), traversed, traversedLine_list, type, level));
             }
         }
         return res;
