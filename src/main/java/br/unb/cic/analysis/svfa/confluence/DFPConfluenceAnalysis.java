@@ -52,10 +52,11 @@ public class DFPConfluenceAnalysis {
      * Executes both source -> base and sink -> base SVFA analysis intersects then populating
      * the confluentFlows attribute with the results
      */
-    public void execute() {
+    public void execute(boolean depthMethodsVisited) {
         DFPAnalysisSemanticConflicts sourceBaseAnalysis = sourceBaseAnalysis(interprocedural);
         Main m = new Main();
         m.stopwatch = Stopwatch.createStarted();
+        sourceBaseAnalysis.setPrintDepthVisitedMethods(depthMethodsVisited);
 
         sourceBaseAnalysis.configureSoot();
         Options.v().ignore_resolution_errors();
@@ -73,6 +74,8 @@ public class DFPConfluenceAnalysis {
         G.v().reset();
 
         DFPAnalysisSemanticConflicts sinkBaseAnalysis = sinkBaseAnalysis(interprocedural);
+        sinkBaseAnalysis.setPrintDepthVisitedMethods(depthMethodsVisited);
+
         sinkBaseAnalysis.configureSoot();
 
         m.saveExecutionTime("Configure Soot Confluence 2");

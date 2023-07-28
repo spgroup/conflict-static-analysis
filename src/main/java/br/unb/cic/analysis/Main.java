@@ -456,7 +456,8 @@ public class Main {
         definition.setRecursiveMode(options.hasOption("recursive"));
         DFPConfluenceAnalysis analysis = new DFPConfluenceAnalysis(classpath, this.definition, interprocedural, depthLimit);
 
-        analysis.execute();
+        boolean depthMethodsVisited = Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
+        analysis.execute(depthMethodsVisited);
 
         conflicts.addAll(analysis.getConfluentConflicts()
                 .stream()
