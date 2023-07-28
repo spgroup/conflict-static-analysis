@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 // TODO Do not add anything when assignments are equal.
 public class InterproceduralOverrideAssignment extends SceneTransformer implements AbstractAnalysis {
 
-    private final int depthLimit;
+    private int depthLimit;
     private final AbstractMergeConflictDefinition definition;
     private Set<Conflict> conflicts;
     private TraversedMethodsWrapper<SootMethod> traversedMethodsWrapper;
@@ -529,4 +529,13 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     public int getVisitedMethods(){
         return this.visitedMethods;
     }
+
+    public int getDepthLimit() {
+        return depthLimit;
+    }
+
+    public void setDepthLimit(int depthLimit) {
+        this.depthLimit = depthLimit;
+    }
+
 }

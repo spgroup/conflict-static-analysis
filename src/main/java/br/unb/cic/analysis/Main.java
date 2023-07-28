@@ -280,7 +280,7 @@ public class Main {
     }
 
     private void runInterproceduralOverrideAssignmentAnalysis(String classpath) {
-        int depthLimit = Integer.parseInt(cmd.getOptionValue("depthLimit", "5"));
+        int depthLimit = Integer.parseInt(cmd.getOptionValue("depthLimit", "10"));
 
         stopwatch = Stopwatch.createStarted();
 
@@ -293,7 +293,7 @@ public class Main {
         interproceduralOverrideAssignment.configureEntryPoints();
 
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", interproceduralOverrideAssignment));
-
+        System.out.println("Depth limit: "+interproceduralOverrideAssignment.getDepthLimit());
         saveExecutionTime("Configure Soot OA Inter");
 
         SootWrapper.applyPackages();
@@ -384,6 +384,7 @@ public class Main {
                 .collect(Collectors.toList()));
 
         saveExecutionTime("Time to perform DFP");
+        System.out.println("Depth limit: "+analysis.getDepthLimit());
 
         System.out.print("CONFLICTS: ");
 
@@ -451,14 +452,14 @@ public class Main {
     }
 
     private void runDFPConfluenceAnalysis(String classpath, boolean interprocedural) {
-        int depthLimit = Integer.parseInt(cmd.getOptionValue("depthLimit", "5"));
+        int depthLimit = Integer.parseInt(cmd.getOptionValue("depthLimit", "10"));
 
         definition.setRecursiveMode(options.hasOption("recursive"));
         DFPConfluenceAnalysis analysis = new DFPConfluenceAnalysis(classpath, this.definition, interprocedural, depthLimit);
-
         boolean depthMethodsVisited = Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
-        analysis.execute(depthMethodsVisited);
 
+        analysis.execute(depthMethodsVisited);
+        System.out.println("Depth limit: "+analysis.getDepthLimit());
         conflicts.addAll(analysis.getConfluentConflicts()
                 .stream()
                 .map(p -> formatConflict(p.toString()))

@@ -246,4 +246,11 @@ public class DFPConfluenceAnalysis {
     public void setVisitedMethods(int visitedMethods) {
         this.visitedMethods = visitedMethods;
     }
+    public void setCp(String cp) {
+        this.cp = cp;
+    }
+
+    public int getDepthLimit() {
+        return depthLimit;
+    }
 }
