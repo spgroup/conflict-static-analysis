@@ -10,3 +10,6 @@ time.txt
 .classpath
 .project
 soot-analysis.iml
+visited_methods.txt
+conflicts_log.txt
+

@@ -29,13 +29,13 @@
 		<dependency>
 			<groupId>br.ufpe.cin</groupId>
 			<artifactId>pdg-sdg_2.12</artifactId>
-			<version>0.4.8</version>
+			<version>0.4.35</version>
 		</dependency>
 
 		<dependency>
 			<groupId>br.unb.cic</groupId>
 			<artifactId>svfa-scala_2.12</artifactId>
-			<version>0.2.3</version>
+			<version>0.4.5</version>
 		</dependency>
 
 		<dependency>

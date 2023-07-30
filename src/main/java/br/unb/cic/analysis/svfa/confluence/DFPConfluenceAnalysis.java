@@ -4,12 +4,14 @@ import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.Main;
 import br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts;
 import br.unb.cic.analysis.model.Statement;
+import br.unb.cic.analysis.model.TraversedLine;
 import br.unb.cic.soot.graph.StatementNode;
 import com.google.common.base.Stopwatch;
 import soot.AbstractSootFieldRef;
 import soot.G;
 import soot.Scene;
 import soot.Unit;
+import soot.options.Options;
 
 import java.util.*;
 
@@ -19,11 +21,23 @@ public class DFPConfluenceAnalysis {
     private boolean interprocedural;
     private AbstractMergeConflictDefinition definition;
     private Set<ConfluenceConflict> confluentFlows = new HashSet<>();
+    private int depthLimit;
+    private String getGraphSize;
+
+    private int visitedMethods;
 
     public DFPConfluenceAnalysis(String classPath, AbstractMergeConflictDefinition definition, boolean interprocedural) {
         this.cp = classPath;
         this.definition = definition;
         this.interprocedural = interprocedural;
+        this.depthLimit = 5;
+    }
+
+    public DFPConfluenceAnalysis(String classPath, AbstractMergeConflictDefinition definition, boolean interprocedural, int depthLimit) {
+        this.cp = classPath;
+        this.definition = definition;
+        this.interprocedural = interprocedural;
+        this.depthLimit = depthLimit;
     }
 
     /**
@@ -44,6 +58,7 @@ public class DFPConfluenceAnalysis {
         m.stopwatch = Stopwatch.createStarted();
 
         sourceBaseAnalysis.configureSoot();
+        Options.v().ignore_resolution_errors();
         m.saveExecutionTime("Configure Soot Confluence 1");
 
         m.stopwatch = Stopwatch.createStarted();
@@ -72,7 +87,9 @@ public class DFPConfluenceAnalysis {
 
         m.saveExecutionTime("Time to perform Confluence 2");
 
-        System.out.println(confluentFlows.toString());
+        System.out.println("Visited methods: "+ (sourceBaseAnalysis.getNumberVisitedMethods()+sinkBaseAnalysis.getNumberVisitedMethods()));
+        setVisitedMethods(sourceBaseAnalysis.getNumberVisitedMethods()+sinkBaseAnalysis.getNumberVisitedMethods());
+        setGraphSize(sourceBaseAnalysis, sinkBaseAnalysis);
     }
 
     /**
@@ -126,7 +143,7 @@ public class DFPConfluenceAnalysis {
      * @return A instance of a child class of the JDFPAnalysis class that redefine source and sink as source and base
      */
     private br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts sourceBaseAnalysis(boolean interprocedural) {
-        return new br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts(this.cp, this.definition) {
+        return new br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts(this.cp, this.definition, depthLimit) {
 
             /**
              * Here we define the list of source statements for the SVFA analysis as the confluence analysis source statements,
@@ -162,7 +179,7 @@ public class DFPConfluenceAnalysis {
      * @return A instance of a child class of the SVFAAnalysis class that redefine source and sink as source and base
      */
     private DFPAnalysisSemanticConflicts sinkBaseAnalysis(boolean interprocedural) {
-        return new DFPAnalysisSemanticConflicts(this.cp, this.definition) {
+        return new DFPAnalysisSemanticConflicts(this.cp, this.definition, depthLimit) {
 
             /**
              * Here we define the list of source statements for the SVFA analysis as the confluence analysis sink statements,
@@ -209,5 +226,21 @@ public class DFPConfluenceAnalysis {
 
     private boolean unitIsNotOnList(List<Statement> statements, Unit unit) {
         return statements.stream().map(stmt -> stmt.getUnit()).noneMatch(u -> u.equals(unit));
+    }
+
+    public int getVisitedMethods() {
+        return visitedMethods;
+    }
+
+    public void setGraphSize(DFPAnalysisSemanticConflicts source, DFPAnalysisSemanticConflicts sink){
+        this.getGraphSize = (source.svg().graph().size()+","+source.svg().edges().size()+","+sink.svg().graph().size()+","+sink.svg().edges().size());
+    }
+
+    public String getGraphSize(){
+        return this.getGraphSize;
+    }
+
+    public void setVisitedMethods(int visitedMethods) {
+        this.visitedMethods = visitedMethods;
     }
 }

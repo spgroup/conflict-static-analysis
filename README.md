@@ -118,11 +118,15 @@ Analysis mode: dataflow, reachability, svfa or tainted.
 
 The folder path or URL of the git project under analysis.
 
-#### -oaDepthLimit
+#### -depthLimit
 
-Sets the depth limit on accessing methods when performing Overriding Assignment Interprocedural analysis. Default = 10.
+Sets the depth limit on accessing methods when performing Overriding Assignment Interprocedural, Direct Flow Interprocedural and Confluence Interprocedural analyses. Default = 5.
 
 Usage example of a Java project, with a .csv file.
+
+#### -printDepthSVFA
+
+Configures (true or false) the printing of the visited method depths in SVFA.
 
 ```SHELL
 mvn exec:java -Dexec.mainClass="br.unb.cic.analysis.Main" \

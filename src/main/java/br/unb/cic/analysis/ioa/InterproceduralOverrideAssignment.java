@@ -30,6 +30,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     private final AbstractMergeConflictDefinition definition;
     private Set<Conflict> conflicts;
     private TraversedMethodsWrapper<SootMethod> traversedMethodsWrapper;
+    private int visitedMethods = 0;
     private FlowSet<DataFlowAbstraction> left;
     private FlowSet<DataFlowAbstraction> right;
     private List<TraversedLine> stacktraceList;
@@ -37,7 +38,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     public InterproceduralOverrideAssignment(AbstractMergeConflictDefinition definition) {
         this.definition = definition;
-        this.depthLimit = 10;
+        this.depthLimit = 5;
 
         initDefaultFields();
     }
@@ -74,11 +75,9 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
         List<SootMethod> methods = Scene.v().getEntryPoints();
         methods.forEach(sootMethod -> traverse(new ArraySparseSet<>(), sootMethod, Statement.Type.IN_BETWEEN));
-
-        logger.log(Level.INFO, () -> String.format("%s", "CONFLICTS: " + filterConflictsWithSameRoot(getConflicts())));
-
         long finalTime = System.currentTimeMillis();
         System.out.println("Runtime: " + ((finalTime - startTime) / 1000d) + "s");
+        System.out.println(String.format("%s", "CONFLICTS: " + filterConflictsWithSameRoot(getConflicts())));
     }
 
     public void configureEntryPoints() {
@@ -146,6 +145,8 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
             return in;
         }
 
+        this.visitedMethods++;
+
         this.traversedMethodsWrapper.add(sootMethod);
 
         //System.out.println( sootMethod + " - " + this.traversedMethodsWrapper.size());
@@ -171,7 +172,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private boolean shouldSkip(SootMethod sootMethod) {
         boolean hasRelativeBeenTraversed = this.traversedMethodsWrapper.hasRelativeBeenTraversed(sootMethod);
-        boolean isSizeGreaterThanDepthLimit = this.traversedMethodsWrapper.size() > this.depthLimit;
+        boolean isSizeGreaterThanDepthLimit = this.traversedMethodsWrapper.size() >= this.depthLimit;
         boolean isPhantom = sootMethod.isPhantom();
 
         return hasRelativeBeenTraversed || isSizeGreaterThanDepthLimit || isPhantom;
@@ -525,4 +526,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         return definition.getSourceStatements().stream().filter(s -> s.getUnit().equals(u)).findFirst().get();
     }
 
+    public int getVisitedMethods(){
+        return this.visitedMethods;
+    }
 }

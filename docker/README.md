@@ -9,7 +9,7 @@
 
 ## Build the app’s container image
 
-Run `docker build -t getting-started .`
+Run `docker build --no-cache -t run-experiment .`
 
 This command used the Dockerfile to build a new container image.
 
@@ -59,3 +59,12 @@ docker cp <container-id>:/home/miningframework/output/data/results.pdf <your-pat
 To stop and remove a docker container, run the following command:
 
 `docker stop <container-id>`
+
+## Running the experiment n times
+
+To run the experiment, use the following commands:
+
+`chmod +x scripts/run_experiment.sh
+./scripts/run_experiment.sh n`
+
+You can pass the number (n) of times as an argument, the default is ten.
