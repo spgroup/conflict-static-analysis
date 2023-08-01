@@ -38,15 +38,29 @@ For remote access, run:
 
 `docker exec -it <container-id> /bin/bash`
 
-## Access the project folder
+## Running the experiment n times
+
+Access the miningframework project folder
 
 `cd /home/miningframework`
 
-Run the following command to run the experiment:
+To run the experiment, use the following commands:
+
+`chmod +x scripts/run_experiment.sh && ./scripts/run_experiment.sh <n>`
+
+You can pass the number (n) of times as an argument, the default is ten.
+
+### To copy the files results:
+
+`docker cp <container-id>:/home/miningframework/output/results <your-path>`
+
+## Analyze scenarios
+
+At the miningframework root, if you want to run the analyzes outside the experiment infrastructure, you can run for example:
 
 `./gradlew run -DmainClass="services.outputProcessors.soot.Main" --args="-icf -ioa -idfp -pdg -report"`
 
-## To copy the files results:
+### To copy the files results:
 
 ```
 docker cp <container-id>:/home/miningframework/out.txt <your-path>  
@@ -62,11 +76,3 @@ To stop and remove a docker container, run the following command:
 
 `docker stop <container-id>`
 
-## Running the experiment n times
-
-To run the experiment, use the following commands:
-
-`chmod +x scripts/run_experiment.sh
-./scripts/run_experiment.sh n`
-
-You can pass the number (n) of times as an argument, the default is ten.
