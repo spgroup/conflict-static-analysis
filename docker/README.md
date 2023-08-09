@@ -22,7 +22,7 @@ This command used the Dockerfile to build a new container image.
 Change the entrypoint to an interactive shell
 Start your container using the docker run command and specify the name of the image we just created:
 
-Run `docker run --entrypoint /bin/sh -itd getting-started:latest`
+Run `docker run --entrypoint /bin/sh -itd run-experiment:latest`
 
 > This is useful if you want to use a container like a virtual machine, and keep it running in the background when you’re not using it. If you override the entrypoint to the container with a shell, like sh or bash, and run the container with the -itd switches, Docker will run the container, detach it (run it in the background), and attach an interactive terminal. Note that this won’t run the container’s default entrypoint script, but run a shell instead. Effectively, you will have a container that stays running permanently.
 
@@ -38,21 +38,37 @@ For remote access, run:
 
 `docker exec -it <container-id> /bin/bash`
 
-## Access the project folder
+## Running the experiment n times
+
+Access the miningframework project folder
 
 `cd /home/miningframework`
 
-Run the following command to run the experiment:
+To run the experiment, use the following commands:
+
+`chmod +x scripts/run_experiment.sh && ./scripts/run_experiment.sh <n>`
+
+You can pass the number (n) of times as an argument, the default is ten.
+
+### To copy the files results:
+
+`docker cp <container-id>:/home/miningframework/output/results <your-path>`
+
+## Analyze scenarios
+
+At the miningframework root, if you want to run the analyzes outside the experiment infrastructure, you can run for example:
 
 `./gradlew run -DmainClass="services.outputProcessors.soot.Main" --args="-icf -ioa -idfp -pdg -report"`
 
-## To copy the files results:
+### To copy the files results:
 
-`docker cp <container-id>:/home/miningframework/out.txt <your-path>
-docker cp <container-id>:/home/miningframework/outConsole.txt <your-path>
-docker cp <container-id>:/home/miningframework/time.txt <your-path>
-docker cp <container-id>:/home/miningframework/output/data/soot-results.csv <your-path>
-docker cp <container-id>:/home/miningframework/output/data/results.pdf <your-path>`
+```
+docker cp <container-id>:/home/miningframework/out.txt <your-path>  
+docker cp <container-id>:/home/miningframework/outConsole.txt <your-path>  
+docker cp <container-id>:/home/miningframework/time.txt <your-path>  
+docker cp <container-id>:/home/miningframework/output/data/soot-results.csv <your-path>  
+docker cp <container-id>:/home/miningframework/output/data/results.pdf <your-path>  
+```
 
 ## Closing Docker Containers
 
@@ -60,11 +76,3 @@ To stop and remove a docker container, run the following command:
 
 `docker stop <container-id>`
 
-## Running the experiment n times
-
-To run the experiment, use the following commands:
-
-`chmod +x scripts/run_experiment.sh
-./scripts/run_experiment.sh n`
-
-You can pass the number (n) of times as an argument, the default is ten.

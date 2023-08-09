@@ -55,10 +55,10 @@ RUN apt-get -y install vim && \
     apt-get clean;
 
 # Clone repos
-RUN git clone --branch article2023 --depth 1 https://github.com/spgroup/conflict-static-analysis.git /home/conflict-static-analysis
-RUN git clone --recursive  --branch article2023 --depth 1 https://github.com/spgroup/miningframework /home/miningframework
+RUN git clone --branch Article202307 --depth 1 https://github.com/spgroup/conflict-static-analysis.git /home/conflict-static-analysis
+RUN git clone --recursive  --branch Article202307 --depth 1 https://github.com/spgroup/miningframework /home/miningframework
 # clone mergedataset to miningframework/output/file
-RUN git clone --branch article2023 --depth 1 https://github.com/spgroup/mergedataset.git /home/miningframework/output/files
+RUN git clone --branch Article202307 --depth 1 https://github.com/spgroup/mergedataset.git /home/miningframework/output/files
 
 # Add settings.xml
 ADD ./settings.xml $USER_HOME_DIR/.m2/
