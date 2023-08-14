@@ -7,9 +7,10 @@ public class DFPBaseSample {
     private String text;
 
     public void cleanText(){
-        normalizeWhiteSpace(); //Left
-        removeComments();
-        removeDuplicateWords(); //Right
+        DFPBaseSample inst = new DFPBaseSample();
+        inst.normalizeWhiteSpace(); //Left
+        inst.removeComments();
+        inst.removeDuplicateWords(); //Right
     }
 
     private void normalizeWhiteSpace(){

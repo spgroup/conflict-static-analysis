@@ -280,7 +280,7 @@ public class Main {
     }
 
     private void runInterproceduralOverrideAssignmentAnalysis(String classpath) {
-        int depthLimit = Integer.parseInt(cmd.getOptionValue("depthLimit", "10"));
+        int depthLimit = Integer.parseInt(cmd.getOptionValue("depthLimit", "5"));
 
         stopwatch = Stopwatch.createStarted();
 
@@ -452,13 +452,13 @@ public class Main {
     }
 
     private void runDFPConfluenceAnalysis(String classpath, boolean interprocedural) {
-        int depthLimit = Integer.parseInt(cmd.getOptionValue("depthLimit", "10"));
+        int depthLimit = Integer.parseInt(cmd.getOptionValue("depthLimit", "5"));
 
         definition.setRecursiveMode(options.hasOption("recursive"));
         DFPConfluenceAnalysis analysis = new DFPConfluenceAnalysis(classpath, this.definition, interprocedural, depthLimit);
         boolean depthMethodsVisited = Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
 
-        analysis.execute(depthMethodsVisited);
+        analysis.execute(true);
         System.out.println("Depth limit: "+analysis.getDepthLimit());
         conflicts.addAll(analysis.getConfluentConflicts()
                 .stream()
@@ -591,35 +591,36 @@ public class Main {
     public List<String> generateDFPReportConflict(DFPAnalysisSemanticConflicts analysis){
         List<String> conflicts_string = new ArrayList<>();
         for (List<StatementNode> stmt_list: analysis.findSourceSinkPaths()){
-            System.out.println(stmt_list);
             StatementNode begin_stmt = stmt_list.get(0);
             StatementNode end_stmt = stmt_list.get(stmt_list.size()-1);
-            System.out.println("\nBegin Statement:"+begin_stmt);
-            conflicts_string.add("Begin Statement:"+begin_stmt);
-            System.out.println("\nEnd Statement: "+end_stmt.value());
-            conflicts_string.add("End Statement: "+end_stmt.value());
-            int last_line = -1;
+
+            String report_entry_point = "";
+            for (Statement stmt: definition.sourceStatements){
+                String aux = begin_stmt.value(). stmt();
+
+                if (stmt.toString().equals(aux)){
+                    report_entry_point = stmt.getTraversedLine().toString();
+                    break;
+                }
+            }
+
+            String report_stmts = "Begin Statement: "+begin_stmt.unit()+", line "+begin_stmt.line()+" => End Statement: "+end_stmt.unit()+", line "+end_stmt.line();
 
             for (Statement stmt: definition.sinkStatements){
                 String aux = end_stmt.value().stmt();
 
                 if (stmt.toString().equals(aux)){
-                    if (stmt.getTraversedLine().size()>0){
-                        int actual_line = stmt.getTraversedLine().get(0).getLineNumber();
-                        if (last_line != actual_line){
-                            System.out.println("\nPath Statements: ");
-                            conflicts_string.add("Path Statements: ");
-                            for (TraversedLine line: stmt.getTraversedLine()){
-                                conflicts_string.add(line+ " => ");
-                                System.out.print(line+ " => ");
-                            }
-                            conflicts_string.add(end_stmt.value().toString());
-                            System.out.println(end_stmt.value());
-                            last_line = actual_line;
-                        }
-                    }
+                    report_entry_point = report_entry_point+ " to " + stmt.getTraversedLine().toString();
+                    break;
                 }
             }
+
+            System.out.println("\n"+report_entry_point);
+            System.out.println(report_stmts);
+            System.out.println("Path Statements: "+ stmt_list.toString());
+
+            conflicts_string.add(report_entry_point+" "+report_stmts+" Path Statements: "+ stmt_list.toString());
+
         }
 
         return conflicts_string;
