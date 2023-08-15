@@ -388,16 +388,16 @@ public class Main {
 
         System.out.print("CONFLICTS: ");
 
-        List<String> conflicts_string = analysis.generateDFPReportConflict(analysis, definition);
+        List<String> conflicts_report = analysis.generateDFPReportConflict(definition);
 
-        conflicts_string.add(conflicts.toString());
+        conflicts_report.add(conflicts.toString());
 
         System.out.println(conflicts.toString());
 
         System.out.println("Visited methods: "+ analysis.getNumberVisitedMethods());
         saveVisitedMethods("DFP", (analysis.getNumberVisitedMethods()+","+analysis.svg().graph().size()+","+analysis.svg().edges().size()));
 
-        saveConflictsLog("DFP", conflicts_string.toString());
+        saveConflictsLog("DFP", conflicts_report.toString());
 
     }
 

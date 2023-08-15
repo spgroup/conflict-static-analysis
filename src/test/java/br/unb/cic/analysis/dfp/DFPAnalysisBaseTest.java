@@ -50,7 +50,7 @@ public class DFPAnalysisBaseTest {
         analysis.configureSoot();
 
         analysis.buildDFP();
-        analysis.generateDFPReportConflict(analysis, definition);
+        analysis.generateDFPReportConflict(definition);
         System.out.println(analysis.svg().reportConflicts().size());
         System.out.println(analysis.svgToDotModel());
         System.out.println(analysis.findSourceSinkPaths());

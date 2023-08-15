@@ -141,18 +141,18 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
         this.depthLimit = depthLimit;
     }
 
-    public List<String> generateDFPReportConflict(DFPAnalysisSemanticConflicts analysis, AbstractMergeConflictDefinition definition){
-        List<String> conflicts_string = new ArrayList<>();
-        for (List<StatementNode> stmt_list: analysis.findSourceSinkPaths()){
+    public List<String> generateDFPReportConflict(AbstractMergeConflictDefinition definition){
+        List<String> conflicts_report = new ArrayList<>();
+        for (List<StatementNode> stmt_list: this.findSourceSinkPaths()){
             StatementNode begin_stmt = stmt_list.get(0);
             StatementNode end_stmt = stmt_list.get(stmt_list.size()-1);
 
-            String report_entry_point = "";
+            StringBuilder report_entry_point = new StringBuilder("");;
             for (Statement stmt: definition.getSourceStatements()){
                 String aux = begin_stmt.value(). stmt();
 
                 if (stmt.toString().equals(aux)){
-                    report_entry_point = stmt.getTraversedLine().toString();
+                    report_entry_point.append(stmt.getTraversedLine().toString());
                     break;
                 }
             }
@@ -163,7 +163,7 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
                 String aux = end_stmt.value().stmt();
 
                 if (stmt.toString().equals(aux)){
-                    report_entry_point = report_entry_point+ " to " + stmt.getTraversedLine().toString();
+                    report_entry_point.append(" to " + stmt.getTraversedLine().toString());
                     break;
                 }
             }
@@ -172,10 +172,10 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
             System.out.println(report_stmts);
             System.out.println("Path Statements: "+ stmt_list.toString());
 
-            conflicts_string.add(report_entry_point+" "+report_stmts+" Path Statements: "+ stmt_list.toString());
+            conflicts_report.add(report_entry_point+" "+report_stmts+" Path Statements: "+ stmt_list.toString());
 
         }
 
-        return conflicts_string;
+        return conflicts_report;
     }
 }
