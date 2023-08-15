@@ -147,11 +147,9 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
             StatementNode begin_stmt = stmt_list.get(0);
             StatementNode end_stmt = stmt_list.get(stmt_list.size()-1);
 
-            StringBuilder report_entry_point = new StringBuilder("");;
+            StringBuilder report_entry_point = new StringBuilder("");
             for (Statement stmt: definition.getSourceStatements()){
-                String aux = begin_stmt.value(). stmt();
-
-                if (stmt.toString().equals(aux)){
+                if (checkIfStatementIsEqualsStatmentNode(begin_stmt, stmt)){
                     report_entry_point.append(stmt.getTraversedLine().toString());
                     break;
                 }
@@ -160,9 +158,7 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
             String report_stmts = "Begin Statement: "+begin_stmt.unit()+", line "+begin_stmt.line()+" => End Statement: "+end_stmt.unit()+", line "+end_stmt.line();
 
             for (Statement stmt: definition.getSinkStatements()){
-                String aux = end_stmt.value().stmt();
-
-                if (stmt.toString().equals(aux)){
+                if (checkIfStatementIsEqualsStatmentNode(end_stmt, stmt)){
                     report_entry_point.append(" to " + stmt.getTraversedLine().toString());
                     break;
                 }
@@ -177,5 +173,11 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
         }
 
         return conflicts_report;
+    }
+
+    public boolean checkIfStatementIsEqualsStatmentNode(StatementNode stmt_node, Statement stmt){
+        return stmt.getUnit().equals(stmt_node.value().sootUnit()) &&
+                stmt.getSootMethod().getSignature().equals(stmt_node.value().method()) &&
+                stmt.getSourceCodeLineNumber().equals(stmt_node.value().line());
     }
 }
