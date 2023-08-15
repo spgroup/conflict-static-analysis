@@ -46,56 +46,15 @@ public class DFPAnalysisBaseTest {
     }
 
     @Test
-    public void testDFPAnalysisExpectingOneConflict() {
+    public void testDFPAnalysisExpectingOneMoreConflict() {
         analysis.configureSoot();
-//        analysis.setPrintDepthVisitedMethods(true);
 
         analysis.buildDFP();
-        generateDFPReportConflict(analysis);
+        analysis.generateDFPReportConflict(analysis, definition);
         System.out.println(analysis.svg().reportConflicts().size());
-//        System.out.println(analysis.svgToDotModel());
-//        System.out.println(analysis.findSourceSinkPaths());
+        System.out.println(analysis.svgToDotModel());
+        System.out.println(analysis.findSourceSinkPaths());
         System.out.println(analysis.svg().findConflictingPaths());
-//        Assert.assertTrue(analysis.svg().reportConflicts().size() >= 1);
-    }
-
-
-
-    public List<String> generateDFPReportConflict(DFPAnalysisSemanticConflicts analysis){
-        List<String> conflicts_string = new ArrayList<>();
-        for (List<StatementNode> stmt_list: analysis.findSourceSinkPaths()){
-            StatementNode begin_stmt = stmt_list.get(0);
-            StatementNode end_stmt = stmt_list.get(stmt_list.size()-1);
-
-            String report_entry_point = "";
-            for (Statement stmt: definition.getSourceStatements()){
-                String aux = begin_stmt.value(). stmt();
-
-                if (stmt.toString().equals(aux)){
-                    report_entry_point = stmt.getTraversedLine().toString();
-                    break;
-                }
-            }
-
-            String report_stmts = "Begin Statement: "+begin_stmt.unit()+", line "+begin_stmt.line()+" => End Statement: "+end_stmt.unit()+", line "+end_stmt.line();
-
-            for (Statement stmt: definition.getSinkStatements()){
-                String aux = end_stmt.value().stmt();
-
-                if (stmt.toString().equals(aux)){
-                    report_entry_point = report_entry_point+ " to " + stmt.getTraversedLine().toString();
-                    break;
-                }
-            }
-
-            System.out.println("\n"+report_entry_point);
-            System.out.println(report_stmts);
-            System.out.println("Path Statements: "+ stmt_list.toString());
-
-            conflicts_string.add(report_entry_point+" "+report_stmts+" Path Statements: "+ stmt_list.toString());
-
-        }
-
-        return conflicts_string;
+        Assert.assertTrue(analysis.svg().reportConflicts().size() >= 1);
     }
 }
