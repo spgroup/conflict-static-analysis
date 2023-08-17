@@ -9,7 +9,7 @@ public class ConfluenceBaseSample {
         confluenceBaseSample.countDupWhitespace(); // LEFT
         confluenceBaseSample.countComments();
         confluenceBaseSample.countDupWords(); // RIGHT
-        return this.spaces + this.words;
+        return confluenceBaseSample.spaces + confluenceBaseSample.words;
     }
 
     private void countDupWords() {

@@ -6,6 +6,7 @@ import br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts;
 import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.analysis.model.TraversedLine;
 import br.unb.cic.soot.graph.StatementNode;
+import ch.qos.logback.core.net.SyslogOutputStream;
 import com.google.common.base.Stopwatch;
 import soot.AbstractSootFieldRef;
 import soot.G;
@@ -93,6 +94,32 @@ public class DFPConfluenceAnalysis {
         System.out.println("Visited methods: "+ (sourceBaseAnalysis.getNumberVisitedMethods()+sinkBaseAnalysis.getNumberVisitedMethods()));
         setVisitedMethods(sourceBaseAnalysis.getNumberVisitedMethods()+sinkBaseAnalysis.getNumberVisitedMethods());
         setGraphSize(sourceBaseAnalysis, sinkBaseAnalysis);
+    }
+
+     public List<String> reportConflicts(){
+        List<String> conflicts_report = new ArrayList<>();
+        for (ConfluenceConflict conflict: confluentFlows){
+
+            StatementNode df1 = conflict.getSourceNodePath().get(0);
+            StatementNode df2 = conflict.getSinkNodePath().get(0);
+
+            StatementNode confluence = conflict.getSinkNodePath().get(conflict.getSinkNodePath().size()-1);
+
+            System.out.println("Confluence interference in "+ df1.getPathVisitedMethods().head().getMethod().method());
+            System.out.println("Confluence flows from execution of lines "+df1.getPathVisitedMethods().head().line()+" and "+df2.getPathVisitedMethods().head().line()+
+                    " to line "+confluence.getPathVisitedMethods().head().line()+", defined in "+df1.getPathVisitedMethods().head().getUnit()+" and "+df2.getPathVisitedMethods().head().getUnit()+" and used in "+confluence.getPathVisitedMethods().head().getUnit());
+            System.out.println("Caused by line "+df1.getPathVisitedMethods().head().line()+ " flow: "+df1.pathVisitedMethodsToString());
+            System.out.println("Caused by line "+df2.getPathVisitedMethods().head().line()+ " flow: "+df2.pathVisitedMethodsToString());
+            System.out.println("Caused by line "+confluence.getPathVisitedMethods().head().line()+ " flow: "+confluence.pathVisitedMethodsToString());
+
+            conflicts_report.add("Confluence interference in "+ df1.getPathVisitedMethods().head().getMethod().method());
+            conflicts_report.add("Confluence flows from execution of lines "+df1.getPathVisitedMethods().head().line()+" and "+df2.getPathVisitedMethods().head().line()+
+                    " to line "+confluence.getPathVisitedMethods().head().line()+", defined in "+df1.getPathVisitedMethods().head().getUnit()+" and "+df2.getPathVisitedMethods().head().getUnit()+" and used in "+confluence.getPathVisitedMethods().head().getUnit());
+            conflicts_report.add("Caused by line "+df1.getPathVisitedMethods().head().line()+ " flow: "+df1.pathVisitedMethodsToString());
+            conflicts_report.add("Caused by line "+df2.getPathVisitedMethods().head().line()+ " flow: "+df2.pathVisitedMethodsToString());
+            conflicts_report.add("Caused by line "+confluence.getPathVisitedMethods().head().line()+ " flow: "+confluence.pathVisitedMethodsToString()+"\n");
+        }
+        return conflicts_report;
     }
 
     /**

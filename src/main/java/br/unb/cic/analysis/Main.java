@@ -388,7 +388,7 @@ public class Main {
 
         System.out.print("CONFLICTS: ");
 
-        List<String> conflicts_report = analysis.generateDFPReportConflict(definition);
+        List<String> conflicts_report = analysis.reportDFConflicts();
 
         conflicts_report.add(conflicts.toString());
 
