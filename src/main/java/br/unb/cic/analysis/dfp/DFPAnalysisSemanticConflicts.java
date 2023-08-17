@@ -142,59 +142,25 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
         this.depthLimit = depthLimit;
     }
 
-    public void reportDFConflitcs(){
+    public List<String> reportDFConflicts(){
         Set<List<StatementNode>>  conflicts = findSourceSinkPaths();
+        List<String> conflicts_report = new ArrayList<>();
         for (List<StatementNode> conflict: conflicts){
-            StatementNode h = conflict.get(0);
-            StatementNode l = conflict.get(conflict.size()-1);
             StatementNode p1 = conflict.get(0);
             StatementNode p2 = conflict.get(conflict.size()-1);
             System.out.println("DF interference in "+ p1.getPathVisitedMethods().head().getMethod().method());
-            System.out.println("Data flows from execution of line "+p1.getPathVisitedMethods().head().line()+" to "+p2.getPathVisitedMethods().head().line()+", defined in "+h.unit()+" and propagated in "+l.unit());
+            System.out.println("Data flows from execution of line "+p1.getPathVisitedMethods().head().line()+" to "+p2.getPathVisitedMethods().head().line()+", defined in "+p1.unit()+" and propagated in "+p2.unit());
             System.out.println("Caused by line "+p1.getPathVisitedMethods().head().line()+ " flow: "+p1.pathVisitedMethodsToString());
             System.out.println("Caused by line "+p2.getPathVisitedMethods().head().line()+ " flow: "+p2.pathVisitedMethodsToString());
-        }
 
-        System.out.println(definition.getSourceStatements());
-    }
-
-    public List<String> generateDFPReportConflict(AbstractMergeConflictDefinition definition){
-        List<String> conflicts_report = new ArrayList<>();
-        for (List<StatementNode> stmt_list: this.findSourceSinkPaths()){
-            StatementNode begin_stmt = stmt_list.get(0);
-            StatementNode end_stmt = stmt_list.get(stmt_list.size()-1);
-
-            StringBuilder report_entry_point = new StringBuilder("");
-            for (Statement stmt: definition.getSourceStatements()){
-                if (checkIfStatementIsEqualsStatmentNode(begin_stmt, stmt)){
-                    report_entry_point.append(stmt.getTraversedLine().toString());
-                    break;
-                }
-            }
-
-            String report_stmts = "Begin Statement: "+begin_stmt.unit()+", line "+begin_stmt.line()+" => End Statement: "+end_stmt.unit()+", line "+end_stmt.line();
-
-            for (Statement stmt: definition.getSinkStatements()){
-                if (checkIfStatementIsEqualsStatmentNode(end_stmt, stmt)){
-                    report_entry_point.append(" to " + stmt.getTraversedLine().toString());
-                    break;
-                }
-            }
-
-            System.out.println("\n"+report_entry_point);
-            System.out.println(report_stmts);
-            System.out.println("Path Statements: "+ stmt_list.toString());
-
-            conflicts_report.add(report_entry_point+" "+report_stmts+" Path Statements: "+ stmt_list.toString());
-
+            conflicts_report.add("DF interference in "+ p1.getPathVisitedMethods().head().getMethod().method());
+            conflicts_report.add("Data flows from execution of line "+p1.getPathVisitedMethods().head().line()+" to "+p2.getPathVisitedMethods().head().line()+", defined in "+p1.unit()+" and propagated in "+p2.unit());
+            conflicts_report.add("Caused by line "+p1.getPathVisitedMethods().head().line()+ " flow: "+p1.pathVisitedMethodsToString());
+            conflicts_report.add("Caused by line "+p2.getPathVisitedMethods().head().line()+ " flow: "+p2.pathVisitedMethodsToString()+"\n");
         }
 
         return conflicts_report;
     }
 
-    public boolean checkIfStatementIsEqualsStatmentNode(StatementNode stmt_node, Statement stmt){
-        return stmt.getUnit().equals(stmt_node.value().sootUnit()) &&
-                stmt.getSootMethod().getSignature().equals(stmt_node.value().method()) &&
-                stmt.getSourceCodeLineNumber().equals(stmt_node.value().line());
-    }
+
 }

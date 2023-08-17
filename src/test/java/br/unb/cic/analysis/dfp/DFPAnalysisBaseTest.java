@@ -52,11 +52,10 @@ public class DFPAnalysisBaseTest {
 
         analysis.buildDFP();
         System.out.println(analysis.svg().reportConflicts().size());
-        analysis.reportDFConflitcs();
-//        analysis.svg().reportConflitcsMessage();
-//        System.out.println(analysis.svgToDotModel());
-//        System.out.println(analysis.findSourceSinkPaths());
-//        System.out.println(analysis.svg().findConflictingPaths());
-//        Assert.assertTrue(analysis.svg().reportConflicts().size() >= 1);
+        analysis.reportDFConflicts();
+        System.out.println(analysis.svgToDotModel());
+        System.out.println(analysis.findSourceSinkPaths());
+        System.out.println(analysis.svg().findConflictingPaths());
+        Assert.assertTrue(analysis.svg().reportConflicts().size() >= 1);
     }
 }
