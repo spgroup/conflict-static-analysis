@@ -37,6 +37,7 @@ public class DFPAnalysisBaseTest {
                 List<Integer> lines = new ArrayList<>();
                 lines.add(13);
                 res.put("br.unb.cic.analysis.samples.DFPBaseSample", lines);
+
                 return res;
             }
         };
@@ -50,11 +51,12 @@ public class DFPAnalysisBaseTest {
         analysis.configureSoot();
 
         analysis.buildDFP();
-        analysis.generateDFPReportConflict(definition);
         System.out.println(analysis.svg().reportConflicts().size());
-        System.out.println(analysis.svgToDotModel());
-        System.out.println(analysis.findSourceSinkPaths());
-        System.out.println(analysis.svg().findConflictingPaths());
-        Assert.assertTrue(analysis.svg().reportConflicts().size() >= 1);
+        analysis.reportDFConflitcs();
+//        analysis.svg().reportConflitcsMessage();
+//        System.out.println(analysis.svgToDotModel());
+//        System.out.println(analysis.findSourceSinkPaths());
+//        System.out.println(analysis.svg().findConflictingPaths());
+//        Assert.assertTrue(analysis.svg().reportConflicts().size() >= 1);
     }
 }

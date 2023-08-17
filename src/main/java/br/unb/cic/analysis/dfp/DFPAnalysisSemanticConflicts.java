@@ -5,6 +5,7 @@ import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.soot.graph.*;
 import scala.collection.JavaConverters;
+import soot.PackManager;
 import soot.SootMethod;
 import soot.Unit;
 
@@ -139,6 +140,22 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
 
     public void setDepthLimit(int depthLimit) {
         this.depthLimit = depthLimit;
+    }
+
+    public void reportDFConflitcs(){
+        Set<List<StatementNode>>  conflicts = findSourceSinkPaths();
+        for (List<StatementNode> conflict: conflicts){
+            StatementNode h = conflict.get(0);
+            StatementNode l = conflict.get(conflict.size()-1);
+            StatementNode p1 = conflict.get(0);
+            StatementNode p2 = conflict.get(conflict.size()-1);
+            System.out.println("DF interference in "+ p1.getPathVisitedMethods().head().getMethod().method());
+            System.out.println("Data flows from execution of line "+p1.getPathVisitedMethods().head().line()+" to "+p2.getPathVisitedMethods().head().line()+", defined in "+h.unit()+" and propagated in "+l.unit());
+            System.out.println("Caused by line "+p1.getPathVisitedMethods().head().line()+ " flow: "+p1.pathVisitedMethodsToString());
+            System.out.println("Caused by line "+p2.getPathVisitedMethods().head().line()+ " flow: "+p2.pathVisitedMethodsToString());
+        }
+
+        System.out.println(definition.getSourceStatements());
     }
 
     public List<String> generateDFPReportConflict(AbstractMergeConflictDefinition definition){
