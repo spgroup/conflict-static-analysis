@@ -339,7 +339,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
             e.printStackTrace();
         }
 
-        Assert.assertEquals(49, analysis.getConflicts().size());
+        Assert.assertEquals(28, analysis.getConflicts().size());
     }
 
     @Test

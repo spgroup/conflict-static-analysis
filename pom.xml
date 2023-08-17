@@ -15,7 +15,7 @@
 	  <repository>
 	    <id>rbonifacio</id>
 	    <name>Temporary repository for the SVFA library</name>
-	    <url>https://maven.pkg.github.com/rbonifacio/svfa-scala/</url>
+	    <url>https://maven.pkg.github.com/galilasmb/svfa-scala/</url>
 	  </repository>
 	</repositories>
 
