@@ -297,6 +297,9 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
+    /**
+     * in this case, we add java.util to the list of packages included in soot to be able to detect conflicts in the Hashmap class
+     */
     @Test
     public void additionToArrayWithJavaUtilConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.AdditionToArrayConflictSample";

@@ -24,6 +24,13 @@ public class OAConflictReport {
         conflicts.add(conflict);
     }
 
+    /**
+     * We apply filters to the list of conflicts to get a single conflict that shares the same root and does not involve
+     * temporary Soot variables ($stack).
+     *
+     * @param conflictsResults the list of all conflicts reported by the analysis
+     * @return the filtered conflict list
+     */
     public Set<Conflict> filterConflictsWithSameRoot(Set<Conflict> conflictsResults) {
         Set<Conflict> conflictsFilter = new HashSet<>();
 
