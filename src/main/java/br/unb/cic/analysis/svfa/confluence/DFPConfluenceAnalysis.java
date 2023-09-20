@@ -55,20 +55,26 @@ public class DFPConfluenceAnalysis {
      */
     public void execute(boolean depthMethodsVisited) {
         DFPAnalysisSemanticConflicts sourceBaseAnalysis = sourceBaseAnalysis(interprocedural);
+        String type_analysis;
+        if (interprocedural) {
+            type_analysis = "Inter";
+        } else {
+            type_analysis = "Intra";
+        }
         Main m = new Main();
         m.stopwatch = Stopwatch.createStarted();
         sourceBaseAnalysis.setPrintDepthVisitedMethods(depthMethodsVisited);
 
         sourceBaseAnalysis.configureSoot();
         Options.v().ignore_resolution_errors();
-        m.saveExecutionTime("Configure Soot Confluence 1");
+        m.saveExecutionTime("Configure Soot Confluence 1 "+type_analysis);
 
         m.stopwatch = Stopwatch.createStarted();
 
         sourceBaseAnalysis.buildDFP();
         Set<List<StatementNode>> sourceBasePaths = sourceBaseAnalysis.findSourceSinkPaths();
 
-        m.saveExecutionTime("Time to perform Confluence 1");
+        m.saveExecutionTime("Time to perform Confluence 1 "+type_analysis);
 
         m.stopwatch = Stopwatch.createStarted();
 
@@ -79,7 +85,7 @@ public class DFPConfluenceAnalysis {
 
         sinkBaseAnalysis.configureSoot();
 
-        m.saveExecutionTime("Configure Soot Confluence 2");
+        m.saveExecutionTime("Configure Soot Confluence 2 "+type_analysis);
 
         m.stopwatch = Stopwatch.createStarted();
 
@@ -89,7 +95,7 @@ public class DFPConfluenceAnalysis {
 
         confluentFlows = intersectPathsByLastNode(sourceBasePaths, sinkBasePaths);
 
-        m.saveExecutionTime("Time to perform Confluence 2");
+        m.saveExecutionTime("Time to perform Confluence 2 "+type_analysis);
 
         System.out.println("Visited methods: "+ (sourceBaseAnalysis.getNumberVisitedMethods()+sinkBaseAnalysis.getNumberVisitedMethods()));
         setVisitedMethods(sourceBaseAnalysis.getNumberVisitedMethods()+sinkBaseAnalysis.getNumberVisitedMethods());
