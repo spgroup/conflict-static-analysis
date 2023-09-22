@@ -6,12 +6,12 @@ public class LocalArrayRecursiveNotConflictSample {
         LocalArrayRecursiveNotConflictSample m = new LocalArrayRecursiveNotConflictSample();
 
         m.foo(); // LEFT
+        int y = 0;
         m.bar(); // RIGHT
     }
 
     private void foo() {
         int[] arr = {0};
-        bar();
     }
 
     private void bar() {

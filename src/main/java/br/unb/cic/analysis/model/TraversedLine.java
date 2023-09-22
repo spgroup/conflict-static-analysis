@@ -4,9 +4,9 @@ import soot.SootClass;
 import soot.SootMethod;
 
 public class TraversedLine {
-    private SootClass sootClass;
-    private SootMethod sootMethod;
-    private Integer lineNumber;
+    private final SootClass sootClass;
+    private final SootMethod sootMethod;
+    private final Integer lineNumber;
 
     public TraversedLine(SootClass sootClass, SootMethod sootMethod, Integer lineNumber) {
         this.sootClass = sootClass;
@@ -20,36 +20,22 @@ public class TraversedLine {
         this.lineNumber = lineNumber;
     }
 
-    public SootClass getSootClass() {
-        return sootClass;
+
+    public Integer getLineNumber() {
+        return lineNumber;
     }
 
-    public void setSootClass(SootClass sootClass) {
-        this.sootClass = sootClass;
+
+    public SootClass getSootClass() {
+        return sootClass;
     }
 
     public SootMethod getSootMethod() {
         return sootMethod;
     }
 
-    public void setSootMethod(SootMethod sootMethod) {
-        this.sootMethod = sootMethod;
-    }
-
-    public Integer getLineNumber() {
-        return lineNumber;
-    }
-
-    public void setLineNumber(Integer lineNumber) {
-        this.lineNumber = lineNumber;
-    }
-
     @Override
     public String toString() {
-        return "Stacktrace{" +
-                "sootClass=" + sootClass.getShortJavaStyleName() +
-                ", sootMethod=" + sootMethod.getSubSignature() +
-                ", lineNumber=" + lineNumber +
-                '}';
+        return "at " + sootClass.getName() + "." + sootMethod.getName() + "(" + sootClass.getShortJavaStyleName() + ".java:" + lineNumber + ")";
     }
 }

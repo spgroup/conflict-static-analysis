@@ -9,6 +9,7 @@ public class ClassFieldWithParameterNotConflictSample {
         ClassFieldWithParameterNotConflictSample m =
                 new ClassFieldWithParameterNotConflictSample();
         m.x = 0; // LEFT
+        int a = 1;
         m.foo(m.x); // RIGHT
     }
 
