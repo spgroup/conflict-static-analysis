@@ -146,17 +146,23 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
         Set<List<StatementNode>>  conflicts = findSourceSinkPaths();
         List<String> conflicts_report = new ArrayList<>();
         for (List<StatementNode> conflict: conflicts){
-            StatementNode p1 = conflict.get(0);
-            StatementNode p2 = conflict.get(conflict.size()-1);
-            System.out.println("DF interference in "+ p1.getPathVisitedMethods().head().getMethod().method());
-            System.out.println("Data flows from execution of line "+p1.getPathVisitedMethods().head().line()+" to "+p2.getPathVisitedMethods().head().line()+", defined in "+p1.unit()+" and propagated in "+p2.unit());
-            System.out.println("Caused by line "+p1.getPathVisitedMethods().head().line()+ " flow: "+p1.pathVisitedMethodsToString());
-            System.out.println("Caused by line "+p2.getPathVisitedMethods().head().line()+ " flow: "+p2.pathVisitedMethodsToString());
+            try{
 
-            conflicts_report.add("DF interference in "+ p1.getPathVisitedMethods().head().getMethod().method());
-            conflicts_report.add("Data flows from execution of line "+p1.getPathVisitedMethods().head().line()+" to "+p2.getPathVisitedMethods().head().line()+", defined in "+p1.unit()+" and propagated in "+p2.unit());
-            conflicts_report.add("Caused by line "+p1.getPathVisitedMethods().head().line()+ " flow: "+p1.pathVisitedMethodsToString());
-            conflicts_report.add("Caused by line "+p2.getPathVisitedMethods().head().line()+ " flow: "+p2.pathVisitedMethodsToString()+"\n");
+                StatementNode p1 = conflict.get(0);
+                StatementNode p2 = conflict.get(conflict.size()-1);
+
+                System.out.println("DF interference in "+ p1.getPathVisitedMethods().head().getMethod().method());
+                System.out.println("Data flows from execution of line "+p1.getPathVisitedMethods().head().line()+" to "+p2.getPathVisitedMethods().head().line()+", defined in "+p1.unit()+" and propagated in "+p2.unit());
+                System.out.println("Caused by line "+p1.getPathVisitedMethods().head().line()+ " flow: "+p1.pathVisitedMethodsToString());
+                System.out.println("Caused by line "+p2.getPathVisitedMethods().head().line()+ " flow: "+p2.pathVisitedMethodsToString());
+
+                conflicts_report.add("DF interference in "+ p1.getPathVisitedMethods().head().getMethod().method());
+                conflicts_report.add("Data flows from execution of line "+p1.getPathVisitedMethods().head().line()+" to "+p2.getPathVisitedMethods().head().line()+", defined in "+p1.unit()+" and propagated in "+p2.unit());
+                conflicts_report.add("Caused by line "+p1.getPathVisitedMethods().head().line()+ " flow: "+p1.pathVisitedMethodsToString());
+                conflicts_report.add("Caused by line "+p2.getPathVisitedMethods().head().line()+ " flow: "+p2.pathVisitedMethodsToString()+"\n");
+            }catch (Exception e){
+                System.out.println("Empty list for reporting data flow! Error: "+ e.getMessage());
+            }
         }
 
         return conflicts_report;
