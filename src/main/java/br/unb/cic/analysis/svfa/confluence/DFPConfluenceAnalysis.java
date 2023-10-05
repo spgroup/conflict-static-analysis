@@ -102,7 +102,7 @@ public class DFPConfluenceAnalysis {
         setGraphSize(sourceBaseAnalysis, sinkBaseAnalysis);
     }
 
-     public List<String> reportConflicts(){
+     public List<String> reportConflictsConfluence(){
         List<String> conflicts_report = new ArrayList<>();
         for (ConfluenceConflict conflict: confluentFlows){
 

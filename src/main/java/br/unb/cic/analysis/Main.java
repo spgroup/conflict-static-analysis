@@ -498,8 +498,7 @@ public class Main {
 
         System.out.println("CONFLICTS: "+conflicts.toString());
         saveVisitedMethods("Confluence "+type_analysis, (analysis.getVisitedMethods()+","+analysis.getGraphSize()));
-
-        saveConflictsLog("Confluence "+type_analysis, conflicts.toString().replace("\n", ""));
+        saveConflictsLog("Confluence "+type_analysis, analysis.reportConflictsConfluence().toString().replace("\n", ""));
     }
 
     private void loadDefinition(String filePath) throws Exception {
@@ -584,7 +583,7 @@ public class Main {
         long time = stopwatch.elapsed(TimeUnit.MILLISECONDS);
         try {
             FileWriter myWriter = new FileWriter("time.txt", true);
-            myWriter.write(description+";"+formatter.format(time/1000d)+"s\n");
+            myWriter.write(description+";"+formatter.format(time/1000d)+"\n");
             System.out.println(description+" "+formatter.format(time/1000d));
             myWriter.close();
         } catch (IOException e) {
