@@ -336,12 +336,9 @@ public class Main {
         CDAnalysisSemanticConflicts cd = new CDIntraProcedural(classpath, definition);
         cd.setOmitExceptingUnitEdges(omitExceptingUnitEdges);
         DFPAnalysisSemanticConflicts dfp = new DFPIntraProcedural(classpath, definition);
-        String type_analysis;
-        if (omitExceptingUnitEdges) {
-            type_analysis = "";
-        } else {
-            type_analysis = "e";
-        }
+
+        String type_analysis = omitExceptingUnitEdges ? "" : "e";
+
         stopwatch = Stopwatch.createStarted();
         analysis.configureSoot();
         saveExecutionTime("Configure Soot PDG"+type_analysis);
@@ -372,12 +369,7 @@ public class Main {
 
         boolean depthMethodsVisited = Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
         analysis.setPrintDepthVisitedMethods(depthMethodsVisited);
-        String type_analysis;
-        if (interprocedural) {
-            type_analysis = "Inter";
-        } else {
-            type_analysis = "Intra";
-        }
+        String type_analysis = interprocedural ? "Inter" : "Intra";
         stopwatch = Stopwatch.createStarted();
 
         analysis.configureSoot();
@@ -414,12 +406,8 @@ public class Main {
     private void runCDAnalysis(String classpath, Boolean omitExceptingUnitEdges) {
 
         CDAnalysisSemanticConflicts analysis = new CDIntraProcedural(classpath, definition);
-        String type_analysis;
-        if (omitExceptingUnitEdges) {
-            type_analysis = "";
-        } else {
-            type_analysis = "e";
-        }
+        String type_analysis = omitExceptingUnitEdges ? "" : "e";
+
         analysis.setOmitExceptingUnitEdges(omitExceptingUnitEdges);
         stopwatch = Stopwatch.createStarted();
         analysis.configureSoot();
@@ -451,12 +439,8 @@ public class Main {
         boolean depthMethodsVisited = Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
         analysis.setPrintDepthVisitedMethods(depthMethodsVisited);
 
-        String type_analysis;
-        if (interprocedural) {
-            type_analysis = "Inter";
-        } else {
-            type_analysis = "Intra";
-        }
+        String type_analysis = interprocedural ? "Inter" : "Intra";
+
         stopwatch = Stopwatch.createStarted();
         analysis.configureSoot();
         saveExecutionTime("Configure Soot DF "+type_analysis);
@@ -479,12 +463,8 @@ public class Main {
 
     private void runDFPConfluenceAnalysis(String classpath, boolean interprocedural) {
         int depthLimit = Integer.parseInt(cmd.getOptionValue("depthLimit", "5"));
-        String type_analysis;
-        if (interprocedural) {
-            type_analysis = "Inter";
-        } else {
-            type_analysis = "Intra";
-        }
+        String type_analysis = interprocedural ? "Inter" : "Intra";
+
         definition.setRecursiveMode(options.hasOption("recursive"));
         DFPConfluenceAnalysis analysis = new DFPConfluenceAnalysis(classpath, this.definition, interprocedural, depthLimit);
         boolean depthMethodsVisited = Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
