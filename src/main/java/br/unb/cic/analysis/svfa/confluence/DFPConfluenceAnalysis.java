@@ -104,27 +104,47 @@ public class DFPConfluenceAnalysis {
 
      public List<String> reportConflictsConfluence(){
         List<String> conflicts_report = new ArrayList<>();
-        for (ConfluenceConflict conflict: confluentFlows){
+         List<Integer> left_lines = new ArrayList<>();
+         List<Integer> right_lines = new ArrayList<>();
+         List<Integer> cf_lines = new ArrayList<>();
+
+         for (ConfluenceConflict conflict: confluentFlows){
 
             StatementNode df1 = conflict.getSourceNodePath().get(0);
             StatementNode df2 = conflict.getSinkNodePath().get(0);
 
             StatementNode confluence = conflict.getSinkNodePath().get(conflict.getSinkNodePath().size()-1);
 
-            System.out.println("Confluence interference in "+ df1.getPathVisitedMethods().head().getMethod().method());
-            System.out.println("Confluence flows from execution of lines "+df1.getPathVisitedMethods().head().line()+" and "+df2.getPathVisitedMethods().head().line()+
-                    " to line "+confluence.getPathVisitedMethods().head().line()+", defined in "+df1.getPathVisitedMethods().head().getUnit()+" and "+df2.getPathVisitedMethods().head().getUnit()+" and used in "+confluence.getPathVisitedMethods().head().getUnit());
-            System.out.println("Caused by line "+df1.getPathVisitedMethods().head().line()+ " flow: "+df1.pathVisitedMethodsToString());
-            System.out.println("Caused by line "+df2.getPathVisitedMethods().head().line()+ " flow: "+df2.pathVisitedMethodsToString());
-            System.out.println("Caused by line "+confluence.getPathVisitedMethods().head().line()+ " flow: "+confluence.pathVisitedMethodsToString());
+            Integer left_line = df1.getPathVisitedMethods().head().line();
+            Integer right_line = df2.getPathVisitedMethods().head().line();
+            Integer cf_line = confluence.getPathVisitedMethods().head().line();
 
-            conflicts_report.add("Confluence interference in "+ df1.getPathVisitedMethods().head().getMethod().method());
-            conflicts_report.add("Confluence flows from execution of lines "+df1.getPathVisitedMethods().head().line()+" and "+df2.getPathVisitedMethods().head().line()+
-                    " to line "+confluence.getPathVisitedMethods().head().line()+", defined in "+df1.getPathVisitedMethods().head().getUnit()+" and "+df2.getPathVisitedMethods().head().getUnit()+" and used in "+confluence.getPathVisitedMethods().head().getUnit());
-            conflicts_report.add("Caused by line "+df1.getPathVisitedMethods().head().line()+ " flow: "+df1.pathVisitedMethodsToString());
-            conflicts_report.add("Caused by line "+df2.getPathVisitedMethods().head().line()+ " flow: "+df2.pathVisitedMethodsToString());
-            conflicts_report.add("Caused by line "+confluence.getPathVisitedMethods().head().line()+ " flow: "+confluence.pathVisitedMethodsToString()+"\n");
-        }
+            Boolean contains_lines = left_lines.contains(left_line)
+                    && right_lines.contains(right_line)
+                    && cf_lines.contains(cf_line);
+
+            if (!contains_lines){
+                System.out.println("Confluence interference in "+ df1.getPathVisitedMethods().head().getMethod().method());
+                System.out.println("Confluence flows from execution of lines "+df1.getPathVisitedMethods().head().line()+" and "+df2.getPathVisitedMethods().head().line()+
+                        " to line "+confluence.getPathVisitedMethods().head().line()+", defined in "+df1.getPathVisitedMethods().head().getUnit()+" and "+df2.getPathVisitedMethods().head().getUnit()+" and used in "+confluence.getPathVisitedMethods().head().getUnit());
+                System.out.println("Caused by line "+left_line+ " flow: "+df1.pathVisitedMethodsToString());
+                System.out.println("Caused by line "+right_line+ " flow: "+df2.pathVisitedMethodsToString());
+                System.out.println("Caused by line "+cf_line+ " flow: "+confluence.pathVisitedMethodsToString());
+
+                conflicts_report.add("Confluence interference in "+ df1.getPathVisitedMethods().head().getMethod().method());
+                conflicts_report.add("Confluence flows from execution of lines "+df1.getPathVisitedMethods().head().line()+" and "+df2.getPathVisitedMethods().head().line()+
+                        " to line "+confluence.getPathVisitedMethods().head().line()+", defined in "+df1.getPathVisitedMethods().head().getUnit()+" and "+df2.getPathVisitedMethods().head().getUnit()+" and used in "+confluence.getPathVisitedMethods().head().getUnit());
+                conflicts_report.add("Caused by line "+left_line+ " flow: "+df1.pathVisitedMethodsToString());
+                conflicts_report.add("Caused by line "+right_line+ " flow: "+df2.pathVisitedMethodsToString());
+                conflicts_report.add("Caused by line "+cf_line+ " flow: "+confluence.pathVisitedMethodsToString()+"\n");
+
+                left_lines.add(left_line);
+                right_lines.add(right_line);
+                cf_lines.add(cf_line);
+            }
+
+
+         }
         return conflicts_report;
     }
 
