@@ -103,6 +103,12 @@ public abstract class AbstractMergeConflictDefinition {
                         Statement stmt = createStatement(m, u, type);
                         statements.add(stmt);
 
+                        List<TraversedLine> actual_traversedLine = new ArrayList<>();
+                        TraversedLine traversedLine_from_invoked_method = new TraversedLine(m.getDeclaringClass(), m, u.getJavaSourceStartLineNumber());
+                        // add an element from the current statement
+                        actual_traversedLine.add(traversedLine_from_invoked_method);
+                        stmt.setTraversedLine(actual_traversedLine);
+
                         if (stmt.isSource()) {
                             entryMethods.add(m);
                         }
