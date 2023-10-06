@@ -1,6 +1,6 @@
 package br.unb.cic.analysis.samples.ioa;
 
-
+// Not conflict
 public class TwoSameObjectSample {
 
     public void m() {
