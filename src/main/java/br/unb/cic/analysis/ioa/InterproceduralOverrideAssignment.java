@@ -2,38 +2,27 @@ package br.unb.cic.analysis.ioa;
 
 import br.unb.cic.analysis.AbstractAnalysis;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
-import br.unb.cic.analysis.df.DataFlowAbstraction;
 import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.OAConflictReport;
 import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.analysis.model.TraversedLine;
-import br.unb.cic.exceptions.ValueNotHandledException;
 import soot.*;
 import soot.jimple.*;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JimpleLocal;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
-import soot.toolkits.scalar.ArraySparseSet;
-import soot.toolkits.scalar.FlowSet;
 import soot.util.Chain;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-// TODO Add treatment of if, loops ... (ForwardFlowAnalysis)
-// TODO Do not add anything when assignments are equal.
 public class InterproceduralOverrideAssignment extends SceneTransformer implements AbstractAnalysis {
-
     private final int depthLimit;
     private final AbstractMergeConflictDefinition definition;
-    private TraversedMethodsWrapper<SootMethod> traversedMethodsWrapper;
-    private int visitedMethods = 0;
-    private FlowSet<DataFlowAbstraction> left;
-    private FlowSet<DataFlowAbstraction> right;
-    private List<TraversedLine> stacktraceList;
-
     private OAConflictReport oaConflictReport;
+    private TraversedMethodsWrapper<SootMethod> traversedMethodsWrapper;
+    private List<TraversedLine> stacktraceList;
 
     public InterproceduralOverrideAssignment(AbstractMergeConflictDefinition definition) {
         this.definition = definition;
@@ -50,11 +39,9 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     private void initDefaultFields() {
-        this.left = new ArraySparseSet<>();
-        this.right = new ArraySparseSet<>();
+        this.oaConflictReport = new OAConflictReport();
         this.traversedMethodsWrapper = new TraversedMethodsWrapper<>();
         this.stacktraceList = new ArrayList<>();
-        this.oaConflictReport = new OAConflictReport();
     }
 
     @Override
@@ -72,9 +59,11 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         long startTime = System.currentTimeMillis();
 
         List<SootMethod> methods = Scene.v().getEntryPoints();
-        methods.forEach(sootMethod -> traverse(new ArraySparseSet<>(), sootMethod, Statement.Type.IN_BETWEEN));
+        methods.forEach(sootMethod -> traverse(new OverrideAssignmentAbstraction(), sootMethod, Statement.Type.IN_BETWEEN));
+
         long finalTime = System.currentTimeMillis();
         System.out.println("Runtime: " + ((finalTime - startTime) / 1000d) + "s");
+
         oaConflictReport.report();
     }
 
@@ -107,8 +96,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         }
     }
 
-
-
     /**
      * This method captures the safe body of the current method and delegates the analysis function to units of (LEFT or RIGHT) or units of BASE.
      *
@@ -118,13 +105,11 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
      *                      The remaining statements of the current method that have no markup will be marked according to the flowChangeTag.
      * @return the result of applying the analysis considering the income abstraction (in) and the sootMethod
      */
-    private FlowSet<DataFlowAbstraction> traverse(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod, Statement.Type flowChangeTag) {
+    private OverrideAssignmentAbstraction traverse(OverrideAssignmentAbstraction in, SootMethod sootMethod, Statement.Type flowChangeTag) {
 
         if (shouldSkip(sootMethod)) {
             return in;
         }
-
-        this.visitedMethods++;
 
         this.traversedMethodsWrapper.add(sootMethod);
 
@@ -134,14 +119,11 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         if (body != null) {
             for (Unit unit : body.getUnits()) {
                 TraversedLine traversedLine = new TraversedLine(sootMethod, unit.getJavaSourceStartLineNumber());
+                Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
 
-                if (isTagged(flowChangeTag, unit)) {
-                    addStackTrace(traversedLine);
-                    in = runAnalysisWithTaggedUnit(in, sootMethod, flowChangeTag, unit);
-                } else {
-                    in = runAnalysisWithBaseUnit(in, sootMethod, flowChangeTag, unit);
-                }
-                removeStackTrace(traversedLine);
+                stacktraceList.add(traversedLine);
+                in = runAnalysis(in, stmt);
+                stacktraceList.remove(traversedLine);
             }
         }
 
@@ -157,81 +139,35 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         return hasRelativeBeenTraversed || isSizeGreaterThanDepthLimit || isPhantom;
     }
 
-    private void handleConstructor(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod, Statement.Type flowChangeTag) {
-        Chain<SootField> sootFieldsInClass = sootMethod.getDeclaringClass().getFields();
-        // Attributes declared as final in Java can only have a single assignment, which means that their value cannot be changed after they are defined during their initialization.
-        List<SootField> nonFinalFields = filterNonFinalFieldsInClass(sootFieldsInClass);
-        nonFinalFields.forEach(sootField -> transformFieldsIntoStatements(in, sootMethod, flowChangeTag, sootField));
+    private boolean isTagged(Statement.Type flowChangeTag, Unit unit) {
+        return (isLeftUnit(unit) || isRightUnit(unit))
+                || (isInLeftStatementFlow(flowChangeTag)
+                || isInRightStatementFlow(flowChangeTag)
+                || isInLeftAndRightStatementFlow(flowChangeTag));
     }
 
-    private List<SootField> filterNonFinalFieldsInClass(Chain<SootField> sootFieldsInClass) {
-        List<SootField> nonFinalFields = new ArrayList<>();
-        for (SootField field : sootFieldsInClass) {
-            if (!field.isFinal()) {
-                nonFinalFields.add(field);
-            }
-        }
-        return nonFinalFields;
-    }
 
-    private void transformFieldsIntoStatements(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod, Statement.Type flowChangeTag, SootField sootField) {
-        String declaringClassShortName = sootField.getDeclaringClass().getShortName();
-        JimpleLocal base = new JimpleLocal(declaringClassShortName, RefType.v(sootField.getDeclaringClass()));
-        SootFieldRef fieldRef = Scene.v().makeFieldRef(sootField.getDeclaringClass(), sootField.getName(), sootField.getType(), sootField.isStatic());
-
-        Value value = getValue(base, fieldRef);
-        Unit unit = new JAssignStmt(value, NullConstant.v());
-        createAndAddStmt(in, sootMethod, flowChangeTag, unit);
-    }
-
-    private Value getValue(JimpleLocal base, SootFieldRef fieldRef) {
-        Value value;
-        if (fieldRef.isStatic()) {
-            value = Jimple.v().newStaticFieldRef(fieldRef);
-        } else {
-            value = Jimple.v().newInstanceFieldRef(base, fieldRef);
-        }
-        return value;
-    }
-
-    private FlowSet<DataFlowAbstraction> runAnalysisWithTaggedUnit(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod, Statement.Type flowChangeTag, Unit unit) {
-        return runAnalysis(in, sootMethod, flowChangeTag, unit, true);
-    }
-
-    private FlowSet<DataFlowAbstraction> runAnalysisWithBaseUnit(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod, Statement.Type flowChangeTag, Unit unit) {
-        return runAnalysis(in, sootMethod, flowChangeTag, unit, false);
-    }
-
-    /**
-     * This method analyzes a method and adds or removes items from the list of possible conflicts.
-     *
-     * @param sootMethod    Current method to be traversed;
-     * @param flowChangeTag This parameter identifies whether the unit under analysis is in the flow of any statement already marked.
-     *                      Initially it receives the value IN_BETWEEN but changes if the call to the current method (sootMethod) has been marked as SOURCE or SINK.
-     *                      The remaining statements of the current method that have no markup will be marked according to the flowChangeTag.
-     * @param tagged        Identifies whether the unit to be analyzed has been tagged. If false the unit is base, if true the unit is left or right.
-     */
-    private FlowSet<DataFlowAbstraction> runAnalysis(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod, Statement.Type flowChangeTag, Unit unit, boolean tagged) {
+    private OverrideAssignmentAbstraction runAnalysis(OverrideAssignmentAbstraction in, Statement stmt) {
         /* Are there other possible cases? Yes, see follow links:
         https://soot-build.cs.uni-paderborn.de/public/origin/develop/soot/soot-develop/jdoc/soot/jimple/Stmt.html
         https://github.com/PAMunb/JimpleFramework/blob/d585caefa8d5f967bfdbeb877346e0ff316e0b5e/src/main/rascal/lang/jimple/core/Syntax.rsc#L77-L95
          */
 
-        if (unit instanceof AssignStmt) {
+        if (stmt.getUnit() instanceof AssignStmt) {
             /* Does AssignStmt check contain objects, arrays or other types?
              Yes, AssignStmt handles assignments, and they can be of any type as long as they follow the structure: variable = value
              */
-            AssignStmt assignStmt = (AssignStmt) unit;
+            AssignStmt assignStmt = (AssignStmt) stmt.getUnit();
 
             if (assignStmt.containsInvokeExpr()) {
-                return executeCallGraph(in, flowChangeTag, unit);
+                return calculateMergedOverrideAssignment(in, stmt);
             }
 
-            separateAbstraction(in);
-            if (tagged) {
-                createAndAddStmt(in, sootMethod, flowChangeTag, unit);
+
+            if (isTagged(stmt.getType(), stmt.getUnit())) {
+                in = runAnalysisWithTaggedUnit(in, stmt);
             } else {
-                kill(in, unit);
+                in = runAnalysisWithBaseUnit(in, stmt);
             }
 
             /* Check case: x = foo() + bar()
@@ -249,210 +185,236 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
               Yes. InvokeStmt also involves builders. What changes is the corresponding InvokeExpression.
               For builders, InvokeExpression is an instance of InvokeSpecial */
 
-        } else if (unit instanceof InvokeStmt) {
-            SootMethod sm = ((InvokeStmt) unit).getInvokeExpr().getMethod();
-            Statement statement = getStatementAssociatedWithUnit(sm, unit, flowChangeTag);
-            if (tagged && sm.isConstructor()) {
-                handleConstructor(in, sm, statement.getType());
+        } else if (stmt.getUnit() instanceof InvokeStmt) {
+            SootMethod sm = ((InvokeStmt) stmt.getUnit()).getInvokeExpr().getMethod();
+            if (sm.isConstructor()) {
+                handleConstructor(in, stmt);
             }
-            return executeCallGraph(in, flowChangeTag, unit);
+            return calculateMergedOverrideAssignment(in, stmt);
         }
 
         return in;
     }
 
-    private void createAndAddStmt(FlowSet<DataFlowAbstraction> in, SootMethod sootMethod, Statement.Type flowChangeTag, Unit unit) {
-        Statement stmt = getStatementAssociatedWithUnit(sootMethod, unit, flowChangeTag);
+
+    private OverrideAssignmentAbstraction runAnalysisWithTaggedUnit(OverrideAssignmentAbstraction in, Statement stmt) {
         stmt.setTraversedLine(new ArrayList<>(this.stacktraceList));
         gen(in, stmt);
+        checkConflict(in, stmt);
+        return in;
     }
 
-    private void separateAbstraction(FlowSet<DataFlowAbstraction> in) {
-        in.forEach(item -> {
-            if (item.getStmt().isLefAndRightStatement()) {
-                left.add(item);
-                right.add(item);
-            } else if (item.getStmt().isLeftStatement()) {
-                left.add(item);
-            } else if (item.getStmt().isRightStatement()) {
-                right.add(item);
+    private OverrideAssignmentAbstraction runAnalysisWithBaseUnit(OverrideAssignmentAbstraction in, Statement stmt) {
+        List<Statement> statementsToRemove = new ArrayList<>();
+        List<List<Statement>> abstractions = in.getLists();
+
+        abstractions.forEach(abstraction -> {
+            addToRemovalListAndFindConflicts(abstraction, stmt, statementsToRemove, false);
+            removeAll(in, statementsToRemove);
+        });
+
+        return in;
+    }
+
+    public void checkConflict(OverrideAssignmentAbstraction in, Statement stmt) {
+        List<Statement> statementsToRemove = new ArrayList<>();
+        if (stmt.isLefAndRightStatement()) {
+            addConflict(stmt, stmt);
+        } else if (stmt.isLeftStatement()) {
+            addToRemovalListAndFindConflicts(in.getRightAbstraction(), stmt, statementsToRemove, true);
+        } else if (stmt.isRightStatement()) {
+            addToRemovalListAndFindConflicts(in.getLeftAbstraction(), stmt, statementsToRemove, true);
+        }
+        removeAll(in, statementsToRemove);
+    }
+
+    private void addToRemovalListAndFindConflicts(List<Statement> abstraction, Statement stmt, List<Statement> statementsToRemove, boolean addConflict) {
+        abstraction.forEach(statement -> {
+            if (isSameStateElement(statement, stmt)) {
+                if (addConflict) {
+                    addConflict(statement, stmt);
+                }
+                statementsToRemove.add(statement);
             }
         });
     }
 
-    private FlowSet<DataFlowAbstraction> executeCallGraph(FlowSet<DataFlowAbstraction> in, Statement.Type flowChangeTag, Unit unit) {
-        CallGraph callGraph = Scene.v().getCallGraph();
-        Iterator<Edge> edges = callGraph.edgesOutOf(unit);
-
-        List<FlowSet<DataFlowAbstraction>> flowSetList = new ArrayList<>();
-
-        while (edges.hasNext()) {
-            Edge e = edges.next();
-            SootMethod method = e.getTgt().method();
-
-            Statement stmt = getStatementAssociatedWithUnit(method, unit, flowChangeTag);
-
-            FlowSet<DataFlowAbstraction> traverseResult = traverse(in.clone(), method, stmt.getType());
-            flowSetList.add(traverseResult);
-        }
-
-        FlowSet<DataFlowAbstraction> flowSetUnion = new ArraySparseSet<>();
-        for (FlowSet<DataFlowAbstraction> flowSet : flowSetList) {
-            flowSetUnion.union(flowSet);
-        }
-
-        return flowSetUnion;
+    private void removeAll(OverrideAssignmentAbstraction in, List<Statement> statementsToRemove) {
+        statementsToRemove.forEach(statement -> kill(in, statement));
     }
 
-    private boolean isTagged(Statement.Type flowChangeTag, Unit unit) {
-        return (isLeftUnit(unit) || isRightUnit(unit)) || (isInLeftStatementFlow(flowChangeTag) || isInRightStatementFlow(flowChangeTag) || isInLeftAndRightStatementFlow(flowChangeTag));
-    }
+    private boolean isSameStateElement(Statement stmtInAbs, Statement stmtInFlow) {
+        for (ValueBox defBoxInAbs : stmtInAbs.getUnit().getDefBoxes()) {
+            for (ValueBox defBoxInFlow : stmtInFlow.getUnit().getDefBoxes()) {
+                Value valueInAbs = defBoxInAbs.getValue();
+                Value valueInFlow = defBoxInFlow.getValue();
 
-    private boolean isInRightStatementFlow(Statement.Type flowChangeTag) {
-        return flowChangeTag.equals(Statement.Type.SINK);
-    }
-
-    private boolean isInLeftStatementFlow(Statement.Type flowChangeTag) {
-        return flowChangeTag.equals(Statement.Type.SOURCE);
-    }
-
-    private boolean isInLeftAndRightStatementFlow(Statement.Type flowChangeTag) {
-        return flowChangeTag.equals(Statement.Type.SOURCE_SINK);
-    }
-
-    // TODO add depth to InstanceFieldRef and StaticFieldRef...
-    // TODO rename Statement. (UnitWithExtraInformations)
-    private void gen(FlowSet<DataFlowAbstraction> in, Statement stmt) {
-        if (stmt.isLefAndRightStatement()) {
-            addConflict(stmt, stmt);
-        } else if (stmt.isLeftStatement()) {
-            checkConflict(stmt, right);
-        } else if (stmt.isRightStatement()) {
-            checkConflict(stmt, left);
-        }
-        addStmtToList(stmt, in);
-    }
-
-    private void addStmtToList(Statement stmt, FlowSet<DataFlowAbstraction> rightOrLeftList) {
-        stmt.getUnit().getDefBoxes().forEach(valueBox -> rightOrLeftList.add(new DataFlowAbstraction(valueBox.getValue(), stmt)));
-    }
-
-    /*
-     * Checks if there is a conflict and if so adds it to the conflict list.
-     */
-    private void checkConflict(Statement stmt, FlowSet<DataFlowAbstraction> rightOrLeftList) {
-        rightOrLeftList.forEach(dataFlowAbstraction -> stmt.getUnit().getDefBoxes().forEach(valueBox -> {
-            try {
-                if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
-                    addConflict(stmt, dataFlowAbstraction.getStmt());
-                    rightOrLeftList.remove(dataFlowAbstraction);
+                if (valueInAbs instanceof Local && valueInFlow instanceof Local) {
+                    return isSameLocal(stmtInAbs, stmtInFlow, valueInAbs, valueInFlow);
+                } else if (valueInAbs instanceof InstanceFieldRef && valueInFlow instanceof InstanceFieldRef) {
+                    return isSameFieldRef(stmtInAbs, stmtInFlow, valueInAbs, valueInFlow);
+                } else if (valueInAbs instanceof ArrayRef && valueInFlow instanceof ArrayRef) {
+                    return isSameArrayRef(stmtInAbs, stmtInFlow, valueInAbs, valueInFlow);
+                } else if (valueInAbs instanceof StaticFieldRef && valueInFlow instanceof StaticFieldRef) {
+                    return isSameStaticFieldRef(valueInAbs, valueInFlow);
                 }
-            } catch (ValueNotHandledException e) {
-                assert false;
-                e.printStackTrace();
             }
-        }));
+        }
+        return false;
+    }
+
+    private boolean isSameLocal(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
+        // Se as variaveis são locais, devem ser do mesmo metodo, se forem de metodos diferentes, não há interferencia.
+        if (!stmtInAbs.getSootMethod().equals(stmtInFlow.getSootMethod())) {
+            return false;
+        }
+        return valueInAbs.toString().equals(valueInFlow.toString());
+    }
+
+    private boolean isSameFieldRef(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
+        InstanceFieldRef abstractFieldRef = (InstanceFieldRef) valueInAbs;
+        InstanceFieldRef flowFieldRef = (InstanceFieldRef) valueInFlow;
+
+        if (stmtInAbs.getPointTo() != null && stmtInFlow.getPointTo() == null) {
+            getPointToFromBase(flowFieldRef.getBase(), stmtInFlow);
+        }
+        return stmtInAbs.getPointTo() != null
+                && areFieldReferencesEqual(stmtInAbs, stmtInFlow, abstractFieldRef, flowFieldRef);
+    }
+
+
+    private static boolean areFieldReferencesEqual(Statement stmtInAbs, Statement stmtInFlow, InstanceFieldRef abstractFieldRef, InstanceFieldRef flowFieldRef) {
+        boolean pointToIntersection = stmtInAbs.getPointTo().hasNonEmptyIntersection(stmtInFlow.getPointTo());
+        boolean typesEqual = abstractFieldRef.getType().equals(flowFieldRef.getType());
+        boolean fieldRefsEqual = abstractFieldRef.getFieldRef().equals(flowFieldRef.getFieldRef());
+
+        return (pointToIntersection || typesEqual) && fieldRefsEqual;
+    }
+
+
+    private boolean isSameArrayRef(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
+        if (stmtInAbs.getPointTo() != null) {
+            if (stmtInFlow.getPointTo() == null) {
+                getPointToFromBase(((ArrayRef) valueInFlow).getBase(), stmtInFlow);
+            }
+            return stmtInAbs.getPointTo().hasNonEmptyIntersection(stmtInFlow.getPointTo());
+        }
+        return false;
+    }
+
+    private boolean isSameStaticFieldRef(Value valueInAbs, Value valueInFlow) {
+        return ((StaticFieldRef) valueInAbs).getFieldRef().getSignature().equals(((StaticFieldRef) valueInFlow).getFieldRef().getSignature());
     }
 
     private void addConflict(Statement left, Statement right) {
         Conflict conflict = new Conflict(left, right);
-        if (this.oaConflictReport.contains(conflict)) {
-            return;
+        if (!this.oaConflictReport.contains(conflict)) {
+            this.oaConflictReport.addConflict(conflict);
+
         }
-        this.oaConflictReport.addConflict(conflict);
-
     }
 
-    private void kill(FlowSet<DataFlowAbstraction> in, Unit unit) {
-        unit.getDefBoxes().forEach(valueBox -> removeAll(valueBox, in));
-        unit.getDefBoxes().forEach(valueBox -> removeAll(valueBox, left));
-        unit.getDefBoxes().forEach(valueBox -> removeAll(valueBox, right));
-    }
 
-    private void removeAll(ValueBox valueBox, FlowSet<DataFlowAbstraction> rightOrLeftList) {
-        FlowSet<DataFlowAbstraction> itemsToRemoved = new ArraySparseSet<>();
-        rightOrLeftList.forEach(dataFlowAbstraction -> {
-            try {
-                if (containsValue(dataFlowAbstraction, valueBox.getValue())) {
-                    itemsToRemoved.add(dataFlowAbstraction);
-                }
-            } catch (ValueNotHandledException e) {
-                e.printStackTrace();
-            }
-        });
-
-        rightOrLeftList.difference(itemsToRemoved);
-    }
-
-    /**
-     * This method checks for each type of variable analyzed if it exists within the abstraction.
-     *
-     * @param dataFlowAbstraction One of the items contained in the abstraction
-     * @param value               Variable to be analyzed.
-     * @return true if the variable exists in the abstraction and false if it does not.
-     * @throws ValueNotHandledException Exception thrown when variable type is not cataloged.
-     */
-    private boolean containsValue(DataFlowAbstraction dataFlowAbstraction, Value value) throws ValueNotHandledException {
-
-        if (dataFlowAbstraction.getValue() instanceof InstanceFieldRef && value instanceof InstanceFieldRef) {
-            return compareInstanceFieldRef(dataFlowAbstraction, value);
+    private void gen(OverrideAssignmentAbstraction in, Statement stmt) {
+        Value value = stmt.getUnit().getDefBoxes().get(0).getValue();
+        if (value instanceof InstanceFieldRef) {
+            getPointToFromBase(((InstanceFieldRef) value).getBase(), stmt);
+        } else if (value instanceof ArrayRef) {
+            getPointToFromBase(((ArrayRef) value).getBase(), stmt);
+        } else if (value instanceof StaticFieldRef) {
+            getPointToFromStaticField(((StaticFieldRef) value).getField(), stmt);
         }
-        if (dataFlowAbstraction.getValue() instanceof Local && value instanceof Local) {
-            return dataFlowAbstraction.getValue().equals(value);
-        }
-        if (dataFlowAbstraction.getValue() instanceof ArrayRef && value instanceof ArrayRef) {
-            return compareArrayRef(dataFlowAbstraction, value);
-        }
-        if (dataFlowAbstraction.getValue() instanceof StaticFieldRef && value instanceof StaticFieldRef) {
-            StaticFieldRef fromDataFlowAbstraction = (StaticFieldRef) dataFlowAbstraction.getValue();
-            StaticFieldRef fromValue = (StaticFieldRef) value;
-            return compareSignature(fromDataFlowAbstraction.getFieldRef(), fromValue.getFieldRef());
-        }
-        if (!dataFlowAbstraction.getValue().getClass().equals(value.getClass())) {
-            return false;
-        }
-
-        throw new ValueNotHandledException("Value Not Handled");
+        in.add(stmt);
     }
 
-    private boolean compareInstanceFieldRef(DataFlowAbstraction dataFlowAbstraction, Value value) {
-        InstanceFieldRef fromDataFlowAbstraction = (InstanceFieldRef) dataFlowAbstraction.getValue();
-        InstanceFieldRef fromValue = (InstanceFieldRef) value;
-        return fromDataFlowAbstraction.toString().equals(fromValue.toString()) || (compareSignature(fromDataFlowAbstraction.getFieldRef(), fromValue.getFieldRef()) && comparePointsToHasNonEmptyIntersection((Local) fromDataFlowAbstraction.getBase(), (Local) fromValue.getBase()));
-    }
-
-    /**
-     * Compare whether arrays have the same reference using pointsToAnalysis and ignoring the index
-     */
-    private boolean compareArrayRef(DataFlowAbstraction dataFlowAbstraction, Value value) {
-        ArrayRef fromDataFlowAbstraction = (ArrayRef) dataFlowAbstraction.getValue();
-        ArrayRef fromValue = (ArrayRef) value;
-        return comparePointsToHasNonEmptyIntersection((Local) fromDataFlowAbstraction.getBase(), (Local) fromValue.getBase());
-    }
-
-    /**
-     * This method compares the FieldRef (Ex: <Object: java.lang.Integer x>) signature textually.
-     *
-     * @param fromDataFlowAbstraction SootFieldRef coming from abstraction
-     * @param fromValue               SootFieldRef coming from the analyzed variable
-     * @return true if the signature is the same and false if it is different
-     */
-    private boolean compareSignature(SootFieldRef fromDataFlowAbstraction, SootFieldRef fromValue) {
-        return fromDataFlowAbstraction.getSignature().equals(fromValue.getSignature());
-    }
-
-    /**
-     * This method compares whether two objects can point to the same memory address using pointsToAnalysis.
-     * This method uses only the InstanceFieldRef base. Ex: in an expression o.x, o is the base.
-     *
-     * @param fromDataFlowAbstraction InstanceFieldRef coming from abstraction
-     * @param fromValue               InstanceFieldRef coming from the analyzed variable
-     * @return true if an intersection exists
-     */
-    private boolean comparePointsToHasNonEmptyIntersection(Local fromDataFlowAbstraction, Local fromValue) {
+    private static void getPointToFromBase(Value value, Statement stmt) {
         PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
-        return pointsToAnalysis.reachingObjects(fromDataFlowAbstraction).hasNonEmptyIntersection(pointsToAnalysis.reachingObjects(fromValue));
+        PointsToSet points = pointsToAnalysis.reachingObjects((Local) value);
+        stmt.setPointTo(points);
     }
+
+    private static void getPointToFromStaticField(SootField fieldRef, Statement stmt) {
+        PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
+        PointsToSet points = pointsToAnalysis.reachingObjects(fieldRef);
+        stmt.setPointTo(points);
+    }
+
+    private void kill(OverrideAssignmentAbstraction in, Statement stmt) {
+        in.remove(stmt);
+    }
+
+    private void handleConstructor(OverrideAssignmentAbstraction in, Statement stmt) {
+        Chain<SootField> sootFieldsInClass = stmt.getSootMethod().getDeclaringClass().getFields();
+        // Attributes declared as final in Java can only have a single assignment, which means that their value cannot be changed after they are defined during their initialization.
+        List<SootField> nonFinalFields = filterNonFinalFieldsInClass(sootFieldsInClass);
+        nonFinalFields.forEach(sootField -> transformFieldsIntoStatements(in, stmt, sootField));
+    }
+
+    private List<SootField> filterNonFinalFieldsInClass(Chain<SootField> sootFieldsInClass) {
+        List<SootField> nonFinalFields = new ArrayList<>();
+        for (SootField field : sootFieldsInClass) {
+            if (!field.isFinal()) {
+                nonFinalFields.add(field);
+            }
+        }
+        return nonFinalFields;
+    }
+
+    private void transformFieldsIntoStatements(OverrideAssignmentAbstraction in, Statement statement, SootField sootField) {
+        String declaringClassShortName = sootField.getDeclaringClass().getShortName();
+        JimpleLocal base = new JimpleLocal(declaringClassShortName, RefType.v(sootField.getDeclaringClass()));
+        SootFieldRef fieldRef = Scene.v().makeFieldRef(sootField.getDeclaringClass(), sootField.getName(), sootField.getType(), sootField.isStatic());
+
+        Value value = createFieldValueReference(base, fieldRef);
+        Unit unit = new JAssignStmt(value, NullConstant.v());
+
+        Statement stmt = getStatementAssociatedWithUnit(statement.getSootMethod(), unit, statement.getType());
+        if (isTagged(stmt.getType(), stmt.getUnit())) {
+            runAnalysisWithTaggedUnit(in, stmt);
+        } else {
+            runAnalysisWithBaseUnit(in, stmt);
+        }
+    }
+
+    private OverrideAssignmentAbstraction calculateMergedOverrideAssignment(OverrideAssignmentAbstraction inputAbstraction, Statement currentStatement) {
+        CallGraph callGraph = Scene.v().getCallGraph();
+        Iterator<Edge> edges = callGraph.edgesOutOf(currentStatement.getUnit());
+
+        List<OverrideAssignmentAbstraction> flowSetList = new ArrayList<>();
+
+        while (edges.hasNext()) {
+            Edge edge = edges.next();
+            SootMethod targetMethod = edge.getTgt().method();
+
+            try {
+                OverrideAssignmentAbstraction clonedAbstraction = (OverrideAssignmentAbstraction) inputAbstraction.clone();
+                OverrideAssignmentAbstraction traverseResult = traverse(clonedAbstraction, targetMethod, currentStatement.getType());
+                flowSetList.add(traverseResult);
+            } catch (CloneNotSupportedException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
+        if (flowSetList.isEmpty()) {
+            return inputAbstraction;
+        }
+
+        OverrideAssignmentAbstraction newOverrideAssignmentAbstraction = new OverrideAssignmentAbstraction();
+        flowSetList.forEach(newOverrideAssignmentAbstraction::union);
+
+        return newOverrideAssignmentAbstraction;
+    }
+
+    private Value createFieldValueReference(JimpleLocal base, SootFieldRef fieldRef) {
+        Value value;
+        if (fieldRef.isStatic()) {
+            value = Jimple.v().newStaticFieldRef(fieldRef);
+        } else {
+            value = Jimple.v().newInstanceFieldRef(base, fieldRef);
+        }
+        return value;
+    }
+
     private Statement getStatementAssociatedWithUnit(SootMethod sootMethod, Unit u, Statement.Type flowChangeTag) {
         if (isLeftAndRightUnit(u) || isInLeftAndRightStatementFlow(flowChangeTag) || isBothUnitOrBothStatementFlow(u, flowChangeTag)) {
             return definition.createStatement(sootMethod, u, Statement.Type.SOURCE_SINK);
@@ -468,14 +430,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
         return definition.createStatement(sootMethod, u, Statement.Type.IN_BETWEEN);
     }
 
-    private void addStackTrace(TraversedLine traversedLine) {
-        this.stacktraceList.add(traversedLine);
-    }
-
-    private void removeStackTrace(TraversedLine traversedLine) {
-        this.stacktraceList.remove(traversedLine);
-    }
-
     private boolean isBothUnitOrBothStatementFlow(Unit u, Statement.Type flowChangeTag) {
         return (isRightUnit(u) && isInLeftStatementFlow(flowChangeTag)) || (isLeftUnit(u) && isInRightStatementFlow(flowChangeTag));
     }
@@ -486,6 +440,18 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
 
     private boolean isRightUnit(Unit u) {
         return definition.getSinkStatements().stream().map(Statement::getUnit).collect(Collectors.toList()).contains(u);
+    }
+
+    private boolean isInRightStatementFlow(Statement.Type flowChangeTag) {
+        return flowChangeTag.equals(Statement.Type.SINK);
+    }
+
+    private boolean isInLeftStatementFlow(Statement.Type flowChangeTag) {
+        return flowChangeTag.equals(Statement.Type.SOURCE);
+    }
+
+    private boolean isInLeftAndRightStatementFlow(Statement.Type flowChangeTag) {
+        return flowChangeTag.equals(Statement.Type.SOURCE_SINK);
     }
 
     private boolean isLeftAndRightUnit(Unit u) {
@@ -501,6 +467,6 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
     }
 
     public int getVisitedMethods(){
-        return this.visitedMethods;
+        return this.traversedMethodsWrapper.getVisitedMethods();
     }
 }
