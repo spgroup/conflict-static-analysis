@@ -103,12 +103,6 @@ public abstract class AbstractMergeConflictDefinition {
                         Statement stmt = createStatement(m, u, type);
                         statements.add(stmt);
 
-                        List<TraversedLine> actual_traversedLine = new ArrayList<>();
-                        TraversedLine traversedLine_from_invoked_method = new TraversedLine(m.getDeclaringClass(), m, u.getJavaSourceStartLineNumber());
-                        // add an element from the current statement
-                        actual_traversedLine.add(traversedLine_from_invoked_method);
-                        stmt.setTraversedLine(actual_traversedLine);
-
                         if (stmt.isSource()) {
                             entryMethods.add(m);
                         }
@@ -167,13 +161,6 @@ public abstract class AbstractMergeConflictDefinition {
             if(u instanceof IdentityStmt) {
                 continue;
             }
-
-            // add all elements from the current traverse line list
-            Statement stmt_actual = createStatement(sm, u, type);
-
-            stmt_actual.setTraversedLine(traversedLine);
-
-            res.add(stmt_actual);
 
             // if the unit is is an AssignStmt, create a statement with your traversedLine list
             if(type.equals(Statement.Type.SOURCE) && u instanceof AssignStmt) {
