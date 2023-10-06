@@ -155,7 +155,7 @@ public abstract class AbstractMergeConflictDefinition {
 
     public List<Statement> traverse(SootMethod sm, List<SootMethod> traversed, List<TraversedLine> traversedLine, Statement.Type type, int level) {
         Body body = retrieveActiveBodySafely(sm);
-        if(traversed.contains(sm) || level > 10 || (!sm.getDeclaringClass().isApplicationClass()) || (body == null)) {
+        if(traversed.contains(sm) || level > 5 || (!sm.getDeclaringClass().isApplicationClass()) || (body == null)) {
             return new ArrayList<>();
         }
         level++;
