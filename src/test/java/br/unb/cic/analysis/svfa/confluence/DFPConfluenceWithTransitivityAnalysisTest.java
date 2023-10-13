@@ -38,7 +38,7 @@ public class DFPConfluenceWithTransitivityAnalysisTest {
 
     @Test
     public void testSVFAConfluentAnalysisExpectingOneConflict() {
-        analysis.execute();
+        analysis.execute(false);
         Set<ConfluenceConflict> conflicts = analysis.getConfluentConflicts();
         Assert.assertEquals(2, conflicts.size());
         ConfluenceConflict conflict = conflicts.iterator().next();

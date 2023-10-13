@@ -38,7 +38,7 @@ public class DFPConfluenceAnalysisWithInterproceduralConfluenceTest {
 
     @Ignore
     public void testSVFAConfluentAnalysisExpectingOneConflict() {
-        analysis.execute();
+        analysis.execute(false);
         Set<ConfluenceConflict> conflicts = analysis.getConfluentConflicts();
         Assert.assertEquals(conflicts.size(), 1);
     }

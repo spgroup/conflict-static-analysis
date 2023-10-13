@@ -40,7 +40,7 @@ public class DFPConfluenceAnalysisWithMultipleConfluences {
 
     @Test
     public void testSVFAConfluentAnalysisExpectingNoConflicts() {
-        analysis.execute();
+        analysis.execute(false);
         Set<ConfluenceConflict> conflicts = analysis.getConfluentConflicts();
         Assert.assertEquals(conflicts.size(), 2);
 

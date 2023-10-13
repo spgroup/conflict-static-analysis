@@ -17,6 +17,22 @@ public class ConfluenceConflict {
         this.sinkNodePath = sinkNodePath;
     }
 
+    public List<StatementNode> getSourceNodePath() {
+        return sourceNodePath;
+    }
+
+    public void setSourceNodePath(List<StatementNode> sourceNodePath) {
+        this.sourceNodePath = sourceNodePath;
+    }
+
+    public List<StatementNode> getSinkNodePath() {
+        return sinkNodePath;
+    }
+
+    public void setSinkNodePath(List<StatementNode> sinkNodePath) {
+        this.sinkNodePath = sinkNodePath;
+    }
+
     @Override
     public String toString() {
         return "SOURCE=>BASE: "

@@ -6,6 +6,7 @@ import br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts;
 import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.analysis.model.TraversedLine;
 import br.unb.cic.soot.graph.StatementNode;
+import ch.qos.logback.core.net.SyslogOutputStream;
 import com.google.common.base.Stopwatch;
 import soot.AbstractSootFieldRef;
 import soot.G;
@@ -52,30 +53,39 @@ public class DFPConfluenceAnalysis {
      * Executes both source -> base and sink -> base SVFA analysis intersects then populating
      * the confluentFlows attribute with the results
      */
-    public void execute() {
+    public void execute(boolean depthMethodsVisited) {
         DFPAnalysisSemanticConflicts sourceBaseAnalysis = sourceBaseAnalysis(interprocedural);
+        String type_analysis;
+        if (interprocedural) {
+            type_analysis = "Inter";
+        } else {
+            type_analysis = "Intra";
+        }
         Main m = new Main();
         m.stopwatch = Stopwatch.createStarted();
+        sourceBaseAnalysis.setPrintDepthVisitedMethods(depthMethodsVisited);
 
         sourceBaseAnalysis.configureSoot();
         Options.v().ignore_resolution_errors();
-        m.saveExecutionTime("Configure Soot Confluence 1");
+        m.saveExecutionTime("Configure Soot Confluence 1 "+type_analysis);
 
         m.stopwatch = Stopwatch.createStarted();
 
         sourceBaseAnalysis.buildDFP();
         Set<List<StatementNode>> sourceBasePaths = sourceBaseAnalysis.findSourceSinkPaths();
 
-        m.saveExecutionTime("Time to perform Confluence 1");
+        m.saveExecutionTime("Time to perform Confluence 1 "+type_analysis);
 
         m.stopwatch = Stopwatch.createStarted();
 
         G.v().reset();
 
         DFPAnalysisSemanticConflicts sinkBaseAnalysis = sinkBaseAnalysis(interprocedural);
+        sinkBaseAnalysis.setPrintDepthVisitedMethods(depthMethodsVisited);
+
         sinkBaseAnalysis.configureSoot();
 
-        m.saveExecutionTime("Configure Soot Confluence 2");
+        m.saveExecutionTime("Configure Soot Confluence 2 "+type_analysis);
 
         m.stopwatch = Stopwatch.createStarted();
 
@@ -85,11 +95,57 @@ public class DFPConfluenceAnalysis {
 
         confluentFlows = intersectPathsByLastNode(sourceBasePaths, sinkBasePaths);
 
-        m.saveExecutionTime("Time to perform Confluence 2");
+        m.saveExecutionTime("Time to perform Confluence 2 "+type_analysis);
 
         System.out.println("Visited methods: "+ (sourceBaseAnalysis.getNumberVisitedMethods()+sinkBaseAnalysis.getNumberVisitedMethods()));
         setVisitedMethods(sourceBaseAnalysis.getNumberVisitedMethods()+sinkBaseAnalysis.getNumberVisitedMethods());
         setGraphSize(sourceBaseAnalysis, sinkBaseAnalysis);
+    }
+
+     public List<String> reportConflictsConfluence(){
+        List<String> conflicts_report = new ArrayList<>();
+         List<Integer> left_lines = new ArrayList<>();
+         List<Integer> right_lines = new ArrayList<>();
+         List<Integer> cf_lines = new ArrayList<>();
+
+         for (ConfluenceConflict conflict: confluentFlows){
+
+            StatementNode df1 = conflict.getSourceNodePath().get(0);
+            StatementNode df2 = conflict.getSinkNodePath().get(0);
+
+            StatementNode confluence = conflict.getSinkNodePath().get(conflict.getSinkNodePath().size()-1);
+
+            Integer left_line = df1.getPathVisitedMethods().head().line();
+            Integer right_line = df2.getPathVisitedMethods().head().line();
+            Integer cf_line = confluence.getPathVisitedMethods().head().line();
+
+            Boolean contains_lines = left_lines.contains(left_line)
+                    && right_lines.contains(right_line)
+                    && cf_lines.contains(cf_line);
+
+            if (!contains_lines){
+                System.out.println("Confluence interference in "+ df1.getPathVisitedMethods().head().getMethod().method());
+                System.out.println("Confluence flows from execution of lines "+df1.getPathVisitedMethods().head().line()+" and "+df2.getPathVisitedMethods().head().line()+
+                        " to line "+confluence.getPathVisitedMethods().head().line()+", defined in "+df1.getPathVisitedMethods().head().getUnit()+" and "+df2.getPathVisitedMethods().head().getUnit()+" and used in "+confluence.getPathVisitedMethods().head().getUnit());
+                System.out.println("Caused by line "+left_line+ " flow: "+df1.pathVisitedMethodsToString());
+                System.out.println("Caused by line "+right_line+ " flow: "+df2.pathVisitedMethodsToString());
+                System.out.println("Caused by line "+cf_line+ " flow: "+confluence.pathVisitedMethodsToString());
+
+                conflicts_report.add("Confluence interference in "+ df1.getPathVisitedMethods().head().getMethod().method());
+                conflicts_report.add("Confluence flows from execution of lines "+df1.getPathVisitedMethods().head().line()+" and "+df2.getPathVisitedMethods().head().line()+
+                        " to line "+confluence.getPathVisitedMethods().head().line()+", defined in "+df1.getPathVisitedMethods().head().getUnit()+" and "+df2.getPathVisitedMethods().head().getUnit()+" and used in "+confluence.getPathVisitedMethods().head().getUnit());
+                conflicts_report.add("Caused by line "+left_line+ " flow: "+df1.pathVisitedMethodsToString());
+                conflicts_report.add("Caused by line "+right_line+ " flow: "+df2.pathVisitedMethodsToString());
+                conflicts_report.add("Caused by line "+cf_line+ " flow: "+confluence.pathVisitedMethodsToString()+"\n");
+
+                left_lines.add(left_line);
+                right_lines.add(right_line);
+                cf_lines.add(cf_line);
+            }
+
+
+         }
+        return conflicts_report;
     }
 
     /**
@@ -242,5 +298,12 @@ public class DFPConfluenceAnalysis {
 
     public void setVisitedMethods(int visitedMethods) {
         this.visitedMethods = visitedMethods;
+    }
+    public void setCp(String cp) {
+        this.cp = cp;
+    }
+
+    public int getDepthLimit() {
+        return depthLimit;
     }
 }

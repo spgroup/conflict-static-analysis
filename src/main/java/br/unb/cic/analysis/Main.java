@@ -293,7 +293,7 @@ public class Main {
         interproceduralOverrideAssignment.configureEntryPoints();
 
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", interproceduralOverrideAssignment));
-
+        System.out.println("Depth limit: "+interproceduralOverrideAssignment.getDepthLimit());
         saveExecutionTime("Configure Soot OA Inter");
 
         SootWrapper.applyPackages();
@@ -303,9 +303,9 @@ public class Main {
 
         System.out.println("Visited methods: "+ interproceduralOverrideAssignment.getVisitedMethods());
 
-        saveVisitedMethods("OA", (interproceduralOverrideAssignment.getVisitedMethods()+""));
+        saveVisitedMethods("OA Inter", (interproceduralOverrideAssignment.getVisitedMethods()+""));
 
-        saveConflictsLog("OA", conflicts.toString());
+        saveConflictsLog("OA Inter", conflicts.toString());
 
     }
 
@@ -337,9 +337,11 @@ public class Main {
         cd.setOmitExceptingUnitEdges(omitExceptingUnitEdges);
         DFPAnalysisSemanticConflicts dfp = new DFPIntraProcedural(classpath, definition);
 
+        String type_analysis = omitExceptingUnitEdges ? "" : "e";
+
         stopwatch = Stopwatch.createStarted();
         analysis.configureSoot();
-        saveExecutionTime("Configure Soot PDG");
+        saveExecutionTime("Configure Soot PDG"+type_analysis);
 
         stopwatch = Stopwatch.createStarted();
 
@@ -350,11 +352,11 @@ public class Main {
                 .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
 
-        saveExecutionTime("Time to perform PDG");
+        saveExecutionTime("Time to perform PDG"+type_analysis);
 
         System.out.println("CONFLICTS: "+conflicts.toString());
 
-        saveConflictsLog("PDG", conflicts.toString());
+        saveConflictsLog("PDG"+type_analysis, conflicts.toString());
     }
 
     private void runDFPAnalysis(String classpath, Boolean interprocedural) {
@@ -367,12 +369,12 @@ public class Main {
 
         boolean depthMethodsVisited = Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
         analysis.setPrintDepthVisitedMethods(depthMethodsVisited);
-
+        String type_analysis = interprocedural ? "Inter" : "Intra";
         stopwatch = Stopwatch.createStarted();
 
         analysis.configureSoot();
 
-        saveExecutionTime("Configure Soot DFP");
+        saveExecutionTime("Configure Soot DFP "+type_analysis);
 
         stopwatch = Stopwatch.createStarted();
 
@@ -383,30 +385,33 @@ public class Main {
                 .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
 
-        saveExecutionTime("Time to perform DFP");
+        saveExecutionTime("Time to perform DFP "+type_analysis);
+        System.out.println("Depth limit: "+analysis.getDepthLimit());
 
         System.out.print("CONFLICTS: ");
 
-        List<String> conflicts_string = generateDFPReportConflict(analysis);
+        List<String> conflicts_report = analysis.reportDFConflicts();
 
-        conflicts_string.add(conflicts.toString());
+        conflicts_report.add(conflicts.toString());
 
         System.out.println(conflicts.toString());
 
         System.out.println("Visited methods: "+ analysis.getNumberVisitedMethods());
-        saveVisitedMethods("DFP", (analysis.getNumberVisitedMethods()+","+analysis.svg().graph().size()+","+analysis.svg().edges().size()));
+        saveVisitedMethods("DFP "+type_analysis, (analysis.getNumberVisitedMethods()+","+analysis.svg().graph().size()+","+analysis.svg().edges().size()));
 
-        saveConflictsLog("DFP", conflicts_string.toString());
+        saveConflictsLog("DFP "+type_analysis, conflicts_report.toString());
 
     }
 
     private void runCDAnalysis(String classpath, Boolean omitExceptingUnitEdges) {
 
         CDAnalysisSemanticConflicts analysis = new CDIntraProcedural(classpath, definition);
+        String type_analysis = omitExceptingUnitEdges ? "" : "e";
+
         analysis.setOmitExceptingUnitEdges(omitExceptingUnitEdges);
         stopwatch = Stopwatch.createStarted();
         analysis.configureSoot();
-        saveExecutionTime("Configure Soot CD");
+        saveExecutionTime("Configure Soot CD"+type_analysis);
 
         stopwatch = Stopwatch.createStarted();
 
@@ -417,9 +422,11 @@ public class Main {
                 .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
 
-        saveExecutionTime("Time to perform CD");
+        saveExecutionTime("Time to perform CD"+type_analysis);
 
-        System.out.println(conflicts.toString());
+        System.out.println("CONFLICTS: "+conflicts.toString());
+
+        saveConflictsLog("CD"+type_analysis, conflicts.toString());
     }
 
     private void runSparseValueFlowAnalysis(String classpath, boolean interprocedural) {
@@ -432,9 +439,11 @@ public class Main {
         boolean depthMethodsVisited = Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
         analysis.setPrintDepthVisitedMethods(depthMethodsVisited);
 
+        String type_analysis = interprocedural ? "Inter" : "Intra";
+
         stopwatch = Stopwatch.createStarted();
         analysis.configureSoot();
-        saveExecutionTime("Configure Soot DF");
+        saveExecutionTime("Configure Soot DF "+type_analysis);
 
         stopwatch = Stopwatch.createStarted();
 
@@ -445,28 +454,31 @@ public class Main {
                 .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
 
-        saveExecutionTime("Time to perform DF");
+        saveExecutionTime("Time to perform DF "+type_analysis);
 
-        System.out.println(conflicts.toString());
+        System.out.println("CONFLICTS: "+conflicts.toString());
+
+        saveConflictsLog("DF "+type_analysis, conflicts.toString());
     }
 
     private void runDFPConfluenceAnalysis(String classpath, boolean interprocedural) {
         int depthLimit = Integer.parseInt(cmd.getOptionValue("depthLimit", "5"));
+        String type_analysis = interprocedural ? "Inter" : "Intra";
 
         definition.setRecursiveMode(options.hasOption("recursive"));
         DFPConfluenceAnalysis analysis = new DFPConfluenceAnalysis(classpath, this.definition, interprocedural, depthLimit);
+        boolean depthMethodsVisited = Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
 
-        analysis.execute();
-
+        analysis.execute(false);
+        System.out.println("Depth limit: "+analysis.getDepthLimit());
         conflicts.addAll(analysis.getConfluentConflicts()
                 .stream()
                 .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
 
         System.out.println("CONFLICTS: "+conflicts.toString());
-        saveVisitedMethods("Confluence", (analysis.getVisitedMethods()+","+analysis.getGraphSize()));
-
-        saveConflictsLog("Confluence", conflicts.toString().replace("\n", ""));
+        saveVisitedMethods("Confluence "+type_analysis, (analysis.getVisitedMethods()+","+analysis.getGraphSize()));
+        saveConflictsLog("Confluence "+type_analysis, analysis.reportConflictsConfluence().toString().replace("\n", ""));
     }
 
     private void loadDefinition(String filePath) throws Exception {
@@ -551,7 +563,7 @@ public class Main {
         long time = stopwatch.elapsed(TimeUnit.MILLISECONDS);
         try {
             FileWriter myWriter = new FileWriter("time.txt", true);
-            myWriter.write(description+" "+formatter.format(time/1000d)+"s\n");
+            myWriter.write(description+";"+formatter.format(time/1000d)+"\n");
             System.out.println(description+" "+formatter.format(time/1000d));
             myWriter.close();
         } catch (IOException e) {
@@ -563,7 +575,7 @@ public class Main {
     public void saveVisitedMethods(String description, String visited_methods){
         try {
             FileWriter myWriter = new FileWriter("visited_methods.txt", true);
-            myWriter.write(description+" "+visited_methods+"\n");
+            myWriter.write(description+"; "+visited_methods+"\n");
             myWriter.close();
         } catch (IOException e) {
             System.out.println("An error occurred.");
@@ -574,7 +586,7 @@ public class Main {
     public void saveConflictsLog(String description, String log_message){
         try {
             FileWriter myWriter = new FileWriter("conflicts_log.txt", true);
-            myWriter.write(description+": "+log_message+"\n");
+            myWriter.write(description+" log => "+log_message+"\n");
             myWriter.close();
         } catch (IOException e) {
             System.out.println("An error occurred.");
@@ -584,42 +596,5 @@ public class Main {
 
     public String formatConflict(String p){
         return p.replace("), Node", ") => Node");
-    }
-
-    public List<String> generateDFPReportConflict(DFPAnalysisSemanticConflicts analysis){
-        List<String> conflicts_string = new ArrayList<>();
-        for (List<StatementNode> stmt_list: analysis.findSourceSinkPaths()){
-            System.out.println(stmt_list);
-            StatementNode begin_stmt = stmt_list.get(0);
-            StatementNode end_stmt = stmt_list.get(stmt_list.size()-1);
-            System.out.println("\nBegin Statement:"+begin_stmt);
-            conflicts_string.add("Begin Statement:"+begin_stmt);
-            System.out.println("\nEnd Statement: "+end_stmt.value());
-            conflicts_string.add("End Statement: "+end_stmt.value());
-            int last_line = -1;
-
-            for (Statement stmt: definition.sinkStatements){
-                String aux = end_stmt.value().stmt();
-
-                if (stmt.toString().equals(aux)){
-                    if (stmt.getTraversedLine().size()>0){
-                        int actual_line = stmt.getTraversedLine().get(0).getLineNumber();
-                        if (last_line != actual_line){
-                            System.out.println("\nPath Statements: ");
-                            conflicts_string.add("Path Statements: ");
-                            for (TraversedLine line: stmt.getTraversedLine()){
-                                conflicts_string.add(line+ " => ");
-                                System.out.print(line+ " => ");
-                            }
-                            conflicts_string.add(end_stmt.value().toString());
-                            System.out.println(end_stmt.value());
-                            last_line = actual_line;
-                        }
-                    }
-                }
-            }
-        }
-
-        return conflicts_string;
     }
 }
