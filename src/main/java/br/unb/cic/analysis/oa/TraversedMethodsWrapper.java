@@ -1,4 +1,4 @@
-package br.unb.cic.analysis.ioa;
+package br.unb.cic.analysis.oa;
 
 import soot.SootClass;
 import soot.SootMethod;

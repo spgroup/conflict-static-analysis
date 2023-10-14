@@ -1,4 +1,4 @@
-package br.unb.cic.analysis.ioa;
+package br.unb.cic.analysis.oa;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.SootWrapper;
@@ -19,7 +19,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
 
     private final int depthLimit = 5;
 
-    private void configureTest(InterproceduralOverrideAssignment analysis) {
+    private void configureTest(OverrideAssignment analysis) {
         G.reset();
 
         List<String> testClasses = Collections.singletonList("target/test-classes/");
@@ -71,7 +71,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentArraysClassFieldSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{7}, new int[]{9});
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition, depthLimit, false);
+        OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
@@ -81,7 +81,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentArraysCompleteOverlaySample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{11}, new int[]{7, 13});
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition, depthLimit, false);
+        OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
@@ -91,7 +91,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentArraysSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{8}, new int[]{9});
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition, depthLimit, false);
+        OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
@@ -101,7 +101,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentArraysSample2";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{3, 12}, new int[]{10, 13});
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition, depthLimit, false);
+        OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
@@ -111,7 +111,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentArraysOfObjectsSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{19, 21}, new int[]{22});
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition, depthLimit, false);
+        OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
@@ -121,7 +121,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentArraysParameterSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{6}, new int[]{8});
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition, depthLimit, false);
+        OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
@@ -131,7 +131,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentLocalVariablesClassFieldSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{7}, new int[]{9});
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition, depthLimit, false);
+        OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
@@ -141,7 +141,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentLocalVariablesSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{7, 10}, new int[]{8, 11});
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition, depthLimit, false);
+        OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
@@ -151,7 +151,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentLocalVariablesParameterSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{9}, new int[]{11});
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition, depthLimit, false);
+        OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
@@ -161,7 +161,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentMethodCallSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{7, 10}, new int[]{9});
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition, depthLimit, false);
+        OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
@@ -171,7 +171,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentObjectOneFieldConditionalTwoConflictsSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{11, 13}, new int[]{15, 16});
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition, depthLimit, false);
+        OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
         Assert.assertEquals(2, analysis.getConflicts().size());
     }
@@ -181,7 +181,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentObjectOneFieldConditionalZeroConflictSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{11}, new int[]{13});
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition, depthLimit, false);
+        OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
         Assert.assertEquals(0, analysis.getConflicts().size());
     }
@@ -191,7 +191,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentObjectOneFieldOneConflictSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{10, 13}, new int[]{11, 14});
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition, depthLimit, false);
+        OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
@@ -201,7 +201,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentObjectOneFieldTwoConflictsSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{10, 13}, new int[]{11, 14});
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition, depthLimit, false);
+        OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
         Assert.assertEquals(2, analysis.getConflicts().size());
     }
@@ -211,7 +211,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentObjectOneFieldZeroConflictSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{10, 14}, new int[]{11, 15});
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition, depthLimit, false);
+        OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
         Assert.assertEquals(0, analysis.getConflicts().size());
     }
@@ -221,7 +221,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentObjectThreeFieldsOneConflictSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{10, 13}, new int[]{11, 14});
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition, depthLimit, false);
+        OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
@@ -231,7 +231,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentArraysClassFieldSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{10, 13}, new int[]{11, 14});
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition, depthLimit, false);
+        OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
         Assert.assertEquals(2, analysis.getConflicts().size());
     }
@@ -241,7 +241,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentObjectTwoFieldsOneConflictSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{10, 13}, new int[]{11, 14});
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition, depthLimit, false);
+        OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
@@ -251,7 +251,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentObjectTwoFieldsTwoConflictsSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{10, 13}, new int[]{11, 14});
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition, depthLimit, false);
+        OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
         Assert.assertEquals(2, analysis.getConflicts().size());
     }
@@ -261,7 +261,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentSameReturnSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{8}, new int[]{8});
-        InterproceduralOverrideAssignment analysis = new InterproceduralOverrideAssignment(definition, depthLimit, false);
+        OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());
     }

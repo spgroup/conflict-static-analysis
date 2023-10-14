@@ -1,4 +1,4 @@
-package br.unb.cic.analysis.ioa;
+package br.unb.cic.analysis.oa;
 
 import br.unb.cic.analysis.model.Statement;
 

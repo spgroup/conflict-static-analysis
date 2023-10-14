@@ -9,10 +9,10 @@ import br.unb.cic.analysis.dfp.DFPInterProcedural;
 import br.unb.cic.analysis.dfp.DFPIntraProcedural;
 import br.unb.cic.analysis.io.DefaultReader;
 import br.unb.cic.analysis.io.MergeConflictReader;
-import br.unb.cic.analysis.ioa.InterproceduralOverrideAssignment;
 import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.analysis.model.TraversedLine;
+import br.unb.cic.analysis.oa.OverrideAssignment;
 import br.unb.cic.analysis.pdg.PDGAnalysisSemanticConflicts;
 import br.unb.cic.analysis.pdg.PDGIntraProcedural;
 import br.unb.cic.analysis.reachability.ReachabilityAnalysis;
@@ -284,26 +284,26 @@ public class Main {
 
         stopwatch = Stopwatch.createStarted();
 
-        InterproceduralOverrideAssignment interproceduralOverrideAssignment =
-                new InterproceduralOverrideAssignment(definition, depthLimit);
+        OverrideAssignment overrideAssignment =
+                new OverrideAssignment(definition, depthLimit);
 
         List<String> classes = Collections.singletonList(classpath);
         SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classes);
 
-        interproceduralOverrideAssignment.configureEntryPoints();
+        overrideAssignment.configureEntryPoints();
 
-        PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", interproceduralOverrideAssignment));
+        PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", overrideAssignment));
 
         saveExecutionTime("Configure Soot OA Inter");
 
         SootWrapper.applyPackages();
 
-        conflicts.addAll(interproceduralOverrideAssignment.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
+        conflicts.addAll(overrideAssignment.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
         saveExecutionTime("Time to perform OA Inter");
 
-        System.out.println("Visited methods: "+ interproceduralOverrideAssignment.getVisitedMethods());
+        System.out.println("Visited methods: " + overrideAssignment.getVisitedMethods());
 
-        saveVisitedMethods("OA", (interproceduralOverrideAssignment.getVisitedMethods()+""));
+        saveVisitedMethods("OA", (overrideAssignment.getVisitedMethods() + ""));
 
         saveConflictsLog("OA", conflicts.toString());
 

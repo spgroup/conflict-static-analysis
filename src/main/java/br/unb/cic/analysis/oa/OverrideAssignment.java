@@ -1,4 +1,4 @@
-package br.unb.cic.analysis.ioa;
+package br.unb.cic.analysis.oa;
 
 import br.unb.cic.analysis.AbstractAnalysis;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
@@ -17,23 +17,34 @@ import soot.util.Chain;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class InterproceduralOverrideAssignment extends SceneTransformer implements AbstractAnalysis {
+public class OverrideAssignment extends SceneTransformer implements AbstractAnalysis {
     private final int depthLimit;
+    private final Boolean interprocedural;
     private final AbstractMergeConflictDefinition definition;
     private OAConflictReport oaConflictReport;
     private TraversedMethodsWrapper<SootMethod> traversedMethodsWrapper;
     private List<TraversedLine> stacktraceList;
 
-    public InterproceduralOverrideAssignment(AbstractMergeConflictDefinition definition) {
+    public OverrideAssignment(AbstractMergeConflictDefinition definition) {
         this.definition = definition;
         this.depthLimit = 5;
+        this.interprocedural = true;
 
         initDefaultFields();
     }
 
-    public InterproceduralOverrideAssignment(AbstractMergeConflictDefinition definition, int depthLimit) {
+    public OverrideAssignment(AbstractMergeConflictDefinition definition, int depthLimit) {
         this.definition = definition;
         this.depthLimit = depthLimit;
+        this.interprocedural = true;
+
+        initDefaultFields();
+    }
+
+    public OverrideAssignment(AbstractMergeConflictDefinition definition, int depthLimit, Boolean interprocedural) {
+        this.definition = definition;
+        this.depthLimit = depthLimit;
+        this.interprocedural = interprocedural;
 
         initDefaultFields();
     }
@@ -159,7 +170,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
              */
             AssignStmt assignStmt = (AssignStmt) stmt.getUnit();
 
-            if (assignStmt.containsInvokeExpr()) {
+            if (this.interprocedural && assignStmt.containsInvokeExpr()) {
                 return calculateMergedOverrideAssignment(in, stmt);
             }
 
@@ -185,7 +196,7 @@ public class InterproceduralOverrideAssignment extends SceneTransformer implemen
               Yes. InvokeStmt also involves builders. What changes is the corresponding InvokeExpression.
               For builders, InvokeExpression is an instance of InvokeSpecial */
 
-        } else if (stmt.getUnit() instanceof InvokeStmt) {
+        } else if (this.interprocedural && stmt.getUnit() instanceof InvokeStmt) {
             SootMethod sm = ((InvokeStmt) stmt.getUnit()).getInvokeExpr().getMethod();
             if (sm.isConstructor()) {
                 handleConstructor(in, stmt);
