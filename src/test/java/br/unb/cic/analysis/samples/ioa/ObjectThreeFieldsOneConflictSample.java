@@ -1,6 +1,6 @@
 package br.unb.cic.analysis.samples.ioa;
 
-import br.unb.cic.analysis.samples.OverridingAssignmentInstance2;
+import br.unb.cic.analysis.samples.oa.OverridingAssignmentInstance2;
 
 // Conflict: [left, baz():35] --> [right, bar():31]
 public class ObjectThreeFieldsOneConflictSample {
