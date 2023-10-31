@@ -199,7 +199,7 @@ public class OverrideAssignment extends SceneTransformer implements AbstractAnal
         } else if (this.interprocedural && stmt.getUnit() instanceof InvokeStmt) {
             SootMethod sm = ((InvokeStmt) stmt.getUnit()).getInvokeExpr().getMethod();
             if (sm.isConstructor()) {
-                handleConstructor(in, stmt);
+                handleConstructor(in, sm, stmt.getType());
             }
             return calculateMergedOverrideAssignment(in, stmt);
         }
@@ -268,7 +268,13 @@ public class OverrideAssignment extends SceneTransformer implements AbstractAnal
                     return isSameArrayRef(stmtInAbs, stmtInFlow, valueInAbs, valueInFlow);
                 } else if (valueInAbs instanceof StaticFieldRef && valueInFlow instanceof StaticFieldRef) {
                     return isSameStaticFieldRef(valueInAbs, valueInFlow);
+                } else if (valueInAbs instanceof ArrayRef && valueInFlow instanceof Local) {
+                    if (!stmtInAbs.getSootMethod().equals(stmtInFlow.getSootMethod())) {
+                        return false;
+                    }
+                    return valueInAbs.toString().contains(valueInFlow.toString());
                 }
+
             }
         }
         return false;
@@ -307,6 +313,9 @@ public class OverrideAssignment extends SceneTransformer implements AbstractAnal
         if (stmtInAbs.getPointTo() != null) {
             if (stmtInFlow.getPointTo() == null) {
                 getPointToFromBase(((ArrayRef) valueInFlow).getBase(), stmtInFlow);
+            }
+            if (stmtInAbs.getPointTo().isEmpty() && stmtInFlow.getPointTo().isEmpty()) {
+                return valueInAbs.toString().equals(valueInFlow.toString());
             }
             return stmtInAbs.getPointTo().hasNonEmptyIntersection(stmtInFlow.getPointTo());
         }
@@ -354,11 +363,12 @@ public class OverrideAssignment extends SceneTransformer implements AbstractAnal
         in.remove(stmt);
     }
 
-    private void handleConstructor(OverrideAssignmentAbstraction in, Statement stmt) {
-        Chain<SootField> sootFieldsInClass = stmt.getSootMethod().getDeclaringClass().getFields();
+    private void handleConstructor(OverrideAssignmentAbstraction in, SootMethod sm, Statement.Type type) {
+        Chain<SootField> sootFieldsInClass = sm.getDeclaringClass().getFields();
+        //Chain<SootField> sootFieldsInClass = stmt.getSootMethod().getDeclaringClass().getFields();
         // Attributes declared as final in Java can only have a single assignment, which means that their value cannot be changed after they are defined during their initialization.
         List<SootField> nonFinalFields = filterNonFinalFieldsInClass(sootFieldsInClass);
-        nonFinalFields.forEach(sootField -> transformFieldsIntoStatements(in, stmt, sootField));
+        nonFinalFields.forEach(sootField -> transformFieldsIntoStatements(in, sm, type, sootField));
     }
 
     private List<SootField> filterNonFinalFieldsInClass(Chain<SootField> sootFieldsInClass) {
@@ -371,7 +381,7 @@ public class OverrideAssignment extends SceneTransformer implements AbstractAnal
         return nonFinalFields;
     }
 
-    private void transformFieldsIntoStatements(OverrideAssignmentAbstraction in, Statement statement, SootField sootField) {
+    private void transformFieldsIntoStatements(OverrideAssignmentAbstraction in, SootMethod sm, Statement.Type type, SootField sootField) {
         String declaringClassShortName = sootField.getDeclaringClass().getShortName();
         JimpleLocal base = new JimpleLocal(declaringClassShortName, RefType.v(sootField.getDeclaringClass()));
         SootFieldRef fieldRef = Scene.v().makeFieldRef(sootField.getDeclaringClass(), sootField.getName(), sootField.getType(), sootField.isStatic());
@@ -379,7 +389,7 @@ public class OverrideAssignment extends SceneTransformer implements AbstractAnal
         Value value = createFieldValueReference(base, fieldRef);
         Unit unit = new JAssignStmt(value, NullConstant.v());
 
-        Statement stmt = getStatementAssociatedWithUnit(statement.getSootMethod(), unit, statement.getType());
+        Statement stmt = getStatementAssociatedWithUnit(sm, unit, type);
         if (isTagged(stmt.getType(), stmt.getUnit())) {
             runAnalysisWithTaggedUnit(in, stmt);
         } else {
