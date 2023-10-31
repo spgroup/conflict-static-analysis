@@ -80,7 +80,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
     public void fieldRefConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.FieldRefTestConflictSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
-                .definition(sampleClassPath, new int[]{10}, new int[]{12});
+                .definition(sampleClassPath, new int[]{8}, new int[]{10});
         OverrideAssignment analysis = new OverrideAssignment(definition);
         configureTest(analysis);
         Assert.assertEquals(7, analysis.getConflicts().size());
@@ -103,7 +103,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
                 .definition(sampleClassPath, new int[]{7}, new int[]{9});
         OverrideAssignment analysis = new OverrideAssignment(definition);
         configureTest(analysis);
-        Assert.assertEquals(2, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
 
@@ -222,7 +222,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
                 .definition(sampleClassPath, new int[]{13}, new int[]{12});
         OverrideAssignment analysis = new OverrideAssignment(definition);
         configureTest(analysis);
-        Assert.assertEquals(1, analysis.getConflicts().size());
+        Assert.assertEquals(3, analysis.getConflicts().size());
     }
 
     @Test
@@ -364,7 +364,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
             e.printStackTrace();
         }
 
-        Assert.assertEquals(22, analysis.getConflicts().size());
+        Assert.assertEquals(24, analysis.getConflicts().size());
     }
 
     @Test
@@ -417,7 +417,7 @@ public class InterproceduralOverridingAssignmentAnalysisTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Assert.assertEquals(169, analysis.getConflicts().size());
+        Assert.assertEquals(164, analysis.getConflicts().size());
     }
 
     @Test

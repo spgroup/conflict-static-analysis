@@ -8,9 +8,9 @@ public class OverridingAssignmentArraysCompleteOverlaySample {
         int[] arr = {0,0,0,0,0};
 
         arr[4] = 10;
-        arr[5] = 10; //left
+        arr[5] = 10; //left ARRAYREF
 
-        arr = aux; //right
+        arr = aux; //right LOCAL
 
         System.out.println(arr[5]);
     }

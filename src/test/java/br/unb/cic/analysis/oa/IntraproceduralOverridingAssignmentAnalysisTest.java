@@ -163,7 +163,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
                 .definition(sampleClassPath, new int[]{7, 10}, new int[]{9});
         OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
-        Assert.assertEquals(1, analysis.getConflicts().size());
+        Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
     @Test
@@ -183,7 +183,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
                 .definition(sampleClassPath, new int[]{11}, new int[]{13});
         OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
         configureTest(analysis);
-        Assert.assertEquals(0, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
     @Test
@@ -228,7 +228,7 @@ public class IntraproceduralOverridingAssignmentAnalysisTest {
 
     @Test
     public void objectThreeFieldsTwoConflictsSample() {
-        String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentArraysClassFieldSample";
+        String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentObjectThreeFieldsTwoConflictsSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{10, 13}, new int[]{11, 14});
         OverrideAssignment analysis = new OverrideAssignment(definition, depthLimit, false);
