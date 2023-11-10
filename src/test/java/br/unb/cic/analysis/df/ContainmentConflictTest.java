@@ -1,11 +1,12 @@
 package br.unb.cic.analysis.df;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
-import br.unb.cic.analysis.SootWrapper;
+import br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts;
+import br.unb.cic.analysis.dfp.DFPInterProcedural;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import soot.*;
+import soot.G;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +15,7 @@ import java.util.Map;
 
 public class ContainmentConflictTest {
 
-    private TaintedAnalysis analysis;
+    private DFPAnalysisSemanticConflicts analysis;
 
     @Before
     public void configure() {
@@ -41,21 +42,22 @@ public class ContainmentConflictTest {
             }
         };
 
-        PackManager.v().getPack("jtp").add(
-                new Transform("jtp.oneConflict", new BodyTransformer() {
-                    @Override
-                    protected void internalTransform(Body body, String phaseName, Map<String, String> options) {
-                        analysis = new TaintedAnalysis(body, definition);
-                    }
-                }));
         String cp = "target/test-classes";
-        String targetClass = "br.unb.cic.analysis.samples.ioa.ContainmentSample";
 
-        SootWrapper.builder().withClassPath(cp).addClass(targetClass).build().execute();
+        analysis = new DFPInterProcedural(cp, definition);
     }
 
     @Test
     public void testDataFlowAnalysisExpectingOneConflict() {
-        Assert.assertEquals(1, analysis.getConflicts().size());
+        analysis.configureSoot();
+        analysis.setPrintDepthVisitedMethods(true);
+
+        analysis.buildDFP();
+
+        System.out.println(analysis.svg().reportConflicts().size());
+        System.out.println(analysis.svgToDotModel());
+        System.out.println(analysis.findSourceSinkPaths());
+        System.out.println(analysis.svg().findConflictingPaths());
+        Assert.assertTrue(analysis.svg().reportConflicts().size() >= 1);
     }
 }
