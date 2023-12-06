@@ -31,13 +31,14 @@ public class OverrideAssignmentAbstraction implements Cloneable {
         }
     }
 
+    // If Statement is base, remove from both abstractions.
     public void remove(Statement stmt) {
         List<Statement> abstraction = getListForType(stmt.getType());
         if (abstraction != null) {
             abstraction.remove(stmt);
         } else {
-            getLeftAbstraction().remove(stmt);
-            getRightAbstraction().remove(stmt);
+            leftAbstraction.remove(stmt);
+            rightAbstraction.remove(stmt);
         }
 
     }
@@ -45,8 +46,8 @@ public class OverrideAssignmentAbstraction implements Cloneable {
 
     public List<List<Statement>> getLists() {
         List<List<Statement>> lists = new ArrayList<>();
-        lists.add(getLeftAbstraction());
-        lists.add(getRightAbstraction());
+        lists.add(leftAbstraction);
+        lists.add(rightAbstraction);
         return lists;
     }
 
@@ -82,15 +83,15 @@ public class OverrideAssignmentAbstraction implements Cloneable {
 
         // Percorre a lista1 da outra instância e adiciona elementos únicos à lista1 atual
         for (Statement element : otherList1) {
-            if (!this.getLeftAbstraction().contains(element)) {
-                this.getLeftAbstraction().add(element);
+            if (!this.leftAbstraction.contains(element)) {
+                this.leftAbstraction.add(element);
             }
         }
 
         // Percorre a lista2 da outra instância e adiciona elementos únicos à lista2 atual
         for (Statement element : otherList2) {
-            if (!this.getRightAbstraction().contains(element)) {
-                this.getRightAbstraction().add(element);
+            if (!this.rightAbstraction.contains(element)) {
+                this.rightAbstraction.add(element);
             }
         }
     }

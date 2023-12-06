@@ -11,7 +11,7 @@ import java.util.Set;
 public class TraversedMethodsWrapper<E> {
 
     private final List<E> traversedMethods;
-    private int visitedMethods = 0;
+    private int visitedMethodsCount = 0;
 
     public TraversedMethodsWrapper() {
         this.traversedMethods = new ArrayList<>();
@@ -31,11 +31,11 @@ public class TraversedMethodsWrapper<E> {
 
     public void add(E element) {
         this.traversedMethods.add(element);
-        this.visitedMethods++;
+        this.visitedMethodsCount++;
     }
 
-    public int getVisitedMethods() {
-        return visitedMethods;
+    public int getVisitedMethodsCount() {
+        return visitedMethodsCount;
     }
 
     public void remove(E element) {

@@ -305,7 +305,7 @@ public class Main {
         conflicts.addAll(overrideAssignment.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
         saveExecutionTime("Time to perform OA" + (interprocedural ? "interprocedural" : "intraprocedural"));
 
-        int visitedMethods = overrideAssignment.getVisitedMethods();
+        int visitedMethods = overrideAssignment.getVisitedMethodsCount();
         System.out.println("OA" + (interprocedural ? "interprocedural" : "intraprocedural") + "Visited methods: " + visitedMethods);
 
         saveVisitedMethods("OA" + (interprocedural ? "interprocedural" : "intraprocedural"), (visitedMethods + ""));

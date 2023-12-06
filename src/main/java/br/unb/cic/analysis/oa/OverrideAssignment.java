@@ -124,7 +124,7 @@ public class OverrideAssignment extends SceneTransformer implements AbstractAnal
 
         this.traversedMethodsWrapper.add(sootMethod);
 
-        //System.out.println( sootMethod + " - " + this.traversedMethodsWrapper.size());
+        System.out.println(sootMethod + " - " + this.traversedMethodsWrapper.size());
         Body body = definition.retrieveActiveBodySafely(sootMethod);
 
         if (body != null) {
@@ -292,16 +292,16 @@ public class OverrideAssignment extends SceneTransformer implements AbstractAnal
         InstanceFieldRef abstractFieldRef = (InstanceFieldRef) valueInAbs;
         InstanceFieldRef flowFieldRef = (InstanceFieldRef) valueInFlow;
 
-        if (stmtInAbs.getPointTo() != null && stmtInFlow.getPointTo() == null) {
+        if (stmtInAbs.getPointsTo() != null && stmtInFlow.getPointsTo() == null) {
             getPointToFromBase(flowFieldRef.getBase(), stmtInFlow);
         }
-        return stmtInAbs.getPointTo() != null
+        return stmtInAbs.getPointsTo() != null
                 && areFieldReferencesEqual(stmtInAbs, stmtInFlow, abstractFieldRef, flowFieldRef);
     }
 
 
     private static boolean areFieldReferencesEqual(Statement stmtInAbs, Statement stmtInFlow, InstanceFieldRef abstractFieldRef, InstanceFieldRef flowFieldRef) {
-        boolean pointToIntersection = stmtInAbs.getPointTo().hasNonEmptyIntersection(stmtInFlow.getPointTo());
+        boolean pointToIntersection = stmtInAbs.getPointsTo().hasNonEmptyIntersection(stmtInFlow.getPointsTo());
         boolean typesEqual = abstractFieldRef.getType().equals(flowFieldRef.getType());
         boolean fieldRefsEqual = abstractFieldRef.getFieldRef().equals(flowFieldRef.getFieldRef());
 
@@ -310,14 +310,14 @@ public class OverrideAssignment extends SceneTransformer implements AbstractAnal
 
 
     private boolean isSameArrayRef(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
-        if (stmtInAbs.getPointTo() != null) {
-            if (stmtInFlow.getPointTo() == null) {
+        if (stmtInAbs.getPointsTo() != null) {
+            if (stmtInFlow.getPointsTo() == null) {
                 getPointToFromBase(((ArrayRef) valueInFlow).getBase(), stmtInFlow);
             }
-            if (stmtInAbs.getPointTo().isEmpty() && stmtInFlow.getPointTo().isEmpty()) {
+            if (stmtInAbs.getPointsTo().isEmpty() && stmtInFlow.getPointsTo().isEmpty()) {
                 return valueInAbs.toString().equals(valueInFlow.toString());
             }
-            return stmtInAbs.getPointTo().hasNonEmptyIntersection(stmtInFlow.getPointTo());
+            return stmtInAbs.getPointsTo().hasNonEmptyIntersection(stmtInFlow.getPointsTo());
         }
         return false;
     }
@@ -350,13 +350,13 @@ public class OverrideAssignment extends SceneTransformer implements AbstractAnal
     private static void getPointToFromBase(Value value, Statement stmt) {
         PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
         PointsToSet points = pointsToAnalysis.reachingObjects((Local) value);
-        stmt.setPointTo(points);
+        stmt.setPointsTo(points);
     }
 
     private static void getPointToFromStaticField(SootField fieldRef, Statement stmt) {
         PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
         PointsToSet points = pointsToAnalysis.reachingObjects(fieldRef);
-        stmt.setPointTo(points);
+        stmt.setPointsTo(points);
     }
 
     private void kill(OverrideAssignmentAbstraction in, Statement stmt) {
@@ -487,7 +487,7 @@ public class OverrideAssignment extends SceneTransformer implements AbstractAnal
         return definition.getSourceStatements().stream().filter(s -> s.getUnit().equals(u)).findFirst().get();
     }
 
-    public int getVisitedMethods(){
-        return this.traversedMethodsWrapper.getVisitedMethods();
+    public int getVisitedMethodsCount() {
+        return this.traversedMethodsWrapper.getVisitedMethodsCount();
     }
 }

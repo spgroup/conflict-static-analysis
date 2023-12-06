@@ -39,7 +39,7 @@ public class Statement {
 	private Type type;
 	private Integer sourceCodeLineNumber;
 	private List<TraversedLine> traversedLine;
-	private PointsToSet pointTo;
+	private PointsToSet pointsTo;
 
 	Statement(SootClass sootClass, SootMethod sootMethod, Unit unit, Type type, Integer sourceCodeLineNumber) {
 		this.sootClass = sootClass;
@@ -66,8 +66,8 @@ public class Statement {
 		return type;
 	}
 
-	public PointsToSet getPointTo() {
-		return pointTo;
+	public PointsToSet getPointsTo() {
+		return pointsTo;
 	}
 
 	public Integer getSourceCodeLineNumber() {
@@ -78,8 +78,8 @@ public class Statement {
 		return traversedLine;
 	}
 
-	public void setPointTo(PointsToSet pointTo) {
-		this.pointTo = pointTo;
+	public void setPointsTo(PointsToSet pointsTo) {
+		this.pointsTo = pointsTo;
 	}
 
 	public void setTraversedLine(List<TraversedLine> traversedLine) {
