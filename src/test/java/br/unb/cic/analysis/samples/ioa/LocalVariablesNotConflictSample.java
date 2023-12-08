@@ -6,6 +6,7 @@ public class LocalVariablesNotConflictSample {
         LocalVariablesNotConflictSample m = new LocalVariablesNotConflictSample();
 
         m.foo(); // LEFT
+        int b = 1;
         m.bar(); // RIGHT
     }
 

@@ -1,6 +1,6 @@
 package br.unb.cic.analysis.samples;
 
-class Employee {
+public class Employee {
 
     public String name = "Name";
     public int salary = 20;

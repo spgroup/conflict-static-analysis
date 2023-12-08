@@ -1,9 +1,6 @@
 package br.unb.cic.analysis.model;
 
-import soot.SootClass;
-import soot.SootMethod;
-import soot.Unit;
-import soot.ValueBox;
+import soot.*;
 import soot.jimple.AssignStmt;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
@@ -21,7 +18,7 @@ import java.util.Objects;
  */
 public class Statement {
 	public enum Type {
-		SOURCE, 
+		SOURCE,
 		SINK,
 		IN_BETWEEN,
 		SOURCE_SINK
@@ -42,6 +39,7 @@ public class Statement {
 	private Type type;
 	private Integer sourceCodeLineNumber;
 	private List<TraversedLine> traversedLine;
+	private PointsToSet pointsTo;
 
 	Statement(SootClass sootClass, SootMethod sootMethod, Unit unit, Type type, Integer sourceCodeLineNumber) {
 		this.sootClass = sootClass;
@@ -68,12 +66,20 @@ public class Statement {
 		return type;
 	}
 
+	public PointsToSet getPointsTo() {
+		return pointsTo;
+	}
+
 	public Integer getSourceCodeLineNumber() {
 		return sourceCodeLineNumber;
 	}
 
 	public List<TraversedLine> getTraversedLine() {
 		return traversedLine;
+	}
+
+	public void setPointsTo(PointsToSet pointsTo) {
+		this.pointsTo = pointsTo;
 	}
 
 	public void setTraversedLine(List<TraversedLine> traversedLine) {
@@ -137,7 +143,7 @@ public class Statement {
 			if (expr instanceof InstanceInvokeExpr) {
 				return (InstanceInvokeExpr) expr;
 			}
- 		}
+		}
 		for (ValueBox use : this.unit.getUseBoxes()) {
 			if (use.getValue() instanceof InstanceInvokeExpr) {
 				return (InstanceInvokeExpr) use.getValue();

@@ -9,6 +9,7 @@ public class ArrayConstantSample {
         ArrayConstantSample m = new ArrayConstantSample();
         m.arr = new int[]{0, 0, 0, 0, 0};
         m.foo(3); // LEFT
+        int b = 0;
         m.bar(2); // RIGHT
     }
 
