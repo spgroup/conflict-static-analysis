@@ -11,9 +11,10 @@ public class DFPBaseSample {
     }
 
     public void cleanText(){
-        this.normalizeWhiteSpace(); //Left
-        this.removeComments();
-        this.removeDuplicateWords(); //Right
+        DFPBaseSample inst = new DFPBaseSample("the  the dog");
+        inst.normalizeWhiteSpace(); //Left
+        inst.removeComments();
+        inst.removeDuplicateWords(); //Right
     }
 
     private void normalizeWhiteSpace(){
