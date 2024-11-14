@@ -111,7 +111,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
                 this.stacktraceList.remove(traversedLine);
             }
         }
-
+        in.cleanLocalVariable();
         this.traversedMethodsWrapper.remove(sootMethod);
         return in;
     }
@@ -235,10 +235,11 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         }
         String normalizedValueInAbs = normalizeValue(valueInAbs);
         String normalizedValueInFlow = normalizeValue(valueInFlow);
-        boolean isSameUseBox = stmtInAbs.getUnit().getUseBoxes().equals(stmtInFlow.getUnit().getUseBoxes());
+        //boolean isSameUseBox = stmtInAbs.getUnit().getUseBoxes().equals(stmtInFlow.getUnit().getUseBoxes());
         boolean isSameValue = normalizedValueInAbs.equals(normalizedValueInFlow);
+        //boolean isRealVariable = !normalizedValueInAbs.contains("$stack") && !normalizedValueInFlow.contains("$stack");
 
-        return isSameValue && !isSameUseBox;
+        return isSameValue;
     }
 
     private String normalizeValue(Value value) {

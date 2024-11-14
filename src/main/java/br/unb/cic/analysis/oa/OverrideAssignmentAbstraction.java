@@ -1,6 +1,9 @@
 package br.unb.cic.analysis.oa;
 
 import br.unb.cic.analysis.model.Statement;
+import soot.Local;
+import soot.Value;
+import soot.ValueBox;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +26,45 @@ public class OverrideAssignmentAbstraction implements Cloneable {
         this.leftAbstraction = leftAbstraction;
         this.rightAbstraction = rightAbstraction;
     }
+
+    public void cleanLocalVariable() {
+        List<Statement> newLeftAbstraction = new ArrayList<>();
+        List<Statement> newRightAbstraction = new ArrayList<>();
+
+
+        for (Statement statement : this.getLeftAbstraction()) {
+            boolean containsLocal = false;
+            for (ValueBox valueBox : statement.getUnit().getDefBoxes()) {
+                Value value = valueBox.getValue();
+                if (value instanceof Local) {
+                    containsLocal = true;
+                    break;
+                }
+            }
+            if (!containsLocal) {
+                newLeftAbstraction.add(statement);
+            }
+        }
+
+
+        for (Statement statement : this.getRightAbstraction()) {
+            boolean containsLocal = false;
+            for (ValueBox valueBox : statement.getUnit().getDefBoxes()) {
+                Value value = valueBox.getValue();
+                if (value instanceof Local) {
+                    containsLocal = true;
+                    break;
+                }
+            }
+            if (!containsLocal) {
+                newRightAbstraction.add(statement);
+            }
+        }
+
+        this.setLeftAbstraction(newLeftAbstraction);
+        this.setRightAbstraction(newRightAbstraction);
+    }
+
 
     public void add(Statement stmt) {
         List<Statement> abstraction = getListForType(stmt.getType());
