@@ -233,9 +233,16 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         if (!stmtInAbs.getSootMethod().equals(stmtInFlow.getSootMethod())) {
             return false;
         }
+        String normalizedValueInAbs = normalizeValue(valueInAbs);
+        String normalizedValueInFlow = normalizeValue(valueInFlow);
         boolean isSameUseBox = stmtInAbs.getUnit().getUseBoxes().equals(stmtInFlow.getUnit().getUseBoxes());
-        boolean isSameValue = valueInAbs.toString().equals(valueInFlow.toString());
+        boolean isSameValue = normalizedValueInAbs.equals(normalizedValueInFlow);
+
         return isSameValue && !isSameUseBox;
+    }
+
+    private String normalizeValue(Value value) {
+        return value.toString().replaceAll("^(\\w+)#.*$", "$1");
     }
 
     protected boolean isSameFieldRef(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {

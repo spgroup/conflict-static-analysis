@@ -97,7 +97,7 @@ public class OAInterWithoutPointerAnalysisTest {
         System.out.println("----------------------------");
     }
 
-    @Ignore
+
     @Test
     public void localConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.LocalTestConflictSample";
