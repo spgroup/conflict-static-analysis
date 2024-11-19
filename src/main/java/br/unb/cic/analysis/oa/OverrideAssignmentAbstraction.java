@@ -2,8 +2,9 @@ package br.unb.cic.analysis.oa;
 
 import br.unb.cic.analysis.model.Statement;
 import soot.Local;
-import soot.Value;
+import soot.SootMethod;
 import soot.ValueBox;
+import soot.jimple.ArrayRef;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,42 +28,34 @@ public class OverrideAssignmentAbstraction implements Cloneable {
         this.rightAbstraction = rightAbstraction;
     }
 
-    public void cleanLocalVariable() {
-        List<Statement> newLeftAbstraction = new ArrayList<>();
-        List<Statement> newRightAbstraction = new ArrayList<>();
+    public void cleanLocalVariable(SootMethod sootMethod) {
+        this.setLeftAbstraction(filterAbstraction(this.getLeftAbstraction(), sootMethod));
+        this.setRightAbstraction(filterAbstraction(this.getRightAbstraction(), sootMethod));
+    }
 
-
-        for (Statement statement : this.getLeftAbstraction()) {
-            boolean containsLocal = false;
-            for (ValueBox valueBox : statement.getUnit().getDefBoxes()) {
-                Value value = valueBox.getValue();
-                if (value instanceof Local) {
-                    containsLocal = true;
-                    break;
-                }
-            }
-            if (!containsLocal) {
-                newLeftAbstraction.add(statement);
+    private List<Statement> filterAbstraction(List<Statement> abstraction, SootMethod sootMethod) {
+        List<Statement> filteredAbstraction = new ArrayList<>();
+        for (Statement statement : abstraction) {
+            boolean isLocal = containsLocalVariable(statement);
+            boolean isSameMethod = isSameSootMethod(sootMethod, statement);
+            if (!isLocal || !isSameMethod) {
+                filteredAbstraction.add(statement);
             }
         }
+        return filteredAbstraction;
+    }
 
-
-        for (Statement statement : this.getRightAbstraction()) {
-            boolean containsLocal = false;
-            for (ValueBox valueBox : statement.getUnit().getDefBoxes()) {
-                Value value = valueBox.getValue();
-                if (value instanceof Local) {
-                    containsLocal = true;
-                    break;
-                }
-            }
-            if (!containsLocal) {
-                newRightAbstraction.add(statement);
+    private boolean containsLocalVariable(Statement statement) {
+        for (ValueBox valueBox : statement.getUnit().getDefBoxes()) {
+            if (valueBox.getValue() instanceof Local || valueBox.getValue() instanceof ArrayRef) {
+                return true;
             }
         }
+        return false;
+    }
 
-        this.setLeftAbstraction(newLeftAbstraction);
-        this.setRightAbstraction(newRightAbstraction);
+    private static boolean isSameSootMethod(SootMethod sootMethod, Statement statement) {
+        return statement.getSootMethod().equals(sootMethod);
     }
 
 

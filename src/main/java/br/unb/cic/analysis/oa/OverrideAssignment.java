@@ -111,7 +111,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
                 this.stacktraceList.remove(traversedLine);
             }
         }
-        in.cleanLocalVariable();
+        in.cleanLocalVariable(sootMethod);
         this.traversedMethodsWrapper.remove(sootMethod);
         return in;
     }
@@ -120,8 +120,22 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         boolean hasRelativeBeenTraversed = this.traversedMethodsWrapper.hasRelativeBeenTraversed(sootMethod);
         boolean isSizeGreaterThanDepthLimit = this.traversedMethodsWrapper.size() >= this.depthLimit;
         boolean isPhantom = sootMethod.isPhantom();
+        boolean isMethodInObjectClass = isMethodDefinedInObject(sootMethod);
 
-        return hasRelativeBeenTraversed || isSizeGreaterThanDepthLimit || isPhantom;
+        return hasRelativeBeenTraversed || isSizeGreaterThanDepthLimit || isPhantom || isMethodInObjectClass;
+    }
+
+    private boolean isMethodDefinedInObject(SootMethod sootMethod) {
+        String methodName = sootMethod.getName();
+        return (
+                methodName.equals("toString") ||
+                        methodName.equals("hashCode") ||
+                        methodName.equals("equals") ||
+                        methodName.equals("getClass") ||
+                        methodName.equals("notify") ||
+                        methodName.equals("notifyAll") ||
+                        methodName.equals("wait")
+        );
     }
 
     private boolean isTagged(Statement.Type flowChangeTag, Unit unit) {
