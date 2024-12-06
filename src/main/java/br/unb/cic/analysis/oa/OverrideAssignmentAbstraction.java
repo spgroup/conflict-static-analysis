@@ -1,10 +1,8 @@
 package br.unb.cic.analysis.oa;
 
 import br.unb.cic.analysis.model.Statement;
+import soot.Body;
 import soot.Local;
-import soot.SootMethod;
-import soot.ValueBox;
-import soot.jimple.ArrayRef;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,34 +26,23 @@ public class OverrideAssignmentAbstraction implements Cloneable {
         this.rightAbstraction = rightAbstraction;
     }
 
-    public void cleanLocalVariable(SootMethod sootMethod) {
-        this.setLeftAbstraction(filterAbstraction(this.getLeftAbstraction(), sootMethod));
-        this.setRightAbstraction(filterAbstraction(this.getRightAbstraction(), sootMethod));
-    }
-
-    private List<Statement> filterAbstraction(List<Statement> abstraction, SootMethod sootMethod) {
-        List<Statement> filteredAbstraction = new ArrayList<>();
-        for (Statement statement : abstraction) {
-            boolean isLocal = containsLocalVariable(statement);
-            boolean isSameMethod = isSameSootMethod(sootMethod, statement);
-            if (!isLocal || !isSameMethod) {
-                filteredAbstraction.add(statement);
-            }
+    public void cleanLocalVariable(Body body) {
+        for (Local local : body.getLocals()) {
+            getLeftAbstraction().remove(filterStatementByLocal(getLeftAbstraction(), local));
+            getRightAbstraction().remove(filterStatementByLocal(getRightAbstraction(), local));
         }
-        return filteredAbstraction;
+
     }
 
-    private boolean containsLocalVariable(Statement statement) {
-        for (ValueBox valueBox : statement.getUnit().getDefBoxes()) {
-            if (valueBox.getValue() instanceof Local || valueBox.getValue() instanceof ArrayRef) {
-                return true;
+    private Statement filterStatementByLocal(List<Statement> abs, Local local) {
+        for (Statement s : abs) {
+
+            if (s.getUnit().getDefBoxes().get(0).getValue().equals(local)) {
+                return s;
             }
-        }
-        return false;
-    }
 
-    private static boolean isSameSootMethod(SootMethod sootMethod, Statement statement) {
-        return statement.getSootMethod().equals(sootMethod);
+        }
+        return null;
     }
 
 

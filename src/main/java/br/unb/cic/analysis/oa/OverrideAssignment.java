@@ -110,8 +110,9 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
                 in = runAnalysis(in, stmt);
                 this.stacktraceList.remove(traversedLine);
             }
+            in.cleanLocalVariable(body);
         }
-        in.cleanLocalVariable(sootMethod);
+
         this.traversedMethodsWrapper.remove(sootMethod);
         return in;
     }
