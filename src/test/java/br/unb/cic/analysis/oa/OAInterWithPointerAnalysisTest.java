@@ -984,6 +984,16 @@ public class OAInterWithPointerAnalysisTest {
     }
 
     @Test
+    public void callGraphFromMainTest() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.CallGraphFromMainSample.Text";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{11}, new int[]{13});
+        OverrideAssignment analysis = new OverrideAssignmentWithPointerAnalysis(definition);
+        configureTest(analysis);
+        Assert.assertEquals(0, analysis.getConflicts().size());
+    }
+
+    @Test
     public void baseConflictTwoEntrypointsTest() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.BaseConflictTwoEntrypointsSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
