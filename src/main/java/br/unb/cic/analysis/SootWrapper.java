@@ -90,20 +90,9 @@ public class SootWrapper {
         System.out.println("CG configuration init.");
 
         if (usePointsToAnalysis) {
-            //Enable Spark
-            HashMap<String, String> opt = new HashMap<String, String>();
-            //opt.put("propagator","worklist");
-            //opt.put("simple-edges-bidirectional","false");
-            opt.put("on-fly-cg", "true");
-            //opt.put("set-impl","double");
-            //opt.put("double-set-old","hybrid");
-            //opt.put("double-set-new","hybrid");
-            //opt.put("pre_jimplify", "true");
-            SparkTransformer.v().transform("", opt);
-
-            // Configurações para análise de points-to precisa
-            Options.v().setPhaseOption("cg.spark", "on"); // Ativa o Spark
-            Options.v().setPhaseOption("cg.spark", "enabled:true"); // Habilita o Spark
+            //enableRtaCallGraph();
+            enableSparkCallGraph();
+            //enableVtaCallGraph();
         } else {
             // Configurações para análise conservadora (CHA)
             //enableCHACallGraph();
@@ -123,6 +112,33 @@ public class SootWrapper {
 
     private static void enableCHACallGraph() {
         CHATransformer.v().transform();
+    }
+
+    private static void enableVtaCallGraph() {
+        Options.v().setPhaseOption("cg", "vta");
+
+    }
+
+    private static void enableRtaCallGraph() {
+        Options.v().setPhaseOption("cg", "rta");
+
+    }
+
+    private static void enableSparkCallGraph() {
+        //Enable Spark
+        HashMap<String, String> opt = new HashMap<String, String>();
+        //opt.put("propagator","worklist");
+        //opt.put("simple-edges-bidirectional","false");
+        opt.put("on-fly-cg", "true");
+        //opt.put("set-impl","double");
+        //opt.put("double-set-old","hybrid");
+        //opt.put("double-set-new","hybrid");
+        //opt.put("pre_jimplify", "true");
+        SparkTransformer.v().transform("", opt);
+
+        // Configurações para análise de points-to precisa
+        //Options.v().setPhaseOption("cg.spark", "on"); // Ativa o Spark
+        Options.v().setPhaseOption("cg.spark", "enabled:true"); // Habilita o Spark
     }
 
     private static List<String> configurePackagesWithCallGraph() {

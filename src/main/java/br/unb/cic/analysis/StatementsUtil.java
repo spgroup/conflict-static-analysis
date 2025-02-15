@@ -2,6 +2,7 @@ package br.unb.cic.analysis;
 
 import br.unb.cic.analysis.model.Statement;
 import scala.collection.JavaConverters;
+import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Value;
@@ -23,6 +24,43 @@ public class StatementsUtil {
         this.entrypoints = entrypoints;
     }
 
+    public static List<SootMethod> findMainMethods() {
+        List<SootMethod> mainMethods = new ArrayList<>();
+
+        for (SootClass sootClass : Scene.v().getApplicationClasses()) {
+            for (SootMethod method : sootClass.getMethods()) {
+                if (isMainMethod(method)) {
+                    mainMethods.add(method);
+                }
+            }
+        }
+
+        return mainMethods;
+    }
+
+    private static boolean isMainMethod(SootMethod method) {
+
+        return method.getName().equals("main")
+                && method.isStatic()
+                && method.getReturnType().toString().equals("void")
+                && method.getParameterCount() == 1
+                && method.getParameterType(0).toString().equals("java.lang.String[]");
+    }
+
+    public static List<SootMethod> findPublicMethods() {
+        List<SootMethod> publicMethods = new ArrayList<>();
+
+        for (SootClass sootClass : Scene.v().getApplicationClasses()) {
+            for (SootMethod method : sootClass.getMethods()) {
+
+                publicMethods.add(method);
+
+            }
+        }
+
+        return publicMethods;
+    }
+
     /**
      * Combines all source and sink statements into a single list.
      *
@@ -42,7 +80,7 @@ public class StatementsUtil {
      * @return A Scala list of SootMethod instances representing the entry points.
      */
     private scala.collection.immutable.List<SootMethod> retrieveEntryPointsFromSource() {
-        SootMethod traversedMethod = getTraversedMethod();
+        SootMethod traversedMethod = getCallRealisticRunMethod();
 
         if (traversedMethod != null) {
             return JavaConverters.asScalaBuffer(Collections.singletonList(traversedMethod)).toList();
@@ -86,7 +124,20 @@ public class StatementsUtil {
         }
     }
 
-    private SootMethod getTraversedMethod() {
+    public final scala.collection.immutable.List<SootMethod> getCallgraphEntryPoints() {
+        List<SootMethod> mainMethods = findMainMethods();
+
+        if (mainMethods.isEmpty()) {
+            //throw new RuntimeException("Nenhum método 'main' foi encontrado no projeto.");
+            mainMethods = findPublicMethods();
+        }
+        //mainMethods.addAll(new ArrayList<>(JavaConverters.seqAsJavaList(getEntryPoints())));
+
+
+        return JavaConverters.asScalaBuffer(mainMethods).toList();
+    }
+
+    private SootMethod getCallRealisticRunMethod() {
         try {
             SootClass sootClass = this.definition.getSourceStatements().get(0).getSootClass();
             return sootClass.getMethodByName("callRealisticRun");

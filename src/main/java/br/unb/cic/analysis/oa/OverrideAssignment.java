@@ -18,16 +18,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class OverrideAssignment extends SceneTransformer implements AbstractAnalysis {
-    private int depthLimit;
     private final Boolean interprocedural;
+    private int depthLimit;
     private OAConflictReport oaConflictReport;
     private TraversedMethodsWrapper<SootMethod> traversedMethodsWrapper;
     private List<TraversedLine> stacktraceList;
     private StatementsUtil statementsUtils;
-
-    protected abstract void gen(OverrideAssignmentAbstraction in, Statement stmt);
-
-    protected abstract boolean isSameStateElement(Statement stmtInAbs, Statement stmtInFlow);
 
     public OverrideAssignment(AbstractMergeConflictDefinition definition, int depthLimit, Boolean interprocedural, List<String> entrypoints) {
         this.depthLimit = depthLimit;
@@ -44,6 +40,56 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
     public OverrideAssignment(AbstractMergeConflictDefinition definition) {
         this(definition, 5, true);
     }
+
+    public void printCallGraph() {
+        List<String> graphEdges = new ArrayList<>();
+        CallGraph cg = Scene.v().getCallGraph();
+        System.out.println("digraph CallGraph {");
+
+
+        // Percorre todos os nós do Call Graph e imprime em formato DOT
+        for (Edge edge : cg) {
+            SootMethod source = edge.src();
+            SootMethod target = edge.tgt();
+            System.out.println("    \"" + source.getSignature() + "\" -> \"" + target.getSignature() + "\";");
+            graphEdges.add("    \"" + source.getSignature() + "\" -> \"" + target.getSignature() + "\";");
+        }
+
+
+        System.out.println("}");
+
+
+        exportCallGraphToDot(graphEdges, "callgraph.dot");
+
+    }
+
+    private static boolean areFieldReferencesEqual(Statement stmtInAbs, Statement stmtInFlow, InstanceFieldRef abstractFieldRef, InstanceFieldRef flowFieldRef) {
+        boolean pointToIntersection = stmtInAbs.getPointsTo().hasNonEmptyIntersection(stmtInFlow.getPointsTo());
+        boolean typesEqual = abstractFieldRef.getType().equals(flowFieldRef.getType());
+        boolean fieldRefsEqual = abstractFieldRef.getFieldRef().equals(flowFieldRef.getFieldRef());
+        boolean baseNameEqual = abstractFieldRef.getBase().toString().equals(flowFieldRef.getBase().toString());
+        boolean nameAndTypeAraEquals = stmtInAbs.getPointsTo().isEmpty() && stmtInFlow.getPointsTo().isEmpty() && baseNameEqual && typesEqual;
+        boolean methodIsConstructor = stmtInAbs.getSootMethod().isConstructor() && stmtInFlow.getSootMethod().isConstructor();
+
+
+        return ((pointToIntersection && !methodIsConstructor) || nameAndTypeAraEquals) && fieldRefsEqual;
+    }
+
+    protected static void getPointToFromBase(Value value, Statement stmt) {
+        PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
+        PointsToSet points = pointsToAnalysis.reachingObjects((Local) value);
+        stmt.setPointsTo(points);
+    }
+
+    protected static void getPointToFromStaticField(SootField fieldRef, Statement stmt) {
+        PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
+        PointsToSet points = pointsToAnalysis.reachingObjects(fieldRef);
+        stmt.setPointsTo(points);
+    }
+
+    protected abstract void gen(OverrideAssignmentAbstraction in, Statement stmt);
+
+    protected abstract boolean isSameStateElement(Statement stmtInAbs, Statement stmtInFlow);
 
     private void initDefaultFields() {
         this.oaConflictReport = new OAConflictReport();
@@ -65,7 +111,11 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
     protected void internalTransform(String s, Map<String, String> map) {
         long startTime = System.currentTimeMillis();
 
-        List<SootMethod> methods = Scene.v().getEntryPoints();
+        // List<SootMethod> methods = Scene.v().getEntryPoints();
+        scala.collection.immutable.List<SootMethod> scalaList = this.statementsUtils.getEntryPoints();
+        List<SootMethod> methods = new ArrayList<>(JavaConverters.seqAsJavaList(scalaList));
+        System.out.println("OA Entrypoints" + methods);
+        //printCallGraph();
         methods.forEach(sootMethod -> traverse(new OverrideAssignmentAbstraction(), sootMethod, Statement.Type.IN_BETWEEN));
 
         long finalTime = System.currentTimeMillis();
@@ -73,11 +123,12 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
 
         oaConflictReport.report();
     }
-
     public void configureEntryPoints() {
-        scala.collection.immutable.List<SootMethod> scalaList = this.statementsUtils.getEntryPoints();
-        List<SootMethod> entryPoints = new ArrayList<>(JavaConverters.seqAsJavaList(scalaList));
 
+        scala.collection.immutable.List<SootMethod> scalaList = this instanceof OverrideAssignmentWithPointerAnalysis ? this.statementsUtils.getCallgraphEntryPoints() : this.statementsUtils.getEntryPoints();
+        List<SootMethod> entryPoints = new ArrayList<>(JavaConverters.seqAsJavaList(scalaList));
+        //List<SootMethod> methods = new ArrayList<>(Collections.singleton(entryPoints.get(1).getDeclaringClass().getMethodByName("main")));
+        System.out.println("CG Entrypoints" + entryPoints);
         Scene.v().setEntryPoints(entryPoints);
     }
 
@@ -146,7 +197,6 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
                 || isInLeftAndRightStatementFlow(flowChangeTag));
     }
 
-
     private OverrideAssignmentAbstraction runAnalysis(OverrideAssignmentAbstraction in, Statement stmt) {
         /* Are there other possible cases? Yes, see follow links:
         https://soot-build.cs.uni-paderborn.de/public/origin/develop/soot/soot-develop/jdoc/soot/jimple/Stmt.html
@@ -195,7 +245,6 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
 
         return in;
     }
-
 
     private OverrideAssignmentAbstraction runAnalysisWithTaggedUnit(OverrideAssignmentAbstraction in, Statement stmt) {
         stmt.setTraversedLine(new ArrayList<>(this.stacktraceList));
@@ -272,18 +321,6 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
                 && areFieldReferencesEqual(stmtInAbs, stmtInFlow, abstractFieldRef, flowFieldRef);
     }
 
-    private static boolean areFieldReferencesEqual(Statement stmtInAbs, Statement stmtInFlow, InstanceFieldRef abstractFieldRef, InstanceFieldRef flowFieldRef) {
-        boolean pointToIntersection = stmtInAbs.getPointsTo().hasNonEmptyIntersection(stmtInFlow.getPointsTo());
-        boolean typesEqual = abstractFieldRef.getType().equals(flowFieldRef.getType());
-        boolean fieldRefsEqual = abstractFieldRef.getFieldRef().equals(flowFieldRef.getFieldRef());
-        boolean baseNameEqual = abstractFieldRef.getBase().toString().equals(flowFieldRef.getBase().toString());
-        boolean nameAndTypeAraEquals = stmtInAbs.getPointsTo().isEmpty() && stmtInFlow.getPointsTo().isEmpty() && baseNameEqual && typesEqual;
-        boolean methodIsConstructor = stmtInAbs.getSootMethod().isConstructor() && stmtInFlow.getSootMethod().isConstructor();
-
-
-        return ((pointToIntersection && !methodIsConstructor) || nameAndTypeAraEquals) && fieldRefsEqual;
-    }
-
     protected boolean isSameArrayRef(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
         if (stmtInAbs.getPointsTo() != null) {
             if (stmtInFlow.getPointsTo() == null) {
@@ -307,18 +344,6 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
             this.oaConflictReport.addConflict(conflict);
 
         }
-    }
-
-    protected static void getPointToFromBase(Value value, Statement stmt) {
-        PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
-        PointsToSet points = pointsToAnalysis.reachingObjects((Local) value);
-        stmt.setPointsTo(points);
-    }
-
-    protected static void getPointToFromStaticField(SootField fieldRef, Statement stmt) {
-        PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
-        PointsToSet points = pointsToAnalysis.reachingObjects(fieldRef);
-        stmt.setPointsTo(points);
     }
 
     private void kill(OverrideAssignmentAbstraction in, Statement stmt) {
@@ -367,7 +392,18 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         // Lista para armazenar as arestas do grafo
         List<String> graphEdges = new ArrayList<>();
 
+/*
+        if(!edges.hasNext()){
+            try {
+                SootMethod targetMethod = ((Stmt) currentStatement.getUnit()).getInvokeExpr().getMethod();
+                OverrideAssignmentAbstraction clonedAbstraction = (OverrideAssignmentAbstraction) inputAbstraction.clone();
+                OverrideAssignmentAbstraction traverseResult = traverse(clonedAbstraction, targetMethod, currentStatement.getType());
+                flowSetList.add(traverseResult);
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }
 
+        }*/
         while (edges.hasNext()) {
             Edge edge = edges.next();
             SootMethod srcMethod = edge.getSrc().method();
@@ -382,7 +418,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
                 throw new RuntimeException(ex);
             }
         }
-        exportCallGraphToDot(graphEdges);
+        exportCallGraphToDot(graphEdges, "calculateMergedOverrideAssignment.dot");
         if (flowSetList.isEmpty()) {
             return inputAbstraction;
         }
@@ -394,8 +430,8 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
     }
 
     // Método para exportar o grafo para um arquivo DOT
-    private void exportCallGraphToDot(List<String> graphEdges) {
-        try (PrintWriter out = new PrintWriter("callgraph.dot")) {
+    private void exportCallGraphToDot(List<String> graphEdges, String filename) {
+        try (PrintWriter out = new PrintWriter(filename)) {
             out.println("digraph CallGraph {");
             for (String edge : graphEdges) {
                 out.println("    " + edge);
