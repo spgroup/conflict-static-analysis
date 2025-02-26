@@ -36,6 +36,8 @@ import soot.Transform;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
@@ -111,9 +113,10 @@ public class Main {
             return;
         }
 
+        // write results to out.txt
         System.out.println(" Number of conflicts: " + conflicts.size());
         final String out = "out.txt";
-        final FileWriter fw = new FileWriter(out);
+        final FileWriter fw = new FileWriter(out, true);
         conflicts.forEach(c -> {
             try {
                 fw.write(c + "\n\n");
@@ -124,18 +127,45 @@ public class Main {
         fw.close();
         System.out.println(" Results exported to " + out);
 
+        // write results to out.json
         final String outJSON = "out.json";
-        final FileWriter fwJSON = new FileWriter(outJSON);
-        fwJSON.write("[\n");
-        JSONconflicts.forEach(c -> {
-            try {
-                fwJSON.write(c);
-                fwJSON.write(JSONconflicts.indexOf(c) == JSONconflicts.size() - 1 ? "\n" : ",\n");
-            } catch (Exception e) {
-                System.out.println("error exporting the results " + e.getMessage());
+
+        // get the previous content
+        String prevContent;
+        try {
+            prevContent = new String(Files.readAllBytes(Paths.get(outJSON)));
+        }
+        catch (Exception e) {
+            prevContent = "[\n";
+            System.out.println("Error getting the previous content of the JSON file " + e.getMessage());
+        }
+        StringBuilder results = new StringBuilder(prevContent);
+
+        if (!JSONconflicts.isEmpty()) {
+            // remove the last character if it is a closing bracket
+            if (results.toString().trim().endsWith("]")) {
+                int idx = results.lastIndexOf("]");
+                results.replace(idx, idx + 1, ",\n");
             }
-        });
-        fwJSON.write("\n]");
+
+            // add the new content
+            JSONconflicts.forEach(c -> {
+                try {
+                    results.append(c);
+                    results.append(JSONconflicts.indexOf(c) == JSONconflicts.size() - 1 ? "\n" : ",\n");
+                } catch (Exception e) {
+                    System.out.println("error exporting the results " + e.getMessage());
+                }
+            });
+            results.append("\n]");
+        }
+
+        // write the new content
+        final FileWriter fwJSON = new FileWriter(outJSON);
+        String[] lines = results.toString().split("\n");
+        for (String line : lines) {
+            fwJSON.write(line + "\n");
+        }
         fwJSON.close();
         System.out.println(" JSON Results exported to " + outJSON);
 
