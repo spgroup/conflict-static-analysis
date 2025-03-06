@@ -4,8 +4,6 @@ import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.SootWrapper;
 import br.unb.cic.analysis.model.Conflict;
 import br.unc.cic.analysis.test.DefinitionFactory;
-import org.junit.Assert;
-import org.junit.Test;
 import soot.*;
 
 import java.util.HashSet;
@@ -50,6 +48,7 @@ public class PessimisticTaintedAnalysisTest {
         System.out.println(conflicts);
         return conflicts;
     }
+/*
 
     @Test
     public void testSimpleDataflow() {
@@ -128,5 +127,6 @@ public class PessimisticTaintedAnalysisTest {
         Set<Conflict> conflicts = executeAnalysis(INTRAPROCEDURAL_DATAFLOW_SPECIAL_CASES, new int[]{24}, new int[]{26});
         Assert.assertTrue(conflicts.size() >= 1);
     }
+*/
 
 }

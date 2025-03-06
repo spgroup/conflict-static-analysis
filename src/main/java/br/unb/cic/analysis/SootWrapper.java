@@ -46,6 +46,10 @@ public class SootWrapper {
     }
 
     public static void configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(String classpath) {
+        configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath, true);
+    }
+
+    public static void configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(String classpath, boolean usePointsToAnalysis) {
         List<String> classes = Collections.singletonList(classpath);
 
         Options.v().set_no_bodies_for_excluded(true);
@@ -56,6 +60,9 @@ public class SootWrapper {
         Options.v().set_full_resolver(true);
         Options.v().set_keep_line_number(true);
         Options.v().set_include(getIncludeList());
+        //Options.v().set_exclude(Arrays.asList("java.lang.*","javax.*", "com.sun.*", "com.metamx.common.*", "com.netflix.curator.*", "com.google.*", "kafka.*", "org.*", "scala.*"));
+        //Options.v().set_exclude(Arrays.asList( "org.*",  "com.google.*")); // "scala.*",
+        // Options.v().set_no_bodies_for_excluded(true);
 
         // JAVA 8
         if (getJavaVersion() < 9) {
@@ -66,19 +73,58 @@ public class SootWrapper {
         else if (getJavaVersion() >= 9) {
             Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK" + File.pathSeparator + classpath);
         }
-
-        //Options.v().setPhaseOption("cg.spark", "on");
-        //Options.v().setPhaseOption("cg.spark", "verbose:true");
-        Options.v().setPhaseOption("cg.spark", "enabled:true");
+        //Options.v().setPhaseOption("jb.ls", "off"); // remove x = 1; x#2 = 2
         Options.v().setPhaseOption("jb", "use-original-names:true");
 
-        Scene.v().loadNecessaryClasses();
-
-        enableSparkCallGraph();
+        enableCallGraph(usePointsToAnalysis);
         //enableCHACallGraph();
+
+        Scene.v().loadNecessaryClasses();
     }
 
-    public static void enableSparkCallGraph() {
+    public static void enableCallGraph() {
+        enableCallGraph(true);
+    }
+
+    public static void enableCallGraph(boolean usePointsToAnalysis) {
+        System.out.println("CG configuration init.");
+
+        if (usePointsToAnalysis) {
+            //enableRtaCallGraph();
+            enableSparkCallGraph();
+            //enableVtaCallGraph();
+        } else {
+            // Configurações para análise conservadora (CHA)
+            //enableCHACallGraph();
+
+            Options.v().setPhaseOption("cg.cha", "enabled:true");
+            Options.v().setPhaseOption("cg.cha", "verbose:true");
+            Options.v().setPhaseOption("cg.cha", "apponly:true");
+
+            //Options.v().setPhaseOption("cg.spark", "on");
+            // Options.v().setPhaseOption("cg.spark", "rta:true");
+
+
+            // Ativa CHA para considerar todas as possíveis implementações
+        }
+        System.out.println("CG configuration completed.");
+    }
+
+    private static void enableCHACallGraph() {
+        CHATransformer.v().transform();
+    }
+
+    private static void enableVtaCallGraph() {
+        Options.v().setPhaseOption("cg", "vta");
+
+    }
+
+    private static void enableRtaCallGraph() {
+        Options.v().setPhaseOption("cg", "rta");
+
+    }
+
+    private static void enableSparkCallGraph() {
         //Enable Spark
         HashMap<String, String> opt = new HashMap<String, String>();
         //opt.put("propagator","worklist");
@@ -89,11 +135,10 @@ public class SootWrapper {
         //opt.put("double-set-new","hybrid");
         //opt.put("pre_jimplify", "true");
         SparkTransformer.v().transform("", opt);
-        soot.options.Options.v().setPhaseOption("cg.spark", "enable:true");
-    }
 
-    private static void enableCHACallGraph() {
-        CHATransformer.v().transform();
+        // Configurações para análise de points-to precisa
+        //Options.v().setPhaseOption("cg.spark", "on"); // Ativa o Spark
+        Options.v().setPhaseOption("cg.spark", "enabled:true"); // Habilita o Spark
     }
 
     private static List<String> configurePackagesWithCallGraph() {
@@ -104,9 +149,19 @@ public class SootWrapper {
     }
 
     public static void applyPackages() {
-        configurePackagesWithCallGraph().forEach(p -> {
-            PackManager.v().getPack(p).apply();
-        });
+        List<String> packages = configurePackagesWithCallGraph();
+
+        for (String p : packages) {
+            System.out.println("Applying package: " + p);
+
+            try {
+                PackManager.v().getPack(p).apply(); //.runPacks(); //
+                System.out.println("Successfully applied package: " + p);
+            } catch (Exception e) {
+                System.err.println("Error applying package: " + p);
+                e.printStackTrace();
+            }
+        }
     }
 
     public static class Builder {

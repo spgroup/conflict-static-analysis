@@ -183,9 +183,6 @@ public class Main {
         Option entrypointsOption = Option.builder("entrypoints").argName("entrypoints").hasArg()
                 .desc("entrypoints")
                 .build();
-        Option oaPointerAnalysisOption = Option.builder("oaPointerAnalysis").argName("oaPointerAnalysis").hasArg()
-                .desc("enable pointer analysis in overloading assignment")
-                .build();
 
         options.addOption(classPathOption);
         options.addOption(inputFileOption);
@@ -197,7 +194,6 @@ public class Main {
         options.addOption(depthLimitOption);
         options.addOption(depthMethodsVisitedSVFAOption);
         options.addOption(entrypointsOption);
-        options.addOption(oaPointerAnalysisOption);
     }
 
     private void runAnalysis(String mode, String classpath) {
@@ -218,10 +214,16 @@ public class Main {
                 runReachabilityAnalysis(classpath);
                 break;
             case "overriding-interprocedural":
-                runOverrideAssignmentAnalysis(classpath, true);
+                runOverrideAssignmentAnalysis(classpath, true, true);
                 break;
             case "overriding-intraprocedural":
-                runOverrideAssignmentAnalysis(classpath, false);
+                runOverrideAssignmentAnalysis(classpath, false, true);
+                break;
+            case "ioa-without-pa":
+                runOverrideAssignmentAnalysis(classpath, true, false);
+                break;
+            case "oa-without-pa":
+                runOverrideAssignmentAnalysis(classpath, false, false);
                 break;
             case "dfp-intra":
                 runDFPAnalysis(classpath, false);
@@ -315,38 +317,37 @@ public class Main {
         }
     }
 
-    private void runOverrideAssignmentAnalysis(String classpath, Boolean interprocedural) {
+    private void runOverrideAssignmentAnalysis(String classpath, Boolean interprocedural, Boolean pointerAnalysis) {
         int depthLimit = Integer.parseInt(cmd.getOptionValue("depthLimit", "5"));
-        boolean oaPointerAnalysis = Boolean.parseBoolean(cmd.getOptionValue("oaPointerAnalysis", "true"));
         List<String> entrypoints = convertStringEntrypointsToList(cmd.getOptionValue("entrypoints"));
 
         stopwatch = Stopwatch.createStarted();
 
-        OverrideAssignment overrideAssignment = oaPointerAnalysis
+        OverrideAssignment overrideAssignment = pointerAnalysis
                 ? new OverrideAssignmentWithPointerAnalysis(definition, depthLimit, interprocedural, entrypoints)
                 : new OverrideAssignmentWithoutPointerAnalysis(definition, depthLimit, interprocedural, entrypoints);
 
-        SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath);
+        SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath, pointerAnalysis);
 
         overrideAssignment.configureEntryPoints();
 
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", overrideAssignment));
         System.out.println("Depth limit: " + overrideAssignment.getDepthLimit());
 
-        saveExecutionTime("Configure Soot OA " + (interprocedural ? "Inter" : "Intra"));
+        saveExecutionTime("Configure Soot OA " + (interprocedural ? "Inter" : "Intra") + (!pointerAnalysis ? " Without Pointer Analysis" : ""));
 
         SootWrapper.applyPackages();
 
         conflicts.addAll(overrideAssignment.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
         JSONconflicts.addAll(overrideAssignment.getConflicts().stream().map(c -> c.toJSON()).collect(Collectors.toList()));
-        saveExecutionTime("Time to perform OA " + (interprocedural ? "Inter" : "Intra"));
+        saveExecutionTime("Time to perform OA " + (interprocedural ? "Inter" : "Intra") + (!pointerAnalysis ? " Without Pointer Analysis" : ""));
 
         int visitedMethods = overrideAssignment.getVisitedMethodsCount();
         System.out.println("OA " + (interprocedural ? "Inter" : "Intra") + " Visited methods: " + visitedMethods);
 
-        saveVisitedMethods("OA " + (interprocedural ? "Inter" : "Intra"), (visitedMethods + ""));
+        saveVisitedMethods("OA " + (interprocedural ? "Inter" : "Intra") + (!pointerAnalysis ? " Without Pointer Analysis" : ""), (visitedMethods + ""));
 
-        saveConflictsLog("OA " + (interprocedural ? "Inter" : "Intra"), conflicts.toString());
+        saveConflictsLog("OA " + (interprocedural ? "Inter" : "Intra") + (!pointerAnalysis ? " Without Pointer Analysis" : ""), conflicts.toString());
 
     }
 

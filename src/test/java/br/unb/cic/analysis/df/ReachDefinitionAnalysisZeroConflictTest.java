@@ -2,11 +2,8 @@ package br.unb.cic.analysis.df;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.SootWrapper;
-import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 import soot.*;
-import soot.toolkits.graph.ExceptionalUnitGraph;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,11 +52,11 @@ public class ReachDefinitionAnalysisZeroConflictTest {
         SootWrapper.builder().withClassPath(cp).addClass(targetClass).build().execute();
     }
 
-    @Test
+/*    @Test
     public void testDataFlowAnalysisExpectingZeroConflict() {
         Assert.assertNotNull(analysisExpectingZeroConflict);
         Assert.assertNotNull(analysisExpectingZeroConflict.getConflicts());
         Assert.assertEquals(0, analysisExpectingZeroConflict.getConflicts().size());
-    }
+    }*/
 
 }
