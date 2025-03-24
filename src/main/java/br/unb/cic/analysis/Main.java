@@ -23,6 +23,7 @@ import br.unb.cic.analysis.reachability.ReachabilityAnalysis;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
 import br.unb.cic.analysis.svfa.SVFAInterProcedural;
 import br.unb.cic.analysis.svfa.SVFAIntraProcedural;
+import br.unb.cic.analysis.svfa.confluence.ConfluenceConflict;
 import br.unb.cic.analysis.svfa.confluence.DFPConfluenceAnalysis;
 import br.unb.cic.diffclass.DiffClass;
 import com.google.common.base.Stopwatch;
@@ -554,6 +555,10 @@ public class Main {
         conflicts.addAll(analysis.getConfluentConflicts()
                 .stream()
                 .map(p -> formatConflict(p.toString()))
+                .collect(Collectors.toList()));
+        JSONconflicts.addAll(analysis.getConfluentConflicts()
+                .stream()
+                .map(ConfluenceConflict::toJSON)
                 .collect(Collectors.toList()));
 
         System.out.println("CONFLICTS: "+conflicts.toString());
