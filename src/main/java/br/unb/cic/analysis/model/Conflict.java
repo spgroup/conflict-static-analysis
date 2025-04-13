@@ -151,7 +151,7 @@ public class Conflict {
                                     "\t\t\t\t\t" + "\"method\": \"%s\"," + "\n" +
                                     "\t\t\t\t\t" + "\"line\": %d" + "\n" +
                                 "\t\t\t\t" + "}," + "\n" +
-                                "\t\t\t\t" + "\"stackTrace\": [\"" + sourceTraversedLine.stream().map(t -> t.toString()).collect(Collectors.joining("\", \"")) + "\"]" + "\n" +
+                                "\t\t\t\t" + "\"stackTrace\": [" + sourceTraversedLine.stream().map(TraversedLine::toJSON).collect(Collectors.joining(",")) + "]" + "\n" +
                             "\t\t\t" + "}," + "\n" +
                             "\t\t\t" + "{" + "\n" +
                                 "\t\t\t\t" + "\"type\": \"sink\"," + "\n" +
@@ -163,14 +163,14 @@ public class Conflict {
                                     "\t\t\t\t\t" + "\"method\": \"%s\"," + "\n" +
                                     "\t\t\t\t\t" + "\"line\": %d" + "\n" +
                                 "\t\t\t\t" + "}," + "\n" +
-                                "\t\t\t\t" + "\"stackTrace\": [\"" + sinkTraversedLine.stream().map(t -> t.toString()).collect(Collectors.joining("\", \"")) + "\"]" + "\n" +
+                                "\t\t\t\t" + "\"stackTrace\": [" + sinkTraversedLine.stream().map(TraversedLine::toJSON).collect(Collectors.joining(",")) + "]" + "\n" +
                             "\t\t\t" + "}" + "\n" +
                         "\t\t" + "]" + "\n" +
                     "\t" + "}" + "\n" +
                 "}",
-                type, label, sourceUnit, sinkUnit,
-                sourceUnit, sourceClassName, sourceMethodName, sourceLineNumber,
-                sinkUnit, sinkClassName, sinkMethodName, sinkLineNumber
+                type, label, sourceUnit.toString().replaceAll("\"", "'"), sinkUnit.toString().replaceAll("\"", "'"),
+                sourceUnit.toString().replaceAll("\"", "'"), sourceClassName, sourceMethodName, sourceLineNumber,
+                sinkUnit.toString().replaceAll("\"", "'"), sinkClassName, sinkMethodName, sinkLineNumber
         );
     }
 }

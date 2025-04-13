@@ -38,4 +38,15 @@ public class TraversedLine {
     public String toString() {
         return "at " + sootClass.getName() + "." + sootMethod.getName() + "(" + sootClass.getShortJavaStyleName() + ".java:" + lineNumber + ")";
     }
+
+    public String toJSON() {
+        return String.format(
+            "{" + "\n" +
+                "\t" + "\"class\": \"%s\"," + "\n" +
+                "\t" + "\"method\": \"%s\"," + "\n" +
+                "\t" + "\"line\": %d" + "\n" +
+            "}",
+            sootClass.getName(), sootMethod.getName(), lineNumber
+        );
+    }
 }
