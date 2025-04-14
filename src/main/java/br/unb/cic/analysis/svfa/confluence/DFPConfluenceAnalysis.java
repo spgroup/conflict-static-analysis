@@ -232,6 +232,18 @@ public class DFPConfluenceAnalysis {
         return new DFPAnalysisSemanticConflicts(this.cp, this.definition, this.depthLimit, this.entrypoints) {
 
             /**
+             * As in this case we want to detect flows between sink and base, this methods defines isSource as all units
+             * that are initially defined as sink
+             */
+            @Override
+            protected boolean isSource(Unit unit) {
+                return definition.getSinkStatements()
+                        .stream()
+                        .map(stmt -> stmt.getUnit())
+                        .anyMatch(u -> u.equals(unit));
+            }
+
+            /**
              * As in this case we want to detect flows between sink and base, this methods defines isSink as all units
              * that are neither source nor sink and are inside a method body
              */
