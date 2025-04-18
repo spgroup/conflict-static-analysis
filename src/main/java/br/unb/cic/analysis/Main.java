@@ -552,11 +552,11 @@ public class Main {
 
         analysis.execute(false);
         System.out.println("Depth limit: "+analysis.getDepthLimit());
-        conflicts.addAll(analysis.getConfluentConflicts()
+        conflicts.addAll(analysis.getConfluentConflicts(false)
                 .stream()
                 .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
-        JSONconflicts.addAll(analysis.getConfluentConflicts()
+        JSONconflicts.addAll(analysis.getConfluentConflicts(true)
                 .stream()
                 .map(ConfluenceConflict::toJSON)
                 .collect(Collectors.toList()));
