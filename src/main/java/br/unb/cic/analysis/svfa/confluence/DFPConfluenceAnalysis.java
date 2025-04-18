@@ -68,8 +68,6 @@ public class DFPConfluenceAnalysis {
             }
 
             if (toRemove != null) {
-                System.out.println("CONFLITO REMOVIDO");
-                System.out.println(toRemove);
                 conflicts.remove(toRemove);
             }
 
@@ -95,11 +93,6 @@ public class DFPConfluenceAnalysis {
     
                 if (!confluenceA.value().className().equals(confluenceB.value().className()) ||
                     confluenceA.value().line() != confluenceB.value().line()) {
-                    System.out.println("Linha do conflueceA");
-                    System.out.println(confluenceA.value().line());
-                    System.out.println("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ");
-                    System.out.println("Linha do conflueceB");
-                    System.out.println(confluenceB.value().line());
                     continue;
                 }
                 
