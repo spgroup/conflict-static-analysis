@@ -57,27 +57,16 @@ public class DFPConfluenceAnalysis {
     
         List<ConfluenceConflict> conflicts = new ArrayList<>(this.confluentFlows);
 
-        List<StatementNode> subStack = findFirstSubStack(conflicts);
-        while (subStack != null){
-            ConfluenceConflict toRemove = null;
-            for (ConfluenceConflict conflict : conflicts) {
-                if (conflict.getSourceNodePath().equals(subStack)) {
-                    toRemove = conflict;
-                    break;
-                }
-            }
-
-            if (toRemove != null) {
-                conflicts.remove(toRemove);
-            }
-
-            subStack = findFirstSubStack(conflicts);
+        ConfluenceConflict toRemove = findFirstSubStack(conflicts);
+        while (toRemove != null) {
+            conflicts.remove(toRemove);
+            toRemove = findFirstSubStack(conflicts);
         }
 
         return new HashSet<>(conflicts);
     }
     
-    private List<StatementNode> findFirstSubStack(List<ConfluenceConflict> conflicts) {
+    private ConfluenceConflict findFirstSubStack(List<ConfluenceConflict> conflicts) {
 
         for (int i = 0; i < conflicts.size(); i++){
             ConfluenceConflict conflictA = conflicts.get(i);
@@ -113,7 +102,7 @@ public class DFPConfluenceAnalysis {
                             break;
                         }
                     }
-                    if (match) return pathA;
+                    if (match) return conflictA;
                 }
             }
         }
