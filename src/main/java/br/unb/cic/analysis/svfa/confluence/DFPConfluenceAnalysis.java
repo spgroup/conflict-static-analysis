@@ -182,7 +182,9 @@ public class DFPConfluenceAnalysis {
 
     public StatementNode containsKey(Map<StatementNode, List<StatementNode>> pathEndHash, StatementNode lastNode){
         for (StatementNode stmt: pathEndHash.keySet()){
-            if (lastNode.equals(stmt)) {
+            if (lastNode.value().line() == stmt.value().line() &&
+                    lastNode.value().method().equals(stmt.value().method()) &&
+                    lastNode.value().className().equals(stmt.value().className())) {
                 return stmt;
             }
         }
