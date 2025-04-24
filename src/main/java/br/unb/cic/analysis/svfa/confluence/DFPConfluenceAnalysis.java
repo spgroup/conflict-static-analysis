@@ -50,9 +50,65 @@ public class DFPConfluenceAnalysis {
      *
      * @return a set of confluence conflicts
      */
-    public Set<ConfluenceConflict> getConfluentConflicts() {
-        return this.confluentFlows;
+    public Set<ConfluenceConflict> getConfluentConflicts(boolean filterDuplicates) {
+        if (!filterDuplicates) {
+            return this.confluentFlows;
+        }
+    
+        List<ConfluenceConflict> conflicts = new ArrayList<>(this.confluentFlows);
+
+        ConfluenceConflict toRemove = findFirstSubStack(conflicts);
+        while (toRemove != null) {
+            conflicts.remove(toRemove);
+            toRemove = findFirstSubStack(conflicts);
+        }
+
+        return new HashSet<>(conflicts);
     }
+    
+    private ConfluenceConflict findFirstSubStack(List<ConfluenceConflict> conflicts) {
+
+        for (int i = 0; i < conflicts.size(); i++){
+            ConfluenceConflict conflictA = conflicts.get(i);
+            List<StatementNode> pathA = conflictA.getSourceNodePath();
+            StatementNode confluenceA = pathA.get(pathA.size() - 1); 
+
+            for (int j = 0; j < conflicts.size(); j++) {
+                if (i == j) continue;
+    
+                ConfluenceConflict conflictB = conflicts.get(j);
+                List<StatementNode> pathB = conflictB.getSourceNodePath();
+                StatementNode confluenceB = pathB.get(pathB.size() - 1);
+    
+                if (!confluenceA.value().className().equals(confluenceB.value().className()) ||
+                    confluenceA.value().line() != confluenceB.value().line()) {
+                    continue;
+                }
+                
+                if (pathA.size() > pathB.size()){
+                    continue;
+                }
+
+                for (int z = 0; z <= pathB.size() - pathA.size(); z++) {
+                    boolean match = true;
+                    for (int y = 0; y < pathA.size(); y++) {
+                        StatementNode s = pathA.get(y);
+                        StatementNode b = pathB.get(z + y);
+            
+                        if (!s.value().className().equals(b.value().className()) ||
+                            !s.value().method().equals(b.value().method()) ||
+                            s.value().line() != b.value().line()) {
+                            match = false;
+                            break;
+                        }
+                    }
+                    if (match) return conflictA;
+                }
+            }
+        }
+        return null;
+    }
+    
 
     /**
      * Executes both source -> base and sink -> base SVFA analysis intersects then populating
