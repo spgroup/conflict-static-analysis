@@ -50,9 +50,65 @@ public class DFPConfluenceAnalysis {
      *
      * @return a set of confluence conflicts
      */
-    public Set<ConfluenceConflict> getConfluentConflicts() {
-        return this.confluentFlows;
+    public Set<ConfluenceConflict> getConfluentConflicts(boolean filterDuplicates) {
+        if (!filterDuplicates) {
+            return this.confluentFlows;
+        }
+    
+        List<ConfluenceConflict> conflicts = new ArrayList<>(this.confluentFlows);
+
+        ConfluenceConflict toRemove = findFirstSubStack(conflicts);
+        while (toRemove != null) {
+            conflicts.remove(toRemove);
+            toRemove = findFirstSubStack(conflicts);
+        }
+
+        return new HashSet<>(conflicts);
     }
+    
+    private ConfluenceConflict findFirstSubStack(List<ConfluenceConflict> conflicts) {
+
+        for (int i = 0; i < conflicts.size(); i++){
+            ConfluenceConflict conflictA = conflicts.get(i);
+            List<StatementNode> pathA = conflictA.getSourceNodePath();
+            StatementNode confluenceA = pathA.get(pathA.size() - 1); 
+
+            for (int j = 0; j < conflicts.size(); j++) {
+                if (i == j) continue;
+    
+                ConfluenceConflict conflictB = conflicts.get(j);
+                List<StatementNode> pathB = conflictB.getSourceNodePath();
+                StatementNode confluenceB = pathB.get(pathB.size() - 1);
+    
+                if (!confluenceA.value().className().equals(confluenceB.value().className()) ||
+                    confluenceA.value().line() != confluenceB.value().line()) {
+                    continue;
+                }
+                
+                if (pathA.size() > pathB.size()){
+                    continue;
+                }
+
+                for (int z = 0; z <= pathB.size() - pathA.size(); z++) {
+                    boolean match = true;
+                    for (int y = 0; y < pathA.size(); y++) {
+                        StatementNode s = pathA.get(y);
+                        StatementNode b = pathB.get(z + y);
+            
+                        if (!s.value().className().equals(b.value().className()) ||
+                            !s.value().method().equals(b.value().method()) ||
+                            s.value().line() != b.value().line()) {
+                            match = false;
+                            break;
+                        }
+                    }
+                    if (match) return conflictA;
+                }
+            }
+        }
+        return null;
+    }
+    
 
     /**
      * Executes both source -> base and sink -> base SVFA analysis intersects then populating
@@ -182,7 +238,9 @@ public class DFPConfluenceAnalysis {
 
     public StatementNode containsKey(Map<StatementNode, List<StatementNode>> pathEndHash, StatementNode lastNode){
         for (StatementNode stmt: pathEndHash.keySet()){
-            if (lastNode.equals(stmt)) {
+            if (lastNode.value().line() == stmt.value().line() &&
+                    lastNode.value().method().equals(stmt.value().method()) &&
+                    lastNode.value().className().equals(stmt.value().className())) {
                 return stmt;
             }
         }
@@ -230,6 +288,18 @@ public class DFPConfluenceAnalysis {
      */
     private DFPAnalysisSemanticConflicts sinkBaseAnalysis(boolean interprocedural) {
         return new DFPAnalysisSemanticConflicts(this.cp, this.definition, this.depthLimit, this.entrypoints) {
+
+            /**
+             * As in this case we want to detect flows between sink and base, this methods defines isSource as all units
+             * that are initially defined as sink
+             */
+            @Override
+            protected boolean isSource(Unit unit) {
+                return definition.getSinkStatements()
+                        .stream()
+                        .map(stmt -> stmt.getUnit())
+                        .anyMatch(u -> u.equals(unit));
+            }
 
             /**
              * As in this case we want to detect flows between sink and base, this methods defines isSink as all units

@@ -60,6 +60,10 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         return oaConflictReport.getConflicts();
     }
 
+    public Set<Conflict> getFilteredConflicts() {
+        return oaConflictReport.filterConflictsWithSameRoot(oaConflictReport.getConflicts());
+    }
+
     @Override
     protected void internalTransform(String s, Map<String, String> map) {
         long startTime = System.currentTimeMillis();

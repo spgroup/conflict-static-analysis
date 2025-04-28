@@ -58,12 +58,11 @@ public class StatementsUtil {
     /**
      * Configures and retrieves the entry points using the provided entrypoints list and all statements.
      *
-     * @param allStatements a list of all source and sink statements.
      * @return a Scala list of SootMethod representing the configured entry points.
      */
-    private scala.collection.immutable.List<SootMethod> getConfiguredEntryPoints(List<Statement> allStatements) throws NoSuchMethodException {
+    private scala.collection.immutable.List<SootMethod> getConfiguredEntryPoints() throws NoSuchMethodException {
         return JavaConverters.asScalaBuffer(
-                new ArrayList<>(this.definition.configureEntryPoints(this.entrypoints, allStatements))
+                new ArrayList<>(this.definition.configureEntryPoints(this.entrypoints))
         ).toList();
     }
 
@@ -77,7 +76,7 @@ public class StatementsUtil {
             return retrieveEntryPointsFromSource();
         } else {
             try {
-                return getConfiguredEntryPoints(allStatements);
+                return getConfiguredEntryPoints();
             } catch (NoSuchMethodException e) {
                 throw new RuntimeException(e);
             }
