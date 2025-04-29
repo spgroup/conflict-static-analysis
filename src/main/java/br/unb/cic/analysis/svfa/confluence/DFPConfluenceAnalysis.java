@@ -115,9 +115,9 @@ public class DFPConfluenceAnalysis {
 
             StatementNode confluence = conflict.getSinkNodePath().get(conflict.getSinkNodePath().size()-1);
 
-            Integer left_line = df1.getPathVisitedMethods().head().line();
-            Integer right_line = df2.getPathVisitedMethods().head().line();
-            Integer cf_line = confluence.getPathVisitedMethods().head().line();
+            Integer left_line = df1.line();
+            Integer right_line = df2.line();
+            Integer cf_line = confluence.line();
 
             Boolean contains_lines = left_lines.contains(left_line)
                     && right_lines.contains(right_line)
@@ -125,18 +125,18 @@ public class DFPConfluenceAnalysis {
 
             if (!contains_lines){
                 System.out.println("Confluence interference in "+ df1.getPathVisitedMethods().head().getMethod().method());
-                System.out.println("Confluence flows from execution of lines "+df1.getPathVisitedMethods().head().line()+" and "+df2.getPathVisitedMethods().head().line()+
-                        " to line "+confluence.getPathVisitedMethods().head().line()+", defined in "+df1.getPathVisitedMethods().head().getUnit()+" and "+df2.getPathVisitedMethods().head().getUnit()+" and used in "+confluence.getPathVisitedMethods().head().getUnit());
-                System.out.println("Caused by line "+left_line+ " flow: "+df1.pathVisitedMethodsToString());
-                System.out.println("Caused by line "+right_line+ " flow: "+df2.pathVisitedMethodsToString());
-                System.out.println("Caused by line "+cf_line+ " flow: "+confluence.pathVisitedMethodsToString());
+                System.out.println("Confluence flows from execution of lines "+left_line +" and "+right_line+
+                        " to line "+confluence.getPathVisitedMethods().head().line()+", defined in "+df1.value().sootUnit()+" and "+df2.value().sootUnit()+" and used in "+confluence.getPathVisitedMethods().head().getUnit());
+                System.out.println("Caused by line "+left_line+ " flow: "+df1.value());
+                System.out.println("Caused by line "+right_line+ " flow: "+df2.value());
+                System.out.println("Caused by line "+cf_line+ " flow: "+confluence.value());
 
                 conflicts_report.add("Confluence interference in "+ df1.getPathVisitedMethods().head().getMethod().method());
-                conflicts_report.add("Confluence flows from execution of lines "+df1.getPathVisitedMethods().head().line()+" and "+df2.getPathVisitedMethods().head().line()+
-                        " to line "+confluence.getPathVisitedMethods().head().line()+", defined in "+df1.getPathVisitedMethods().head().getUnit()+" and "+df2.getPathVisitedMethods().head().getUnit()+" and used in "+confluence.getPathVisitedMethods().head().getUnit());
-                conflicts_report.add("Caused by line "+left_line+ " flow: "+df1.pathVisitedMethodsToString());
-                conflicts_report.add("Caused by line "+right_line+ " flow: "+df2.pathVisitedMethodsToString());
-                conflicts_report.add("Caused by line "+cf_line+ " flow: "+confluence.pathVisitedMethodsToString()+"\n");
+                conflicts_report.add("Confluence flows from execution of lines "+left_line+" and "+right_line+
+                        " to line "+confluence.getPathVisitedMethods().head().line()+", defined in "+df1.value().sootUnit()+" and "+df2.value().sootUnit()+" and used in "+confluence.getPathVisitedMethods().head().getUnit());
+                conflicts_report.add("Caused by line "+left_line+ " flow: "+df1.value());
+                conflicts_report.add("Caused by line "+right_line+ " flow: "+df2.value());
+                conflicts_report.add("Caused by line "+cf_line+ " flow: "+confluence.value()+"\n");
 
                 left_lines.add(left_line);
                 right_lines.add(right_line);
@@ -152,11 +152,30 @@ public class DFPConfluenceAnalysis {
      * Intersects the list of paths looking for paths that have the same last nodes
      * also ignores redundant node (that represent different jimple lines but the same Java line)
      * @param paths1 A set of lists of nodes with at least 2 nodes
-     * @param paths1 A set of lists of nodes with at least 2 nodes
+     * @param paths2 A set of lists of nodes with at least 2 nodes
      * @return A set of confluence conflicts
      */
     private Set<ConfluenceConflict> intersectPathsByLastNode(Set<List<StatementNode>> paths1, Set<List<StatementNode>> paths2) {
         Map<StatementNode, List<StatementNode>> pathEndHash = new HashMap<>();
+
+        System.out.println("===================================Intersecting paths=====================================");
+        System.out.println("============ paths1:\n");
+        for (List<StatementNode> path: paths1) {
+            System.out.println("(paths1) -> ");
+            StatementNode firstNode = path.get(0);
+            StatementNode lastNode = path.get(path.size() - 1);
+            System.out.println(firstNode.value().className() + ":" + firstNode.value().line() + " / " + firstNode.value().sootUnit() + " -> " +
+                    lastNode.value().className() + ":" + lastNode.value().line() + " / " + lastNode.value().sootUnit());
+        }
+        System.out.println("============ paths2:\n");
+        for (List<StatementNode> path: paths2) {
+            System.out.println("(paths2) -> ");
+            StatementNode firstNode = path.get(0);
+            StatementNode lastNode = path.get(path.size() - 1);
+            System.out.println(firstNode.value().className() + ":" + firstNode.value().line() + " / " + firstNode.value().sootUnit() + " -> " +
+                    lastNode.value().className() + ":" + lastNode.value().line() + " / " + lastNode.value().sootUnit());
+        }
+        System.out.println("========================================================================================");
 
         for (List<StatementNode> path: paths1) {
             pathEndHash.put(getLastNode(path), path);
@@ -175,15 +194,69 @@ public class DFPConfluenceAnalysis {
         return result;
     }
 
-
     public StatementNode containsKey(Map<StatementNode, List<StatementNode>> pathEndHash, StatementNode lastNode){
         for (StatementNode stmt: pathEndHash.keySet()){
-            if (lastNode.equals(stmt)) {
+            if (lastNode.value().line() == stmt.value().line() &&
+                    lastNode.value().method().equals(stmt.value().method()) &&
+                    lastNode.value().className().equals(stmt.value().className())) {
                 return stmt;
             }
         }
         return null;
     }
+
+//    private Set<ConfluenceConflict> intersectPathsByLastNode(Set<List<StatementNode>> paths1, Set<List<StatementNode>> paths2) {
+//        List<PathEntry> pathEndList = new ArrayList<>();
+//
+//        System.out.println("===================================Intersecting paths=====================================");
+//        System.out.println("============ paths1:\n");
+//        for (List<StatementNode> path: paths1) {
+//            System.out.println("(paths1) -> ");
+//            StatementNode firstNode = path.get(0);
+//            StatementNode lastNode = path.get(path.size() - 1);
+//            System.out.println(firstNode.value().className() + ":" + firstNode.value().line() + " / " + firstNode.value().sootUnit() + " -> " +
+//                    lastNode.value().className() + ":" + lastNode.value().line() + " / " + lastNode.value().sootUnit());
+//        }
+//        System.out.println("============ paths2:\n");
+//        for (List<StatementNode> path: paths2) {
+//            System.out.println("(paths2) -> ");
+//            StatementNode firstNode = path.get(0);
+//            StatementNode lastNode = path.get(path.size() - 1);
+//            System.out.println(firstNode.value().className() + ":" + firstNode.value().line() + " / " + firstNode.value().sootUnit() + " -> " +
+//                    lastNode.value().className() + ":" + lastNode.value().line() + " / " + lastNode.value().sootUnit());
+//        }
+//        System.out.println("========================================================================================");
+//
+//        for (List<StatementNode> path : paths1) {
+//            StatementNode lastNode = getLastNode(path);
+//            pathEndList.add(new PathEntry(lastNode, path));
+//        }
+//
+//        Set<ConfluenceConflict> result = new HashSet<>();
+//
+//        for (List<StatementNode> path : paths2) {
+//            StatementNode lastNode = getLastNode(path);
+//
+//            for (PathEntry entry : pathEndList) {
+//                if (lastNode.equals(entry.endNode)) {
+//                    result.add(new ConfluenceConflict(entry.path, path));
+//                }
+//            }
+//        }
+//
+//        return result;
+//    }
+//
+//    private static class PathEntry {
+//        public final StatementNode endNode;
+//        public final List<StatementNode> path;
+//
+//        public PathEntry(StatementNode endNode, List<StatementNode> path) {
+//            this.endNode = endNode;
+//            this.path = path;
+//        }
+//    }
+
 
     /**
      * @param path A list of nodes with at least 2 nodes
