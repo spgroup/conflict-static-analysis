@@ -114,36 +114,42 @@ public class DFPConfluenceAnalysis {
             StatementNode df2 = conflict.getSinkNodePath().get(0);
 
             StatementNode confluence = conflict.getSinkNodePath().get(conflict.getSinkNodePath().size()-1);
+             try {
+//                 Integer left_line = df1.getPathVisitedMethods().head().line();
+//                 Integer right_line = df2.getPathVisitedMethods().head().line();
+//                 Integer cf_line = confluence.getPathVisitedMethods().head().line();
 
-            Integer left_line = df1.line();
-            Integer right_line = df2.line();
-            Integer cf_line = confluence.line();
+                Integer left_line = df1.line();
+                Integer right_line = df2.line();
+                Integer cf_line = confluence.line();
 
-            Boolean contains_lines = left_lines.contains(left_line)
-                    && right_lines.contains(right_line)
-                    && cf_lines.contains(cf_line);
+                Boolean contains_lines = left_lines.contains(left_line)
+                        && right_lines.contains(right_line)
+                        && cf_lines.contains(cf_line);
 
-            if (!contains_lines){
-                System.out.println("Confluence interference in "+ df1.getPathVisitedMethods().head().getMethod().method());
-                System.out.println("Confluence flows from execution of lines "+left_line +" and "+right_line+
-                        " to line "+confluence.getPathVisitedMethods().head().line()+", defined in "+df1.value().sootUnit()+" and "+df2.value().sootUnit()+" and used in "+confluence.getPathVisitedMethods().head().getUnit());
-                System.out.println("Caused by line "+left_line+ " flow: "+df1.value());
-                System.out.println("Caused by line "+right_line+ " flow: "+df2.value());
-                System.out.println("Caused by line "+cf_line+ " flow: "+confluence.value());
+                if (!contains_lines){
+                    System.out.println("Confluence interference in "+ df1.getPathVisitedMethods().head().getMethod().method());
+                    System.out.println("Confluence flows from execution of lines "+left_line +" and "+right_line+
+                            " to line "+confluence.getPathVisitedMethods().head().line()+", defined in "+df1.value().sootUnit()+" and "+df2.value().sootUnit()+" and used in "+confluence.getPathVisitedMethods().head().getUnit());
+                    System.out.println("Caused by line "+left_line+ " flow: "+df1.value());
+                    System.out.println("Caused by line "+right_line+ " flow: "+df2.value());
+                    System.out.println("Caused by line "+cf_line+ " flow: "+confluence.value());
 
-                conflicts_report.add("Confluence interference in "+ df1.getPathVisitedMethods().head().getMethod().method());
-                conflicts_report.add("Confluence flows from execution of lines "+left_line+" and "+right_line+
-                        " to line "+confluence.getPathVisitedMethods().head().line()+", defined in "+df1.value().sootUnit()+" and "+df2.value().sootUnit()+" and used in "+confluence.getPathVisitedMethods().head().getUnit());
-                conflicts_report.add("Caused by line "+left_line+ " flow: "+df1.value());
-                conflicts_report.add("Caused by line "+right_line+ " flow: "+df2.value());
-                conflicts_report.add("Caused by line "+cf_line+ " flow: "+confluence.value()+"\n");
+                    conflicts_report.add("Confluence interference in "+ df1.getPathVisitedMethods().head().getMethod().method());
+                    conflicts_report.add("Confluence flows from execution of lines "+left_line+" and "+right_line+
+                            " to line "+confluence.getPathVisitedMethods().head().line()+", defined in "+df1.value().sootUnit()+" and "+df2.value().sootUnit()+" and used in "+confluence.getPathVisitedMethods().head().getUnit());
+                    conflicts_report.add("Caused by line "+left_line+ " flow: "+df1.value());
+                    conflicts_report.add("Caused by line "+right_line+ " flow: "+df2.value());
+                    conflicts_report.add("Caused by line "+cf_line+ " flow: "+confluence.value()+"\n");
 
-                left_lines.add(left_line);
-                right_lines.add(right_line);
-                cf_lines.add(cf_line);
+                    left_lines.add(left_line);
+                    right_lines.add(right_line);
+                    cf_lines.add(cf_line);
+                }
+
+             } catch (Exception e) {
+                System.err.println("Error accessing visited methods: " + e.getMessage());
             }
-
-
          }
         return conflicts_report;
     }
@@ -157,25 +163,6 @@ public class DFPConfluenceAnalysis {
      */
     private Set<ConfluenceConflict> intersectPathsByLastNode(Set<List<StatementNode>> paths1, Set<List<StatementNode>> paths2) {
         Map<StatementNode, List<StatementNode>> pathEndHash = new HashMap<>();
-
-        System.out.println("===================================Intersecting paths=====================================");
-        System.out.println("============ paths1:\n");
-        for (List<StatementNode> path: paths1) {
-            System.out.println("(paths1) -> ");
-            StatementNode firstNode = path.get(0);
-            StatementNode lastNode = path.get(path.size() - 1);
-            System.out.println(firstNode.value().className() + ":" + firstNode.value().line() + " / " + firstNode.value().sootUnit() + " -> " +
-                    lastNode.value().className() + ":" + lastNode.value().line() + " / " + lastNode.value().sootUnit());
-        }
-        System.out.println("============ paths2:\n");
-        for (List<StatementNode> path: paths2) {
-            System.out.println("(paths2) -> ");
-            StatementNode firstNode = path.get(0);
-            StatementNode lastNode = path.get(path.size() - 1);
-            System.out.println(firstNode.value().className() + ":" + firstNode.value().line() + " / " + firstNode.value().sootUnit() + " -> " +
-                    lastNode.value().className() + ":" + lastNode.value().line() + " / " + lastNode.value().sootUnit());
-        }
-        System.out.println("========================================================================================");
 
         for (List<StatementNode> path: paths1) {
             pathEndHash.put(getLastNode(path), path);
@@ -309,6 +296,17 @@ public class DFPConfluenceAnalysis {
      */
     private DFPAnalysisSemanticConflicts sinkBaseAnalysis(boolean interprocedural) {
         return new DFPAnalysisSemanticConflicts(this.cp, this.definition, depthLimit) {
+            /**
+             * As in this case we want to detect flows between sink and base, this methods defines isSource as all units
+             * that are initially defined as sink
+             */
+            @Override
+            protected boolean isSource(Unit unit) {
+                return definition.getSinkStatements()
+                        .stream()
+                        .map(stmt -> stmt.getUnit())
+                        .anyMatch(u -> u.equals(unit));
+            }
 
             /**
              * Here we define the list of source statements for the SVFA analysis as the confluence analysis sink statements,
