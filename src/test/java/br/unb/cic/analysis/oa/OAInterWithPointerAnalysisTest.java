@@ -984,13 +984,54 @@ public class OAInterWithPointerAnalysisTest {
     }
 
     @Test
-    public void callGraphFromMainTest() {
+    public void pointerAnalisysTest() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.CallGraphFromMainSample.Text";
         AbstractMergeConflictDefinition definition = DefinitionFactory
-                .definition(sampleClassPath, new int[]{11}, new int[]{13});
+                .definition(sampleClassPath, new int[]{13}, new int[]{15});
         OverrideAssignment analysis = new OverrideAssignmentWithPointerAnalysis(definition);
         configureTest(analysis);
         Assert.assertEquals(0, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void CharacterBaseConflictSample() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.CharacterBaseConflictSample";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{7}, new int[]{9});
+        OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
+        configureTest(analysis);
+        Assert.assertEquals(0, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void pointerAnalisysWithReflectionTest() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.CallGraphFromMainSample.TextReflect";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{22}, new int[]{24});
+        OverrideAssignment analysis = new OverrideAssignmentWithPointerAnalysis(definition);
+        configureTest(analysis);
+        Assert.assertEquals(0, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void pointerAnalisysProxyTest() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.CallGraphFromMainSample.TextProxy";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{29}, new int[]{31});
+        OverrideAssignment analysis = new OverrideAssignmentWithPointerAnalysis(definition);
+        configureTest(analysis);
+        Assert.assertEquals(0, analysis.getConflicts().size());
+    }
+
+
+    @Test
+    public void retrofitToyTest() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.retrofit.RestAdapter";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{34}, new int[]{36});
+        OverrideAssignment analysis = new OverrideAssignmentWithPointerAnalysis(definition);
+        configureTest(analysis);
+        Assert.assertEquals(4, analysis.getConflicts().size());
     }
 
     @Test

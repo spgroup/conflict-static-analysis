@@ -68,6 +68,7 @@ public class OverrideAssignmentWithPointerAnalysis extends OverrideAssignment im
             return false;
         }
         if (stmtInFlow.getPointsTo() == null) {
+            count.add(stmtInFlow);
             getPointToFromBase(valueInFlow, stmtInFlow);
         }
         boolean isPointToIntersection = stmtInAbs.getPointsTo().hasNonEmptyIntersection(stmtInFlow.getPointsTo());
@@ -79,7 +80,10 @@ public class OverrideAssignmentWithPointerAnalysis extends OverrideAssignment im
         if (!stmtInAbs.getSootMethod().equals(stmtInFlow.getSootMethod())) {
             return false;
         }
+        if (stmtInFlow.getPointsTo() == null) {
+            count.add(stmtInFlow);
 
+        }
         PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
         boolean isPointToIntersection = pointsToAnalysis.reachingObjects((Local) valueInFlow.getBase()).hasNonEmptyIntersection(pointsToAnalysis.reachingObjects(valueInAbs));
         boolean isFirstUseBoxEqualToArrayRefBase = stmtInAbs.getUnit().getUseBoxes().get(0).getValue().equals(valueInFlow.getBase());

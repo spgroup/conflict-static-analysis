@@ -989,10 +989,40 @@ public class OAInterWithoutPointerAnalysisTest {
     public void callGraphFromMainTest() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.CallGraphFromMainSample.Text";
         AbstractMergeConflictDefinition definition = DefinitionFactory
-                .definition(sampleClassPath, new int[]{11}, new int[]{13});
+                .definition(sampleClassPath, new int[]{13}, new int[]{15});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void pointerAnalisysReflectionTest() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.CallGraphFromMainSample.TextReflect";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{15}, new int[]{17});
+        OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
+        configureTest(analysis);
+        Assert.assertEquals(4, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void pointerAnalisysProxyTest() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.CallGraphFromMainSample.TextProxy";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{29}, new int[]{31});
+        OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
+        configureTest(analysis);
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void retrofitToyTest() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.retrofit.RestAdapter";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{34}, new int[]{36});
+        OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
+        configureTest(analysis);
+        Assert.assertEquals(4, analysis.getConflicts().size());
     }
 
     @Test
