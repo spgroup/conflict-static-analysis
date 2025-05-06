@@ -23,6 +23,7 @@ import br.unb.cic.analysis.reachability.ReachabilityAnalysis;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
 import br.unb.cic.analysis.svfa.SVFAInterProcedural;
 import br.unb.cic.analysis.svfa.SVFAIntraProcedural;
+import br.unb.cic.analysis.svfa.confluence.ConfluenceConflict;
 import br.unb.cic.analysis.svfa.confluence.DFPConfluenceAnalysis;
 import br.unb.cic.diffclass.DiffClass;
 import com.google.common.base.Stopwatch;
@@ -36,6 +37,8 @@ import soot.Transform;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
@@ -111,9 +114,10 @@ public class Main {
             return;
         }
 
+        // write results to out.txt
         System.out.println(" Number of conflicts: " + conflicts.size());
         final String out = "out.txt";
-        final FileWriter fw = new FileWriter(out);
+        final FileWriter fw = new FileWriter(out, true);
         conflicts.forEach(c -> {
             try {
                 fw.write(c + "\n\n");
@@ -124,18 +128,44 @@ public class Main {
         fw.close();
         System.out.println(" Results exported to " + out);
 
+        // write results to out.json
         final String outJSON = "out.json";
-        final FileWriter fwJSON = new FileWriter(outJSON);
-        fwJSON.write("[\n");
-        JSONconflicts.forEach(c -> {
-            try {
-                fwJSON.write(c);
-                fwJSON.write(JSONconflicts.indexOf(c) == JSONconflicts.size() - 1 ? "\n" : ",\n");
-            } catch (Exception e) {
-                System.out.println("error exporting the results " + e.getMessage());
+
+        // get the previous content
+        String prevContent;
+        try {
+            prevContent = new String(Files.readAllBytes(Paths.get(outJSON)));
+        } catch (Exception e) {
+            prevContent = "[\n";
+            System.out.println("Error getting the previous content of the JSON file " + e.getMessage());
+        }
+        StringBuilder results = new StringBuilder(prevContent);
+
+        if (!JSONconflicts.isEmpty()) {
+            // remove the last character if it is a closing bracket
+            if (results.toString().trim().endsWith("]")) {
+                int idx = results.lastIndexOf("]");
+                results.replace(idx, idx + 1, ",\n");
             }
-        });
-        fwJSON.write("\n]");
+
+            // add the new content
+            JSONconflicts.forEach(c -> {
+                try {
+                    results.append(c);
+                    results.append(JSONconflicts.indexOf(c) == JSONconflicts.size() - 1 ? "\n" : ",\n");
+                } catch (Exception e) {
+                    System.out.println("error exporting the results " + e.getMessage());
+                }
+            });
+            results.append("\n]");
+        }
+
+        // write the new content
+        final FileWriter fwJSON = new FileWriter(outJSON);
+        String[] lines = results.toString().split("\n");
+        for (String line : lines) {
+            fwJSON.write(line + "\n");
+        }
         fwJSON.close();
         System.out.println(" JSON Results exported to " + outJSON);
 
@@ -183,6 +213,9 @@ public class Main {
         Option entrypointsOption = Option.builder("entrypoints").argName("entrypoints").hasArg()
                 .desc("entrypoints")
                 .build();
+        Option oaPointerAnalysisOption = Option.builder("oaPointerAnalysis").argName("oaPointerAnalysis").hasArg()
+                .desc("enable pointer analysis in overloading assignment")
+                .build();
 
         options.addOption(classPathOption);
         options.addOption(inputFileOption);
@@ -194,6 +227,7 @@ public class Main {
         options.addOption(depthLimitOption);
         options.addOption(depthMethodsVisitedSVFAOption);
         options.addOption(entrypointsOption);
+        options.addOption(oaPointerAnalysisOption);
     }
 
     private void runAnalysis(String mode, String classpath) {
@@ -334,20 +368,20 @@ public class Main {
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", overrideAssignment));
         System.out.println("Depth limit: " + overrideAssignment.getDepthLimit());
 
-        saveExecutionTime("Configure Soot OA " + (interprocedural ? "Inter" : "Intra") + (!pointerAnalysis ? " Without Pointer Analysis" : ""));
+        saveExecutionTime("Configure Soot OA " + (interprocedural ? "Inter" : "Intra"));
 
         SootWrapper.applyPackages();
 
         conflicts.addAll(overrideAssignment.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
-        JSONconflicts.addAll(overrideAssignment.getConflicts().stream().map(c -> c.toJSON()).collect(Collectors.toList()));
-        saveExecutionTime("Time to perform OA " + (interprocedural ? "Inter" : "Intra") + (!pointerAnalysis ? " Without Pointer Analysis" : ""));
+        JSONconflicts.addAll(overrideAssignment.getFilteredConflicts().stream().map(c -> c.toJSON()).collect(Collectors.toList()));
+        saveExecutionTime("Time to perform OA " + (interprocedural ? "Inter" : "Intra"));
 
         int visitedMethods = overrideAssignment.getVisitedMethodsCount();
         System.out.println("OA " + (interprocedural ? "Inter" : "Intra") + " Visited methods: " + visitedMethods);
 
-        saveVisitedMethods("OA " + (interprocedural ? "Inter" : "Intra") + (!pointerAnalysis ? " Without Pointer Analysis" : ""), (visitedMethods + ""));
+        saveVisitedMethods("OA " + (interprocedural ? "Inter" : "Intra"), (visitedMethods + ""));
 
-        saveConflictsLog("OA " + (interprocedural ? "Inter" : "Intra") + (!pointerAnalysis ? " Without Pointer Analysis" : ""), conflicts.toString());
+        saveConflictsLog("OA " + (interprocedural ? "Inter" : "Intra"), conflicts.toString());
 
     }
 
@@ -521,15 +555,19 @@ public class Main {
         boolean depthMethodsVisited = Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
 
         analysis.execute(false);
-        System.out.println("Depth limit: "+analysis.getDepthLimit());
-        conflicts.addAll(analysis.getConfluentConflicts()
+        System.out.println("Depth limit: " + analysis.getDepthLimit());
+        conflicts.addAll(analysis.getConfluentConflicts(false)
                 .stream()
                 .map(p -> formatConflict(p.toString()))
                 .collect(Collectors.toList()));
+        JSONconflicts.addAll(analysis.getConfluentConflicts(true)
+                .stream()
+                .map(ConfluenceConflict::toJSON)
+                .collect(Collectors.toList()));
 
-        System.out.println("CONFLICTS: "+conflicts.toString());
-        saveVisitedMethods("Confluence "+type_analysis, (analysis.getVisitedMethods()+","+analysis.getGraphSize()));
-        saveConflictsLog("Confluence "+type_analysis, analysis.reportConflictsConfluence().toString().replace("\n", ""));
+        System.out.println("CONFLICTS: " + conflicts.toString());
+        saveVisitedMethods("Confluence " + type_analysis, (analysis.getVisitedMethods() + "," + analysis.getGraphSize()));
+        saveConflictsLog("Confluence " + type_analysis, analysis.reportConflictsConfluence().toString().replace("\n", ""));
     }
 
     private void loadDefinition(String filePath) throws Exception {
@@ -659,22 +697,9 @@ public class Main {
 
         List<String> entrypointsList = new ArrayList<>();
         for (String element : elements) {
-            entrypointsList.add(extractMethodSignature(element));
+            entrypointsList.add(element);
         }
 
         return entrypointsList;
-    }
-
-    private String extractMethodSignature(String fullMethodSignature) {
-        int lastColonIndex = fullMethodSignature.lastIndexOf(':');
-        if (lastColonIndex != -1) {
-            String methodSignature = fullMethodSignature.substring(lastColonIndex + 1).trim();
-            if (methodSignature.endsWith(">")) {
-                methodSignature = methodSignature.substring(0, methodSignature.length() - 1);
-            }
-            return methodSignature;
-        } else {
-            return "";
-        }
     }
 }
