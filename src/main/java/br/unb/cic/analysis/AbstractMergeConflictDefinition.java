@@ -347,7 +347,7 @@ public abstract class AbstractMergeConflictDefinition {
     /**
      * Auxiliary method to extract the SootClass from a method signature.
      *
-     * @param fullMethodSignature the full method signature
+     * @param fullMethodSignature the full method signature. E.g: <br.unb.cic.analysis.samples.ioa.ObjectFieldNotConflictSample: void m()>
      * @return the SootClass extracted from the method signature
      */
     private SootClass extractSootClassFromMethodSignature(String fullMethodSignature) {
@@ -364,7 +364,7 @@ public abstract class AbstractMergeConflictDefinition {
     /**
      * Auxiliary method to extract the method name from a method signature.
      *
-     * @param fullMethodSignature the full method signature
+     * @param fullMethodSignature the full method signature. E.g: <br.unb.cic.analysis.samples.ioa.ObjectFieldNotConflictSample: void m()>
      * @return the method name extracted from the method signature
      */
     private String extractMethodName(String fullMethodSignature) {

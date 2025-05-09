@@ -17,8 +17,8 @@ public class PANotResolveCsvExporter {
             // Header
             if (isNewFile) {
                 writer.append("ClassName;IsAbstractClass;IsFinalClass;IsStaticClass;IsInnerClass;IsPhantomClass;IsInterface;IsConcreteClass;IsEnumClass;")
-                        .append("MethodName;IsAbstractMethod;IsFinalMethod;IsStaticMethod;IsConstructor;IsPhantomMethod;IsEntryMethod;IsConcreteMethod;hasActiveBody;\n");
-                //.append("UnitStatement\n");
+                        .append("MethodName;IsAbstractMethod;IsFinalMethod;IsStaticMethod;IsConstructor;IsPhantomMethod;IsEntryMethod;IsConcreteMethod;hasActiveBody;")
+                        .append("UnitStatement;SourceCodeLineNumber;IsAssign;IsInvoke;").append("TraversedLines\n");
             }
             // Data rows
             for (Statement s : statements) {
@@ -40,9 +40,13 @@ public class PANotResolveCsvExporter {
                 writer.append(String.valueOf(s.getSootMethod().isPhantom())).append(";");
                 writer.append(String.valueOf(s.getSootMethod().isEntryMethod())).append(";");
                 writer.append(String.valueOf(s.getSootMethod().isConcrete())).append(";");
-                writer.append(String.valueOf(s.getSootMethod().hasActiveBody())).append("\n");
+                writer.append(String.valueOf(s.getSootMethod().hasActiveBody())).append(";");
 
-                //writer.append(s.getUnit().toString().replace("\n", " ").replace("\r", " ").replace(";", " ")).append("\n");
+                writer.append(s.getUnit().toString().replace("\n", " ").replace("\r", " ").replace(";", " ")).append(";");
+                writer.append(s.getSourceCodeLineNumber().toString()).append(";");
+                writer.append(String.valueOf(s.isAssign())).append(";");
+                writer.append(String.valueOf(s.isInvoke())).append(";");
+                writer.append(String.valueOf(s.getTraversedLine())).append("\n");
             }
 
             writer.flush();

@@ -73,7 +73,6 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         boolean nameAndTypeAraEquals = stmtInAbs.getPointsTo().isEmpty() && stmtInFlow.getPointsTo().isEmpty() && baseNameEqual && typesEqual;
         boolean methodIsConstructor = stmtInAbs.getSootMethod().isConstructor() && stmtInFlow.getSootMethod().isConstructor();
 
-
         return ((pointToIntersection && !methodIsConstructor) || nameAndTypeAraEquals) && fieldRefsEqual;
     }
 
@@ -116,7 +115,6 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
     @Override
     protected void internalTransform(String s, Map<String, String> map) {
         long startTime = System.currentTimeMillis();
-
         // List<SootMethod> methods = Scene.v().getEntryPoints();
         scala.collection.immutable.List<SootMethod> scalaList = this.statementsUtils.getEntryPoints();
         List<SootMethod> methods = new ArrayList<>(JavaConverters.seqAsJavaList(scalaList));
@@ -405,8 +403,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
 
         if(!edges.hasNext()) {
             count.add(currentStatement);
-
-            /*try {
+            try {
                 SootMethod targetMethod = ((Stmt) currentStatement.getUnit()).getInvokeExpr().getMethod();
                 OverrideAssignmentAbstraction clonedAbstraction = (OverrideAssignmentAbstraction) inputAbstraction.clone();
                 OverrideAssignmentAbstraction traverseResult = traverse(clonedAbstraction, targetMethod, currentStatement.getType());
@@ -414,7 +411,6 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
             } catch (CloneNotSupportedException e) {
                 throw new RuntimeException(e);
             }
-*/
         }
         while (edges.hasNext()) {
             Edge edge = edges.next();

@@ -44,6 +44,9 @@ public class DFPConfluenceAnalysis {
         this(classPath, definition, interprocedural, 5, new ArrayList<>());
     }
 
+    public Set<ConfluenceConflict> getConfluentConflicts() {
+        return getConfluentConflicts(true);
+    }
 
     /**
      * After the execute method has been called, it returns the confluent conflicts returned by the algorithm
