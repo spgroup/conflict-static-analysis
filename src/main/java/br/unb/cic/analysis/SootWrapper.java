@@ -1,9 +1,10 @@
 package br.unb.cic.analysis;
 
+import soot.G;
 import soot.PackManager;
 import soot.Scene;
 import soot.jimple.spark.SparkTransformer;
-import soot.jimple.toolkits.callgraph.CHATransformer;
+import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.options.Options;
 
 import java.io.File;
@@ -15,7 +16,7 @@ import java.util.*;
  * analysis tool.
  */
 public class SootWrapper {
-
+    static CallGraph sparkCG, chaCG;
     private String classPath;
     private String classes;
 
@@ -50,6 +51,7 @@ public class SootWrapper {
     }
 
     public static void configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(String classpath, boolean usePointsToAnalysis) {
+        G.reset();
         List<String> classes = Collections.singletonList(classpath);
 
         Options.v().set_no_bodies_for_excluded(true);
@@ -62,7 +64,7 @@ public class SootWrapper {
         Options.v().set_include(getIncludeList());
         //Options.v().set_exclude(Arrays.asList("java.lang.*","javax.*", "com.sun.*", "com.metamx.common.*", "com.netflix.curator.*", "com.google.*", "kafka.*", "org.*", "scala.*"));
         //Options.v().set_exclude(Arrays.asList( "org.*",  "com.google.*")); // "scala.*",
-        // Options.v().set_no_bodies_for_excluded(true);
+        //Options.v().set_no_bodies_for_excluded(true);
 
         // JAVA 8
         if (getJavaVersion() < 9) {
@@ -77,9 +79,18 @@ public class SootWrapper {
         Options.v().setPhaseOption("jb", "use-original-names:true");
 
         enableCallGraph(usePointsToAnalysis);
-        //enableCHACallGraph();
 
         Scene.v().loadNecessaryClasses();
+
+        applyPackage("cg");
+
+        if (usePointsToAnalysis) {
+            sparkCG = Scene.v().getCallGraph();
+        } else {
+            chaCG = Scene.v().getCallGraph();
+        }
+
+
     }
 
     public static void enableCallGraph() {
@@ -94,34 +105,23 @@ public class SootWrapper {
             enableSparkCallGraph();
             //enableVtaCallGraph();
         } else {
-            // Configurações para análise conservadora (CHA)
-            //enableCHACallGraph();
-
-            Options.v().setPhaseOption("cg.cha", "enabled:true");
-            Options.v().setPhaseOption("cg.cha", "verbose:true");
-            Options.v().setPhaseOption("cg.cha", "apponly:true");
-
-            //Options.v().setPhaseOption("cg.spark", "on");
-            // Options.v().setPhaseOption("cg.spark", "rta:true");
-
-
-            // Ativa CHA para considerar todas as possíveis implementações
+            enableCHACallGraph();
         }
         System.out.println("CG configuration completed.");
     }
 
     private static void enableCHACallGraph() {
-        CHATransformer.v().transform();
+        Options.v().setPhaseOption("cg.cha", "enabled:true");
+        Options.v().setPhaseOption("cg.cha", "verbose:true");
+        Options.v().setPhaseOption("cg.cha", "apponly:true");
     }
 
     private static void enableVtaCallGraph() {
         Options.v().setPhaseOption("cg", "vta");
-
     }
 
     private static void enableRtaCallGraph() {
         Options.v().setPhaseOption("cg", "rta");
-
     }
 
     private static void enableSparkCallGraph() {
@@ -152,15 +152,19 @@ public class SootWrapper {
         List<String> packages = configurePackagesWithCallGraph();
 
         for (String p : packages) {
-            System.out.println("Applying package: " + p);
+            applyPackage(p);
+        }
+    }
 
-            try {
-                PackManager.v().getPack(p).apply(); //.runPacks(); //
-                System.out.println("Successfully applied package: " + p);
-            } catch (Exception e) {
-                System.err.println("Error applying package: " + p);
-                e.printStackTrace();
-            }
+    public static void applyPackage(String p) {
+        System.out.println("Applying package: " + p);
+
+        try {
+            PackManager.v().getPack(p).apply(); //.runPacks(); //
+            System.out.println("Successfully applied package: " + p);
+        } catch (Exception e) {
+            System.err.println("Error applying package: " + p);
+            e.printStackTrace();
         }
     }
 
@@ -239,4 +243,46 @@ public class SootWrapper {
         return Integer.parseInt(version);
     }
 
+    public static CallGraph getSparkCG() {
+        return sparkCG;
+    }
+
+    public static void setSparkCG(CallGraph sparkCG) {
+        SootWrapper.sparkCG = sparkCG;
+    }
+
+    public static CallGraph getChaCG() {
+        return chaCG;
+    }
+
+    public static void setChaCG(CallGraph chaCG) {
+        SootWrapper.chaCG = chaCG;
+    }
+
+    public static Main.AnalysisType getAnalysisType() {
+        CallGraph sparkCG = getSparkCG();
+        CallGraph chaCG = getChaCG();
+
+        if (sparkCG != null && chaCG == null) {
+            return Main.AnalysisType.WITH_POINTER_ANALYSIS;
+        } else if (sparkCG == null && chaCG != null) {
+            return Main.AnalysisType.WITHOUT_POINTER_ANALYSIS;
+        } else if (sparkCG != null && chaCG != null) {
+            return Main.AnalysisType.HYBRID_POINTER_ANALYSIS;
+        } else {
+            throw new IllegalStateException("Nenhum grafo de chamadas disponível.");
+        }
+    }
+
+    public static CallGraph getCallGraphForAnalysisType(CallGraph currentGraph) {
+        Main.AnalysisType analysisType = SootWrapper.getAnalysisType();
+
+        if (analysisType.equals(Main.AnalysisType.WITHOUT_POINTER_ANALYSIS) ||
+                (analysisType.equals(Main.AnalysisType.HYBRID_POINTER_ANALYSIS) && currentGraph == SootWrapper.getSparkCG())) {
+            return SootWrapper.getChaCG();
+        }
+
+        return SootWrapper.getSparkCG();
+    }
 }
+

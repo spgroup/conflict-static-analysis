@@ -2,6 +2,7 @@ package br.unb.cic.analysis.oa;
 
 import br.unb.cic.analysis.AbstractAnalysis;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+import br.unb.cic.analysis.SootWrapper;
 import br.unb.cic.analysis.StatementsUtil;
 import br.unb.cic.analysis.io.PANotResolveCsvExporter;
 import br.unb.cic.analysis.model.*;
@@ -394,39 +395,26 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
     }
 
     private OverrideAssignmentAbstraction calculateMergedOverrideAssignment(OverrideAssignmentAbstraction inputAbstraction, Statement currentStatement) {
-        CallGraph callGraph = Scene.v().getCallGraph();
+        CallGraph callGraph = SootWrapper.getCallGraphForAnalysisType(null);
         Iterator<Edge> edges = callGraph.edgesOutOf(currentStatement.getUnit());
 
         List<OverrideAssignmentAbstraction> flowSetList = new ArrayList<>();
-        // Lista para armazenar as arestas do grafo
         List<String> graphEdges = new ArrayList<>();
 
-        if(!edges.hasNext()) {
-            count.add(currentStatement);
-            try {
-                SootMethod targetMethod = ((Stmt) currentStatement.getUnit()).getInvokeExpr().getMethod();
-                OverrideAssignmentAbstraction clonedAbstraction = (OverrideAssignmentAbstraction) inputAbstraction.clone();
-                OverrideAssignmentAbstraction traverseResult = traverse(clonedAbstraction, targetMethod, currentStatement.getType());
-                flowSetList.add(traverseResult);
-            } catch (CloneNotSupportedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        while (edges.hasNext()) {
-            Edge edge = edges.next();
-            SootMethod srcMethod = edge.getSrc().method();
-            SootMethod targetMethod = edge.getTgt().method();
+        if (!edges.hasNext()) {
+            callGraph = SootWrapper.getCallGraphForAnalysisType(callGraph);
+            ;
+            edges = callGraph.edgesOutOf(currentStatement.getUnit());
 
-            graphEdges.add("\"" + srcMethod.getSignature() + "\" -> \"" + targetMethod.getSignature() + "\";");
-            try {
-                OverrideAssignmentAbstraction clonedAbstraction = (OverrideAssignmentAbstraction) inputAbstraction.clone();
-                OverrideAssignmentAbstraction traverseResult = traverse(clonedAbstraction, targetMethod, currentStatement.getType());
-                flowSetList.add(traverseResult);
-            } catch (CloneNotSupportedException ex) {
-                throw new RuntimeException(ex);
+            if (!edges.hasNext()) {
+                handleEdgesNotFound(inputAbstraction, currentStatement, flowSetList);
             }
+            processEdges(inputAbstraction, currentStatement, edges, flowSetList, graphEdges);
         }
+        processEdges(inputAbstraction, currentStatement, edges, flowSetList, graphEdges);
+
         exportCallGraphToDot(graphEdges, "calculateMergedOverrideAssignment.dot");
+
         if (flowSetList.isEmpty()) {
             return inputAbstraction;
         }
@@ -436,6 +424,38 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
 
         return newOverrideAssignmentAbstraction;
     }
+
+    private void handleEdgesNotFound(OverrideAssignmentAbstraction inputAbstraction, Statement currentStatement, List<OverrideAssignmentAbstraction> flowSetList) {
+        try {
+            count.add(currentStatement);
+            SootMethod targetMethod = ((Stmt) currentStatement.getUnit()).getInvokeExpr().getMethod();
+            cloneAndTraverse(inputAbstraction, currentStatement, flowSetList, targetMethod);
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void processEdges(OverrideAssignmentAbstraction inputAbstraction, Statement currentStatement, Iterator<Edge> edges, List<OverrideAssignmentAbstraction> flowSetList, List<String> graphEdges) {
+        while (edges.hasNext()) {
+            Edge edge = edges.next();
+            SootMethod srcMethod = edge.getSrc().method();
+            SootMethod targetMethod = edge.getTgt().method();
+
+            graphEdges.add("\"" + srcMethod.getSignature() + "\" -> \"" + targetMethod.getSignature() + "\";");
+            try {
+                cloneAndTraverse(inputAbstraction, currentStatement, flowSetList, targetMethod);
+            } catch (CloneNotSupportedException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    }
+
+    private void cloneAndTraverse(OverrideAssignmentAbstraction inputAbstraction, Statement currentStatement, List<OverrideAssignmentAbstraction> flowSetList, SootMethod targetMethod) throws CloneNotSupportedException {
+        OverrideAssignmentAbstraction clonedAbstraction = (OverrideAssignmentAbstraction) inputAbstraction.clone();
+        OverrideAssignmentAbstraction traverseResult = traverse(clonedAbstraction, targetMethod, currentStatement.getType());
+        flowSetList.add(traverseResult);
+    }
+
 
     // Método para exportar o grafo para um arquivo DOT
     private void exportCallGraphToDot(List<String> graphEdges, String filename) {
