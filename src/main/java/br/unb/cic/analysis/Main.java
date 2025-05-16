@@ -374,7 +374,7 @@ public class Main {
 
         saveExecutionTime("Configure Soot OA " + modeLabel);
 
-        SootWrapper.applyPackages();
+        SootWrapper.applyPackage("wjtp");
 
         conflicts.addAll(overrideAssignment.getConflicts().stream()
                 .map(Object::toString)

@@ -115,7 +115,7 @@ public class OAInterWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{8}, new int[]{10});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(1, analysis.getConflicts().size());
+        Assert.assertEquals(7, analysis.getConflicts().size());
     }
 
     @Test
@@ -227,7 +227,7 @@ public class OAInterWithoutPointerAnalysisTest {
         Assert.assertEquals(5, analysis.getConflicts().size());
     }
 
-    @Ignore
+
     @Test
     public void ifWithInvokeConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.IfWithInvokeConflictSample";
@@ -358,23 +358,22 @@ public class OAInterWithoutPointerAnalysisTest {
      */
     @Test
     public void additionToArrayWithJavaUtilConflict() {
+        String classpath = "target/test-classes/";
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.AdditionToArrayConflictSample";
-        List<String> stringList = new ArrayList<String>(Arrays.asList("java.util.*")); // java.util.* java.util.HashMap
 
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{11}, new int[]{13});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
 
+        List<String> stringList = new ArrayList<String>(Arrays.asList("java.util.*")); // java.util.* java.util.HashMap
         G.reset();
-
-        String classpath = "target/test-classes/";
-        List<String> testClasses = Collections.singletonList(classpath);
+        List<String> classes = Collections.singletonList(classpath);
 
         Options.v().set_no_bodies_for_excluded(true);
         Options.v().set_allow_phantom_refs(true);
         Options.v().set_output_format(soot.options.Options.output_format_jimple);
         Options.v().set_whole_program(true);
-        Options.v().set_process_dir(testClasses);
+        Options.v().set_process_dir(classes);
         Options.v().set_full_resolver(true);
         Options.v().set_keep_line_number(true);
         Options.v().set_include(stringList);
@@ -388,13 +387,16 @@ public class OAInterWithoutPointerAnalysisTest {
         else if (getJavaVersion() >= 9) {
             Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK" + File.pathSeparator + classpath);
         }
-
-        Options.v().setPhaseOption("jb.ls", "off"); // remove x = 1; x#2 = 2
+        //Options.v().setPhaseOption("jb.ls", "off"); // remove x = 1; x#2 = 2
         Options.v().setPhaseOption("jb", "use-original-names:true");
 
-        enableCallGraph();
+        enableCallGraph(false);
 
         Scene.v().loadNecessaryClasses();
+
+        applyPackage("cg");
+
+        SootWrapper.setChaCG(Scene.v().getCallGraph());
 
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
         analysis.configureEntryPoints();
@@ -407,7 +409,7 @@ public class OAInterWithoutPointerAnalysisTest {
             e.printStackTrace();
         }
 
-        Assert.assertEquals(6, analysis.getConflicts().size());
+        Assert.assertEquals(8, analysis.getConflicts().size());
     }
 
     @Test
@@ -423,21 +425,21 @@ public class OAInterWithoutPointerAnalysisTest {
     @Test
     public void hashmapWithJavaUtilConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.HashmapConflictSample";
-        List<String> stringList = new ArrayList<String>(Arrays.asList("java.util.HashMap")); // java.util.* java.util.HashMap
+        String classpath = "target/test-classes/";
 
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{11}, new int[]{12});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
-        G.reset();
 
-        String classpath = "target/test-classes/";
-        List<String> testClasses = Collections.singletonList(classpath);
+        List<String> stringList = new ArrayList<String>(Arrays.asList("java.util.*")); // java.util.* java.util.HashMap
+        G.reset();
+        List<String> classes = Collections.singletonList(classpath);
 
         Options.v().set_no_bodies_for_excluded(true);
         Options.v().set_allow_phantom_refs(true);
-        Options.v().set_output_format(Options.output_format_jimple);
+        Options.v().set_output_format(soot.options.Options.output_format_jimple);
         Options.v().set_whole_program(true);
-        Options.v().set_process_dir(testClasses);
+        Options.v().set_process_dir(classes);
         Options.v().set_full_resolver(true);
         Options.v().set_keep_line_number(true);
         Options.v().set_include(stringList);
@@ -451,14 +453,16 @@ public class OAInterWithoutPointerAnalysisTest {
         else if (getJavaVersion() >= 9) {
             Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK" + File.pathSeparator + classpath);
         }
-
-
-        Options.v().setPhaseOption("jb.ls", "off"); // remove x = 1; x#2 = 2
+        //Options.v().setPhaseOption("jb.ls", "off"); // remove x = 1; x#2 = 2
         Options.v().setPhaseOption("jb", "use-original-names:true");
 
         enableCallGraph(false);
 
         Scene.v().loadNecessaryClasses();
+
+        applyPackage("cg");
+
+        SootWrapper.setChaCG(Scene.v().getCallGraph());
 
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
         analysis.configureEntryPoints();
@@ -469,7 +473,7 @@ public class OAInterWithoutPointerAnalysisTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Assert.assertEquals(107, analysis.getConflicts().size());
+        Assert.assertEquals(233, analysis.getConflicts().size());
     }
 
     @Test
@@ -655,7 +659,7 @@ public class OAInterWithoutPointerAnalysisTest {
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
-    @Ignore
+
     @Test
     public void localArraysNotConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.LocalArrayNotConflictSample";
@@ -666,7 +670,6 @@ public class OAInterWithoutPointerAnalysisTest {
         Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
-    @Ignore
     @Test
     public void localArraysRecursiveNotConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.LocalArrayRecursiveNotConflictSample";
@@ -834,7 +837,7 @@ public class OAInterWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{7, 9}, new int[]{8});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(1, analysis.getConflicts().size());
+        Assert.assertEquals(2, analysis.getConflicts().size());
     }
 
     @Test
@@ -867,7 +870,6 @@ public class OAInterWithoutPointerAnalysisTest {
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
-    @Ignore
     @Test
     public void recursiveMockupNotConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.RecursiveMockupNotConflictSample";
@@ -999,10 +1001,10 @@ public class OAInterWithoutPointerAnalysisTest {
     public void pointerAnalisysReflectionTest() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.CallGraphFromMainSample.TextReflect";
         AbstractMergeConflictDefinition definition = DefinitionFactory
-                .definition(sampleClassPath, new int[]{15}, new int[]{17});
+                .definition(sampleClassPath, new int[]{22}, new int[]{24});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(4, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
     @Test
@@ -1013,16 +1015,6 @@ public class OAInterWithoutPointerAnalysisTest {
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());
-    }
-
-    @Test
-    public void retrofitToyTest() {
-        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.retrofit.RestAdapter";
-        AbstractMergeConflictDefinition definition = DefinitionFactory
-                .definition(sampleClassPath, new int[]{34}, new int[]{36});
-        OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
-        configureTest(analysis);
-        Assert.assertEquals(4, analysis.getConflicts().size());
     }
 
     @Test

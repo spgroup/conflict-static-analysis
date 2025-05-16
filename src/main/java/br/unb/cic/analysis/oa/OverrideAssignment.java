@@ -66,15 +66,14 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
 
     }
 
-    private static boolean areFieldReferencesEqual(Statement stmtInAbs, Statement stmtInFlow, InstanceFieldRef abstractFieldRef, InstanceFieldRef flowFieldRef) {
-        boolean pointToIntersection = stmtInAbs.getPointsTo().hasNonEmptyIntersection(stmtInFlow.getPointsTo());
-        boolean typesEqual = abstractFieldRef.getType().equals(flowFieldRef.getType());
-        boolean fieldRefsEqual = abstractFieldRef.getFieldRef().equals(flowFieldRef.getFieldRef());
-        boolean baseNameEqual = abstractFieldRef.getBase().toString().equals(flowFieldRef.getBase().toString());
-        boolean nameAndTypeAraEquals = stmtInAbs.getPointsTo().isEmpty() && stmtInFlow.getPointsTo().isEmpty() && baseNameEqual && typesEqual;
-        boolean methodIsConstructor = stmtInAbs.getSootMethod().isConstructor() && stmtInFlow.getSootMethod().isConstructor();
-
-        return ((pointToIntersection && !methodIsConstructor) || nameAndTypeAraEquals) && fieldRefsEqual;
+    static boolean areFieldReferencesEqual(Statement stmtInAbs, Statement stmtInFlow, InstanceFieldRef valueInAbs, InstanceFieldRef valueInFlow) {
+        boolean isSameFieldReference = valueInAbs.getFieldRef().equals(valueInFlow.getFieldRef());
+        boolean isSameType = valueInAbs.getType().equals(valueInFlow.getType());
+        boolean bothAreSameConstructor =
+                stmtInAbs.getSootMethod().isConstructor()
+                        && stmtInFlow.getSootMethod().isConstructor()
+                        && stmtInAbs.getSootMethod().equals(stmtInFlow.getSootMethod());
+        return isSameType && isSameFieldReference && !bothAreSameConstructor;
     }
 
     protected static void getPointToFromBase(Value value, Statement stmt) {
@@ -155,7 +154,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
 
         this.traversedMethodsWrapper.add(sootMethod);
 
-        //System.out.println(sootMethod + " - " + this.traversedMethodsWrapper.size());
+        System.out.println(sootMethod + " - " + this.traversedMethodsWrapper.size());
         Body body = this.statementsUtils.getDefinition().retrieveActiveBodySafely(sootMethod);
 
         if (body != null) {
@@ -320,28 +319,92 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         InstanceFieldRef abstractFieldRef = (InstanceFieldRef) valueInAbs;
         InstanceFieldRef flowFieldRef = (InstanceFieldRef) valueInFlow;
 
-        if (stmtInAbs.getPointsTo() != null && stmtInFlow.getPointsTo() == null) {
+        // Garante que stmtInFlow tenha points-to se stmtInAbs já tiver
+        if (hasPointsTo(stmtInAbs) && !hasPointsTo(stmtInFlow)) {
             getPointToFromBase(flowFieldRef.getBase(), stmtInFlow);
         }
-        if (stmtInFlow.getPointsTo().isEmpty()) {
+
+        // Se qualquer um dos dois não tem points-to, usa comparação básica e adiciona ao count
+        if (!hasPointsTo(stmtInFlow)) {
             count.add(stmtInFlow);
+            return areFieldReferencesEqual(stmtInAbs, stmtInFlow, abstractFieldRef, flowFieldRef);
         }
-        return stmtInAbs.getPointsTo() != null
-                && areFieldReferencesEqual(stmtInAbs, stmtInFlow, abstractFieldRef, flowFieldRef);
+
+        if (!hasPointsTo(stmtInAbs)) {
+            count.add(stmtInAbs);
+            return areFieldReferencesEqual(stmtInAbs, stmtInFlow, abstractFieldRef, flowFieldRef);
+        }
+
+        // Comparação completa
+        boolean bothAreSameConstructor =
+                stmtInAbs.getSootMethod().isConstructor()
+                        && stmtInFlow.getSootMethod().isConstructor()
+                        && stmtInAbs.getSootMethod().equals(stmtInFlow.getSootMethod());
+
+        boolean isSameFieldReference = abstractFieldRef.getField().equals(flowFieldRef.getField());
+        boolean hasCommonTargets = stmtInAbs.getPointsTo().hasNonEmptyIntersection(stmtInFlow.getPointsTo());
+
+        return hasCommonTargets && isSameFieldReference && !bothAreSameConstructor;
+    }
+
+    private boolean hasPointsTo(Statement stmt) {
+        return stmt.getPointsTo() != null && !stmt.getPointsTo().isEmpty();
     }
 
     protected boolean isSameArrayRef(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
-        if (stmtInAbs.getPointsTo() != null) {
-            if (stmtInFlow.getPointsTo() == null) {
-                count.add(stmtInFlow);
-                getPointToFromBase(((ArrayRef) valueInFlow).getBase(), stmtInFlow);
-            }
-            if (stmtInAbs.getPointsTo().isEmpty() && stmtInFlow.getPointsTo().isEmpty()) {
-                return valueInAbs.toString().equals(valueInFlow.toString());
-            }
-            return stmtInAbs.getPointsTo().hasNonEmptyIntersection(stmtInFlow.getPointsTo());
+        ArrayRef abstractArrayRef = (ArrayRef) valueInAbs;
+        ArrayRef flowArrayRef = (ArrayRef) valueInFlow;
+
+        // Garante que stmtInFlow tenha points-to se stmtInAbs já tiver
+        if (hasPointsTo(stmtInAbs) && !hasPointsTo(stmtInFlow)) {
+            getPointToFromBase(flowArrayRef.getBase(), stmtInFlow);
         }
-        return false;
+
+        // Se qualquer um dos dois não tem points-to, usa comparação básica e adiciona ao count
+        if (!hasPointsTo(stmtInFlow)) {
+            count.add(stmtInFlow);
+            return areArrayReferencesEqual(abstractArrayRef, flowArrayRef);
+        }
+
+        if (!hasPointsTo(stmtInAbs)) {
+            count.add(stmtInAbs);
+            return areArrayReferencesEqual(abstractArrayRef, flowArrayRef);
+        }
+
+        // Comparação completa
+        boolean hasCommonTargets = stmtInAbs.getPointsTo().hasNonEmptyIntersection(stmtInFlow.getPointsTo());
+
+        return hasCommonTargets;
+    }
+
+    static boolean areArrayReferencesEqual(ArrayRef ref1, ArrayRef ref2) {
+        return ref1.getBase().toString().equals(ref2.getBase().toString()) &&
+                ref1.getIndex().toString().equals(ref2.getIndex().toString());
+    }
+
+    protected boolean areArrayAndLocalCompatible(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
+        if (!stmtInAbs.getSootMethod().equals(stmtInFlow.getSootMethod())) {
+            return false;
+        }
+
+        // Garante que stmtInFlow tenha points-to se stmtInAbs já tiver
+        if (hasPointsTo(stmtInAbs) && !hasPointsTo(stmtInFlow)) {
+            getPointToFromBase(valueInFlow, stmtInFlow);
+        }
+
+        // Se nenhum dos dois tem points-to, só compara por nome
+        if (!hasPointsTo(stmtInAbs) || !hasPointsTo(stmtInFlow)) {
+            count.add(stmtInFlow);
+            return valueInAbs.toString().contains(valueInFlow.toString());
+        }
+        boolean isPointToIntersection = stmtInAbs.getPointsTo().hasNonEmptyIntersection(stmtInFlow.getPointsTo());
+        boolean containsSameName = valueInAbs.toString().contains(valueInFlow.toString());
+
+        return isPointToIntersection && containsSameName;
+    }
+
+    protected boolean isLocalAndArrayCompatible(Statement stmtInAbs, Statement stmtInFlow, Local valueInAbs, ArrayRef valueInFlow) {
+        return areArrayAndLocalCompatible(stmtInFlow, stmtInAbs, valueInFlow, valueInAbs);
     }
 
     protected boolean isSameStaticFieldRef(Value valueInAbs, Value valueInFlow) {
@@ -395,6 +458,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
     }
 
     private OverrideAssignmentAbstraction calculateMergedOverrideAssignment(OverrideAssignmentAbstraction inputAbstraction, Statement currentStatement) {
+
         CallGraph callGraph = SootWrapper.getCallGraphForAnalysisType(null);
         Iterator<Edge> edges = callGraph.edgesOutOf(currentStatement.getUnit());
 
@@ -403,7 +467,6 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
 
         if (!edges.hasNext()) {
             callGraph = SootWrapper.getCallGraphForAnalysisType(callGraph);
-            ;
             edges = callGraph.edgesOutOf(currentStatement.getUnit());
 
             if (!edges.hasNext()) {

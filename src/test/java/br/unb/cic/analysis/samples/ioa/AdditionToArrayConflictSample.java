@@ -9,7 +9,7 @@ public class AdditionToArrayConflictSample {
     public void m() {
         List<String> validParameterAnnotations = new ArrayList<String>();
         validParameterAnnotations.add("LEFT"); // LEFT
-        System.out.println(validParameterAnnotations.toString());
+        int i = 0;
         validParameterAnnotations.add("RIGHT");  // RIGHT
     }
 }

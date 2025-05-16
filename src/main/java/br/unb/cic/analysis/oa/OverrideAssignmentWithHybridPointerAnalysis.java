@@ -3,7 +3,9 @@ package br.unb.cic.analysis.oa;
 import br.unb.cic.analysis.AbstractAnalysis;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Statement;
-import soot.*;
+import soot.Local;
+import soot.Value;
+import soot.ValueBox;
 import soot.jimple.ArrayRef;
 import soot.jimple.InstanceFieldRef;
 import soot.jimple.StaticFieldRef;
@@ -61,33 +63,5 @@ public class OverrideAssignmentWithHybridPointerAnalysis extends OverrideAssignm
             }
         }
         return false;
-    }
-
-    private static boolean areArrayAndLocalCompatible(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
-        if (!stmtInAbs.getSootMethod().equals(stmtInFlow.getSootMethod())) {
-            return false;
-        }
-        if (stmtInFlow.getPointsTo() == null) {
-            count.add(stmtInFlow);
-            getPointToFromBase(valueInFlow, stmtInFlow);
-        }
-        boolean isPointToIntersection = stmtInAbs.getPointsTo().hasNonEmptyIntersection(stmtInFlow.getPointsTo());
-        boolean containsSameName = valueInAbs.toString().contains(valueInFlow.toString());
-        return isPointToIntersection && containsSameName;
-    }
-
-    private static boolean isLocalAndArrayCompatible(Statement stmtInAbs, Statement stmtInFlow, Local valueInAbs, ArrayRef valueInFlow) {
-        if (!stmtInAbs.getSootMethod().equals(stmtInFlow.getSootMethod())) {
-            return false;
-        }
-        if (stmtInFlow.getPointsTo() == null) {
-            count.add(stmtInFlow);
-
-        }
-        PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
-        boolean isPointToIntersection = pointsToAnalysis.reachingObjects((Local) valueInFlow.getBase()).hasNonEmptyIntersection(pointsToAnalysis.reachingObjects(valueInAbs));
-        boolean isFirstUseBoxEqualToArrayRefBase = stmtInAbs.getUnit().getUseBoxes().get(0).getValue().equals(valueInFlow.getBase());
-
-        return isPointToIntersection && isFirstUseBoxEqualToArrayRefBase;
     }
 }
