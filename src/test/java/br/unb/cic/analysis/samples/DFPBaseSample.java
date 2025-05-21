@@ -6,15 +6,19 @@ import java.util.regex.Pattern;
 public class DFPBaseSample {
     private String text;
 
+    public DFPBaseSample(String text){
+        this.text = text;
+    }
+
     public void cleanText(){
-        DFPBaseSample inst = new DFPBaseSample();
+        DFPBaseSample inst = new DFPBaseSample("the  the dog");
         inst.normalizeWhiteSpace(); //Left
         inst.removeComments();
         inst.removeDuplicateWords(); //Right
     }
 
     private void normalizeWhiteSpace(){
-        text.replace("  ", "");
+        text = text.replace("  ", " ");
     }
 
     private void removeComments(){
@@ -34,13 +38,13 @@ public class DFPBaseSample {
     }
 
     private void removeDuplicateWords(){
-        String[] words = text.split(" ");
-        StringBuilder result = new StringBuilder(words[0]);
-        for (int i = 1; i < words.length; i++) {
-            if (!words[i].equals(words[i - 1])) {
-                result.append(" ");
+        String[] words = text.split(" ", -1);
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < words.length; i++) {
+            if (i == 0 || !words[i].equals(words[i - 1]))
                 result.append(words[i]);
-            }
+            if (i < words.length - 1)
+                result.append(" ");
         }
 
         text = result.toString();

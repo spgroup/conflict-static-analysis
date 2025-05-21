@@ -1,21 +1,16 @@
 package br.unb.cic.analysis.dfp;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
-import br.unb.cic.analysis.Main;
-import br.unb.cic.analysis.SootWrapper;
-import br.unb.cic.analysis.model.Statement;
-import br.unb.cic.analysis.model.TraversedLine;
-import br.unb.cic.analysis.svfa.confluence.ConfluenceConflict;
-import br.unb.cic.analysis.svfa.confluence.DFPConfluenceAnalysis;
-import br.unb.cic.soot.graph.StatementNode;
-import br.unc.cic.analysis.test.DefinitionFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class DFPAnalysisBaseTest {
+public class DFPAnalysisMotivantingTest {
 
     private DFPAnalysisSemanticConflicts analysis;
     AbstractMergeConflictDefinition definition;
@@ -26,8 +21,8 @@ public class DFPAnalysisBaseTest {
             protected Map<String, List<Integer>> sourceDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(15);
-                res.put("br.unb.cic.analysis.samples.DFPBaseSample", lines);
+                lines.add(9);
+                res.put("br.unb.cic.analysis.samples.DFPMotivating", lines);
                 return res;
             }
 
@@ -35,8 +30,8 @@ public class DFPAnalysisBaseTest {
             protected Map<String, List<Integer>> sinkDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(17);
-                res.put("br.unb.cic.analysis.samples.DFPBaseSample", lines);
+                lines.add(11);
+                res.put("br.unb.cic.analysis.samples.DFPMotivating", lines);
 
                 return res;
             }
@@ -56,6 +51,6 @@ public class DFPAnalysisBaseTest {
         System.out.println(analysis.svgToDotModel());
         System.out.println(analysis.findSourceSinkPaths());
         System.out.println(analysis.svg().findConflictingPaths());
-        Assert.assertTrue(analysis.svg().reportConflicts().size() >= 1);
+        Assert.assertTrue(analysis.svg().reportConflicts().size() == 1);
     }
 }
