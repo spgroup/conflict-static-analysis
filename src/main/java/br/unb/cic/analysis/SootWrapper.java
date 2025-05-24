@@ -1,14 +1,20 @@
 package br.unb.cic.analysis;
 
+import com.google.common.base.Stopwatch;
 import soot.G;
 import soot.PackManager;
 import soot.Scene;
-import soot.jimple.spark.SparkTransformer;
 import soot.jimple.toolkits.callgraph.CallGraph;
+import soot.jimple.toolkits.callgraph.Edge;
 import soot.options.Options;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A fluent API for executing the soot framework
@@ -81,16 +87,18 @@ public class SootWrapper {
         enableCallGraph(usePointsToAnalysis);
 
         Scene.v().loadNecessaryClasses();
+        //applyPackage("cg");
 
-        applyPackage("cg");
+    }
 
-        if (usePointsToAnalysis) {
-            sparkCG = Scene.v().getCallGraph();
-        } else {
-            chaCG = Scene.v().getCallGraph();
+    public static int countEdges(CallGraph cg) {
+        int count = 0;
+        Iterator<Edge> it = cg.iterator();
+        while (it.hasNext()) {
+            it.next();
+            count++;
         }
-
-
+        return count;
     }
 
     public static void enableCallGraph() {
@@ -112,9 +120,12 @@ public class SootWrapper {
 
     private static void enableCHACallGraph() {
         Options.v().setPhaseOption("cg.cha", "enabled:true");
-        Options.v().setPhaseOption("cg.cha", "verbose:true");
-        Options.v().setPhaseOption("cg.cha", "apponly:true");
     }
+
+    private static void enableSparkCallGraph() {
+        Options.v().setPhaseOption("cg.spark", "on");
+    }
+
 
     private static void enableVtaCallGraph() {
         Options.v().setPhaseOption("cg", "vta");
@@ -124,22 +135,7 @@ public class SootWrapper {
         Options.v().setPhaseOption("cg", "rta");
     }
 
-    private static void enableSparkCallGraph() {
-        //Enable Spark
-        HashMap<String, String> opt = new HashMap<String, String>();
-        //opt.put("propagator","worklist");
-        //opt.put("simple-edges-bidirectional","false");
-        opt.put("on-fly-cg", "true");
-        //opt.put("set-impl","double");
-        //opt.put("double-set-old","hybrid");
-        //opt.put("double-set-new","hybrid");
-        //opt.put("pre_jimplify", "true");
-        SparkTransformer.v().transform("", opt);
 
-        // Configurações para análise de points-to precisa
-        //Options.v().setPhaseOption("cg.spark", "on"); // Ativa o Spark
-        Options.v().setPhaseOption("cg.spark", "enabled:true"); // Habilita o Spark
-    }
 
     private static List<String> configurePackagesWithCallGraph() {
         List<String> packages = new ArrayList<String>();
@@ -157,13 +153,32 @@ public class SootWrapper {
     }
 
     public static void applyPackage(String p) {
+        Stopwatch stopwatch = Stopwatch.createStarted();
         System.out.println("Applying package: " + p);
-
+        stopwatch = Stopwatch.createStarted();
         try {
-            PackManager.v().getPack(p).apply(); //.runPacks(); //
-            System.out.println("Successfully applied package: " + p);
+            PackManager.v().getPack(p).apply();
+            //System.out.println("Successfully applied package: " + p);
         } catch (Exception e) {
             System.err.println("Error applying package: " + p);
+            e.printStackTrace();
+        } finally {
+            saveExecutionTime("Successfully applied package: " + p, stopwatch);
+        }
+    }
+
+    public static void saveExecutionTime(String description, Stopwatch stopwatch) {
+
+        NumberFormat formatter = new DecimalFormat("#0.00000");
+
+        long time = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        try {
+            FileWriter myWriter = new FileWriter("time.txt", true);
+            myWriter.write(description + ";" + formatter.format(time / 1000d) + "\n");
+            System.out.println(description + " " + formatter.format(time / 1000d));
+            myWriter.close();
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
             e.printStackTrace();
         }
     }

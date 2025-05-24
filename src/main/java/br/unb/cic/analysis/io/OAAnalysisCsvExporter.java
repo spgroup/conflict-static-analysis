@@ -17,7 +17,7 @@ public class OAAnalysisCsvExporter {
         try (FileWriter writer = new FileWriter(file, true)) {
             // Cabeçalho
             if (isNewFile) {
-                writer.append("DeepLimit;ClassName;MethodName;SourceCodeLine;TargetUnit;PossibleImplementations;CallGraphType;AnalysisType\n");
+                writer.append("DeepLimit;ClassName;MethodName;SourceCodeLine;TargetUnit;PossibleImplementations;CallGraphType\n"); //;CallGraphType;AnalysisType
             }
 
             for (OAAnalysisRecord record : records) {
@@ -29,8 +29,8 @@ public class OAAnalysisCsvExporter {
                 writer.append(String.valueOf(s.getSourceCodeLineNumber())).append(";");
                 writer.append(s.getUnit().toString().replace("\n", " ").replace("\r", " ").replace(";", " ")).append(";");
                 writer.append(String.valueOf(record.getCallGraphEdgesSize())).append(";");
-                writer.append(record.getCallGraphType().name()).append(";");
-                writer.append(record.getAnalysisType().name()).append("\n");
+                writer.append(record.getCallGraphType().name()).append("\n");
+                //writer.append(record.getAnalysisType().name()).append("\n");
             }
 
             writer.flush();

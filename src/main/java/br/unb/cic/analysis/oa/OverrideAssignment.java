@@ -124,7 +124,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
 
     @Override
     protected void internalTransform(String s, Map<String, String> map) {
-        //SootWrapper.saveCallGraph((this instanceof OverrideAssignmentWithoutPointerAnalysis));
+        System.out.println("countEdges: " + SootWrapper.countEdges(Scene.v().getCallGraph()));
         long startTime = System.currentTimeMillis();
         // List<SootMethod> methods = Scene.v().getEntryPoints();
         scala.collection.immutable.List<SootMethod> scalaList = this.statementsUtils.getEntryPoints();
@@ -141,8 +141,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         oaConflictReport.report();
     }
     public void configureEntryPoints() {
-
-        scala.collection.immutable.List<SootMethod> scalaList = this.statementsUtils.getCallgraphEntryPoints(); //this instanceof OverrideAssignmentWithPointerAnalysis ? this.statementsUtils.getCallgraphEntryPoints() : this.statementsUtils.getEntryPoints();
+        scala.collection.immutable.List<SootMethod> scalaList = this instanceof OverrideAssignmentWithPointerAnalysis ? this.statementsUtils.getCallgraphEntryPoints() : this.statementsUtils.getEntryPoints();
         List<SootMethod> entryPoints = new ArrayList<>(JavaConverters.seqAsJavaList(scalaList));
         //List<SootMethod> methods = new ArrayList<>(Collections.singleton(entryPoints.get(1).getDeclaringClass().getMethodByName("main")));
         //System.out.println("CG Entrypoints" + entryPoints);
@@ -467,27 +466,30 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
 
     private OverrideAssignmentAbstraction calculateMergedOverrideAssignment(OverrideAssignmentAbstraction inputAbstraction, Statement currentStatement) {
 
-        CallGraph callGraph = SootWrapper.getCallGraphForAnalysisType(null);
-        Iterator<Edge> edges = callGraph.edgesOutOf(currentStatement.getUnit());
-
+        //CallGraph callGraph = SootWrapper.getCallGraphForAnalysisType(null);
         List<OverrideAssignmentAbstraction> flowSetList = new ArrayList<>();
         List<String> graphEdges = new ArrayList<>();
 
-        if (!edges.hasNext()) {
-            callGraph = SootWrapper.getCallGraphForAnalysisType(callGraph);
-            edges = callGraph.edgesOutOf(currentStatement.getUnit());
+        CallGraph callGraph = Scene.v().getCallGraph();
+        Iterator<Edge> edges = callGraph.edgesOutOf(currentStatement.getUnit());
 
-            if (!edges.hasNext()) {
+        if (!edges.hasNext()) {
+            //callGraph = SootWrapper.getCallGraphForAnalysisType(callGraph);
+            //edges = callGraph.edgesOutOf(currentStatement.getUnit());
+
+/*            if (!edges.hasNext()) {
                 handleEdgesNotFound(inputAbstraction, currentStatement, flowSetList);
             } else {
                 processEdges(inputAbstraction, currentStatement, edges, flowSetList, graphEdges, callGraph);
-            }
+            }*/
 
+            handleEdgesNotFound(inputAbstraction, currentStatement, flowSetList);
+            addOAAnalysisRecord(currentStatement, callGraph, 0);
         } else {
             processEdges(inputAbstraction, currentStatement, edges, flowSetList, graphEdges, callGraph);
         }
 
-        exportCallGraphToDot(graphEdges, "calculateMergedOverrideAssignment.dot");
+        //exportCallGraphToDot(graphEdges, "calculateMergedOverrideAssignment.dot");
 
         if (flowSetList.isEmpty()) {
             return inputAbstraction;
@@ -531,10 +533,8 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         OAAnalysisRecord oaAnalysisRecord = new OAAnalysisRecord(
                 this.traversedMethodsWrapper.size(),
                 currentStatement, callGraphEdgesSize,
-                callGraph.equals(SootWrapper.getSparkCG())
-                        ? OAAnalysisRecord.CallGraphType.SPARK
-                        : OAAnalysisRecord.CallGraphType.CHA,
-                SootWrapper.getAnalysisType());
+                (this instanceof OverrideAssignmentWithPointerAnalysis ? OAAnalysisRecord.CallGraphType.SPARK : OAAnalysisRecord.CallGraphType.CHA),
+                null);
         analysisRecords.add(oaAnalysisRecord);
     }
 
