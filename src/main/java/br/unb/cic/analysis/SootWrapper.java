@@ -68,6 +68,7 @@ public class SootWrapper {
         Options.v().set_full_resolver(true);
         Options.v().set_keep_line_number(true);
         Options.v().set_include(getIncludeList());
+
         //Options.v().set_exclude(Arrays.asList("java.lang.*","javax.*", "com.sun.*", "com.metamx.common.*", "com.netflix.curator.*", "com.google.*", "kafka.*", "org.*", "scala.*"));
         //Options.v().set_exclude(Arrays.asList( "org.*",  "com.google.*")); // "scala.*",
         //Options.v().set_no_bodies_for_excluded(true);
@@ -81,14 +82,36 @@ public class SootWrapper {
         else if (getJavaVersion() >= 9) {
             Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK" + File.pathSeparator + classpath);
         }
-        //Options.v().setPhaseOption("jb.ls", "off"); // remove x = 1; x#2 = 2
-        Options.v().setPhaseOption("jb", "use-original-names:true");
+        configureSootJBOptions();
+
 
         enableCallGraph(usePointsToAnalysis);
 
         Scene.v().loadNecessaryClasses();
         //applyPackage("cg");
 
+    }
+
+    private static void configureSootJBOptions() {
+        //Options.v().setPhaseOption("jb.ls", "off"); // remove x = 1; x#2 = 2
+        Options.v().setPhaseOption("jb", "use-original-names:true");
+        //Options.v().setPhaseOption("jb.dtr", "enabled:false");   // Duplicate CatchAll Trap Remover
+        //Options.v().setPhaseOption("jb.ese", "enabled:false");   // Empty Switch Eliminator
+        Options.v().setPhaseOption("jb.ls", "enabled:false");    // Local Splitter
+        Options.v().setPhaseOption("jb.sils", "enabled:false");  // Shared Initialization Local Splitter
+        Options.v().setPhaseOption("jb.a", "enabled:false");     // Jimple Local Aggregator
+        Options.v().setPhaseOption("jb.ule", "enabled:false");   // Unused Local Eliminator
+        //Options.v().setPhaseOption("jb.tr", "enabled:false");    // Type Assigner
+        Options.v().setPhaseOption("jb.ulp", "enabled:false");   // Unsplit-originals Local Packer
+        Options.v().setPhaseOption("jb.lns", "enabled:false");   // Local Name Standardizer
+        Options.v().setPhaseOption("jb.cp", "enabled:false");    // Copy Propagator
+        Options.v().setPhaseOption("jb.dae", "enabled:false");   // Dead Assignment Eliminator
+        Options.v().setPhaseOption("jb.cp-ule", "enabled:false");// Post-copy propagation Unused Local Eliminator
+        Options.v().setPhaseOption("jb.lp", "enabled:false");    // Local Packer
+        Options.v().setPhaseOption("jb.ne", "enabled:false");    // Nop Eliminator
+        Options.v().setPhaseOption("jb.uce", "enabled:false");   // Unreachable Code Eliminator
+        Options.v().setPhaseOption("jb.tt", "enabled:false");    // Trap Tightener
+        Options.v().setPhaseOption("jb.cbf", "enabled:false");   // Conditional Branch Folder
     }
 
     public static int countEdges(CallGraph cg) {
@@ -120,6 +143,9 @@ public class SootWrapper {
 
     private static void enableCHACallGraph() {
         Options.v().setPhaseOption("cg.cha", "enabled:true");
+
+        //AppOnly (apponly): Setting this option to true causes Soot to only consider application classes when building the callgraph. The resulting callgraph will be inherently unsound. Still, this option can make sense if performance optimization and memory reduction are your primary goal.
+        //Options.v().setPhaseOption("cg.cha", "apponly:true"); // Explicar detalhes de config
     }
 
     private static void enableSparkCallGraph() {
@@ -155,7 +181,6 @@ public class SootWrapper {
     public static void applyPackage(String p) {
         Stopwatch stopwatch = Stopwatch.createStarted();
         System.out.println("Applying package: " + p);
-        stopwatch = Stopwatch.createStarted();
         try {
             PackManager.v().getPack(p).apply();
             //System.out.println("Successfully applied package: " + p);
