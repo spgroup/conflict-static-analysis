@@ -54,11 +54,11 @@ public class OverrideAssignmentWithPointerAnalysis extends OverrideAssignment im
                     return isSameArrayRef(stmtInAbs, stmtInFlow, valueInAbs, valueInFlow);
                 } else if (valueInAbs instanceof StaticFieldRef && valueInFlow instanceof StaticFieldRef) {
                     return isSameStaticFieldRef(valueInAbs, valueInFlow);
-                } else if (valueInAbs instanceof ArrayRef && valueInFlow instanceof Local) {
+                } /*else if (valueInAbs instanceof ArrayRef && valueInFlow instanceof Local) {
                     return areArrayAndLocalCompatible(stmtInAbs, stmtInFlow, valueInAbs, valueInFlow);
                 } else if (valueInAbs instanceof Local && valueInFlow instanceof ArrayRef) {
                     return isLocalAndArrayCompatible(stmtInAbs, stmtInFlow, (Local) valueInAbs, (ArrayRef) valueInFlow);
-                }
+                }*/
 
             }
         }

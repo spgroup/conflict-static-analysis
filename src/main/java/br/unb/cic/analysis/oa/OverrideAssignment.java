@@ -47,14 +47,66 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         this(definition, 5, true);
     }
 
-    static boolean areFieldReferencesEqual(Statement stmtInAbs, Statement stmtInFlow, InstanceFieldRef valueInAbs, InstanceFieldRef valueInFlow) {
-        boolean isSameFieldReference = valueInAbs.getFieldRef().equals(valueInFlow.getFieldRef());
-        boolean isSameType = valueInAbs.getType().equals(valueInFlow.getType());
-        boolean bothAreSameConstructor =
-                stmtInAbs.getSootMethod().isConstructor()
-                        && stmtInFlow.getSootMethod().isConstructor()
-                        && stmtInAbs.getSootMethod().equals(stmtInFlow.getSootMethod());
+    /**
+     * Compara duas referências de campo em diferentes instruções para verificar se elas representam o mesmo campo,
+     * desconsiderando casos onde ambas estão associadas ao mesmo construtor.
+     * <p>
+     * O método verifica se:
+     * <ul>
+     *   <li>As referências de campo ({@code valueInAbs} e {@code valueInFlow}) apontam para o mesmo campo real.</li>
+     *   <li>Os tipos dos objetos base das referências são iguais.</li>
+     *   <li>As instruções não pertencem ao mesmo construtor (verificado por {@code isBothAreSameConstructor}).</li>
+     * </ul>
+     * Retorna {@code true} apenas se os dois primeiros critérios forem verdadeiros e o terceiro for falso.
+     * </p>
+     *
+     * @param stmtInAbs   a primeira instrução a ser comparada.
+     * @param stmtInFlow  a segunda instrução a ser comparada.
+     * @param valueInAbs  o valor associado à primeira instrução, esperado como {@code InstanceFieldRef}.
+     * @param valueInFlow o valor associado à segunda instrução, esperado como {@code InstanceFieldRef}.
+     * @return {@code true} se as referências de campo forem semanticamente equivalentes e não forem parte do mesmo construtor; caso contrário, {@code false}.
+     */
+    static boolean areFieldReferencesEqual(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
+        InstanceFieldRef abstractFieldRef = (InstanceFieldRef) valueInAbs;
+        InstanceFieldRef flowFieldRef = (InstanceFieldRef) valueInFlow;
+
+        boolean isSameFieldReference = abstractFieldRef.getFieldRef().equals(flowFieldRef.getFieldRef());
+        boolean isSameType = abstractFieldRef.getBase().getType().equals(flowFieldRef.getBase().getType());
+        boolean bothAreSameConstructor = isBothAreSameConstructor(stmtInAbs, stmtInFlow);
         return isSameType && isSameFieldReference && !bothAreSameConstructor;
+    }
+
+    /**
+     * Compara duas referências de array em diferentes instruções para verificar se elas apontam para o mesmo elemento de array,
+     * considerando o índice e o tipo base, e excluindo casos onde ambas as referências estão no mesmo construtor
+     * ou são variáveis locais.
+     * <p>
+     * O método verifica se:
+     * <ul>
+     *   <li>Os índices das referências de array ({@code valueInAbs} e {@code valueInFlow}) são iguais.</li>
+     *   <li>Os tipos base dos arrays são iguais.</li>
+     *   <li>As instruções não pertencem ao mesmo construtor (verificado por {@code isBothAreSameConstructor}).</li>
+     *   <li>As instruções não são originadas de variáveis locais em ambos os casos.</li>
+     * </ul>
+     * Retorna {@code true} somente se todas essas condições forem atendidas.
+     * </p>
+     *
+     * @param stmtInAbs   a primeira instrução a ser comparada.
+     * @param stmtInFlow  a segunda instrução a ser comparada.
+     * @param valueInAbs  o valor associado à primeira instrução, esperado como {@code ArrayRef}.
+     * @param valueInFlow o valor associado à segunda instrução, esperado como {@code ArrayRef}.
+     * @return {@code true} se as referências de array forem semanticamente equivalentes e não forem parte do mesmo construtor nem ambas variáveis locais; caso contrário, {@code false}.
+     */
+    static boolean areArrayReferencesEqual(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
+        ArrayRef abstractArrayRef = (ArrayRef) valueInAbs;
+        ArrayRef flowArrayRef = (ArrayRef) valueInFlow;
+
+        // Index é constrante -- se nao, ignorar.
+        boolean isSameIndexReference = abstractArrayRef.getIndex().equals(flowArrayRef.getIndex());
+        boolean isSameType = abstractArrayRef.getBase().getType().equals(flowArrayRef.getBase().getType());
+        boolean bothAreSameConstructor = isBothAreSameConstructor(stmtInAbs, stmtInFlow);
+
+        return isSameType && isSameIndexReference && !bothAreSameConstructor;
     }
 
     protected static void getPointToFromBase(Value value, Statement stmt) {
@@ -69,9 +121,12 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         stmt.setPointsTo(points);
     }
 
-    static boolean areArrayReferencesEqual(ArrayRef ref1, ArrayRef ref2) {
-        return ref1.getBase().toString().equals(ref2.getBase().toString()) &&
-                ref1.getIndex().toString().equals(ref2.getIndex().toString());
+    private static boolean isBothAreSameConstructor(Statement stmtInAbs, Statement stmtInFlow) {
+        boolean bothAreSameConstructor =
+                stmtInAbs.getSootMethod().isConstructor()
+                        && stmtInFlow.getSootMethod().isConstructor()
+                        && stmtInAbs.getSootMethod().equals(stmtInFlow.getSootMethod());
+        return bothAreSameConstructor;
     }
 
     public void printCallGraph(CallGraph cg) {
@@ -177,7 +232,6 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
                 in = runAnalysis(in, stmt);
                 this.stacktraceList.remove(traversedLine);
             }
-            in.cleanLocalVariable(body);
         }
 
         this.traversedMethodsWrapper.remove(sootMethod);
@@ -316,16 +370,46 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         }
         String normalizedValueInAbs = normalizeValue(valueInAbs);
         String normalizedValueInFlow = normalizeValue(valueInFlow);
-        //boolean isSameUseBox = stmtInAbs.getUnit().getUseBoxes().equals(stmtInFlow.getUnit().getUseBoxes());
+
         boolean isSameValue = normalizedValueInAbs.equals(normalizedValueInFlow);
-        //boolean isRealVariable = !normalizedValueInAbs.contains("$stack") && !normalizedValueInFlow.contains("$stack");
 
         return isSameValue;
     }
 
+    /**
+     * Normaliza o valor fornecido extraindo apenas o nome simples do identificador.
+     * <p>
+     * Este método converte o objeto {@code Value} em uma string e remove qualquer
+     * conteúdo após o caractere '#' (inclusive), mantendo apenas a parte antes dele.
+     * Isso é útil para extrair o nome curto de URIs ou identificadores compostos.
+     * </p>
+     *
+     * @param value o objeto {@code Value} a ser normalizado.
+     * @return uma string contendo apenas a parte anterior ao caractere '#' na representação do valor.
+     */
     private String normalizeValue(Value value) {
         return value.toString().replaceAll("^(\\w+)#.*$", "$1");
     }
+
+    /**
+     * Verifica se duas referências de campo, associadas a instruções diferentes, referenciam o mesmo campo de instância.
+     * <p>
+     * O método realiza uma comparação que considera os "points-to" das instruções para
+     * determinar se as referências são equivalentes no contexto da análise de fluxo.
+     * <ul>
+     *   <li>Se a primeira instrução ({@code stmtInAbs}) possui "points-to" e a segunda ({@code stmtInFlow}) não,
+     *       tenta obter os "points-to" da base da referência de fluxo.</li>
+     *   <li>Se qualquer instrução não possuir "points-to", é feita uma comparação básica (sem usar point-to) e a instrução é adicionada a um contador {@code count} para fins de debug.</li>
+     *   <li>Se ambas possuem "points-to", verifica se possuem interseção não vazia, se os campos são iguais e se não pertencem ao mesmo construtor.</li>
+     * </ul>
+     * </p>
+     *
+     * @param stmtInAbs   a primeira instrução a ser comparada.
+     * @param stmtInFlow  a segunda instrução a ser comparada.
+     * @param valueInAbs  o valor associado à primeira instrução, esperado como {@code InstanceFieldRef}.
+     * @param valueInFlow o valor associado à segunda instrução, esperado como {@code InstanceFieldRef}.
+     * @return {@code true} se as referências de campo forem consideradas equivalentes conforme as condições acima; {@code false} caso contrário.
+     */
 
     protected boolean isSameFieldRef(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
         InstanceFieldRef abstractFieldRef = (InstanceFieldRef) valueInAbs;
@@ -348,11 +432,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         }
 
         // Comparação completa
-        boolean bothAreSameConstructor =
-                stmtInAbs.getSootMethod().isConstructor()
-                        && stmtInFlow.getSootMethod().isConstructor()
-                        && stmtInAbs.getSootMethod().equals(stmtInFlow.getSootMethod());
-
+        boolean bothAreSameConstructor = isBothAreSameConstructor(stmtInAbs, stmtInFlow);
         boolean isSameFieldReference = abstractFieldRef.getField().equals(flowFieldRef.getField());
         boolean hasCommonTargets = stmtInAbs.getPointsTo().hasNonEmptyIntersection(stmtInFlow.getPointsTo());
 
@@ -363,6 +443,24 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         return stmt.getPointsTo() != null && !stmt.getPointsTo().isEmpty();
     }
 
+    /**
+     * Verifica se duas referências de array, associadas a instruções diferentes, referenciam o mesmo elemento de array.
+     * <p>
+     * O método considera os "points-to" das instruções para determinar se as referências são equivalentes.
+     * <ul>
+     *   <li>Se a primeira instrução ({@code stmtInAbs}) possui "points-to" e a segunda ({@code stmtInFlow}) não,
+     *       tenta obter os "points-to" da base da referência de array do fluxo.</li>
+     *   <li>Se qualquer uma das instruções não possuir "points-to", realiza uma comparação básica(sem usar point-to) e adiciona a instrução a um contador {@code count} para fins de debug.</li>
+     *   <li>Se ambas possuem "points-to", verifica se há interseção não vazia entre os alvos, se os índices são iguais e se não pertencem ao mesmo construtor.</li>
+     * </ul>
+     * </p>
+     *
+     * @param stmtInAbs   a primeira instrução a ser comparada.
+     * @param stmtInFlow  a segunda instrução a ser comparada.
+     * @param valueInAbs  o valor associado à primeira instrução, esperado como {@code ArrayRef}.
+     * @param valueInFlow o valor associado à segunda instrução, esperado como {@code ArrayRef}.
+     * @return {@code true} se as referências de array forem consideradas equivalentes conforme as condições acima; {@code false} caso contrário.
+     */
     protected boolean isSameArrayRef(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
         ArrayRef abstractArrayRef = (ArrayRef) valueInAbs;
         ArrayRef flowArrayRef = (ArrayRef) valueInFlow;
@@ -375,18 +473,20 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         // Se qualquer um dos dois não tem points-to, usa comparação básica e adiciona ao count
         if (!hasPointsTo(stmtInFlow)) {
             count.add(stmtInFlow);
-            return areArrayReferencesEqual(abstractArrayRef, flowArrayRef);
+            return areArrayReferencesEqual(stmtInAbs, stmtInFlow, abstractArrayRef, flowArrayRef);
         }
 
         if (!hasPointsTo(stmtInAbs)) {
             count.add(stmtInAbs);
-            return areArrayReferencesEqual(abstractArrayRef, flowArrayRef);
+            return areArrayReferencesEqual(stmtInAbs, stmtInFlow, abstractArrayRef, flowArrayRef);
         }
 
-        // Comparação completa
+        boolean bothAreSameConstructor = isBothAreSameConstructor(stmtInAbs, stmtInFlow);
+        boolean isSameIndexReference = abstractArrayRef.getIndex().equals(flowArrayRef.getIndex());
         boolean hasCommonTargets = stmtInAbs.getPointsTo().hasNonEmptyIntersection(stmtInFlow.getPointsTo());
 
-        return hasCommonTargets;
+        // Comparação completa
+        return hasCommonTargets && isSameIndexReference && !bothAreSameConstructor;
     }
 
     protected boolean areArrayAndLocalCompatible(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
@@ -414,8 +514,28 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         return areArrayAndLocalCompatible(stmtInFlow, stmtInAbs, valueInFlow, valueInAbs);
     }
 
+    /**
+     * Verifica se duas referências a campos estáticos representam o mesmo campo.
+     * O método {@code equals}, aplicado a {@code FieldRef} (implementado por {@code AbstractSootFieldRef}),
+     * considera os seguintes critérios de igualdade:
+     * <ul>
+     *   <li><strong>declaringClass</strong> – a classe que declara o campo</li>
+     *   <li><strong>isStatic</strong> – se o campo é estático</li>
+     *   <li><strong>name</strong> – o nome do campo</li>
+     *   <li><strong>type</strong> – o tipo do campo</li>
+     * </ul>
+     * Se todos esses atributos forem iguais (ou ambos {@code null}, quando aplicável), os {@code FieldRef}
+     * são considerados iguais.
+     *
+     * @param valueInAbs  o primeiro valor a ser comparado
+     * @param valueInFlow o segundo valor a ser comparado
+     * @return {@code true} se ambos os {@code FieldRef} forem considerados iguais; {@code false} caso contrário
+     */
     protected boolean isSameStaticFieldRef(Value valueInAbs, Value valueInFlow) {
-        return ((StaticFieldRef) valueInAbs).getFieldRef().getSignature().equals(((StaticFieldRef) valueInFlow).getFieldRef().getSignature());
+        StaticFieldRef abstractFieldRef = (StaticFieldRef) valueInAbs;
+        StaticFieldRef flowFieldRef = (StaticFieldRef) valueInFlow;
+
+        return abstractFieldRef.getFieldRef().equals(flowFieldRef.getFieldRef());
     }
 
     private void addConflict(Statement left, Statement right) {
@@ -465,7 +585,6 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
     }
 
     private OverrideAssignmentAbstraction calculateMergedOverrideAssignment(OverrideAssignmentAbstraction inputAbstraction, Statement currentStatement) {
-
         //CallGraph callGraph = SootWrapper.getCallGraphForAnalysisType(null);
         List<OverrideAssignmentAbstraction> flowSetList = new ArrayList<>();
         List<String> graphEdges = new ArrayList<>();
@@ -474,15 +593,6 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         Iterator<Edge> edges = callGraph.edgesOutOf(currentStatement.getUnit());
 
         if (!edges.hasNext()) {
-            //callGraph = SootWrapper.getCallGraphForAnalysisType(callGraph);
-            //edges = callGraph.edgesOutOf(currentStatement.getUnit());
-
-/*            if (!edges.hasNext()) {
-                handleEdgesNotFound(inputAbstraction, currentStatement, flowSetList);
-            } else {
-                processEdges(inputAbstraction, currentStatement, edges, flowSetList, graphEdges, callGraph);
-            }*/
-
             handleEdgesNotFound(inputAbstraction, currentStatement, flowSetList);
             addOAAnalysisRecord(currentStatement, callGraph, 0);
         } else {

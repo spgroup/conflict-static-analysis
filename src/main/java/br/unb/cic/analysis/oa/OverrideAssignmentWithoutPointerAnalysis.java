@@ -41,26 +41,26 @@ public class OverrideAssignmentWithoutPointerAnalysis extends OverrideAssignment
                 if (valueInAbs instanceof Local && valueInFlow instanceof Local) {
                     return isSameLocal(stmtInAbs, stmtInFlow, valueInAbs, valueInFlow);
                 } else if (valueInAbs instanceof InstanceFieldRef && valueInFlow instanceof InstanceFieldRef) {
-                    return isSameFieldRef(stmtInAbs, stmtInFlow, (InstanceFieldRef) valueInAbs, (InstanceFieldRef) valueInFlow);
+                    return isSameFieldRef(stmtInAbs, stmtInFlow, valueInAbs, valueInFlow);
                 } else if (valueInAbs instanceof ArrayRef && valueInFlow instanceof ArrayRef) {
-                    return isSameArrayRef(valueInAbs, valueInFlow);
+                    return isSameArrayRef(stmtInAbs, stmtInFlow, valueInAbs, valueInFlow);
                 } else if (valueInAbs instanceof StaticFieldRef && valueInFlow instanceof StaticFieldRef) {
                     return isSameStaticFieldRef(valueInAbs, valueInFlow);
-                } else if (valueInAbs instanceof ArrayRef && valueInFlow instanceof Local) {
+                } /*else if (valueInAbs instanceof ArrayRef && valueInFlow instanceof Local) {
                     return areArrayAndLocalCompatible(stmtInAbs, stmtInFlow, valueInAbs, valueInFlow);
                 } else if (valueInAbs instanceof Local && valueInFlow instanceof ArrayRef) {
                     return isLocalAndArrayCompatible(stmtInAbs, stmtInFlow, valueInAbs, (ArrayRef) valueInFlow);
-                }
+                }*/
             }
         }
         return false;
     }
 
-    private static boolean isSameArrayRef(Value valueInAbs, Value valueInFlow) {
-        return areArrayReferencesEqual((ArrayRef) valueInAbs, (ArrayRef) valueInFlow);
+    protected boolean isSameArrayRef(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
+        return areArrayReferencesEqual(stmtInAbs, stmtInFlow, valueInAbs, valueInFlow);
     }
 
-    private static boolean isSameFieldRef(Statement stmtInAbs, Statement stmtInFlow, InstanceFieldRef valueInAbs, InstanceFieldRef valueInFlow) {
+    protected boolean isSameFieldRef(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
         return areFieldReferencesEqual(stmtInAbs, stmtInFlow, valueInAbs, valueInFlow);
     }
 
