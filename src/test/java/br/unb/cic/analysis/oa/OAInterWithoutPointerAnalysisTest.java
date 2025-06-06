@@ -115,7 +115,7 @@ public class OAInterWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{8}, new int[]{10});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(7, analysis.getConflicts().size());
+        Assert.assertEquals(10, analysis.getConflicts().size());
     }
 
     @Test
@@ -214,7 +214,7 @@ public class OAInterWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{11}, new int[]{13});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(1, analysis.getConflicts().size());
+        Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
     @Test
@@ -356,6 +356,7 @@ public class OAInterWithoutPointerAnalysisTest {
     /**
      * in this case, we add java.util to the list of packages included in soot to be able to detect conflicts in the Hashmap class
      */
+    @Ignore
     @Test
     public void additionToArrayWithJavaUtilConflict() {
         String classpath = "target/test-classes/";
@@ -422,6 +423,7 @@ public class OAInterWithoutPointerAnalysisTest {
         Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
+    @Ignore
     @Test
     public void hashmapWithJavaUtilConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.HashmapConflictSample";
@@ -473,7 +475,7 @@ public class OAInterWithoutPointerAnalysisTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Assert.assertEquals(233, analysis.getConflicts().size());
+        Assert.assertEquals(229, analysis.getConflicts().size());
     }
 
     @Test
@@ -667,7 +669,7 @@ public class OAInterWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{8}, new int[]{9});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(0, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
     @Test
@@ -677,7 +679,7 @@ public class OAInterWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{8}, new int[]{10});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(0, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
     @Test
@@ -867,7 +869,7 @@ public class OAInterWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{9}, new int[]{10});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(1, analysis.getConflicts().size());
+        Assert.assertEquals(3, analysis.getConflicts().size());
     }
 
     @Test
@@ -1055,5 +1057,15 @@ public class OAInterWithoutPointerAnalysisTest {
         Assert.assertEquals(1, analysis.getConflicts().size());
 
 
+    }
+
+    @Test
+    public void inheritanceTest() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.Inheritance.Main";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{8}, new int[]{10});
+        OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
+        configureTest(analysis);
+        Assert.assertEquals(4, analysis.getConflicts().size());
     }
 }

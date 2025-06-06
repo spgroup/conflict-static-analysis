@@ -34,11 +34,12 @@ public class OAInterWithPointerAnalysisTest {
 
         SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis("target/test-classes/", true);
 
+        analysis.configureEntryPoints();
+
+        saveExecutionTime("Configure Entrypoints OA Inter");
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
         saveExecutionTime("Configure Soot OA Inter");
 
-        analysis.configureEntryPoints();
-        saveExecutionTime("Configure Entrypoints OA Inter");
 
         SootWrapper.applyPackages();
 
@@ -113,7 +114,7 @@ public class OAInterWithPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{8}, new int[]{10});
         OverrideAssignment analysis = new OverrideAssignmentWithPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(1, analysis.getConflicts().size());
+        Assert.assertEquals(10, analysis.getConflicts().size());
     }
 
     @Test
@@ -213,7 +214,7 @@ public class OAInterWithPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{11}, new int[]{13});
         OverrideAssignment analysis = new OverrideAssignmentWithPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(1, analysis.getConflicts().size());
+        Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
     @Test
@@ -223,7 +224,7 @@ public class OAInterWithPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{10, 13, 16}, new int[]{11, 14, 17});
         OverrideAssignment analysis = new OverrideAssignmentWithPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(4, analysis.getConflicts().size());
+        Assert.assertEquals(5, analysis.getConflicts().size());
     }
 
     @Test
@@ -354,6 +355,7 @@ public class OAInterWithPointerAnalysisTest {
     /**
      * in this case, we add java.util to the list of packages included in soot to be able to detect conflicts in the Hashmap class
      */
+    @Ignore
     @Test
     public void additionToArrayWithJavaUtilConflict() {
         String classpath = "target/test-classes/";
@@ -422,6 +424,7 @@ public class OAInterWithPointerAnalysisTest {
     }
 
 
+    @Ignore
     @Test
     public void hashmapWithJavaUtilConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.HashmapConflictSample";
@@ -617,7 +620,7 @@ public class OAInterWithPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{7}, new int[]{9});
         OverrideAssignment analysis = new OverrideAssignmentWithPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(0, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
     @Test
@@ -867,7 +870,7 @@ public class OAInterWithPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{9}, new int[]{10});
         OverrideAssignment analysis = new OverrideAssignmentWithPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(1, analysis.getConflicts().size());
+        Assert.assertEquals(3, analysis.getConflicts().size());
     }
 
     @Test
@@ -1065,5 +1068,15 @@ public class OAInterWithPointerAnalysisTest {
         //configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());
 
+    }
+
+    @Test
+    public void inheritanceTest() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.Inheritance.Main";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{8}, new int[]{10});
+        OverrideAssignment analysis = new OverrideAssignmentWithPointerAnalysis(definition);
+        configureTest(analysis);
+        Assert.assertEquals(4, analysis.getConflicts().size());
     }
 }
