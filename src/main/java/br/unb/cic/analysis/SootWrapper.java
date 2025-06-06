@@ -94,23 +94,23 @@ public class SootWrapper {
     private static void configureSootJBOptions() {
         Options.v().setPhaseOption("jb", "use-original-names:true");
 
-        Options.v().setPhaseOption("jb.dtr", "enabled:false");   // Duplicate CatchAll Trap Remover
-        Options.v().setPhaseOption("jb.ese", "enabled:false");   // Empty Switch Eliminator
-        Options.v().setPhaseOption("jb.ls", "enabled:false");    // Local Splitter
-        Options.v().setPhaseOption("jb.sils", "enabled:false");  // Shared Initialization Local Splitter
-        Options.v().setPhaseOption("jb.a", "enabled:false");     // Jimple Local Aggregator
-        Options.v().setPhaseOption("jb.ule", "enabled:false");   // Unused Local Eliminator
+        //Options.v().setPhaseOption("jb.dtr", "enabled:false");   // Duplicate CatchAll Trap Remover
+        //Options.v().setPhaseOption("jb.ese", "enabled:false");   // Empty Switch Eliminator
+        //Options.v().setPhaseOption("jb.ls", "enabled:false");    // Local Splitter
+        //Options.v().setPhaseOption("jb.sils", "enabled:false");  // Shared Initialization Local Splitter
+        //Options.v().setPhaseOption("jb.a", "enabled:false");     // Jimple Local Aggregator
+        //Options.v().setPhaseOption("jb.ule", "enabled:false");   // Unused Local Eliminator
         //Options.v().setPhaseOption("jb.tr", "enabled:false");    // Type Assigner
-        Options.v().setPhaseOption("jb.ulp", "enabled:false");   // Unsplit-originals Local Packer
-        Options.v().setPhaseOption("jb.lns", "enabled:false");   // Local Name Standardizer
-        Options.v().setPhaseOption("jb.cp", "enabled:false");    // Copy Propagator
-        Options.v().setPhaseOption("jb.dae", "enabled:false");   // Dead Assignment Eliminator
-        Options.v().setPhaseOption("jb.cp-ule", "enabled:false");// Post-copy propagation Unused Local Eliminator
-        Options.v().setPhaseOption("jb.lp", "enabled:false");    // Local Packer
-        Options.v().setPhaseOption("jb.ne", "enabled:false");    // Nop Eliminator
-        Options.v().setPhaseOption("jb.uce", "enabled:false");   // Unreachable Code Eliminator
-        Options.v().setPhaseOption("jb.tt", "enabled:false");    // Trap Tightener
-        Options.v().setPhaseOption("jb.cbf", "enabled:false");   // Conditional Branch Folder
+        //Options.v().setPhaseOption("jb.ulp", "enabled:false");   // Unsplit-originals Local Packer
+        //Options.v().setPhaseOption("jb.lns", "enabled:false");   // Local Name Standardizer
+        //Options.v().setPhaseOption("jb.cp", "enabled:false");    // Copy Propagator
+        //Options.v().setPhaseOption("jb.dae", "enabled:false");   // Dead Assignment Eliminator
+        //Options.v().setPhaseOption("jb.cp-ule", "enabled:false");// Post-copy propagation Unused Local Eliminator
+        //Options.v().setPhaseOption("jb.lp", "enabled:false");    // Local Packer
+        //Options.v().setPhaseOption("jb.ne", "enabled:false");    // Nop Eliminator
+        //Options.v().setPhaseOption("jb.uce", "enabled:false");   // Unreachable Code Eliminator
+        //Options.v().setPhaseOption("jb.tt", "enabled:false");    // Trap Tightener
+        //Options.v().setPhaseOption("jb.cbf", "enabled:false");   // Conditional Branch Folder
     }
 
     public static int countEdges(CallGraph cg) {
@@ -141,6 +141,7 @@ public class SootWrapper {
     }
 
     private static void enableCHACallGraph() {
+        System.out.println("Enable CHA CG");
         Options.v().setPhaseOption("cg.cha", "enabled:true");
 
         //AppOnly (apponly): Setting this option to true causes Soot to only consider application classes when building the callgraph. The resulting callgraph will be inherently unsound. Still, this option can make sense if performance optimization and memory reduction are your primary goal.
@@ -148,6 +149,7 @@ public class SootWrapper {
     }
 
     private static void enableSparkCallGraph() {
+        System.out.println("Enable Spark CG");
         Options.v().setPhaseOption("cg.spark", "on");
     }
 
