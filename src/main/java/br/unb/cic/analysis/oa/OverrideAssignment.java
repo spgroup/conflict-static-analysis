@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 public abstract class OverrideAssignment extends SceneTransformer implements AbstractAnalysis {
     private final Boolean interprocedural;
-    protected List<Statement> count;
+    protected List<Statement> pointerAnalysisMissingRefs;
     List<OAAnalysisRecord> analysisRecords;
     private int depthLimit;
     private OAConflictReport oaConflictReport;
@@ -34,7 +34,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         this.depthLimit = depthLimit;
         this.interprocedural = interprocedural;
         this.statementsUtils = new StatementsUtil(definition, entrypoints);
-        this.count = new ArrayList<>();
+        this.pointerAnalysisMissingRefs = new ArrayList<>();
         this.analysisRecords = new ArrayList<>();
         initDefaultFields();
     }
@@ -180,23 +180,14 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
             cg = Scene.v().getCallGraph();
         }
         List<String> graphEdges = new ArrayList<>();
-        System.out.println("digraph CallGraph {");
-
 
         // Percorre todos os nós do Call Graph e imprime em formato DOT
         for (Edge edge : cg) {
             SootMethod source = edge.src();
             SootMethod target = edge.tgt();
-            System.out.println("    \"" + source.getSignature() + "\" -> \"" + target.getSignature() + "\";");
             graphEdges.add("    \"" + source.getSignature() + "\" -> \"" + target.getSignature() + "\";");
         }
-
-
-        System.out.println("}");
-
-
         exportCallGraphToDot(graphEdges, "callgraph.dot");
-
     }
 
     protected abstract void gen(OverrideAssignmentAbstraction in, Statement stmt);
@@ -230,12 +221,11 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         // List<SootMethod> methods = Scene.v().getEntryPoints();
         scala.collection.immutable.List<SootMethod> scalaList = this.statementsUtils.getEntryPoints();
         List<SootMethod> methods = new ArrayList<>(JavaConverters.seqAsJavaList(scalaList));
-        //System.out.println("OA Entrypoints" + methods);
-        //printCallGraph();
+
         methods.forEach(sootMethod -> traverse(new OverrideAssignmentAbstraction(), sootMethod, Statement.Type.IN_BETWEEN));
-        new PANotResolveCsvExporter().export(count, "PANotResolve.csv");
+        new PANotResolveCsvExporter().export(pointerAnalysisMissingRefs, "PANotResolve.csv");
         new OAAnalysisCsvExporter().export(analysisRecords, "AnalysisRecords.csv");
-        //System.out.println("Count: " + count.size() + count.toString());
+
         long finalTime = System.currentTimeMillis();
         System.out.println("Runtime: " + ((finalTime - startTime) / 1000d) + "s");
 
@@ -246,7 +236,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         scala.collection.immutable.List<SootMethod> scalaList = this instanceof OverrideAssignmentWithPointerAnalysis ? this.statementsUtils.getCallgraphEntryPoints() : this.statementsUtils.getEntryPoints();
         List<SootMethod> entryPoints = new ArrayList<>(JavaConverters.seqAsJavaList(scalaList));
         //List<SootMethod> methods = new ArrayList<>(Collections.singleton(entryPoints.get(1).getDeclaringClass().getMethodByName("main")));
-        //System.out.println("CG Entrypoints" + entryPoints);
+
         Scene.v().setEntryPoints(entryPoints);
     }
 
@@ -491,7 +481,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
      * <ul>
      *   <li>Se a primeira instrução ({@code stmtInAbs}) possui "points-to" e a segunda ({@code stmtInFlow}) não,
      *       tenta obter os "points-to" da base da referência de fluxo.</li>
-     *   <li>Se qualquer instrução não possuir "points-to", é feita uma comparação básica (sem usar point-to) e a instrução é adicionada a um contador {@code count} para fins de debug.</li>
+     *   <li>Se qualquer instrução não possuir "points-to", é feita uma comparação básica (sem usar point-to) e a instrução é adicionada a um contador {@code pointerAnalysisMissingRefs} para fins de debug.</li>
      *   <li>Se ambas possuem "points-to", verifica se possuem interseção não vazia, se os campos são iguais e se não pertencem ao mesmo construtor.</li>
      * </ul>
      * </p>
@@ -512,14 +502,14 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
             getPointToFromBase(flowFieldRef.getBase(), stmtInFlow);
         }
 
-        // Se qualquer um dos dois não tem points-to, usa comparação básica e adiciona ao count
+        // Se qualquer um dos dois não tem points-to, usa comparação básica e adiciona ao pointerAnalysisMissingRefs
         if (!hasPointsTo(stmtInFlow)) {
-            count.add(stmtInFlow);
+            pointerAnalysisMissingRefs.add(stmtInFlow);
             return areFieldReferencesEqual(stmtInAbs, stmtInFlow, abstractFieldRef, flowFieldRef);
         }
 
         if (!hasPointsTo(stmtInAbs)) {
-            count.add(stmtInAbs);
+            pointerAnalysisMissingRefs.add(stmtInAbs);
             return areFieldReferencesEqual(stmtInAbs, stmtInFlow, abstractFieldRef, flowFieldRef);
         }
 
@@ -542,7 +532,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
      * <ul>
      *   <li>Se a primeira instrução ({@code stmtInAbs}) possui "points-to" e a segunda ({@code stmtInFlow}) não,
      *       tenta obter os "points-to" da base da referência de array do fluxo.</li>
-     *   <li>Se qualquer uma das instruções não possuir "points-to", realiza uma comparação básica(sem usar point-to) e adiciona a instrução a um contador {@code count} para fins de debug.</li>
+     *   <li>Se qualquer uma das instruções não possuir "points-to", realiza uma comparação básica(sem usar point-to) e adiciona a instrução a um contador {@code pointerAnalysisMissingRefs} para fins de debug.</li>
      *   <li>Se ambas possuem "points-to", verifica se há interseção não vazia entre os alvos, se os índices são iguais e se não pertencem ao mesmo construtor.</li>
      * </ul>
      * </p>
@@ -562,14 +552,14 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
             getPointToFromBase(flowArrayRef.getBase(), stmtInFlow);
         }
 
-        // Se qualquer um dos dois não tem points-to, usa comparação básica e adiciona ao count
+        // Se qualquer um dos dois não tem points-to, usa comparação básica e adiciona ao pointerAnalysisMissingRefs
         if (!hasPointsTo(stmtInFlow)) {
-            count.add(stmtInFlow);
+            pointerAnalysisMissingRefs.add(stmtInFlow);
             return areArrayReferencesEqual(stmtInAbs, stmtInFlow, abstractArrayRef, flowArrayRef);
         }
 
         if (!hasPointsTo(stmtInAbs)) {
-            count.add(stmtInAbs);
+            pointerAnalysisMissingRefs.add(stmtInAbs);
             return areArrayReferencesEqual(stmtInAbs, stmtInFlow, abstractArrayRef, flowArrayRef);
         }
 
@@ -593,7 +583,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
 
         // Se nenhum dos dois tem points-to, só compara por nome
         if (!hasPointsTo(stmtInAbs) || !hasPointsTo(stmtInFlow)) {
-            count.add(stmtInFlow);
+            pointerAnalysisMissingRefs.add(stmtInFlow);
             return valueInAbs.toString().contains(valueInFlow.toString());
         }
         boolean isPointToIntersection = stmtInAbs.getPointsTo().hasNonEmptyIntersection(stmtInFlow.getPointsTo());
@@ -704,7 +694,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
 
     private void handleEdgesNotFound(OverrideAssignmentAbstraction inputAbstraction, Statement currentStatement, List<OverrideAssignmentAbstraction> flowSetList) {
         try {
-            count.add(currentStatement);
+            pointerAnalysisMissingRefs.add(currentStatement);
             SootMethod targetMethod = ((Stmt) currentStatement.getUnit()).getInvokeExpr().getMethod();
             cloneAndTraverse(inputAbstraction, currentStatement, flowSetList, targetMethod);
         } catch (CloneNotSupportedException e) {
