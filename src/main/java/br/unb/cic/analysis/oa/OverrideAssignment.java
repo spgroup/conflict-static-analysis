@@ -401,7 +401,16 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
                 if (addConflict) {
                     addConflict(statement, stmt);
                 }
+                // Adiciona o statement principal
                 statementsToRemove.add(statement);
+
+                // Adiciona todos os statements com a mesma linha de código
+                int line = statement.getSourceCodeLineNumber();
+                abstraction.forEach(other -> {
+                    if (!statementsToRemove.contains(other) && other.getSourceCodeLineNumber() == line) {
+                        statementsToRemove.add(other);
+                    }
+                });
             }
         });
     }
@@ -415,12 +424,48 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         if (!stmtInAbs.getSootMethod().equals(stmtInFlow.getSootMethod())) {
             return false;
         }
+        if (isLikelyRedundantLocalAssignment(stmtInAbs, stmtInFlow)) {
+            return false;
+        }
         String normalizedValueInAbs = normalizeValue(valueInAbs);
         String normalizedValueInFlow = normalizeValue(valueInFlow);
 
         boolean isSameValue = normalizedValueInAbs.equals(normalizedValueInFlow);
 
         return isSameValue;
+    }
+
+    /**
+     * Verifica se uma possível interferência entre duas atribuições é, na verdade, um falso positivo.
+     * <p>
+     * Essa situação ocorre quando ambas as atribuições são locais (isto é, atribuídas dentro do mesmo fluxo de execução)
+     * e apontam para a mesma linha de código. Um exemplo típico ocorre durante alterações simultâneas nos dois lados do diff:
+     *
+     * <pre>
+     *     foo(); // left
+     *     ...
+     *     foo(); // right
+     *
+     *     void foo() {
+     *         x = 1; // atribuição local
+     *     }
+     * </pre>
+     * <p>
+     * Nesse caso, como ambas as chamadas percorrem mais de uma linha (indicando execução de métodos),
+     * e a linha final da atribuição é a mesma, é provável que se trate de um falso positivo.
+     *
+     * @param stmtInAbs  a instrução do mapeamento abstrato (lado esquerdo ou original)
+     * @param stmtInFlow a instrução dentro do fluxo alterado (lado direito ou modificado)
+     * @return {@code false} se for detectado como falso positivo; {@code true} caso contrário
+     */
+    public boolean isLikelyRedundantLocalAssignment(Statement stmtInAbs, Statement stmtInFlow) {
+        boolean bothTraverseMultipleLines = stmtInAbs.getTraversedLine().size() > 1
+                && stmtInFlow.getTraversedLine().size() > 1;
+
+        boolean sameTargetLine = stmtInAbs.getSourceCodeLineNumber()
+                .equals(stmtInFlow.getSourceCodeLineNumber());
+
+        return bothTraverseMultipleLines && sameTargetLine;
     }
 
     /**

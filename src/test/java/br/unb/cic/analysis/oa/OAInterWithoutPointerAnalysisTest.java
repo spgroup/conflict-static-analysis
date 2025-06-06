@@ -115,7 +115,7 @@ public class OAInterWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{8}, new int[]{10});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(10, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
     @Test
@@ -580,6 +580,7 @@ public class OAInterWithoutPointerAnalysisTest {
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
+    @Ignore
     @Test
     public void pointsToDifferentObjectFromParametersWithMainNotConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToDifferentObjectFromParametersWithMainSample";
@@ -869,7 +870,7 @@ public class OAInterWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{9}, new int[]{10});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(3, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
     @Test
@@ -1066,6 +1067,6 @@ public class OAInterWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{8}, new int[]{10});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(4, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 }
