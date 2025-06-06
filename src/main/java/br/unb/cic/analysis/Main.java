@@ -15,7 +15,6 @@ import br.unb.cic.analysis.io.MergeConflictReader;
 import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.analysis.oa.OverrideAssignment;
-import br.unb.cic.analysis.oa.OverrideAssignmentWithHybridPointerAnalysis;
 import br.unb.cic.analysis.oa.OverrideAssignmentWithPointerAnalysis;
 import br.unb.cic.analysis.oa.OverrideAssignmentWithoutPointerAnalysis;
 import br.unb.cic.analysis.pdg.PDGAnalysisSemanticConflicts;
@@ -254,17 +253,11 @@ public class Main {
             case "ioa-without-pa":
                 runOverrideAssignmentAnalysis(classpath, true, AnalysisType.WITHOUT_POINTER_ANALYSIS);
                 break;
-            case "ioa-hybrid-pa":
-                runOverrideAssignmentAnalysis(classpath, true, AnalysisType.HYBRID_POINTER_ANALYSIS);
-                break;
             case "oa":
                 runOverrideAssignmentAnalysis(classpath, false, AnalysisType.WITH_POINTER_ANALYSIS);
                 break;
             case "oa-without-pa":
                 runOverrideAssignmentAnalysis(classpath, false, AnalysisType.WITHOUT_POINTER_ANALYSIS);
-                break;
-            case "oa-hybrid-pa":
-                runOverrideAssignmentAnalysis(classpath, false, AnalysisType.HYBRID_POINTER_ANALYSIS);
                 break;
             case "dfp-intra":
                 runDFPAnalysis(classpath, false);
@@ -408,11 +401,6 @@ public class Main {
                 return overrideAssignment;
             case WITHOUT_POINTER_ANALYSIS:
                 overrideAssignment = new OverrideAssignmentWithoutPointerAnalysis(definition, depthLimit, interprocedural, entrypoints);
-                SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath, false);
-                return overrideAssignment;
-            case HYBRID_POINTER_ANALYSIS:
-                overrideAssignment = new OverrideAssignmentWithHybridPointerAnalysis(definition, depthLimit, interprocedural, entrypoints);
-                SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath, true);
                 SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath, false);
                 return overrideAssignment;
             default:
@@ -741,6 +729,5 @@ public class Main {
     public enum AnalysisType {
         WITH_POINTER_ANALYSIS,
         WITHOUT_POINTER_ANALYSIS,
-        HYBRID_POINTER_ANALYSIS,
     }
 }
