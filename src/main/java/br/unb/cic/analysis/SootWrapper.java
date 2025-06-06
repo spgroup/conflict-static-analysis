@@ -84,7 +84,6 @@ public class SootWrapper {
         }
         configureSootJBOptions();
 
-
         enableCallGraph(usePointsToAnalysis);
 
         Scene.v().loadNecessaryClasses();
@@ -93,10 +92,10 @@ public class SootWrapper {
     }
 
     private static void configureSootJBOptions() {
-        //Options.v().setPhaseOption("jb.ls", "off"); // remove x = 1; x#2 = 2
         Options.v().setPhaseOption("jb", "use-original-names:true");
-        //Options.v().setPhaseOption("jb.dtr", "enabled:false");   // Duplicate CatchAll Trap Remover
-        //Options.v().setPhaseOption("jb.ese", "enabled:false");   // Empty Switch Eliminator
+
+        Options.v().setPhaseOption("jb.dtr", "enabled:false");   // Duplicate CatchAll Trap Remover
+        Options.v().setPhaseOption("jb.ese", "enabled:false");   // Empty Switch Eliminator
         Options.v().setPhaseOption("jb.ls", "enabled:false");    // Local Splitter
         Options.v().setPhaseOption("jb.sils", "enabled:false");  // Shared Initialization Local Splitter
         Options.v().setPhaseOption("jb.a", "enabled:false");     // Jimple Local Aggregator
@@ -297,32 +296,6 @@ public class SootWrapper {
 
     public static void setChaCG(CallGraph chaCG) {
         SootWrapper.chaCG = chaCG;
-    }
-
-    public static Main.AnalysisType getAnalysisType() {
-        CallGraph sparkCG = getSparkCG();
-        CallGraph chaCG = getChaCG();
-
-        if (sparkCG != null && chaCG == null) {
-            return Main.AnalysisType.WITH_POINTER_ANALYSIS;
-        } else if (sparkCG == null && chaCG != null) {
-            return Main.AnalysisType.WITHOUT_POINTER_ANALYSIS;
-        } else if (sparkCG != null && chaCG != null) {
-            return Main.AnalysisType.HYBRID_POINTER_ANALYSIS;
-        } else {
-            throw new IllegalStateException("Nenhum grafo de chamadas disponível.");
-        }
-    }
-
-    public static CallGraph getCallGraphForAnalysisType(CallGraph currentGraph) {
-        Main.AnalysisType analysisType = SootWrapper.getAnalysisType();
-
-        if (analysisType.equals(Main.AnalysisType.WITHOUT_POINTER_ANALYSIS) ||
-                (analysisType.equals(Main.AnalysisType.HYBRID_POINTER_ANALYSIS) && currentGraph == SootWrapper.getSparkCG())) {
-            return SootWrapper.getChaCG();
-        }
-
-        return SootWrapper.getSparkCG();
     }
 }
 

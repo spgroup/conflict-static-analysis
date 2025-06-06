@@ -70,10 +70,11 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         InstanceFieldRef abstractFieldRef = (InstanceFieldRef) valueInAbs;
         InstanceFieldRef flowFieldRef = (InstanceFieldRef) valueInFlow;
 
+        boolean isSameOrSubtype = isSameOrSubtype(valueInAbs, valueInFlow);
         boolean isSameFieldReference = abstractFieldRef.getFieldRef().equals(flowFieldRef.getFieldRef());
-        boolean isSameType = abstractFieldRef.getBase().getType().equals(flowFieldRef.getBase().getType());
         boolean bothAreSameConstructor = isBothAreSameConstructor(stmtInAbs, stmtInFlow);
-        return isSameType && isSameFieldReference && !bothAreSameConstructor;
+
+        return isSameOrSubtype && isSameFieldReference && !bothAreSameConstructor;
     }
 
     /**
@@ -84,7 +85,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
      * O método verifica se:
      * <ul>
      *   <li>Os índices das referências de array ({@code valueInAbs} e {@code valueInFlow}) são iguais.</li>
-     *   <li>Os tipos base dos arrays são iguais.</li>
+     *   <li>Os tipos base dos arrays são iguais ou são subtipos.</li>
      *   <li>As instruções não pertencem ao mesmo construtor (verificado por {@code isBothAreSameConstructor}).</li>
      *   <li>As instruções não são originadas de variáveis locais em ambos os casos.</li>
      * </ul>
@@ -101,12 +102,57 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         ArrayRef abstractArrayRef = (ArrayRef) valueInAbs;
         ArrayRef flowArrayRef = (ArrayRef) valueInFlow;
 
-        // Index é constrante -- se nao, ignorar.
+
+        boolean isSameOrSubtype = isSameOrSubtype(abstractArrayRef, flowArrayRef);
         boolean isSameIndexReference = abstractArrayRef.getIndex().equals(flowArrayRef.getIndex());
-        boolean isSameType = abstractArrayRef.getBase().getType().equals(flowArrayRef.getBase().getType());
         boolean bothAreSameConstructor = isBothAreSameConstructor(stmtInAbs, stmtInFlow);
 
-        return isSameType && isSameIndexReference && !bothAreSameConstructor;
+        return isSameOrSubtype && isSameIndexReference && !bothAreSameConstructor;
+    }
+
+    public static boolean isSameOrSubtype(Value valueInAbs, Value valueInFlow) {
+        Type typeInAbs = extractType(valueInAbs);
+        Type typeInFlow = extractType(valueInFlow);
+
+        // Verificação direta
+        if (typeInAbs.equals(typeInFlow)) {
+            return true;
+        }
+
+        FastHierarchy hierarchy = Scene.v().getOrMakeFastHierarchy();
+
+        // Se ambos são RefType (ex: objetos)
+        if (typeInAbs instanceof RefType && typeInFlow instanceof RefType) {
+            return hierarchy.canStoreType(typeInAbs, typeInFlow)
+                    || hierarchy.canStoreType(typeInFlow, typeInAbs);
+        }
+
+        // Se ambos são ArrayType (ex: String[], Object[], etc.)
+        if (typeInAbs instanceof ArrayType && typeInFlow instanceof ArrayType) {
+            Type baseA = ((ArrayType) typeInAbs).baseType;
+            Type baseB = ((ArrayType) typeInFlow).baseType;
+
+            // Se ambos são arrays de tipos referenciais
+            if (baseA instanceof RefType && baseB instanceof RefType) {
+                return hierarchy.canStoreType(baseA, baseB)
+                        || hierarchy.canStoreType(baseB, baseA);
+            }
+
+            // Arrays com tipos primitivos devem ser exatamente iguais
+            return baseA.equals(baseB);
+        }
+
+        return false; // Tipos incompatíveis
+    }
+
+    private static Type extractType(Value val) {
+        if (val instanceof ArrayRef) {
+            return ((ArrayRef) val).getBase().getType();
+        }
+        if (val instanceof FieldRef) {
+            return ((FieldRef) val).getField().getType();
+        }
+        return null;
     }
 
     protected static void getPointToFromBase(Value value, Statement stmt) {
@@ -195,6 +241,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
 
         oaConflictReport.report();
     }
+
     public void configureEntryPoints() {
         scala.collection.immutable.List<SootMethod> scalaList = this instanceof OverrideAssignmentWithPointerAnalysis ? this.statementsUtils.getCallgraphEntryPoints() : this.statementsUtils.getEntryPoints();
         List<SootMethod> entryPoints = new ArrayList<>(JavaConverters.seqAsJavaList(scalaList));
@@ -585,7 +632,6 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
     }
 
     private OverrideAssignmentAbstraction calculateMergedOverrideAssignment(OverrideAssignmentAbstraction inputAbstraction, Statement currentStatement) {
-        //CallGraph callGraph = SootWrapper.getCallGraphForAnalysisType(null);
         List<OverrideAssignmentAbstraction> flowSetList = new ArrayList<>();
         List<String> graphEdges = new ArrayList<>();
 
