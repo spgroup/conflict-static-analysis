@@ -4,6 +4,7 @@ import soot.Unit;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * An abstract representation of a conflict,
@@ -126,5 +127,49 @@ public class Conflict {
         return String.format("source(%s, %s, %d, %s, %s) => sink(%s, %s, %d, %s, %s)", sourceClassName,
                 sourceMethodName, sourceLineNumber, sourceUnit, sourceTraversedLine,
                 sinkClassName, sinkMethodName, sinkLineNumber, sinkUnit, sinkTraversedLine);
+    }
+    public String toJSON() {
+        return this.formatJSON("CONFLICT", "Conflict");
+    }
+
+    protected String formatJSON(String type, String label) {
+        return String.format(
+                "{" + "\n" +
+                        "\t" + "\"type\": \"%s\"," + "\n" +
+                        "\t" + "\"label\": \"%s\"," + "\n" +
+                        "\t" + "\"body\": {" + "\n" +
+                        "\t\t" + "\"description\": \"%s - %s\"," + "\n" +
+                        "\t\t" + "\"interference\": [" + "\n" +
+                        "\t\t\t" + "{" + "\n" +
+                        "\t\t\t\t" + "\"type\": \"source\"," + "\n" +
+                        "\t\t\t\t" + "\"branch\": \"L\"," + "\n" +
+                        "\t\t\t\t" + "\"text\": \"%s\"," + "\n" +
+                        "\t\t\t\t" + "\"location\": {" + "\n" +
+                        "\t\t\t\t\t" + "\"file\": \"\"," + "\n" +
+                        "\t\t\t\t\t" + "\"class\": \"%s\"," + "\n" +
+                        "\t\t\t\t\t" + "\"method\": \"%s\"," + "\n" +
+                        "\t\t\t\t\t" + "\"line\": %d" + "\n" +
+                        "\t\t\t\t" + "}," + "\n" +
+                        "\t\t\t\t" + "\"stackTrace\": [" + sourceTraversedLine.stream().map(TraversedLine::toJSON).collect(Collectors.joining(",")) + "]" + "\n" +
+                        "\t\t\t" + "}," + "\n" +
+                        "\t\t\t" + "{" + "\n" +
+                        "\t\t\t\t" + "\"type\": \"sink\"," + "\n" +
+                        "\t\t\t\t" + "\"branch\": \"R\"," + "\n" +
+                        "\t\t\t\t" + "\"text\": \"%s\"," + "\n" +
+                        "\t\t\t\t" + "\"location\": {" + "\n" +
+                        "\t\t\t\t\t" + "\"file\": \"\"," + "\n" +
+                        "\t\t\t\t\t" + "\"class\": \"%s\"," + "\n" +
+                        "\t\t\t\t\t" + "\"method\": \"%s\"," + "\n" +
+                        "\t\t\t\t\t" + "\"line\": %d" + "\n" +
+                        "\t\t\t\t" + "}," + "\n" +
+                        "\t\t\t\t" + "\"stackTrace\": [" + sinkTraversedLine.stream().map(TraversedLine::toJSON).collect(Collectors.joining(",")) + "]" + "\n" +
+                        "\t\t\t" + "}" + "\n" +
+                        "\t\t" + "]" + "\n" +
+                        "\t" + "}" + "\n" +
+                        "}",
+                type, label, sourceUnit.toString().replaceAll("\"", "'"), sinkUnit.toString().replaceAll("\"", "'"),
+                sourceUnit.toString().replaceAll("\"", "'"), sourceClassName, sourceMethodName, sourceLineNumber,
+                sinkUnit.toString().replaceAll("\"", "'"), sinkClassName, sinkMethodName, sinkLineNumber
+        );
     }
 }

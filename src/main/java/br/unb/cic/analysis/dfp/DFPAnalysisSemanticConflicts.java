@@ -2,22 +2,22 @@ package br.unb.cic.analysis.dfp;
 
 import br.ufpe.cin.soot.analysis.jimple.JDFP;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+import br.unb.cic.analysis.FindEntryPoints;
 import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.soot.graph.*;
+import scala.Tuple2;
 import scala.collection.JavaConverters;
-import soot.PackManager;
-import soot.SootMethod;
-import soot.Unit;
+import scala.collection.mutable.ListBuffer;
+import soot.*;
 
 import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
-
 /**
  * An analysis wrapper around the Sparse value
  * flow analysis implementation.
  */
-public abstract class DFPAnalysisSemanticConflicts extends JDFP {
+public class DFPAnalysisSemanticConflicts extends JDFP {
 
     private String cp;
     private int depthLimit;
@@ -48,6 +48,29 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
     }
 
     @Override
+    public Tuple2<String, Transform> createSceneTransform() {
+        return new Tuple2<>("wjtp", new Transform("wjtp.svfa", new soot.SceneTransformer() {
+            @Override
+            protected void internalTransform(String phaseName, Map<String, String> options) {
+                List<SootMethod> methods = JavaConverters.seqAsJavaList(getAnalysisEntryPoints());
+                methods.forEach(sootMethod -> traverse(sootMethod, new ListBuffer<>(), false));
+            }
+        }));
+    }
+
+    @Override
+    public Tuple2<String, Transform> createSceneTransformDFP() {
+
+        return new Tuple2<>("wjtp", new Transform("wjtp.dfp", new soot.SceneTransformer() {
+            @Override
+            protected void internalTransform(String phaseName, Map<String, String> options) {
+                List<SootMethod> methods = JavaConverters.seqAsJavaList(getAnalysisEntryPoints());
+                methods.forEach(sootMethod -> traverseDFP(sootMethod, new ListBuffer<>(), false));
+            }
+        }));
+    }
+
+    @Override
     public scala.collection.immutable.List<String> getIncludeList() {
         return JavaConverters.asScalaBuffer(Arrays.asList("")).toList();
     }
@@ -67,6 +90,11 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
     }
 
     @Override
+    public boolean interprocedural() {
+        return true;
+    }
+
+    @Override
     public final scala.collection.immutable.List<String> applicationClassPath() {
         String[] array = cp.split(File.pathSeparator);
         return JavaConverters.asScalaBuffer(Arrays.asList(array)).toList();
@@ -76,10 +104,21 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
     public final scala.collection.immutable.List<SootMethod> getEntryPoints() {
         definition.loadSourceStatements();
         definition.loadSinkStatements();
+        return FindEntryPoints.getEntryMethods();
+//        return JavaConverters.asScalaBuffer(getSourceStatements()
+//                .stream()
+//                .map(Statement::getSootMethod)
+//                .collect(Collectors.toList())).toList();
+    }
+
+    public final scala.collection.immutable.List<SootMethod> getAnalysisEntryPoints() {
+        definition.loadSourceStatements();
+        definition.loadSinkStatements();
+
         return JavaConverters.asScalaBuffer(getSourceStatements()
-                .stream()
-                .map(Statement::getSootMethod)
-                .collect(Collectors.toList())).toList();
+            .stream()
+            .map(Statement::getSootMethod)
+            .collect(Collectors.toList())).toList();
     }
 
     @Override
@@ -163,6 +202,5 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
 
         return conflicts_report;
     }
-
 
 }

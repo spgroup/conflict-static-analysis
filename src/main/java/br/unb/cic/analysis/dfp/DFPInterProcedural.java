@@ -1,8 +1,9 @@
 package br.unb.cic.analysis.dfp;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+import br.unb.cic.soot.svfa.CG;
+import br.unb.cic.soot.svfa.CHA$;
 import scala.collection.JavaConverters;
-
 import java.util.Arrays;
 
 public class DFPInterProcedural extends DFPAnalysisSemanticConflicts{
@@ -13,6 +14,11 @@ public class DFPInterProcedural extends DFPAnalysisSemanticConflicts{
 
     public DFPInterProcedural(String classPath, AbstractMergeConflictDefinition definition) {
         super(classPath, definition);
+    }
+
+    @Override
+    public CG callGraph() {
+        return CHA$.MODULE$;
     }
 
     @Override

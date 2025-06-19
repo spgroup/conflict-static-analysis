@@ -336,4 +336,78 @@ public abstract class AbstractMergeConflictDefinition {
         return entryMethods;
     }
 
+    /**
+     * Auxiliary method to extract the SootClass from a method signature.
+     *
+     * @param fullMethodSignature the full method signature. E.g: <br.unb.cic.analysis.samples.ioa.ObjectFieldNotConflictSample: void m()>
+     * @return the SootClass extracted from the method signature
+     */
+    private SootClass extractSootClassFromMethodSignature(String fullMethodSignature) {
+        int lastColonIndex = fullMethodSignature.lastIndexOf(':');
+        if (lastColonIndex == -1) {
+            throw new RuntimeException("Method signature does not contain a colon: " + fullMethodSignature);
+        }
+
+        String className = fullMethodSignature.substring(1, lastColonIndex).trim();
+        Scene.v().loadClass(className, SootClass.BODIES);
+        return Scene.v().getSootClass(className);
+    }
+
+    /**
+     * Auxiliary method to extract the method name from a method signature.
+     *
+     * @param fullMethodSignature the full method signature. E.g: <br.unb.cic.analysis.samples.ioa.ObjectFieldNotConflictSample: void m()>
+     * @return the method name extracted from the method signature
+     */
+    private String extractMethodName(String fullMethodSignature) {
+        int lastColonIndex = fullMethodSignature.lastIndexOf(':');
+        if (lastColonIndex != -1) {
+            String methodSignature = fullMethodSignature.substring(lastColonIndex + 1).trim();
+            if (methodSignature.endsWith(">")) {
+                methodSignature = methodSignature.substring(0, methodSignature.length() - 1);
+            }
+            return methodSignature;
+        } else {
+            return "";
+        }
+    }
+
+    public Set<SootMethod> configureEntryPoints(List<String> entryMethodNames) throws NoSuchMethodException {
+        Set<SootMethod> entryPoints = new HashSet<>();
+        addMethodsToEntryPoints(entryPoints, entryMethodNames);
+        return entryPoints;
+    }
+
+    /**
+     * Adds methods to the entry points set based on the provided method names and SootClass.
+     *
+     * @param entryPoints      a set to which the methods will be added
+     * @param methodSignatures a list of method names to be added as entry points
+     */
+    private void addMethodsToEntryPoints(Set<SootMethod> entryPoints, List<String> methodSignatures) throws NoSuchMethodException {
+        for (String methodSignature : methodSignatures) {
+            String methodName;
+            try {
+                methodName = extractMethodName(methodSignature);
+            } catch (RuntimeException e) {
+                throw new NoSuchMethodException("Method not found in method signature: " + methodSignature);
+            }
+
+            SootClass sootClass;
+            try {
+                sootClass = extractSootClassFromMethodSignature(methodSignature);
+            } catch (RuntimeException e) {
+                throw new NoSuchMethodException("Class not found in method signature: " + methodSignature);
+            }
+
+            try {
+                SootMethod sootMethod = sootClass.getMethod(methodName);
+                entryPoints.add(sootMethod);
+            } catch (RuntimeException e) {
+                throw new NoSuchMethodException("Method not found: " + methodName + " in class " + sootClass.getName());
+            }
+        }
+    }
+
+
 }

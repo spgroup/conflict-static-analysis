@@ -14,8 +14,7 @@ import br.unb.cic.analysis.io.DefaultReader;
 import br.unb.cic.analysis.io.MergeConflictReader;
 import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
-import br.unb.cic.analysis.model.TraversedLine;
-import br.unb.cic.analysis.oa.OverrideAssignment;
+import br.unb.cic.analysis.oa.*;
 import br.unb.cic.analysis.pdg.PDGAnalysisSemanticConflicts;
 import br.unb.cic.analysis.pdg.PDGIntraProcedural;
 import br.unb.cic.analysis.reachability.ReachabilityAnalysis;
@@ -24,7 +23,6 @@ import br.unb.cic.analysis.svfa.SVFAInterProcedural;
 import br.unb.cic.analysis.svfa.SVFAIntraProcedural;
 import br.unb.cic.analysis.svfa.confluence.DFPConfluenceAnalysis;
 import br.unb.cic.diffclass.DiffClass;
-import br.unb.cic.soot.graph.StatementNode;
 import com.google.common.base.Stopwatch;
 import org.apache.commons.cli.*;
 import scala.collection.JavaConverters;
@@ -52,6 +50,7 @@ public class Main {
     private List<String> conflicts = new ArrayList<>();
     private ReachDefinitionAnalysis analysis;
     public static Stopwatch stopwatch;
+    private List<String> JSONconflicts = new ArrayList<>();
 
     public static void main(String args[]) {
         Main m = new Main();
@@ -193,10 +192,16 @@ public class Main {
                 runReachabilityAnalysis(classpath);
                 break;
             case "overriding-interprocedural":
-                runOverrideAssignmentAnalysis(classpath, true);
+                runOverrideAssignmentAnalysis(classpath, true, AnalysisType.WITH_POINTER_ANALYSIS);
                 break;
             case "overriding-intraprocedural":
-                runOverrideAssignmentAnalysis(classpath, false);
+                runOverrideAssignmentAnalysis(classpath, false, AnalysisType.WITH_POINTER_ANALYSIS);
+                break;
+            case "ioa-without-pa":
+                runOverrideAssignmentAnalysis(classpath, true, AnalysisType.WITHOUT_POINTER_ANALYSIS);
+                break;
+            case "oa-without-pa":
+                runOverrideAssignmentAnalysis(classpath, false, AnalysisType.WITHOUT_POINTER_ANALYSIS);
                 break;
             case "dfp-intra":
                 runDFPAnalysis(classpath, false);
@@ -282,36 +287,62 @@ public class Main {
         }
     }
 
-    private void runOverrideAssignmentAnalysis(String classpath, Boolean interprocedural) {
+    private void runOverrideAssignmentAnalysis(String classpath, Boolean interprocedural, AnalysisType analysisType) {
         int depthLimit = Integer.parseInt(cmd.getOptionValue("depthLimit", "5"));
+        List<String> entrypoints = convertStringEntrypointsToList(cmd.getOptionValue("entrypoints"));
 
         stopwatch = Stopwatch.createStarted();
+        String modeLabel = interprocedural ? "Inter" : "Intra";
 
-        OverrideAssignment overrideAssignment =
-                new OverrideAssignment(definition, depthLimit, interprocedural);
-
-        List<String> classes = Collections.singletonList(classpath);
-        SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classes);
+        OverrideAssignment overrideAssignment = buildOverrideAssignment(analysisType, depthLimit, interprocedural, entrypoints, classpath);
 
         overrideAssignment.configureEntryPoints();
 
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", overrideAssignment));
-        System.out.println("Depth limit: "+overrideAssignment.getDepthLimit());
+        System.out.println("Depth limit: " + overrideAssignment.getDepthLimit());
 
-        saveExecutionTime("Configure Soot OA " + (interprocedural ? "Inter" : "Intra"));
+        saveExecutionTime("Configure Soot OA " + modeLabel);
 
         SootWrapper.applyPackages();
 
-        conflicts.addAll(overrideAssignment.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
-        saveExecutionTime("Time to perform OA " + (interprocedural ? "Inter" : "Intra"));
+        conflicts.addAll(overrideAssignment.getConflicts().stream()
+                .map(Object::toString)
+                .collect(Collectors.toList()));
+
+        JSONconflicts.addAll(overrideAssignment.getFilteredConflicts().stream()
+                .map(c -> c.toJSON())
+                .collect(Collectors.toList()));
+
+        saveExecutionTime("Time to perform OA " + modeLabel);
 
         int visitedMethods = overrideAssignment.getVisitedMethodsCount();
-        System.out.println("OA " + (interprocedural ? "Inter" : "Intra") + " Visited methods: " + visitedMethods);
+        System.out.println("OA " + modeLabel + " Visited methods: " + visitedMethods);
 
-        saveVisitedMethods("OA " + (interprocedural ? "Inter" : "Intra"), (visitedMethods + ""));
+        saveVisitedMethods("OA " + modeLabel, String.valueOf(visitedMethods));
+        saveConflictsLog("OA " + modeLabel, conflicts.toString());
 
-        saveConflictsLog("OA " + (interprocedural ? "Inter" : "Intra"), conflicts.toString());
+    }
 
+    private OverrideAssignment buildOverrideAssignment(
+            AnalysisType type,
+            int depthLimit,
+            boolean interprocedural,
+            List<String> entrypoints,
+            String classpath
+    ) {
+        OverrideAssignment overrideAssignment;
+        switch (type) {
+            case WITH_POINTER_ANALYSIS:
+                overrideAssignment = new OverrideAssignmentWithPointerAnalysis(definition, depthLimit, interprocedural, entrypoints);
+                SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath, true);
+                return overrideAssignment;
+            case WITHOUT_POINTER_ANALYSIS:
+                overrideAssignment = new OverrideAssignmentWithoutPointerAnalysis(definition, depthLimit, interprocedural, entrypoints);
+                SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath, false);
+                return overrideAssignment;
+            default:
+                throw new IllegalArgumentException("Unknown analysis type: " + type);
+        }
     }
 
 
@@ -602,5 +633,25 @@ public class Main {
 
     public String formatConflict(String p){
         return p.replace("), Node", ") => Node");
+    }
+    private List<String> convertStringEntrypointsToList(String str) {
+        if (str == null) {
+            return Collections.emptyList();
+        }
+
+        String trimmedStr = str.substring(1, str.length() - 1);
+        String[] elements = trimmedStr.split(", ");
+
+        List<String> entrypointsList = new ArrayList<>();
+        for (String element : elements) {
+            entrypointsList.add(element);
+        }
+
+        return entrypointsList;
+    }
+
+    public enum AnalysisType {
+        WITH_POINTER_ANALYSIS,
+        WITHOUT_POINTER_ANALYSIS,
     }
 }

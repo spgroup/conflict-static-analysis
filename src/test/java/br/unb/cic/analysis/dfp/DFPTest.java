@@ -17,8 +17,7 @@ public class DFPTest{
     public DFPAnalysisSemanticConflicts configureInterTestDFP(String classpath, int[] leftchangedlines, int[] rightchangedlines) {
         AbstractMergeConflictDefinition definition = DefinitionFactory.definition(classpath, leftchangedlines, rightchangedlines, true);
         String cp = "target/test-classes";
-        List<String> classes = Collections.singletonList(cp);
-        SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classes);
+        SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(cp);
 
         return new DFPIntraProcedural(cp, definition);
     }
