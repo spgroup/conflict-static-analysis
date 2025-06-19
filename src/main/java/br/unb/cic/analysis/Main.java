@@ -192,16 +192,16 @@ public class Main {
                 runReachabilityAnalysis(classpath);
                 break;
             case "overriding-interprocedural":
-                runOverrideAssignmentAnalysis(classpath, true, AnalysisType.WITH_POINTER_ANALYSIS);
-                break;
-            case "overriding-intraprocedural":
-                runOverrideAssignmentAnalysis(classpath, false, AnalysisType.WITH_POINTER_ANALYSIS);
-                break;
-            case "ioa-without-pa":
                 runOverrideAssignmentAnalysis(classpath, true, AnalysisType.WITHOUT_POINTER_ANALYSIS);
                 break;
-            case "oa-without-pa":
+            case "overriding-intraprocedural":
                 runOverrideAssignmentAnalysis(classpath, false, AnalysisType.WITHOUT_POINTER_ANALYSIS);
+                break;
+            case "ioa-with-pa":
+                runOverrideAssignmentAnalysis(classpath, true, AnalysisType.WITH_POINTER_ANALYSIS);
+                break;
+            case "oa-with-pa":
+                runOverrideAssignmentAnalysis(classpath, false, AnalysisType.WITH_POINTER_ANALYSIS);
                 break;
             case "dfp-intra":
                 runDFPAnalysis(classpath, false);
