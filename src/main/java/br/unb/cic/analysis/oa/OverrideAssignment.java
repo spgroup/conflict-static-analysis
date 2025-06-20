@@ -223,11 +223,11 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         List<SootMethod> methods = new ArrayList<>(JavaConverters.seqAsJavaList(scalaList));
 
         methods.forEach(sootMethod -> traverse(new OverrideAssignmentAbstraction(), sootMethod, Statement.Type.IN_BETWEEN));
-        new PANotResolveCsvExporter().export(pointerAnalysisMissingRefs, "PANotResolve.csv");
-        new OAAnalysisCsvExporter().export(analysisRecords, "AnalysisRecords.csv");
+//        new PANotResolveCsvExporter().export(pointerAnalysisMissingRefs, "PANotResolve.csv");
+//        new OAAnalysisCsvExporter().export(analysisRecords, "AnalysisRecords.csv");
 
-        long finalTime = System.currentTimeMillis();
-        System.out.println("Runtime: " + ((finalTime - startTime) / 1000d) + "s");
+//        long finalTime = System.currentTimeMillis();
+//        System.out.println("Runtime: " + ((finalTime - startTime) / 1000d) + "s");
 
         oaConflictReport.report();
     }

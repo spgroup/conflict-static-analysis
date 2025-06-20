@@ -110,12 +110,14 @@ public class DFPConfluenceAnalysis {
 
          for (ConfluenceConflict conflict: confluentFlows){
 
-            StatementNode df1 = conflict.getSourceNodePath().get(0);
-            StatementNode df2 = conflict.getSinkNodePath().get(0);
-
-            StatementNode confluence = conflict.getSinkNodePath().get(conflict.getSinkNodePath().size()-1);
              try {
-//                 Integer left_line = df1.getPathVisitedMethods().head().line();
+
+                 StatementNode df1 = conflict.getSourceNodePath().get(0);
+                 StatementNode df2 = conflict.getSinkNodePath().get(0);
+
+                 StatementNode confluence = conflict.getSinkNodePath().get(conflict.getSinkNodePath().size()-1);
+
+                 //                 Integer left_line = df1.getPathVisitedMethods().head().line();
 //                 Integer right_line = df2.getPathVisitedMethods().head().line();
 //                 Integer cf_line = confluence.getPathVisitedMethods().head().line();
 

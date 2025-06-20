@@ -95,7 +95,7 @@ public class SootWrapper {
 
     public static void applyPackage(String p) {
         Stopwatch stopwatch = Stopwatch.createStarted();
-        System.out.println("Applying package: " + p);
+//        System.out.println("Applying package: " + p);
         try {
             PackManager.v().getPack(p).apply();
             //System.out.println("Successfully applied package: " + p);
@@ -128,7 +128,7 @@ public class SootWrapper {
     }
 
     public static void enableCallGraph(boolean usePointsToAnalysis) {
-        System.out.println("CG configuration init.");
+//        System.out.println("CG configuration init.");
 
         if (usePointsToAnalysis) {
             //enableRtaCallGraph();
@@ -137,11 +137,11 @@ public class SootWrapper {
         } else {
             enableCHACallGraph();
         }
-        System.out.println("CG configuration completed.");
+//        System.out.println("CG configuration completed.");
     }
 
     private static void enableCHACallGraph() {
-        System.out.println("Enable CHA CG");
+//        System.out.println("Enable CHA CG");
         Options.v().setPhaseOption("cg.cha", "enabled:true");
 
         //AppOnly (apponly): Setting this option to true causes Soot to only consider application classes when building the callgraph. The resulting callgraph will be inherently unsound. Still, this option can make sense if performance optimization and memory reduction are your primary goal.

@@ -64,14 +64,14 @@ public class Main {
             if (cmd.hasOption("mode")) {
                 mode = cmd.getOptionValue("mode");
             }
-            if (cmd.hasOption("repo") && cmd.hasOption("commit")) {
-                DiffClass module = new DiffClass();
-                module.getGitRepository(cmd.getOptionValue("repo"));
-                module.diffAnalysis(cmd.getOptionValue("commit"));
-                m.loadDefinitionFromDiffAnalysis(module);
-            } else {
-                m.loadDefinition(cmd.getOptionValue("csv"));
-            }
+//            if (cmd.hasOption("repo") && cmd.hasOption("commit")) {
+//                DiffClass module = new DiffClass();
+//                module.getGitRepository(cmd.getOptionValue("repo"));
+//                module.diffAnalysis(cmd.getOptionValue("commit"));
+//                m.loadDefinitionFromDiffAnalysis(module);
+//            } else {
+            m.loadDefinition(cmd.getOptionValue("csv"));
+//            }
             m.runAnalysis(mode, m.parseClassPath(cmd.getOptionValue("cp")));
 
             m.exportResults();
@@ -305,18 +305,18 @@ public class Main {
 
         SootWrapper.applyPackages();
 
-        conflicts.addAll(overrideAssignment.getConflicts().stream()
-                .map(Object::toString)
-                .collect(Collectors.toList()));
+        int visitedMethods = overrideAssignment.getVisitedMethodsCount();
+        System.out.println("OA " + modeLabel + " Visited methods: " + visitedMethods);
 
-        JSONconflicts.addAll(overrideAssignment.getFilteredConflicts().stream()
-                .map(c -> c.toJSON())
-                .collect(Collectors.toList()));
+//        JSONconflicts.addAll(overrideAssignment.getFilteredConflicts().stream()
+//                .map(c -> c.toJSON())
+//                .collect(Collectors.toList()));
 
         saveExecutionTime("Time to perform OA " + modeLabel);
 
-        int visitedMethods = overrideAssignment.getVisitedMethodsCount();
-        System.out.println("OA " + modeLabel + " Visited methods: " + visitedMethods);
+        conflicts.addAll(overrideAssignment.getConflicts().stream()
+                .map(Object::toString)
+                .collect(Collectors.toList()));
 
         saveVisitedMethods("OA " + modeLabel, String.valueOf(visitedMethods));
         saveConflictsLog("OA " + modeLabel, conflicts.toString());
