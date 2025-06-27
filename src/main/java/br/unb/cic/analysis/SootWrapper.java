@@ -89,7 +89,7 @@ public class SootWrapper {
         enableCallGraph(usePointsToAnalysis);
 
         Scene.v().loadNecessaryClasses();
-        applyPackage("cg");
+//        applyPackage("cg");
 
     }
 
