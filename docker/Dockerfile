@@ -55,10 +55,10 @@ RUN apt-get -y install vim && \
     apt-get clean;
 
 # Clone repos
-RUN git clone --branch Article202405 --depth 1 https://github.com/spgroup/conflict-static-analysis.git /home/conflict-static-analysis
-RUN git clone --recursive  --branch Article202405 --depth 1 https://github.com/spgroup/miningframework /home/miningframework
+RUN git clone --branch develop --depth 1 https://github.com/barbosamaatheus/conflict-static-analysis /home/conflict-static-analysis
+RUN git clone --recursive  --branch add_pa --depth 1 https://github.com/barbosamaatheus/miningframework/ /home/miningframework
 # clone mergedataset to miningframework/output/file
-RUN git clone --branch Article202405 --depth 1 https://github.com/spgroup/mergedataset.git /home/miningframework/output/files
+RUN git clone --branch master --depth 1 https://github.com/barbosamaatheus/ref-dataset /home/miningframework/output/files
 
 # Add settings.xml
 ADD ./settings.xml $USER_HOME_DIR/.m2/
@@ -74,10 +74,10 @@ RUN cd /home/miningframework && pip install -r requirements.txt
 # Run Build Union Script in mergedaset project
 # Some build files are larger than 100 MB, not supported by Github, so they were separated using split, to union them, 
 # run the script located at the root with the following command:
-RUN cd /home/miningframework/output/files && ./prepareDataset.sh
+RUN cd /home/miningframework/output/files && ./prepare-dataset.sh
 
 # Copy files
 RUN cd /home/miningframework/output && mkdir data
-RUN cp /home/miningframework/results-with-build-information.csv /home/miningframework/output/data/results-with-build-information.csv
+RUN cp /home/miningframework/output/files/results-with-build-information.csv /home/miningframework/output/data/results-with-build-information.csv
 
 #RUN cp /home/conflict-static-analysis/target/*.jar /home/miningframework/dependencies/
