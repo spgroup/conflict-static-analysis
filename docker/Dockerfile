@@ -70,6 +70,7 @@ ADD ./settings.xml $USER_HOME_DIR/.m2/
 # Install Requeriments in miningframework project
 # Install dependencies for Python scripts
 RUN cd /home/miningframework && pip install -r requirements.txt
+RUN python3 -m pip install --upgrade pandas
 
 # Run Build Union Script in mergedaset project
 # Some build files are larger than 100 MB, not supported by Github, so they were separated using split, to union them, 
