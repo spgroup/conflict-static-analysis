@@ -1,0 +1,596 @@
+[
+{
+	"type": "OAINTER",
+	"label": "OA conflict",
+	"body": {
+		"description": "$stack21 = \"java.lang\" - $stack21 = \"java.lang\"",
+		"interference": [
+			{
+				"type": "declaration",
+				"branch": "L",
+				"text": "$stack21 = \"java.lang\"",
+				"location": {
+					"file": "",
+					"class": "org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter",
+					"method": "getNeededImportsFor",
+					"line": 163
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)"]
+			},
+			{
+				"type": "override",
+				"branch": "R",
+				"text": "$stack21 = \"java.lang\"",
+				"location": {
+					"file": "",
+					"class": "org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter",
+					"method": "getNeededImportsFor",
+					"line": 163
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)"]
+			}
+		]
+	}
+},
+{
+	"type": "OAINTER",
+	"label": "OA conflict",
+	"body": {
+		"description": "l2 = (java.lang.String) l1 - l2 = (java.lang.String) l1",
+		"interference": [
+			{
+				"type": "declaration",
+				"branch": "L",
+				"text": "l2 = (java.lang.String) l1",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 981
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:981)"]
+			},
+			{
+				"type": "override",
+				"branch": "R",
+				"text": "l2 = (java.lang.String) l1",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 981
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:981)"]
+			}
+		]
+	}
+},
+{
+	"type": "OAINTER",
+	"label": "OA conflict",
+	"body": {
+		"description": "$stack8 = l0.<java.lang.String: char[] value> - $stack8 = l0.<java.lang.String: char[] value>",
+		"interference": [
+			{
+				"type": "declaration",
+				"branch": "L",
+				"text": "$stack8 = l0.<java.lang.String: char[] value>",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 982
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:982)"]
+			},
+			{
+				"type": "override",
+				"branch": "R",
+				"text": "$stack8 = l0.<java.lang.String: char[] value>",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 982
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:982)"]
+			}
+		]
+	}
+},
+{
+	"type": "OAINTER",
+	"label": "OA conflict",
+	"body": {
+		"description": "l3 = lengthof $stack8 - l3 = lengthof $stack8",
+		"interference": [
+			{
+				"type": "declaration",
+				"branch": "L",
+				"text": "l3 = lengthof $stack8",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 982
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:982)"]
+			},
+			{
+				"type": "override",
+				"branch": "R",
+				"text": "l3 = lengthof $stack8",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 982
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:982)"]
+			}
+		]
+	}
+},
+{
+	"type": "OAINTER",
+	"label": "OA conflict",
+	"body": {
+		"description": "$stack7 = l1 instanceof java.lang.String - $stack7 = l1 instanceof java.lang.String",
+		"interference": [
+			{
+				"type": "declaration",
+				"branch": "L",
+				"text": "$stack7 = l1 instanceof java.lang.String",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 980
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:980)"]
+			},
+			{
+				"type": "override",
+				"branch": "R",
+				"text": "$stack7 = l1 instanceof java.lang.String",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 980
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:980)"]
+			}
+		]
+	}
+},
+{
+	"type": "OAINTER",
+	"label": "OA conflict",
+	"body": {
+		"description": "l5 = l2.<java.lang.String: char[] value> - l5 = l2.<java.lang.String: char[] value>",
+		"interference": [
+			{
+				"type": "declaration",
+				"branch": "L",
+				"text": "l5 = l2.<java.lang.String: char[] value>",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 985
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:985)"]
+			},
+			{
+				"type": "override",
+				"branch": "R",
+				"text": "l5 = l2.<java.lang.String: char[] value>",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 985
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:985)"]
+			}
+		]
+	}
+},
+{
+	"type": "OAINTER",
+	"label": "OA conflict",
+	"body": {
+		"description": "l6 = 0 - l6 = 0",
+		"interference": [
+			{
+				"type": "declaration",
+				"branch": "L",
+				"text": "l6 = 0",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 986
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:986)"]
+			},
+			{
+				"type": "override",
+				"branch": "R",
+				"text": "l6 = 0",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 986
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:986)"]
+			}
+		]
+	}
+},
+{
+	"type": "OAINTER",
+	"label": "OA conflict",
+	"body": {
+		"description": "$stack9 = l2.<java.lang.String: char[] value> - $stack9 = l2.<java.lang.String: char[] value>",
+		"interference": [
+			{
+				"type": "declaration",
+				"branch": "L",
+				"text": "$stack9 = l2.<java.lang.String: char[] value>",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 983
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:983)"]
+			},
+			{
+				"type": "override",
+				"branch": "R",
+				"text": "$stack9 = l2.<java.lang.String: char[] value>",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 983
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:983)"]
+			}
+		]
+	}
+},
+{
+	"type": "OAINTER",
+	"label": "OA conflict",
+	"body": {
+		"description": "$stack10 = lengthof $stack9 - $stack10 = lengthof $stack9",
+		"interference": [
+			{
+				"type": "declaration",
+				"branch": "L",
+				"text": "$stack10 = lengthof $stack9",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 983
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:983)"]
+			},
+			{
+				"type": "override",
+				"branch": "R",
+				"text": "$stack10 = lengthof $stack9",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 983
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:983)"]
+			}
+		]
+	}
+},
+{
+	"type": "OAINTER",
+	"label": "OA conflict",
+	"body": {
+		"description": "l4 = l0.<java.lang.String: char[] value> - l4 = l0.<java.lang.String: char[] value>",
+		"interference": [
+			{
+				"type": "declaration",
+				"branch": "L",
+				"text": "l4 = l0.<java.lang.String: char[] value>",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 984
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:984)"]
+			},
+			{
+				"type": "override",
+				"branch": "R",
+				"text": "l4 = l0.<java.lang.String: char[] value>",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 984
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:984)"]
+			}
+		]
+	}
+},
+{
+	"type": "OAINTER",
+	"label": "OA conflict",
+	"body": {
+		"description": "$i0 = (int) -1 - $i0 = (int) -1",
+		"interference": [
+			{
+				"type": "declaration",
+				"branch": "L",
+				"text": "$i0 = (int) -1",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": -1
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:-1)"]
+			},
+			{
+				"type": "override",
+				"branch": "R",
+				"text": "$i0 = (int) -1",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": -1
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:-1)"]
+			}
+		]
+	}
+},
+{
+	"type": "OAINTER",
+	"label": "OA conflict",
+	"body": {
+		"description": "$i1 = (int) $stack14 - $i1 = (int) $stack14",
+		"interference": [
+			{
+				"type": "declaration",
+				"branch": "L",
+				"text": "$i1 = (int) $stack14",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": -1
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:-1)"]
+			},
+			{
+				"type": "override",
+				"branch": "R",
+				"text": "$i1 = (int) $stack14",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": -1
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:-1)"]
+			}
+		]
+	}
+},
+{
+	"type": "OAINTER",
+	"label": "OA conflict",
+	"body": {
+		"description": "$i2 = (int) $stack13 - $i2 = (int) $stack13",
+		"interference": [
+			{
+				"type": "declaration",
+				"branch": "L",
+				"text": "$i2 = (int) $stack13",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": -1
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:-1)"]
+			},
+			{
+				"type": "override",
+				"branch": "R",
+				"text": "$i2 = (int) $stack13",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": -1
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:-1)"]
+			}
+		]
+	}
+},
+{
+	"type": "OAINTER",
+	"label": "OA conflict",
+	"body": {
+		"description": "l6 = l6 + 1 - l6 = l6 + 1",
+		"interference": [
+			{
+				"type": "declaration",
+				"branch": "L",
+				"text": "l6 = l6 + 1",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 990
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:990)"]
+			},
+			{
+				"type": "override",
+				"branch": "R",
+				"text": "l6 = l6 + 1",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 990
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:990)"]
+			}
+		]
+	}
+},
+{
+	"type": "OAINTER",
+	"label": "OA conflict",
+	"body": {
+		"description": "$stack12 = l3 - $stack12 = l3",
+		"interference": [
+			{
+				"type": "declaration",
+				"branch": "L",
+				"text": "$stack12 = l3",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 987
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:987)"]
+			},
+			{
+				"type": "override",
+				"branch": "R",
+				"text": "$stack12 = l3",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 987
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:987)"]
+			}
+		]
+	}
+},
+{
+	"type": "OAINTER",
+	"label": "OA conflict",
+	"body": {
+		"description": "l3 = l3 + $i0 - l3 = l3 + $i0",
+		"interference": [
+			{
+				"type": "declaration",
+				"branch": "L",
+				"text": "l3 = l3 + $i0",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 987
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:987)"]
+			},
+			{
+				"type": "override",
+				"branch": "R",
+				"text": "l3 = l3 + $i0",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 987
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:987)"]
+			}
+		]
+	}
+},
+{
+	"type": "OAINTER",
+	"label": "OA conflict",
+	"body": {
+		"description": "$stack14 = l4[l6] - $stack14 = l4[l6]",
+		"interference": [
+			{
+				"type": "declaration",
+				"branch": "L",
+				"text": "$stack14 = l4[l6]",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 988
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:988)"]
+			},
+			{
+				"type": "override",
+				"branch": "R",
+				"text": "$stack14 = l4[l6]",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 988
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:988)"]
+			}
+		]
+	}
+},
+{
+	"type": "OAINTER",
+	"label": "OA conflict",
+	"body": {
+		"description": "$stack13 = l5[l6] - $stack13 = l5[l6]",
+		"interference": [
+			{
+				"type": "declaration",
+				"branch": "L",
+				"text": "$stack13 = l5[l6]",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 988
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:988)"]
+			},
+			{
+				"type": "override",
+				"branch": "R",
+				"text": "$stack13 = l5[l6]",
+				"location": {
+					"file": "",
+					"class": "java.lang.String",
+					"method": "equals",
+					"line": 988
+				},
+				"stackTrace": ["at org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter.getNeededImportsFor(ClassToClassDescriptionConverter.java:163)", "at java.lang.String.equals(String.java:988)"]
+			}
+		]
+	}
+}
+]
