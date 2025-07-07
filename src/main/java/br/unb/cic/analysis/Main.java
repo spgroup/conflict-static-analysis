@@ -425,6 +425,9 @@ public class Main {
         saveExecutionTime("Time to perform DFP "+type_analysis);
         System.out.println("Depth limit: "+analysis.getDepthLimit());
 
+        System.out.println("No edges:"+analysis.getCountNoEdges());
+        System.out.println("With edges:"+analysis.getCountWithEdges());
+
         System.out.print("CONFLICTS: ");
 
         List<String> conflicts_report = analysis.reportDFConflicts();
@@ -508,6 +511,7 @@ public class Main {
 
         analysis.execute(false);
         System.out.println("Depth limit: "+analysis.getDepthLimit());
+
         conflicts.addAll(analysis.getConfluentConflicts()
                 .stream()
                 .map(p -> formatConflict(p.toString()))

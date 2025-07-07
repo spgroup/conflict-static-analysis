@@ -76,6 +76,9 @@ public class DFPConfluenceAnalysis {
 
         m.saveExecutionTime("Time to perform Confluence 1 "+type_analysis);
 
+        System.out.println("No edges source:"+sourceBaseAnalysis.getCountNoEdges());
+        System.out.println("With edges source:"+sourceBaseAnalysis.getCountWithEdges());
+
         m.stopwatch = Stopwatch.createStarted();
 
         G.v().reset();
@@ -96,6 +99,9 @@ public class DFPConfluenceAnalysis {
         confluentFlows = intersectPathsByLastNode(sourceBasePaths, sinkBasePaths);
 
         m.saveExecutionTime("Time to perform Confluence 2 "+type_analysis);
+
+        System.out.println("No edges sink:"+sinkBaseAnalysis.getCountNoEdges());
+        System.out.println("With edges sink:"+sinkBaseAnalysis.getCountWithEdges());
 
         System.out.println("Visited methods: "+ (sourceBaseAnalysis.getNumberVisitedMethods()+sinkBaseAnalysis.getNumberVisitedMethods()));
         setVisitedMethods(sourceBaseAnalysis.getNumberVisitedMethods()+sinkBaseAnalysis.getNumberVisitedMethods());
