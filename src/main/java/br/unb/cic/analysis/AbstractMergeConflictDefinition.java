@@ -7,12 +7,10 @@ import soot.jimple.AssignStmt;
 import soot.jimple.IdentityStmt;
 import soot.jimple.InvokeStmt;
 import soot.jimple.Stmt;
+import soot.jimple.toolkits.callgraph.CallGraph;
+import soot.jimple.toolkits.callgraph.Edge;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
 
 /**
  * This abstract class works as a contract. Whenever we
@@ -133,8 +131,31 @@ public abstract class AbstractMergeConflictDefinition {
 
                         SootMethod invoked_method = unit_from_stmt.getInvokeExpr().getMethod();
 
-                        //call traverse passing currently travesed line list
-                        recursiveStatements.addAll(traverse(invoked_method, traversedMethods, statement.getTraversedLine(), type, 1));
+                        if (!traversedMethods.contains(invoked_method)) {
+                            recursiveStatements.addAll(
+                                    traverse(invoked_method, traversedMethods, statement.getTraversedLine(), type, 1)
+                            );
+                        }
+
+                        if (Scene.v().hasCallGraph()){
+
+                            //get all edges from call graph
+                            Iterator<Edge> edges = Scene.v().getCallGraph().edgesOutOf(statement.getUnit());
+
+                            while (edges.hasNext()) {
+                                Edge edge = edges.next();
+                                SootMethod targetMethod = edge.getTgt().method();
+
+                                if (traversedMethods.contains(targetMethod)) {
+                                    continue;
+                                }
+
+                                recursiveStatements.addAll(
+                                        traverse(targetMethod, traversedMethods, statement.getTraversedLine(), type, 1)
+                                );
+                            }
+
+                        }
                     }
                 }
             }

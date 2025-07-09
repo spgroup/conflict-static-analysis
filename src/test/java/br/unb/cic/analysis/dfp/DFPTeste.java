@@ -6,17 +6,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import scala.collection.JavaConverters;
-import soot.PhaseOptions;
-import soot.Scene;
-import soot.SootMethod;
-
+import soot.*;
 import java.util.*;
 
 public class DFPTeste {
 
     private DFPInterProcedural analysis;
     AbstractMergeConflictDefinition definition;
-    public static String class_name = "br.unb.cic.analysis.samples.teste.Text";
+    public static String class_name = "br.unb.cic.analysis.samples.DFPMotivating";
 
     @Before
     public void configure() {
@@ -25,14 +22,14 @@ public class DFPTeste {
             protected Map<String, List<Integer>> sourceDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                addConfiguration(res, class_name, 11);
+                addConfiguration(res, class_name, 18);
                 return res;
             }
 
             @Override
             protected Map<String, List<Integer>> sinkDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
-                addConfiguration(res, class_name, 13);
+                addConfiguration(res, class_name, 21, 22, 23, 24);
                 return res;
             }
 
@@ -50,19 +47,25 @@ public class DFPTeste {
 
         PhaseOptions.v().setPhaseOption("jb", "use-original-names:true");
         SootWrapper.builder().withClassPath(cp).addClass(class_name).build().execute();
+
     }
 
     @Test
     public void testDFPAnalysisExpectingOneMoreConflict() {
         analysis.configureSoot();
-        analysis.setPrintDepthVisitedMethods(true);
 
+        analysis.setPrintDepthVisitedMethods(true);
+        List<SootMethod> entryPointsSCENE = Scene.v().getEntryPoints();
+
+
+//        Scene.v().setEntryPoints(entryPointsDEVs);
         analysis.buildDFP();
+        List<SootMethod> entryPointsDEVs = JavaConverters.seqAsJavaList(analysis.getEntryPoints());
+
         System.out.println(analysis.svg().reportConflicts().size());
         analysis.reportDFConflicts();
         System.out.println("Call graph:"+ analysis.callGraph());
-        List<SootMethod> entryPointsSCENE = Scene.v().getEntryPoints();
-        List<SootMethod> entryPointsDEVs = JavaConverters.seqAsJavaList(analysis.getAnalysisEntryPoints());
+
         System.out.println(entryPointsSCENE.size());
         System.out.println(entryPointsDEVs.size());
         System.out.println(analysis.svgToDotModel());

@@ -141,7 +141,7 @@ public class SootWrapper {
     }
 
     private static void enableCHACallGraph() {
-//        System.out.println("Enable CHA CG");
+        // System.out.println("Enable CHA CG");
         Options.v().setPhaseOption("cg.cha", "enabled:true");
 
         //AppOnly (apponly): Setting this option to true causes Soot to only consider application classes when building the callgraph. The resulting callgraph will be inherently unsound. Still, this option can make sense if performance optimization and memory reduction are your primary goal.

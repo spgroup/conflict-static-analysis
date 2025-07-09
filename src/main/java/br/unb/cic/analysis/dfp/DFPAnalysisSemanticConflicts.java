@@ -47,28 +47,28 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
         return cp;
     }
 
-//    @Override
-//    public Tuple2<String, Transform> createSceneTransform() {
-//        return new Tuple2<>("wjtp", new Transform("wjtp.svfa", new soot.SceneTransformer() {
-//            @Override
-//            protected void internalTransform(String phaseName, Map<String, String> options) {
-//                List<SootMethod> methods = JavaConverters.seqAsJavaList(getAnalysisEntryPoints());
-//                methods.forEach(sootMethod -> traverse(sootMethod, new ListBuffer<>(), false));
-//            }
-//        }));
-//    }
+    @Override
+    public Tuple2<String, Transform> createSceneTransform() {
+        return new Tuple2<>("wjtp", new Transform("wjtp.svfa", new soot.SceneTransformer() {
+            @Override
+            protected void internalTransform(String phaseName, Map<String, String> options) {
+                List<SootMethod> methods = JavaConverters.seqAsJavaList(getAnalysisEntryPoints());
+                methods.forEach(sootMethod -> traverse(sootMethod, new ListBuffer<>(), false));
+            }
+        }));
+    }
 
-//    @Override
-//    public Tuple2<String, Transform> createSceneTransformDFP() {
-//
-//        return new Tuple2<>("wjtp", new Transform("wjtp.dfp", new soot.SceneTransformer() {
-//            @Override
-//            protected void internalTransform(String phaseName, Map<String, String> options) {
-//                List<SootMethod> methods = JavaConverters.seqAsJavaList(getAnalysisEntryPoints());
-//                methods.forEach(sootMethod -> traverseDFP(sootMethod, new ListBuffer<>(), false));
-//            }
-//        }));
-//    }
+    @Override
+    public Tuple2<String, Transform> createSceneTransformDFP() {
+
+        return new Tuple2<>("wjtp", new Transform("wjtp.dfp", new soot.SceneTransformer() {
+            @Override
+            protected void internalTransform(String phaseName, Map<String, String> options) {
+                List<SootMethod> methods = JavaConverters.seqAsJavaList(getAnalysisEntryPoints());
+                methods.forEach(sootMethod -> traverseDFP(sootMethod, new ListBuffer<>(), false));
+            }
+        }));
+    }
 
     @Override
     public scala.collection.immutable.List<String> getIncludeList() {
@@ -202,5 +202,4 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
 
         return conflicts_report;
     }
-
 }
