@@ -25,7 +25,7 @@ public class DFPMotivatingTest {
             protected Map<String, List<Integer>> sourceDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                addConfiguration(res, class_name, 12, 18);
+                addConfiguration(res, class_name, 18);
                 return res;
             }
 
@@ -60,10 +60,6 @@ public class DFPMotivatingTest {
         System.out.println(analysis.svg().reportConflicts().size());
         analysis.reportDFConflicts();
         System.out.println(analysis.callGraph());
-        List<SootMethod> entryPointsSCENE = Scene.v().getEntryPoints();
-        List<SootMethod> entryPointsDEVs = JavaConverters.seqAsJavaList(analysis.getAnalysisEntryPoints());
-
-//        System.out.println(analysis.svgToDotModel());
         System.out.println(analysis.findSourceSinkPaths());
         System.out.println(analysis.svg().findConflictingPaths());
         Assert.assertTrue(analysis.svg().reportConflicts().size() >= 1);

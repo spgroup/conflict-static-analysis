@@ -55,19 +55,11 @@ public class DFPTeste {
         analysis.configureSoot();
 
         analysis.setPrintDepthVisitedMethods(true);
-        List<SootMethod> entryPointsSCENE = Scene.v().getEntryPoints();
-
-
-//        Scene.v().setEntryPoints(entryPointsDEVs);
         analysis.buildDFP();
-        List<SootMethod> entryPointsDEVs = JavaConverters.seqAsJavaList(analysis.getEntryPoints());
 
         System.out.println(analysis.svg().reportConflicts().size());
         analysis.reportDFConflicts();
         System.out.println("Call graph:"+ analysis.callGraph());
-
-        System.out.println(entryPointsSCENE.size());
-        System.out.println(entryPointsDEVs.size());
         System.out.println(analysis.svgToDotModel());
         System.out.println(analysis.findSourceSinkPaths());
         System.out.println(analysis.svg().findConflictingPaths());
