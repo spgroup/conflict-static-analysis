@@ -13,9 +13,6 @@ depth = []
 same_depth_count = 0
 
 for idx, entry in enumerate(data):
-    if 'body' not in entry or 'interference' not in entry['body']:
-        print(f"Warning: Skipping entry {idx} due to missing 'body' or 'interference' key.")
-        continue
     interference = entry['body']['interference']
     l_stack = interference[0]['stackTrace']
     r_stack = interference[1]['stackTrace']
