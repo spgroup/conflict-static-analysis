@@ -163,6 +163,10 @@ public class Main {
                 .desc("sets depthMethodsVisited from SVFA")
                 .build();
 
+        Option spark = Option.builder("spark").argName("spark").hasArg()
+                .desc("sets CallGraph")
+                .build();
+
         options.addOption(classPathOption);
         options.addOption(inputFileOption);
         options.addOption(analysisOption);
@@ -172,6 +176,7 @@ public class Main {
         options.addOption(recursiveOption);
         options.addOption(depthLimitOption);
         options.addOption(depthMethodsVisitedSVFAOption);
+        options.addOption(spark);
     }
 
     private void runAnalysis(String mode, String classpath) {
@@ -406,6 +411,15 @@ public class Main {
 
         boolean depthMethodsVisited = Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
         analysis.setPrintDepthVisitedMethods(depthMethodsVisited);
+
+        boolean callGraph = Boolean.parseBoolean(cmd.getOptionValue("spark", "false")); //defaul false = CHA
+
+        if (callGraph){
+            analysis.setCallGraph("SPARK");
+        }else{
+            analysis.setCallGraph("CHA");
+        }
+
         String type_analysis = interprocedural ? "Inter" : "Intra";
         stopwatch = Stopwatch.createStarted();
 
@@ -509,7 +523,10 @@ public class Main {
         DFPConfluenceAnalysis analysis = new DFPConfluenceAnalysis(classpath, this.definition, interprocedural, depthLimit);
         boolean depthMethodsVisited = Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
 
-        analysis.execute(false);
+        boolean callGraph = Boolean.parseBoolean(cmd.getOptionValue("spark", "false")); //defaul false = CHA
+
+        analysis.execute(depthMethodsVisited, callGraph);
+
         System.out.println("Depth limit: "+analysis.getDepthLimit());
 
         conflicts.addAll(analysis.getConfluentConflicts()

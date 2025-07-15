@@ -37,7 +37,7 @@ public class ConfluenceFlowTest5 {
 
     @Test
     public void testSVFAConfluentAnalysisExpectingOneConflict() {
-        analysis.execute(false);
+        analysis.execute(false, true);
         Set<ConfluenceConflict> conflicts = analysis.getConfluentConflicts();
         System.out.println("Conflicts: "+conflicts.size());
         analysis.reportConflictsConfluence();

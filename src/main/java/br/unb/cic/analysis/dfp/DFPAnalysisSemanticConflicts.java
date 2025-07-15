@@ -2,9 +2,11 @@ package br.unb.cic.analysis.dfp;
 
 import br.ufpe.cin.soot.analysis.jimple.JDFP;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
-import br.unb.cic.analysis.FindEntryPoints;
 import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.soot.graph.*;
+import br.unb.cic.soot.svfa.CG;
+import br.unb.cic.soot.svfa.CHA$;
+import br.unb.cic.soot.svfa.SPARK$;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
 import scala.collection.mutable.ListBuffer;
@@ -21,6 +23,7 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
 
     private String cp;
     private int depthLimit;
+    private CG callGraph = SPARK$.MODULE$;
 
     private AbstractMergeConflictDefinition definition;
 
@@ -201,5 +204,19 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
         }
 
         return conflicts_report;
+    }
+
+
+    @Override
+    public CG callGraph() {
+        return this.callGraph;
+    }
+
+    public void setCallGraph(String callGraph){
+        if (callGraph.toUpperCase().contains("SPARK")){
+            this.callGraph = SPARK$.MODULE$;
+        }else{
+            this.callGraph = CHA$.MODULE$;
+        }
     }
 }

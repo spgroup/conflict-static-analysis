@@ -49,11 +49,20 @@ public class DFPConfluenceAnalysis {
         return confluentFlows;
     }
 
+
+    public void setCallGraph(DFPAnalysisSemanticConflicts instance, boolean spark){
+        if (spark){
+            instance.setCallGraph("SPARK");
+        }else{
+            instance.setCallGraph("CHA");
+        }
+    }
+
     /**
      * Executes both source -> base and sink -> base SVFA analysis intersects then populating
      * the confluentFlows attribute with the results
      */
-    public void execute(boolean depthMethodsVisited) {
+    public void execute(boolean depthMethodsVisited, boolean spark) {
         DFPAnalysisSemanticConflicts sourceBaseAnalysis = sourceBaseAnalysis(interprocedural);
         String type_analysis;
         if (interprocedural) {
@@ -61,9 +70,12 @@ public class DFPConfluenceAnalysis {
         } else {
             type_analysis = "Intra";
         }
+
         Main m = new Main();
         m.stopwatch = Stopwatch.createStarted();
         sourceBaseAnalysis.setPrintDepthVisitedMethods(depthMethodsVisited);
+
+        setCallGraph(sourceBaseAnalysis, spark);
 
         sourceBaseAnalysis.configureSoot();
         Options.v().ignore_resolution_errors();
@@ -85,6 +97,8 @@ public class DFPConfluenceAnalysis {
 
         DFPAnalysisSemanticConflicts sinkBaseAnalysis = sinkBaseAnalysis(interprocedural);
         sinkBaseAnalysis.setPrintDepthVisitedMethods(depthMethodsVisited);
+
+        setCallGraph(sinkBaseAnalysis, spark);
 
         sinkBaseAnalysis.configureSoot();
 

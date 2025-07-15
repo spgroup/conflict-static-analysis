@@ -52,7 +52,10 @@ public class DFPTeste {
 
     @Test
     public void testDFPAnalysisExpectingOneMoreConflict() {
+
+        analysis.setCallGraph("CHA");
         analysis.configureSoot();
+        System.out.println("Call graph:"+ analysis.callGraph());
 
         analysis.setPrintDepthVisitedMethods(true);
         analysis.buildDFP();
