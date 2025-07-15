@@ -26,10 +26,7 @@ import br.unb.cic.diffclass.DiffClass;
 import com.google.common.base.Stopwatch;
 import org.apache.commons.cli.*;
 import scala.collection.JavaConverters;
-import soot.Body;
-import soot.BodyTransformer;
-import soot.PackManager;
-import soot.Transform;
+import soot.*;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -188,10 +185,16 @@ public class Main {
                 runSparseValueFlowAnalysis(classpath, false);
                 break;
             case "dfp-confluence-interprocedural":
-                runDFPConfluenceAnalysis(classpath, true);
+                runDFPConfluenceAnalysis(classpath, true, false);
                 break;
             case "dfp-confluence-intraprocedural":
-                runDFPConfluenceAnalysis(classpath, false);
+                runDFPConfluenceAnalysis(classpath, false, false);
+                break;
+            case "dfp-confluence-interprocedural-pa":
+                runDFPConfluenceAnalysis(classpath, true, true);
+                break;
+            case "dfp-confluence-intraprocedural-pa":
+                runDFPConfluenceAnalysis(classpath, false, true);
                 break;
             case "reachability":
                 runReachabilityAnalysis(classpath);
@@ -209,22 +212,40 @@ public class Main {
                 runOverrideAssignmentAnalysis(classpath, false, AnalysisType.WITH_POINTER_ANALYSIS);
                 break;
             case "dfp-intra":
-                runDFPAnalysis(classpath, false);
+                runDFPAnalysis(classpath, false, false);
                 break;
             case "dfp-inter":
-                runDFPAnalysis(classpath, true);
+                runDFPAnalysis(classpath, true, false);
+                break;
+            case "dfp-intra-pa":
+                runDFPAnalysis(classpath, false, true);
+                break;
+            case "dfp-inter-pa":
+                runDFPAnalysis(classpath, true, true);
                 break;
             case "pdg":
-                runPDGAnalysis(classpath, true);
+                runPDGAnalysis(classpath, true, false);
                 break;
             case "cd":
-                runCDAnalysis(classpath, true);
+                runCDAnalysis(classpath, true, false);
                 break;
             case "pdg-e":
-                runPDGAnalysis(classpath, false);
+                runPDGAnalysis(classpath, false, false);
                 break;
             case "cd-e":
-                runCDAnalysis(classpath, false);
+                runCDAnalysis(classpath, false, false);
+                break;
+            case "pdg-pa":
+                runPDGAnalysis(classpath, true, true);
+                break;
+            case "cd-pa":
+                runCDAnalysis(classpath, true, true);
+                break;
+            case "pdg-e-pa":
+                runPDGAnalysis(classpath, false, true);
+                break;
+            case "cd-e-pa":
+                runCDAnalysis(classpath, false, true);
                 break;
             case "pessimistic-dataflow":
                 runPessimisticDataFlowAnalysis(classpath);
@@ -373,8 +394,15 @@ public class Main {
         conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
     }
 
-    private void runPDGAnalysis(String classpath, Boolean omitExceptingUnitEdges) {
+    private void runPDGAnalysis(String classpath, Boolean omitExceptingUnitEdges, boolean spark) {
         PDGAnalysisSemanticConflicts analysis = new PDGIntraProcedural(classpath, definition);
+
+        if (spark){
+            analysis.setCallGraph("SPARK");
+        }else{
+            analysis.setCallGraph("CHA");
+        }
+
         CDAnalysisSemanticConflicts cd = new CDIntraProcedural(classpath, definition);
         cd.setOmitExceptingUnitEdges(omitExceptingUnitEdges);
         DFPAnalysisSemanticConflicts dfp = new DFPIntraProcedural(classpath, definition);
@@ -383,6 +411,9 @@ public class Main {
 
         stopwatch = Stopwatch.createStarted();
         analysis.configureSoot();
+
+        System.out.println("CallGraph: "+analysis.callGraph());
+
         saveExecutionTime("Configure Soot PDG"+type_analysis);
 
         stopwatch = Stopwatch.createStarted();
@@ -401,7 +432,7 @@ public class Main {
         saveConflictsLog("PDG"+type_analysis, conflicts.toString());
     }
 
-    private void runDFPAnalysis(String classpath, Boolean interprocedural) {
+    private void runDFPAnalysis(String classpath, Boolean interprocedural, Boolean spark) {
         int depthLimit = Integer.parseInt(cmd.getOptionValue("depthLimit", "5"));
 
         definition.setRecursiveMode(options.hasOption("recursive"));
@@ -412,19 +443,16 @@ public class Main {
         boolean depthMethodsVisited = Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
         analysis.setPrintDepthVisitedMethods(depthMethodsVisited);
 
-        boolean callGraph = Boolean.parseBoolean(cmd.getOptionValue("spark", "false")); //defaul false = CHA
-
-        if (callGraph){
+        if (spark){
             analysis.setCallGraph("SPARK");
         }else{
             analysis.setCallGraph("CHA");
         }
-
         String type_analysis = interprocedural ? "Inter" : "Intra";
         stopwatch = Stopwatch.createStarted();
-
         analysis.configureSoot();
 
+        System.out.println("CallGraph: "+analysis.callGraph());
         saveExecutionTime("Configure Soot DFP "+type_analysis);
 
         stopwatch = Stopwatch.createStarted();
@@ -457,14 +485,23 @@ public class Main {
 
     }
 
-    private void runCDAnalysis(String classpath, Boolean omitExceptingUnitEdges) {
+    private void runCDAnalysis(String classpath, Boolean omitExceptingUnitEdges, boolean spark) {
 
         CDAnalysisSemanticConflicts analysis = new CDIntraProcedural(classpath, definition);
         String type_analysis = omitExceptingUnitEdges ? "" : "e";
 
+        if (spark){
+            analysis.setCallGraph("SPARK");
+        }else{
+            analysis.setCallGraph("CHA");
+        }
+
         analysis.setOmitExceptingUnitEdges(omitExceptingUnitEdges);
         stopwatch = Stopwatch.createStarted();
         analysis.configureSoot();
+
+        System.out.println("CallGraph: "+analysis.callGraph());
+
         saveExecutionTime("Configure Soot CD"+type_analysis);
 
         stopwatch = Stopwatch.createStarted();
@@ -515,7 +552,7 @@ public class Main {
         saveConflictsLog("DF "+type_analysis, conflicts.toString());
     }
 
-    private void runDFPConfluenceAnalysis(String classpath, boolean interprocedural) {
+    private void runDFPConfluenceAnalysis(String classpath, boolean interprocedural, boolean spark) {
         int depthLimit = Integer.parseInt(cmd.getOptionValue("depthLimit", "5"));
         String type_analysis = interprocedural ? "Inter" : "Intra";
 
@@ -523,9 +560,7 @@ public class Main {
         DFPConfluenceAnalysis analysis = new DFPConfluenceAnalysis(classpath, this.definition, interprocedural, depthLimit);
         boolean depthMethodsVisited = Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
 
-        boolean callGraph = Boolean.parseBoolean(cmd.getOptionValue("spark", "false")); //defaul false = CHA
-
-        analysis.execute(depthMethodsVisited, callGraph);
+        analysis.execute(depthMethodsVisited, spark);
 
         System.out.println("Depth limit: "+analysis.getDepthLimit());
 

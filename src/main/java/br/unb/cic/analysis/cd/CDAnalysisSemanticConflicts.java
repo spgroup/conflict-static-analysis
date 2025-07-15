@@ -5,6 +5,9 @@ import br.ufpe.cin.soot.graph.*;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.soot.graph.*;
+import br.unb.cic.soot.svfa.CG;
+import br.unb.cic.soot.svfa.CHA$;
+import br.unb.cic.soot.svfa.SPARK$;
 import scala.collection.JavaConverters;
 import soot.SootMethod;
 import soot.Unit;
@@ -20,7 +23,7 @@ import java.util.stream.Collectors;
 public abstract class CDAnalysisSemanticConflicts extends JCD {
 
     private String cp;
-
+    private CG callGraph = SPARK$.MODULE$;
     private AbstractMergeConflictDefinition definition;
 
     /**
@@ -112,4 +115,18 @@ public abstract class CDAnalysisSemanticConflicts extends JCD {
     public final boolean isFieldSensitiveAnalysis() {
         return true;
     }
+
+    @Override
+    public CG callGraph() {
+        return this.callGraph;
+    }
+
+    public void setCallGraph(String callGraph){
+        if (callGraph.toUpperCase().contains("SPARK")){
+            this.callGraph = SPARK$.MODULE$;
+        }else{
+            this.callGraph = CHA$.MODULE$;
+        }
+    }
+
 }

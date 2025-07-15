@@ -78,6 +78,9 @@ public class DFPConfluenceAnalysis {
         setCallGraph(sourceBaseAnalysis, spark);
 
         sourceBaseAnalysis.configureSoot();
+
+        System.out.println("CallGraph: "+sourceBaseAnalysis.callGraph());
+
         Options.v().ignore_resolution_errors();
         m.saveExecutionTime("Configure Soot Confluence 1 "+type_analysis);
 
@@ -101,6 +104,8 @@ public class DFPConfluenceAnalysis {
         setCallGraph(sinkBaseAnalysis, spark);
 
         sinkBaseAnalysis.configureSoot();
+
+        System.out.println("CallGraph: "+sourceBaseAnalysis.callGraph());
 
         m.saveExecutionTime("Configure Soot Confluence 2 "+type_analysis);
 
