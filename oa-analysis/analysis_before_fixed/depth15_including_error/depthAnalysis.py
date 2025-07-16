@@ -12,40 +12,55 @@ rows = []
 depth = []
 same_depth_count = 0
 
-for idx, entry in enumerate(data):
-    if 'body' not in entry or 'interference' not in entry['body']:
-        print(f"Warning: Skipping entry {idx} due to missing 'body' or 'interference' key.")
-        continue
-    interference = entry['body']['interference']
-    l_stack = interference[0]['stackTrace']
-    r_stack = interference[1]['stackTrace']
-    
-    l_len = len(l_stack)
-    r_len = len(r_stack)
-    diff = abs(l_len - r_len)
-    max_len = max(l_len, r_len)
+def process_conflicts(conflicts, start_idx=0):
+    global same_depth_count
+    for idx, entry in enumerate(conflicts, start=start_idx):
+        if not isinstance(entry, dict):
+            continue
+        if 'body' not in entry or 'interference' not in entry['body']:
+            continue
+        interference = entry['body']['interference']
+        if not isinstance(interference, list) or len(interference) < 2:
+            continue
+        l_stack = interference[0].get('stackTrace', [])
+        r_stack = interference[1].get('stackTrace', [])
 
-    depth.append(max_len)
-    l_lengths.append(l_len)
-    r_lengths.append(r_len)
-    diffs.append(diff)
-    
-    if l_len == r_len:
-        same_depth_count += 1
-        
-    l_class = interference[0]['location'].get('class', None)
-    r_class = interference[1]['location'].get('class', None)
-    l_method = interference[0]['location'].get('method', None)
-    r_method = interference[1]['location'].get('method', None)
-    same_class = l_class == r_class and l_class is not None
-    same_method = same_class and l_method == r_method and l_method is not None
-    rows.append([idx, l_len, r_len, max_len, diff, same_class, same_method])
+        l_len = len(l_stack)
+        r_len = len(r_stack)
+        diff = abs(l_len - r_len)
+        max_len = max(l_len, r_len)
+
+        depth.append(max_len)
+        l_lengths.append(l_len)
+        r_lengths.append(r_len)
+        diffs.append(diff)
+
+        if l_len == r_len:
+            same_depth_count += 1
+
+        l_class = interference[0].get('location', {}).get('class', None)
+        r_class = interference[1].get('location', {}).get('class', None)
+        l_method = interference[0].get('location', {}).get('method', None)
+        r_method = interference[1].get('location', {}).get('method', None)
+        same_class = l_class == r_class and l_class is not None
+        same_method = same_class and l_method == r_method and l_method is not None
+        rows.append([idx, l_len, r_len, max_len, diff, same_class, same_method])
+
+idx = 0
+if data and isinstance(data, list):
+    for entry in data:
+        if isinstance(entry, dict) and 'conflicts' in entry:
+            conflicts = entry.get('conflicts', [])
+            process_conflicts(conflicts, start_idx=idx)
+            idx += len(conflicts)
+        elif isinstance(entry, dict) and 'body' in entry:
+            process_conflicts([entry], start_idx=idx)
+            idx += 1
 
 with open('conflict_stacktrace_stats.csv', 'w', newline='') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(['conflict_index', 'left_stacktrace_length', 'right_stacktrace_length', 'conflict_depth', 'stacktrace_diff', 'same_class', 'same_method'])
     writer.writerows(rows)
-
 
 plt.figure(figsize=(10, 5))
 plt.plot(l_lengths, label='L branch stackTrace length', marker='o')
