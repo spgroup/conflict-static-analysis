@@ -346,7 +346,8 @@ public abstract class AbstractMergeConflictDefinition {
 
     /**
      * Auxiliary method to extract the SootClass from a method signature.
-     * @param fullMethodSignature the full method signature
+     *
+     * @param fullMethodSignature the full method signature. E.g: <br.unb.cic.analysis.samples.ioa.ObjectFieldNotConflictSample: void m()>
      * @return the SootClass extracted from the method signature
      */
     private SootClass extractSootClassFromMethodSignature(String fullMethodSignature) {
@@ -362,7 +363,8 @@ public abstract class AbstractMergeConflictDefinition {
 
     /**
      * Auxiliary method to extract the method name from a method signature.
-     * @param fullMethodSignature the full method signature
+     *
+     * @param fullMethodSignature the full method signature. E.g: <br.unb.cic.analysis.samples.ioa.ObjectFieldNotConflictSample: void m()>
      * @return the method name extracted from the method signature
      */
     private String extractMethodName(String fullMethodSignature) {
@@ -381,7 +383,7 @@ public abstract class AbstractMergeConflictDefinition {
     /**
      * Adds methods to the entry points set based on the provided method names and SootClass.
      *
-     * @param entryPoints a set to which the methods will be added
+     * @param entryPoints      a set to which the methods will be added
      * @param methodSignatures a list of method names to be added as entry points
      */
     private void addMethodsToEntryPoints(Set<SootMethod> entryPoints, List<String> methodSignatures) throws NoSuchMethodException {

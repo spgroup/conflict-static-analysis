@@ -43,7 +43,6 @@ public class OverrideAssignmentAbstraction implements Cloneable {
 
     }
 
-
     public List<List<Statement>> getLists() {
         List<List<Statement>> lists = new ArrayList<>();
         lists.add(leftAbstraction);

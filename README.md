@@ -112,7 +112,10 @@ the merge commit hash. See the comment above regarding the -csv parameter.
 
 #### -mode
 
-Analysis mode: dataflow, reachability, svfa or tainted.
+Analysis mode: dataflow, tainted, confluence, confluence-tainted, svfa-interprocedural, svfa-intraprocedural,
+dfp-confluence-interprocedural, dfp-confluence-intraprocedural, reachability, overriding-interprocedural,
+overriding-intraprocedural, ioa-without-pa, oa-without-pa, dfp-intra, dfp-inter, pdg, pdg-e, cd, cd-e or
+pessimistic-dataflow,
 
 #### -repo
 

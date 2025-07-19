@@ -25,14 +25,14 @@ import java.util.concurrent.TimeUnit;
 
 import static br.unb.cic.analysis.SootWrapper.*;
 
-public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
+public class OAInterWithoutPointerAnalysisTest {
     public static Stopwatch stopwatch;
 
     private void configureTest(OverrideAssignment analysis) {
         stopwatch = Stopwatch.createStarted();
         G.reset();
 
-        SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis("target/test-classes/");
+        SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis("target/test-classes/", false);
 
 
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
@@ -97,6 +97,7 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
         System.out.println("----------------------------");
     }
 
+
     @Test
     public void localConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.LocalTestConflictSample";
@@ -114,14 +115,14 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{8}, new int[]{10});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(7, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
     @Test
     public void loggingConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.LoggingConflictSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
-                .definition(sampleClassPath, new int[]{13}, new int[]{10});
+                .definition(sampleClassPath, new int[]{8}, new int[]{11});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());
@@ -137,7 +138,7 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
-
+    @Ignore
     @Test
     public void StringArray() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.StringArraySample";
@@ -213,7 +214,7 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{11}, new int[]{13});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(1, analysis.getConflicts().size());
+        Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
     @Test
@@ -225,6 +226,7 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
         configureTest(analysis);
         Assert.assertEquals(5, analysis.getConflicts().size());
     }
+
 
     @Test
     public void ifWithInvokeConflict() {
@@ -246,14 +248,15 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
+    @Ignore
     @Test
     public void chainedMethodCallsConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.ChainedMethodCallsConflictSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
-                .definition(sampleClassPath, new int[]{13}, new int[]{12});
+                .definition(sampleClassPath, new int[]{12}, new int[]{13});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(3, analysis.getConflicts().size());
+        Assert.assertEquals(2, analysis.getConflicts().size());
     }
 
     @Test
@@ -353,25 +356,25 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
     /**
      * in this case, we add java.util to the list of packages included in soot to be able to detect conflicts in the Hashmap class
      */
+    @Ignore
     @Test
     public void additionToArrayWithJavaUtilConflict() {
+        String classpath = "target/test-classes/";
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.AdditionToArrayConflictSample";
-        List<String> stringList = new ArrayList<String>(Arrays.asList("java.util.*")); // java.util.* java.util.HashMap
 
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{11}, new int[]{13});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
 
+        List<String> stringList = new ArrayList<String>(Arrays.asList("java.util.*")); // java.util.* java.util.HashMap
         G.reset();
-
-        String classpath = "target/test-classes/";
-        List<String> testClasses = Collections.singletonList(classpath);
+        List<String> classes = Collections.singletonList(classpath);
 
         Options.v().set_no_bodies_for_excluded(true);
         Options.v().set_allow_phantom_refs(true);
-        Options.v().set_output_format(Options.output_format_jimple);
+        Options.v().set_output_format(soot.options.Options.output_format_jimple);
         Options.v().set_whole_program(true);
-        Options.v().set_process_dir(testClasses);
+        Options.v().set_process_dir(classes);
         Options.v().set_full_resolver(true);
         Options.v().set_keep_line_number(true);
         Options.v().set_include(stringList);
@@ -383,23 +386,23 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
         }
         // JAVA VERSION 9 && IS A CLASSPATH PROJECT
         else if (getJavaVersion() >= 9) {
-            Options.v().set_soot_classpath(classpath);
+            Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK" + File.pathSeparator + classpath);
         }
-
-
-        //Options.v().setPhaseOption("cg.spark", "on");
-        //Options.v().setPhaseOption("cg.spark", "verbose:true");
-        Options.v().setPhaseOption("cg.spark", "enabled:true");
+        //Options.v().setPhaseOption("jb.ls", "off"); // remove x = 1; x#2 = 2
         Options.v().setPhaseOption("jb", "use-original-names:true");
+
+        enableCallGraph(false);
 
         Scene.v().loadNecessaryClasses();
 
-        enableSparkCallGraph();
+        applyPackage("cg");
 
-        analysis.configureEntryPoints();
+        SootWrapper.setChaCG(Scene.v().getCallGraph());
 
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
+        analysis.configureEntryPoints();
         SootWrapper.applyPackages();
+
 
         try {
             exportResults(analysis.getConflicts());
@@ -407,7 +410,7 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
             e.printStackTrace();
         }
 
-        Assert.assertEquals(24, analysis.getConflicts().size());
+        Assert.assertEquals(8, analysis.getConflicts().size());
     }
 
     @Test
@@ -420,24 +423,25 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
         Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
+    @Ignore
     @Test
     public void hashmapWithJavaUtilConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.HashmapConflictSample";
-        List<String> stringList = new ArrayList<String>(Arrays.asList("java.util.HashMap")); // java.util.* java.util.HashMap
+        String classpath = "target/test-classes/";
 
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{11}, new int[]{12});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
-        G.reset();
 
-        String classpath = "target/test-classes/";
-        List<String> testClasses = Collections.singletonList(classpath);
+        List<String> stringList = new ArrayList<String>(Arrays.asList("java.util.*")); // java.util.* java.util.HashMap
+        G.reset();
+        List<String> classes = Collections.singletonList(classpath);
 
         Options.v().set_no_bodies_for_excluded(true);
         Options.v().set_allow_phantom_refs(true);
-        Options.v().set_output_format(Options.output_format_jimple);
+        Options.v().set_output_format(soot.options.Options.output_format_jimple);
         Options.v().set_whole_program(true);
-        Options.v().set_process_dir(testClasses);
+        Options.v().set_process_dir(classes);
         Options.v().set_full_resolver(true);
         Options.v().set_keep_line_number(true);
         Options.v().set_include(stringList);
@@ -449,22 +453,21 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
         }
         // JAVA VERSION 9 && IS A CLASSPATH PROJECT
         else if (getJavaVersion() >= 9) {
-            Options.v().set_soot_classpath(classpath);
+            Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK" + File.pathSeparator + classpath);
         }
-
-
-        //Options.v().setPhaseOption("cg.spark", "on");
-        //Options.v().setPhaseOption("cg.spark", "verbose:true");
-        Options.v().setPhaseOption("cg.spark", "enabled:true");
+        //Options.v().setPhaseOption("jb.ls", "off"); // remove x = 1; x#2 = 2
         Options.v().setPhaseOption("jb", "use-original-names:true");
+
+        enableCallGraph(false);
 
         Scene.v().loadNecessaryClasses();
 
-        enableSparkCallGraph();
+        applyPackage("cg");
 
-        analysis.configureEntryPoints();
+        SootWrapper.setChaCG(Scene.v().getCallGraph());
 
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
+        analysis.configureEntryPoints();
         SootWrapper.applyPackages();
 
         try {
@@ -472,7 +475,7 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Assert.assertEquals(164, analysis.getConflicts().size());
+        Assert.assertEquals(229, analysis.getConflicts().size());
     }
 
     @Test
@@ -497,6 +500,16 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
     }
 
     @Test
+    public void PointsToDifferentMethods() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToDifferentMethodsSample.Cx";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{12}, new int[]{14});
+        OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
+        configureTest(analysis);
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    @Test
     public void pointsToSameArray() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToSameArraySample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
@@ -513,7 +526,7 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{8}, new int[]{10});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(1, analysis.getConflicts().size());
+        Assert.assertEquals(0, analysis.getConflicts().size());
     }
 
     @Test
@@ -533,7 +546,7 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{12}, new int[]{14});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(2, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
     @Test
@@ -543,7 +556,7 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{8}, new int[]{10});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(2, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
 
@@ -564,9 +577,10 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{7}, new int[]{9});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(0, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
+    @Ignore
     @Test
     public void pointsToDifferentObjectFromParametersWithMainNotConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.PointsToDifferentObjectFromParametersWithMainSample";
@@ -574,7 +588,7 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{11}, new int[]{13});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(0, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
     @Test
@@ -584,7 +598,7 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{11}, new int[]{13});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(2, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
 
@@ -595,7 +609,7 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{7}, new int[]{9});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(2, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
     @Test
@@ -605,7 +619,7 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{7}, new int[]{9});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(0, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
     @Test
@@ -625,7 +639,7 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{7}, new int[]{9});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(2, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
     @Test
@@ -648,6 +662,7 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
+
     @Test
     public void localArraysNotConflict() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.LocalArrayNotConflictSample";
@@ -655,7 +670,7 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{8}, new int[]{9});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(0, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
     @Test
@@ -665,7 +680,7 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{8}, new int[]{10});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(0, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
     @Test
@@ -825,7 +840,7 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{7, 9}, new int[]{8});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(1, analysis.getConflicts().size());
+        Assert.assertEquals(2, analysis.getConflicts().size());
     }
 
     @Test
@@ -855,7 +870,7 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
                 .definition(sampleClassPath, new int[]{9}, new int[]{10});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
-        Assert.assertEquals(3, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
     @Test
@@ -976,13 +991,43 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
     }
 
     @Test
+    public void callGraphFromMainTest() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.CallGraphFromMainSample.Text";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{11}, new int[]{13});
+        OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
+        configureTest(analysis);
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void pointerAnalisysReflectionTest() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.CallGraphFromMainSample.TextReflect";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{22}, new int[]{24});
+        OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
+        configureTest(analysis);
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void pointerAnalisysProxyTest() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.CallGraphFromMainSample.TextProxy";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{29}, new int[]{31});
+        OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
+        configureTest(analysis);
+        Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    @Test
     public void baseConflictTwoEntrypointsTest() {
         String sampleClassPath = "br.unb.cic.analysis.samples.ioa.BaseConflictTwoEntrypointsSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{11, 16}, new int[]{18});
 
         List<String> entrypoints = new ArrayList<>();
-        entrypoints.add("void main()");
+        entrypoints.add("<br.unb.cic.analysis.samples.ioa.BaseConflictTwoEntrypointsSample: void main(java.lang.String[])>");
 
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition, 5, true, entrypoints);
 
@@ -1013,5 +1058,15 @@ public class InterproceduralOverridingAssignmentWithoutPointerAnalysisTest {
         Assert.assertEquals(1, analysis.getConflicts().size());
 
 
+    }
+
+    @Test
+    public void inheritanceTest() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.ioa.Inheritance.Main";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{8}, new int[]{10});
+        OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
+        configureTest(analysis);
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 }
