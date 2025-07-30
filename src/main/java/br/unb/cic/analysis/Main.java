@@ -342,8 +342,8 @@ public class Main {
         stopwatch = Stopwatch.createStarted();
 
         OverrideAssignment overrideAssignment = oaPointerAnalysis
-                ? new OverrideAssignmentWithPointerAnalysis(definition, depthLimit, interprocedural, entrypoints)
-                : new OverrideAssignmentWithoutPointerAnalysis(definition, depthLimit, interprocedural, entrypoints);
+                ? new OverrideAssignmentWithPointerAnalysis(definition, depthLimit, interprocedural, entrypoints, classpath)
+                : new OverrideAssignmentWithoutPointerAnalysis(definition, depthLimit, interprocedural, entrypoints, classpath);
 
         SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath);
 

@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class OverrideAssignment extends SceneTransformer implements AbstractAnalysis {
+    private String classpath;
     private int depthLimit;
     private final Boolean interprocedural;
     private OAConflictReport oaConflictReport;
@@ -28,12 +29,17 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
 
     protected abstract boolean isSameStateElement(Statement stmtInAbs, Statement stmtInFlow);
 
-    public OverrideAssignment(AbstractMergeConflictDefinition definition, int depthLimit, Boolean interprocedural, List<String> entrypoints) {
+    public OverrideAssignment(AbstractMergeConflictDefinition definition, int depthLimit, Boolean interprocedural, List<String> entrypoints, String classpath) {
         this.depthLimit = depthLimit;
         this.interprocedural = interprocedural;
         this.statementsUtils = new StatementsUtil(definition, entrypoints);
+        this.classpath = classpath;
 
         initDefaultFields();
+    }
+
+    public OverrideAssignment(AbstractMergeConflictDefinition definition, int depthLimit, Boolean interprocedural, List<String> entrypoints) {
+        this(definition, depthLimit, interprocedural, entrypoints, "ScenarioJAR not defined");
     }
 
     public OverrideAssignment(AbstractMergeConflictDefinition definition, int depthLimit, Boolean interprocedural) {
@@ -276,7 +282,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
     }
 
     private void addConflict(Statement left, Statement right) {
-        Conflict conflict = new OAConflict(left, right, this.interprocedural);
+        Conflict conflict = new OAConflict(left, right, this.interprocedural, this.classpath);
         if (!this.oaConflictReport.contains(conflict)) {
             this.oaConflictReport.addConflict(conflict);
 
