@@ -110,6 +110,18 @@ def compute_true_percentage(lst):
 scenario_same_method_pct = {idx: compute_true_percentage(conflicts_same_method[idx]) for idx in conflicts_same_method}
 scenario_same_class_pct = {idx: compute_true_percentage(conflicts_same_class[idx]) for idx in conflicts_same_class}
 
+conflicts_depths_hist = []
+for idx in conflicts_depth:
+    depths = conflicts_depth[idx]
+    for depth in depths:
+        conflicts_depths_hist.append(depth)
+
+conflicts_diffs_hist = []
+for idx in conflicts_diffs:
+    diffs = conflicts_diffs[idx]
+    for diff in diffs:
+        conflicts_diffs_hist.append(diff)
+
 scenario_jar_list = {idx: list(scenario_jar_map[idx])[0] for idx in scenario_jar_map}
 
 def save_hist(data, title, xlabel, filename, bins='auto', xticks=None):
@@ -123,6 +135,20 @@ def save_hist(data, title, xlabel, filename, bins='auto', xticks=None):
     plt.tight_layout()
     plt.savefig(filename)
     plt.close()
+
+save_hist(
+    data=conflicts_depths_hist,
+    title='Conflicts histogram of Depths',
+    xlabel='Depths',
+    filename='conflicts_depth_hist.png'
+)
+
+save_hist(
+    data=conflicts_diffs_hist,
+    title='Conflicts histogram of Diffs (Stacktrace)',
+    xlabel='Absolute difference (L -R)',
+    filename='conflicts_diffs_hist.png'
+)
 
 save_hist(
     data=conflict_counts.values(),
