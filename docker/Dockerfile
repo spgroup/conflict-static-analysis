@@ -1,83 +1,90 @@
 FROM ubuntu:22.04
 
-# Install OpenJDK-8
+# -------------------------------------
+# 1. Instalar dependências de sistema
+# -------------------------------------
 RUN apt-get update --fix-missing && \
-    apt-get install -y openjdk-8-jdk && \
-    apt-get install -y ant && \
-    apt-get install -y curl && \
-    apt-get clean;
-    
-# Fix certificate issues
-RUN apt-get update && \
-    apt-get install ca-certificates-java && \
+    apt-get install -y openjdk-8-jdk ant curl python3 python3-pip git vim ca-certificates-java && \
     apt-get clean && \
-    update-ca-certificates -f;
+    update-ca-certificates -f
 
-# Install Python
-RUN apt-get update && \
-   apt-get install python3 && \
-   apt-get install python3-pip -y  && \
-   apt-get clean;
+# -------------------------------------
+# 2. Configurar JAVA_HOME
+# -------------------------------------
+ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
+ENV PATH=$JAVA_HOME/bin:$PATH
 
-# Setup JAVA_HOME -- useful for docker commandline
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
-RUN export JAVA_HOME
-
-# Downloading and installing Maven
-## 1- Define a constant with the version of maven you want to install
-ARG MAVEN_VERSION=3.8.8
-
-## 2- Define a constant with the working directory
+# -------------------------------------
+# 3. Instalar Maven
+# -------------------------------------
+ARG MAVEN_VERSION=3.8.9
 ARG USER_HOME_DIR="/root"
-
-## 3- Define the SHA key to validate the maven download
-ARG SHA=b4880fb7a3d81edd190a029440cdf17f308621af68475a4fe976296e71ff4a4b546dd6d8a58aaafba334d309cc11e638c52808a4b0e818fc0fd544226d952544
-
-## 4- Define the URL where maven can be downloaded from
 ARG BASE_URL=https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries
 
-## 5- Create the directories, download maven, validate the download, install it, remove downloaded file and set links
 RUN mkdir -p /usr/share/maven /usr/share/maven/ref && \
     curl -fsSL -o /tmp/apache-maven.tar.gz ${BASE_URL}/apache-maven-${MAVEN_VERSION}-bin.tar.gz && \
     tar -xzf /tmp/apache-maven.tar.gz -C /usr/share/maven --strip-components=1 && \
-    rm -f /tmp/apache-maven.tar.gz && ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
+    rm -f /tmp/apache-maven.tar.gz && \
+    ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
 
-## 6- Define environmental variables required by Maven, like Maven_Home directory and where the maven repo is located
 ENV MAVEN_HOME /usr/share/maven
 ENV MAVEN_CONFIG "$USER_HOME_DIR/.m2"
 
-# Install git
-RUN apt-get -y install git && \
-    apt-get clean;
+# -------------------------------------
+# 4. Prepare miningframework
+# -------------------------------------
 
-# Install vim
-RUN apt-get -y install vim && \
-    apt-get clean;
+RUN git clone --recursive --branch article_ioa_2025 --depth 1 https://github.com/spgroup/miningframework.git /home/tmp/miningframework
+RUN pip install -r /home/tmp/miningframework/requirements.txt
 
-# Clone repos
-RUN git clone --branch Article202405 --depth 1 https://github.com/spgroup/conflict-static-analysis.git /home/conflict-static-analysis
-RUN git clone --recursive  --branch Article202405 --depth 1 https://github.com/spgroup/miningframework /home/miningframework
-# clone mergedataset to miningframework/output/file
-RUN git clone --branch Article202405 --depth 1 https://github.com/spgroup/mergedataset.git /home/miningframework/output/files
+RUN mkdir -p /home/mds /home/rds && \
+    cp -r /home/tmp/miningframework /home/mds/miningframework && \
+    cp -r /home/tmp/miningframework /home/rds/miningframework && \
+    rm -rf /home/tmp
 
-# Add settings.xml
-ADD ./settings.xml $USER_HOME_DIR/.m2/
+RUN mkdir -p /home/mds/miningframework/output/data
+ADD results-with-build-information.csv /home/mds/miningframework/output/data/
 
-#Build conflict-static-analysis
-#RUN cd /home/conflict-static-analysis && mvn clean install -DskipTests
-#RUN cd /home/conflict-static-analysis && mvn compile assembly:single
 
-# Install Requeriments in miningframework project
-# Install dependencies for Python scripts
-RUN cd /home/miningframework && pip install -r requirements.txt
+# -------------------------------------
+# 5. Prepare conflict-static-analysis
+# -------------------------------------
+ADD ioa-experiment/settings.xml $USER_HOME_DIR/.m2/
+RUN git clone --branch article_ioa_2025 --depth 1 https://github.com/spgroup/conflict-static-analysis.git /home/conflict-static-analysis
 
-# Run Build Union Script in mergedaset project
-# Some build files are larger than 100 MB, not supported by Github, so they were separated using split, to union them, 
-# run the script located at the root with the following command:
-RUN cd /home/miningframework/output/files && ./prepareDataset.sh
+RUN cd /home/conflict-static-analysis && mvn clean install -DskipTests && mvn compile assembly:single && \
+    cp /home/conflict-static-analysis/target/*.jar /home/mds/miningframework/dependencies/ && \
+    cp /home/conflict-static-analysis/target/*.jar /home/rds/miningframework/dependencies/
 
-# Copy files
-RUN cd /home/miningframework/output && mkdir data
-RUN cp /home/miningframework/results-with-build-information.csv /home/miningframework/output/data/results-with-build-information.csv
 
-#RUN cp /home/conflict-static-analysis/target/*.jar /home/miningframework/dependencies/
+# -------------------------------------
+# 6. Preparar datasets
+# -------------------------------------
+
+RUN git clone --branch article_ioa_2025 --depth 1 https://github.com/spgroup/mergedataset.git /home/mds/miningframework/output/files
+#RUN /home/mds/miningframework/output/files/prepareDataset.sh
+
+RUN git clone --branch article_ioa_2025 --depth 1 https://github.com/barbosamaatheus/ref-dataset.git /home/rds/miningframework/output/files
+RUN /home/rds/miningframework/output/files/prepare-dataset.sh
+
+# -------------------------------------
+# 7. Copiar scripts para o container
+# -------------------------------------
+COPY scripts/run_and_organize_ioa_experimental_results.py /home/mds/miningframework/run_and_organize_ioa_experimental_results.py
+COPY scripts/run_and_organize_ioa_experimental_results.py /home/rds/miningframework/run_and_organize_ioa_experimental_results.py
+
+COPY scripts /home/mds/miningframework/results
+COPY scripts /home/rds/miningframework/results
+
+COPY entrypoint.sh /home/
+RUN chmod +x /home/entrypoint.sh && chmod +x /home/mds/miningframework/gradlew && chmod +x /home/rds/miningframework/gradlew
+
+# -------------------------------------
+# 8. Instalar dependências dos scripts experimentais
+# -------------------------------------
+RUN pip install -r /home/mds/miningframework/results/requirements.txt
+RUN pip install -r /home/rds/miningframework/results/requirements.txt
+# -------------------------------------
+# 11. Definir comando de execução do container
+# -------------------------------------
+CMD ["/home/run_experiment.sh"]
