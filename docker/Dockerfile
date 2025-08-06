@@ -66,6 +66,9 @@ RUN git clone --branch article_ioa_2025 --depth 1 https://github.com/spgroup/mer
 
 RUN git clone --branch article_ioa_2025 --depth 1 https://github.com/barbosamaatheus/ref-dataset.git /home/rds/miningframework/output/files
 RUN /home/rds/miningframework/output/files/prepare-dataset.sh
+RUN mkdir -p /home/rds/miningframework/output/data && \
+    cp /home/rds/miningframework/output/files/results-with-build-information.csv /home/rds/miningframework/output/data/results-with-build-information.csv
+
 
 # -------------------------------------
 # 7. Copiar scripts para o container
