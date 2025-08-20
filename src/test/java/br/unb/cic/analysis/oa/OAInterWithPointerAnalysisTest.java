@@ -371,7 +371,7 @@ public class OAInterWithPointerAnalysisTest {
 
         Options.v().set_no_bodies_for_excluded(true);
         Options.v().set_allow_phantom_refs(true);
-        Options.v().set_output_format(soot.options.Options.output_format_jimple);
+        Options.v().set_output_format(Options.output_format_jimple);
         Options.v().set_whole_program(true);
         Options.v().set_process_dir(classes);
         Options.v().set_full_resolver(true);
@@ -440,7 +440,7 @@ public class OAInterWithPointerAnalysisTest {
 
         Options.v().set_no_bodies_for_excluded(true);
         Options.v().set_allow_phantom_refs(true);
-        Options.v().set_output_format(soot.options.Options.output_format_jimple);
+        Options.v().set_output_format(Options.output_format_jimple);
         Options.v().set_whole_program(true);
         Options.v().set_process_dir(classes);
         Options.v().set_full_resolver(true);
@@ -1054,8 +1054,8 @@ public class OAInterWithPointerAnalysisTest {
         saveExecutionTime("Configure Soot OA Inter");
 
         analysis.configureEntryPoints();
-        saveExecutionTime("Configure Entrypoints OA Inter");
 
+        saveExecutionTime("Configure Entrypoints OA Inter");
 
         SootWrapper.applyPackages();
 

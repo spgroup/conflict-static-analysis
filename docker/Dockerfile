@@ -55,8 +55,8 @@ RUN apt-get -y install vim && \
     apt-get clean;
 
 # Clone repos
-RUN git clone --branch Article202405 --depth 1 https://github.com/spgroup/conflict-static-analysis.git /home/conflict-static-analysis
-RUN git clone --recursive  --branch Article202405 --depth 1 https://github.com/spgroup/miningframework /home/miningframework
+RUN git clone --branch paper3 --depth 1 https://github.com/galilasmb/conflict-static-analysis.git /home/conflict-static-analysis
+RUN git clone --recursive  --branch paper3 --depth 1 https://github.com/galilasmb/miningframework.git /home/miningframework
 # clone mergedataset to miningframework/output/file
 RUN git clone --branch Article202405 --depth 1 https://github.com/spgroup/mergedataset.git /home/miningframework/output/files
 
@@ -70,6 +70,7 @@ ADD ./settings.xml $USER_HOME_DIR/.m2/
 # Install Requeriments in miningframework project
 # Install dependencies for Python scripts
 RUN cd /home/miningframework && pip install -r requirements.txt
+RUN python3 -m pip install --upgrade pandas
 
 # Run Build Union Script in mergedaset project
 # Some build files are larger than 100 MB, not supported by Github, so they were separated using split, to union them, 

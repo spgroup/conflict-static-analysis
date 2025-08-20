@@ -41,7 +41,6 @@ public class OAInterWithoutPointerAnalysisTest {
         analysis.configureEntryPoints();
         saveExecutionTime("Configure Entrypoints OA Inter");
 
-
         SootWrapper.applyPackages();
 
         try {
@@ -372,7 +371,7 @@ public class OAInterWithoutPointerAnalysisTest {
 
         Options.v().set_no_bodies_for_excluded(true);
         Options.v().set_allow_phantom_refs(true);
-        Options.v().set_output_format(soot.options.Options.output_format_jimple);
+        Options.v().set_output_format(Options.output_format_jimple);
         Options.v().set_whole_program(true);
         Options.v().set_process_dir(classes);
         Options.v().set_full_resolver(true);
@@ -439,7 +438,7 @@ public class OAInterWithoutPointerAnalysisTest {
 
         Options.v().set_no_bodies_for_excluded(true);
         Options.v().set_allow_phantom_refs(true);
-        Options.v().set_output_format(soot.options.Options.output_format_jimple);
+        Options.v().set_output_format(Options.output_format_jimple);
         Options.v().set_whole_program(true);
         Options.v().set_process_dir(classes);
         Options.v().set_full_resolver(true);
@@ -1044,7 +1043,6 @@ public class OAInterWithoutPointerAnalysisTest {
         analysis.configureEntryPoints();
         saveExecutionTime("Configure Entrypoints OA Inter");
 
-
         SootWrapper.applyPackages();
 
         try {
@@ -1068,5 +1066,15 @@ public class OAInterWithoutPointerAnalysisTest {
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
         configureTest(analysis);
         Assert.assertEquals(1, analysis.getConflicts().size());
+    }
+
+    @Test
+    public void inheritanceTestDF() {
+        String sampleClassPath = "br.unb.cic.analysis.samples.DFPMotivating";
+        AbstractMergeConflictDefinition definition = DefinitionFactory
+                .definition(sampleClassPath, new int[]{18}, new int[]{21, 22, 23, 24});
+        OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
+        configureTest(analysis);
+        Assert.assertTrue(analysis.getConflicts().size() > 1);
     }
 }

@@ -4,22 +4,32 @@ import br.ufpe.cin.soot.analysis.jimple.JDFP;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.StatementsUtil;
 import br.unb.cic.soot.graph.*;
+import br.unb.cic.soot.svfa.CG;
+import br.unb.cic.soot.svfa.CHA$;
+import br.unb.cic.soot.svfa.SPARK$;
+
+import scala.Tuple2;
 import scala.collection.JavaConverters;
-import soot.SootMethod;
-import soot.Unit;
+import scala.collection.mutable.ListBuffer;
+
+import soot.*;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
+
 
 /**
  * An analysis wrapper around the Sparse value
  * flow analysis implementation.
  */
-public abstract class DFPAnalysisSemanticConflicts extends JDFP {
+public class DFPAnalysisSemanticConflicts extends JDFP {
 
     private String cp;
     private int depthLimit;
     private StatementsUtil statementsUtils;
+    private CG callGraph = SPARK$.MODULE$;
+    private AbstractMergeConflictDefinition definition;
 
     /**
      * DFPAnalysis constructor
@@ -54,6 +64,29 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
     }
 
     @Override
+    public Tuple2<String, Transform> createSceneTransform() {
+        return new Tuple2<>("wjtp", new Transform("wjtp.svfa", new soot.SceneTransformer() {
+            @Override
+            protected void internalTransform(String phaseName, Map<String, String> options) {
+                List<SootMethod> methods = JavaConverters.seqAsJavaList(getAnalysisEntryPoints());
+                methods.forEach(sootMethod -> traverse(sootMethod, new ListBuffer<>(), false));
+            }
+        }));
+    }
+
+    @Override
+    public Tuple2<String, Transform> createSceneTransformDFP() {
+
+        return new Tuple2<>("wjtp", new Transform("wjtp.dfp", new soot.SceneTransformer() {
+            @Override
+            protected void internalTransform(String phaseName, Map<String, String> options) {
+                List<SootMethod> methods = JavaConverters.seqAsJavaList(getAnalysisEntryPoints());
+                methods.forEach(sootMethod -> traverseDFP(sootMethod, new ListBuffer<>(), false));
+            }
+        }));
+    }
+
+    @Override
     public scala.collection.immutable.List<String> getIncludeList() {
         return JavaConverters.asScalaBuffer(Arrays.asList("")).toList();
     }
@@ -73,6 +106,11 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
     }
 
     @Override
+    public boolean interprocedural() {
+        return true;
+    }
+
+    @Override
     public final scala.collection.immutable.List<String> applicationClassPath() {
         String[] array = cp.split(File.pathSeparator);
         return JavaConverters.asScalaBuffer(Arrays.asList(array)).toList();
@@ -81,7 +119,26 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
 
     @Override
     public final scala.collection.immutable.List<SootMethod> getEntryPoints() {
-        return this.statementsUtils.getEntryPoints();
+
+        //return this.statementsUtils.getEntryPoints(); // DEVELOP
+
+        definition.loadSourceStatements();
+        definition.loadSinkStatements();
+        return JavaConverters.asScalaBuffer(getSourceStatements()
+                .stream()
+                .map(Statement::getSootMethod)
+                .collect(Collectors.toList())).toList();
+
+    }
+
+    public final scala.collection.immutable.List<SootMethod> getAnalysisEntryPoints() {
+        definition.loadSourceStatements();
+        definition.loadSinkStatements();
+
+        return JavaConverters.asScalaBuffer(getSourceStatements()
+            .stream()
+            .map(Statement::getSootMethod)
+            .collect(Collectors.toList())).toList();
     }
 
     @Override
@@ -159,4 +216,16 @@ public abstract class DFPAnalysisSemanticConflicts extends JDFP {
     }
 
 
+    @Override
+    public CG callGraph() {
+        return this.callGraph;
+    }
+
+    public void setCallGraph(String callGraph){
+        if (callGraph.toUpperCase().contains("SPARK")){
+            this.callGraph = SPARK$.MODULE$;
+        }else{
+            this.callGraph = CHA$.MODULE$;
+        }
+    }
 }

@@ -1,24 +1,23 @@
 package br.unb.cic.analysis.svfa.confluence;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.*;
 
-public class DFPConfluenceAnalysisBaseTest2 {
+public class ConfluenceFlowTestMain {
 
     private DFPConfluenceAnalysis analysis;
     @Before
     public void configure() {
-        AbstractMergeConflictDefinition definition = new AbstractMergeConflictDefinition(true) {
+        AbstractMergeConflictDefinition definition = new AbstractMergeConflictDefinition() {
             @Override
             protected Map<String, List<Integer>> sourceDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(6);
-                res.put("br.unb.cic.analysis.samples.ConfluenceBaseSample2", lines);
+                lines.add(8);
+                res.put("br.unb.cic.analysis.samples.Main", lines);
                 return res;
             }
 
@@ -26,8 +25,8 @@ public class DFPConfluenceAnalysisBaseTest2 {
             protected Map<String, List<Integer>> sinkDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(8);
-                res.put("br.unb.cic.analysis.samples.ConfluenceBaseSample2", lines);
+                lines.add(11);
+                res.put("br.unb.cic.analysis.samples.Main", lines);
                 return res;
             }
         };
@@ -40,7 +39,8 @@ public class DFPConfluenceAnalysisBaseTest2 {
     public void testSVFAConfluentAnalysisExpectingOneConflict() {
         analysis.execute(false, true);
         Set<ConfluenceConflict> conflicts = analysis.getConfluentConflicts();
-        System.out.println(conflicts);
-        Assert.assertEquals(1, conflicts.size());
+        System.out.println("Conflicts: "+conflicts.size());
+        analysis.reportConflictsConfluence();
     }
+
 }

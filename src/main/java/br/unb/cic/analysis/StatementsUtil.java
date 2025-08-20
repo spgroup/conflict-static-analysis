@@ -135,7 +135,6 @@ public class StatementsUtil {
         }
         //mainMethods.addAll(new ArrayList<>(JavaConverters.seqAsJavaList(getEntryPoints())));
 
-
         return JavaConverters.asScalaBuffer(mainMethods).toList();
     }
 

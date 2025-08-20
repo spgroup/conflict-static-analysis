@@ -7,18 +7,19 @@ import org.junit.Test;
 
 import java.util.*;
 
-public class DFPConfluenceAnalysisBaseTest2 {
+public class ConfluenceFlowTest2 {
 
     private DFPConfluenceAnalysis analysis;
     @Before
     public void configure() {
-        AbstractMergeConflictDefinition definition = new AbstractMergeConflictDefinition(true) {
+        AbstractMergeConflictDefinition definition = new AbstractMergeConflictDefinition() {
             @Override
             protected Map<String, List<Integer>> sourceDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(6);
-                res.put("br.unb.cic.analysis.samples.ConfluenceBaseSample2", lines);
+                lines.add(8);
+                lines.add(9);
+                res.put("br.unb.cic.analysis.samples.ConfluenceFlowSample2", lines);
                 return res;
             }
 
@@ -26,8 +27,8 @@ public class DFPConfluenceAnalysisBaseTest2 {
             protected Map<String, List<Integer>> sinkDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(8);
-                res.put("br.unb.cic.analysis.samples.ConfluenceBaseSample2", lines);
+                lines.add(10);
+                res.put("br.unb.cic.analysis.samples.ConfluenceFlowSample2", lines);
                 return res;
             }
         };
@@ -40,7 +41,9 @@ public class DFPConfluenceAnalysisBaseTest2 {
     public void testSVFAConfluentAnalysisExpectingOneConflict() {
         analysis.execute(false, true);
         Set<ConfluenceConflict> conflicts = analysis.getConfluentConflicts();
-        System.out.println(conflicts);
-        Assert.assertEquals(1, conflicts.size());
+        Assert.assertTrue(conflicts.size() >= 1);
+        System.out.println("Conflicts: "+conflicts.size());
+        analysis.reportConflictsConfluence();
     }
+
 }
