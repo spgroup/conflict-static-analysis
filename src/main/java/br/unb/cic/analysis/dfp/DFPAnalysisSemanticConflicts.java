@@ -30,7 +30,6 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
     private int depthLimit;
     private StatementsUtil statementsUtils;
     private CG callGraph = SPARK$.MODULE$;
-    private AbstractMergeConflictDefinition definition;
 
     /**
      * DFPAnalysis constructor
@@ -123,8 +122,8 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
 
         //return this.statementsUtils.getEntryPoints(); // DEVELOP
 
-        definition.loadSourceStatements();
-        definition.loadSinkStatements();
+        this.statementsUtils.getDefinition().loadSourceStatements();
+        this.statementsUtils.getDefinition().loadSinkStatements();
         return JavaConverters.asScalaBuffer(this.statementsUtils.getDefinition().getSourceStatements()
                 .stream()
                 .map(Statement::getSootMethod)
@@ -134,8 +133,8 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
 
 
     public final scala.collection.immutable.List<SootMethod> getAnalysisEntryPoints() {
-        definition.loadSourceStatements();
-        definition.loadSinkStatements();
+        this.statementsUtils.getDefinition().loadSourceStatements();
+        this.statementsUtils.getDefinition().loadSinkStatements();
 
         return JavaConverters.asScalaBuffer(this.statementsUtils.getDefinition().getSourceStatements()
                 .stream()
