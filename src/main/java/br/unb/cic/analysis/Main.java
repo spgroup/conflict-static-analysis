@@ -14,7 +14,9 @@ import br.unb.cic.analysis.io.DefaultReader;
 import br.unb.cic.analysis.io.MergeConflictReader;
 import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
-import br.unb.cic.analysis.oa.*;
+import br.unb.cic.analysis.oa.OverrideAssignment;
+import br.unb.cic.analysis.oa.OverrideAssignmentWithPointerAnalysis;
+import br.unb.cic.analysis.oa.OverrideAssignmentWithoutPointerAnalysis;
 import br.unb.cic.analysis.pdg.PDGAnalysisSemanticConflicts;
 import br.unb.cic.analysis.pdg.PDGIntraProcedural;
 import br.unb.cic.analysis.reachability.ReachabilityAnalysis;
@@ -27,7 +29,10 @@ import br.unb.cic.diffclass.DiffClass;
 import com.google.common.base.Stopwatch;
 import org.apache.commons.cli.*;
 import scala.collection.JavaConverters;
-import soot.*;
+import soot.Body;
+import soot.BodyTransformer;
+import soot.PackManager;
+import soot.Transform;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -405,30 +410,6 @@ public class Main {
         saveVisitedMethods("OA " + modeLabel, String.valueOf(visitedMethods));
         saveConflictsLog("OA " + modeLabel, conflicts.toString());
     }
-
-    private OverrideAssignment buildOverrideAssignment(
-            AnalysisType type,
-            int depthLimit,
-            boolean interprocedural,
-            List<String> entrypoints,
-            String classpath
-    ) {
-        OverrideAssignment overrideAssignment;
-        switch (type) {
-            case WITH_POINTER_ANALYSIS:
-                overrideAssignment = new OverrideAssignmentWithPointerAnalysis(definition, depthLimit, interprocedural, entrypoints);
-                SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath, true);
-                return overrideAssignment;
-            case WITHOUT_POINTER_ANALYSIS:
-                overrideAssignment = new OverrideAssignmentWithoutPointerAnalysis(definition, depthLimit, interprocedural, entrypoints);
-                SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath, false);
-                return overrideAssignment;
-            default:
-                throw new IllegalArgumentException("Unknown analysis type: " + type);
-        }
-    }
-
-
     private OverrideAssignment buildOverrideAssignment(
             AnalysisType type,
             int depthLimit,

@@ -3,16 +3,17 @@ package br.unb.cic.analysis.dfp;
 import br.ufpe.cin.soot.analysis.jimple.JDFP;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.StatementsUtil;
+import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.soot.graph.*;
 import br.unb.cic.soot.svfa.CG;
 import br.unb.cic.soot.svfa.CHA$;
 import br.unb.cic.soot.svfa.SPARK$;
-
 import scala.Tuple2;
 import scala.collection.JavaConverters;
 import scala.collection.mutable.ListBuffer;
-
-import soot.*;
+import soot.SootMethod;
+import soot.Transform;
+import soot.Unit;
 
 import java.io.File;
 import java.util.*;
@@ -124,21 +125,22 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
 
         definition.loadSourceStatements();
         definition.loadSinkStatements();
-        return JavaConverters.asScalaBuffer(getSourceStatements()
+        return JavaConverters.asScalaBuffer(this.statementsUtils.getDefinition().getSourceStatements()
                 .stream()
                 .map(Statement::getSootMethod)
                 .collect(Collectors.toList())).toList();
 
     }
 
+
     public final scala.collection.immutable.List<SootMethod> getAnalysisEntryPoints() {
         definition.loadSourceStatements();
         definition.loadSinkStatements();
 
-        return JavaConverters.asScalaBuffer(getSourceStatements()
-            .stream()
-            .map(Statement::getSootMethod)
-            .collect(Collectors.toList())).toList();
+        return JavaConverters.asScalaBuffer(this.statementsUtils.getDefinition().getSourceStatements()
+                .stream()
+                .map(Statement::getSootMethod)
+                .collect(Collectors.toList())).toList();
     }
 
     @Override

@@ -4,8 +4,6 @@ import com.google.common.base.Stopwatch;
 import soot.G;
 import soot.PackManager;
 import soot.Scene;
-import soot.jimple.spark.SparkTransformer;
-import soot.jimple.toolkits.callgraph.CHATransformer;
 import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
 import soot.options.Options;
@@ -123,41 +121,6 @@ public class SootWrapper {
             count++;
         }
         return count;
-    }
-
-    public static void enableCallGraph() {
-        enableCallGraph(true);
-    }
-
-
-    public static void applyPackage(String p) {
-        Stopwatch stopwatch = Stopwatch.createStarted();
-//        System.out.println("Applying package: " + p);
-        try {
-            PackManager.v().getPack(p).apply();
-            //System.out.println("Successfully applied package: " + p);
-        } catch (Exception e) {
-            System.err.println("Error applying package: " + p);
-            e.printStackTrace();
-        } finally {
-//            saveExecutionTime("Successfully applied package: " + p, stopwatch);
-        }
-    }
-
-    public static void saveExecutionTime(String description, Stopwatch stopwatch) {
-
-        NumberFormat formatter = new DecimalFormat("#0.00000");
-
-        long time = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-        try {
-            FileWriter myWriter = new FileWriter("time.txt", true);
-            myWriter.write(description + ";" + formatter.format(time / 1000d) + "\n");
-            System.out.println(description + " " + formatter.format(time / 1000d));
-            myWriter.close();
-        } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-        }
     }
 
     public static void enableCallGraph() {
