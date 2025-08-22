@@ -1,12 +1,10 @@
 package br.unb.cic.analysis.dfp;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
-import br.unb.cic.analysis.SootWrapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import scala.collection.JavaConverters;
-import soot.*;
+
 import java.util.*;
 
 public class DFPTeste {
@@ -44,10 +42,6 @@ public class DFPTeste {
         String cp = "target/test-classes";
 
         analysis = new DFPInterProcedural(cp, definition);
-
-        PhaseOptions.v().setPhaseOption("jb", "use-original-names:true");
-        SootWrapper.builder().withClassPath(cp).addClass(class_name).build().execute();
-
     }
 
     @Test

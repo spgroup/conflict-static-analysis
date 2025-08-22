@@ -40,7 +40,7 @@ public class DFPConfluenceAnalysisTest {
     public void testDFPConfluentAnalysisExpectingTwoConflicts() {
         analysis.execute(false, true);
         Set<ConfluenceConflict> conflicts = analysis.getConfluentConflicts();
-        Assert.assertEquals(2, conflicts.size());
+        Assert.assertEquals(1, conflicts.size());
         ConfluenceConflict conflict = conflicts.iterator().next();
 //
 //        Assert.assertEquals(

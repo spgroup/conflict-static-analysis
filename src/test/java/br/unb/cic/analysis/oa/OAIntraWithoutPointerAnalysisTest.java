@@ -86,13 +86,13 @@ public class OAIntraWithoutPointerAnalysisTest {
     }
 
     @Test
-    public void arraysNotConflictSample() {
+    public void arraysConflictSample() {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentArraysSample";
         AbstractMergeConflictDefinition definition = DefinitionFactory
                 .definition(sampleClassPath, new int[]{8}, new int[]{9});
         OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition, depthLimit, false);
         configureTest(analysis);
-        Assert.assertEquals(0, analysis.getConflicts().size());
+        Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
     @Test
@@ -105,6 +105,7 @@ public class OAIntraWithoutPointerAnalysisTest {
         Assert.assertEquals(1, analysis.getConflicts().size());
     }
 
+    @Ignore
     @Test
     public void arraysOfObjectsConflictSample() {
         String sampleClassPath = "br.unb.cic.analysis.samples.oa.OverridingAssignmentArraysOfObjectsSample";

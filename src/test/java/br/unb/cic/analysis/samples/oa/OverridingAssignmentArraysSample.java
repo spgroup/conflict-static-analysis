@@ -6,7 +6,7 @@ public class OverridingAssignmentArraysSample {
         int[] arr = {0,0,0,0,0};
 
         arr[4] = 10; //left
-        arr[3] = 3;  //right
+        arr[4] = 3;  //right
 
         System.out.println(arr[5]);
     }
