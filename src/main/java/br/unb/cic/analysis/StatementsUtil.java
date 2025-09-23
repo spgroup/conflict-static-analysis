@@ -66,7 +66,7 @@ public class StatementsUtil {
      *
      * @return a list of all source and sink statements.
      */
-    private List<Statement> getAllSourceAndSinkStatements() {
+    public List<Statement> getAllSourceAndSinkStatements() {
         List<Statement> allStatements = new ArrayList<>();
         allStatements.addAll(this.definition.getSourceStatements());
         allStatements.addAll(this.definition.getSinkStatements());

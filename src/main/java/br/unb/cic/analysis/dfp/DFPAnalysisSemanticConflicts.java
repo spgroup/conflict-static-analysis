@@ -124,10 +124,21 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
 
         this.statementsUtils.getDefinition().loadSourceStatements();
         this.statementsUtils.getDefinition().loadSinkStatements();
-        return JavaConverters.asScalaBuffer(this.statementsUtils.getDefinition().getSourceStatements()
+//        scala.collection.immutable.List<SootMethod> entrypoints0 = JavaConverters.asScalaBuffer(this.statementsUtils.getDefinition().getSourceStatements()
+//                .stream()
+//                .map(Statement::getSootMethod)
+//                .collect(Collectors.toList())).toList();
+//
+        List<Statement> allStatements = this.statementsUtils.getAllSourceAndSinkStatements();
+        scala.collection.immutable.List<SootMethod> entrypoints = JavaConverters.asScalaBuffer(allStatements
                 .stream()
                 .map(Statement::getSootMethod)
                 .collect(Collectors.toList())).toList();
+
+        //scala.collection.immutable.List<SootMethod> entrypoints2  = this.statementsUtils.getEntryPoints();
+
+        scala.collection.immutable.List<SootMethod> entrypoints3 = this.statementsUtils.getCallgraphEntryPoints();
+        return entrypoints3;
 
     }
 
@@ -136,10 +147,20 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
         this.statementsUtils.getDefinition().loadSourceStatements();
         this.statementsUtils.getDefinition().loadSinkStatements();
 
-        return JavaConverters.asScalaBuffer(this.statementsUtils.getDefinition().getSourceStatements()
+//        scala.collection.immutable.List<SootMethod> entrypoints0 = JavaConverters.asScalaBuffer(this.statementsUtils.getDefinition().getSourceStatements()
+//                .stream()
+//                .map(Statement::getSootMethod)
+//                .collect(Collectors.toList())).toList();
+//
+        List<Statement> allStatements = this.statementsUtils.getAllSourceAndSinkStatements();
+        scala.collection.immutable.List<SootMethod> entrypoints = JavaConverters.asScalaBuffer(allStatements
                 .stream()
                 .map(Statement::getSootMethod)
                 .collect(Collectors.toList())).toList();
+
+        scala.collection.immutable.List<SootMethod> entrypoints2 = this.statementsUtils.getEntryPoints();
+        // scala.collection.immutable.List<SootMethod> entrypoints3 = this.statementsUtils.getCallgraphEntryPoints();
+        return entrypoints;
     }
 
     @Override
