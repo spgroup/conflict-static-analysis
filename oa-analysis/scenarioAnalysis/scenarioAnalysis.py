@@ -46,11 +46,11 @@ class ScenarioAnalyzer:
 
     def _create_plots(self, conflict_df, scenario_df):
         # Plot scenarios per jar distribution
-        self.visualizer.plot_distribution(
+        self.visualizer.plot_histogram(
             data=scenario_df[COL_NUM_SCENARIOS],
+            bins=DEFAULT_HIST_BINS,
             title='Number of Scenarios per ScenarioJAR',
             xlabel='Number of Scenarios',
-            ylabel='Frequency',
             filename=PLOT_SCENARIOS_PER_JAR
         )
 
@@ -60,16 +60,35 @@ class ScenarioAnalyzer:
             COL_SAME_CLASS: ('Same Class', PLOT_SAME_CLASS_DIST),
             COL_SAME_METHOD: ('Same Method', PLOT_SAME_METHOD_DIST)
         }
-
+        
         for metric, (title, filename) in metrics.items():
             self.visualizer.plot_histogram(
                 data=scenario_stats[metric],
                 bins=len(PERCENTAGE_BUCKETS),
                 title=f'{title} % Distribution',
                 xlabel='Percentage',
-                ylabel='Number of Scenarios',
                 filename=filename
             )
+
+        # Metrics per scenario
+        self._plot_scenario_metrics(conflict_df)
+
+    def _plot_scenario_metrics(self, df):
+        metrics = {
+            COL_DEPTH: ('Conflict Depth', [PLOT_MEDIAN_DEPTH, PLOT_MAX_DEPTH, PLOT_MIN_DEPTH]),
+            COL_DIFF: ('StackTrace Diff', [PLOT_MEDIAN_DIFF, PLOT_MAX_DIFF, PLOT_MIN_DIFF])
+        }
+        
+        for metric_col, (title, filenames) in metrics.items():
+            for agg_func, filename in zip(['median', 'max', 'min'], filenames):
+                prefix = agg_func.capitalize()
+                self.visualizer.plot_scenario_metric(
+                    df=df,
+                    metric_col=metric_col,
+                    agg_func=agg_func,
+                    title=f'{prefix} {title} per Scenario',
+                    filename=filename
+                )
 
 if __name__ == "__main__":
     analyzer = ScenarioAnalyzer()

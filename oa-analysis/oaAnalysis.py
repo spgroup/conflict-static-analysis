@@ -2,8 +2,8 @@ import json
 import csv
 from collections import defaultdict
 from constants import *
-from conflictAnalysis import ConflictAnalyzer
-from scenarioAnalysis import ScenarioAnalyzer
+from conflictAnalysis.conflictAnalysis import ConflictAnalyzer
+from scenarioAnalysis.scenarioAnalysis import ScenarioAnalyzer
 
 class ConflictProcessor:
     def __init__(self):

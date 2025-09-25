@@ -32,7 +32,6 @@ class ConflictAnalyzer:
             bins=DEFAULT_HIST_BINS,
             title='Conflicts Histogram of Depths',
             xlabel='Depths',
-            ylabel='Frequency',
             filename=PLOT_DEPTH_HIST
         )
 
@@ -41,48 +40,35 @@ class ConflictAnalyzer:
             bins=DEFAULT_HIST_BINS,
             title='Conflicts Histogram of Diffs (Stacktrace)',
             xlabel='Absolute difference (L-R)',
-            ylabel='Frequency',
             filename=PLOT_DIFF_HIST
         )
 
         # Conflicts per scenario/jar
         conflicts_per_scenario = df.groupby(COL_SCENARIO_INDEX).size()
-        self.visualizer.plot_distribution(
+        self.visualizer.plot_histogram(
             data=conflicts_per_scenario,
+            bins=DEFAULT_HIST_BINS,
             title='Number of Conflicts per Scenario',
             xlabel='Number of Conflicts',
-            ylabel='Frequency',
             filename=PLOT_CONFLICTS_PER_SCENARIO
         )
 
         conflicts_per_jar = df.groupby(COL_SCENARIO_JAR).size()
-        self.visualizer.plot_distribution(
+        self.visualizer.plot_histogram(
             data=conflicts_per_jar,
+            bins=DEFAULT_HIST_BINS,
             title='Number of Conflicts per ScenarioJAR',
             xlabel='Number of Conflicts',
-            ylabel='Frequency',
             filename=PLOT_CONFLICTS_PER_JAR
         )
-
-        # Metrics per scenario
-        self._plot_scenario_metrics(df)
-    
-    def _plot_scenario_metrics(self, df):
-        metrics = {
-            COL_DEPTH: ('Conflict Depth', [PLOT_MEDIAN_DEPTH, PLOT_MAX_DEPTH, PLOT_MIN_DEPTH]),
-            COL_DIFF: ('StackTrace Diff', [PLOT_MEDIAN_DIFF, PLOT_MAX_DIFF, PLOT_MIN_DIFF])
-        }
         
-        for metric_col, (title, filenames) in metrics.items():
-            for agg_func, filename in zip(['median', 'max', 'min'], filenames):
-                prefix = agg_func.capitalize()
-                self.visualizer.plot_scenario_metric(
-                    df=df,
-                    metric_col=metric_col,
-                    agg_func=agg_func,
-                    title=f'{prefix} {title} per Scenario',
-                    filename=filename
-                )
+        # Plot conflict depth lines
+        self.visualizer.plot_conflict_depth_lines(
+            df=df,
+            title='Conflict Depths Distribution',
+            filename='conflicts_depth_lines.png'
+        )
+    
 
 if __name__ == "__main__":
     analyzer = ConflictAnalyzer()
