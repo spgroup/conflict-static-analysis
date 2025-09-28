@@ -14,9 +14,25 @@ class Visualizer:
     def plot_histogram(self, data, bins, title, xlabel, filename):
         plt.figure(figsize=(10, 6))
         plt.hist(data, bins=bins)
-        plt.title(title)
         plt.xlabel(xlabel)
         plt.ylabel('Frequency')
+        plt.title(title)
+        plt.savefig(filename)
+        plt.close()
+
+    def plot_pie_chart(self, data, title, filename):
+        plt.figure(figsize=(10, 6))
+        # Create pie chart with percentages and counts
+        plt.pie(data['values'], labels=[f"{label}\n({int(count)} - {pct:.1f}%)" 
+                for label, count, pct in zip(data['labels'], 
+                                            data['values'], 
+                                            data['percentages'])],
+                autopct='', # We don't need autopct since we include it in labels
+                startangle=140,
+                colors=sns.color_palette("husl", len(data['labels']))
+        )
+        plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle
+        plt.title(title)
         plt.savefig(filename)
         plt.close()
 

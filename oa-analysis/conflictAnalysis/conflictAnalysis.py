@@ -25,6 +25,31 @@ class ConflictAnalyzer:
         print(f"Conflicts in same class: {same_class_count} ({same_class_count/total_conflicts*100:.2f}%)")
         print(f"Conflicts in same method: {same_method_count} ({same_method_count/total_conflicts*100:.2f}%)")
     
+    def _get_conflict_type_distribution(self, df):
+        col = pd.Series("", index=df.index)
+        same_class_path_one = (df[COL_SAME_CLASS]) & (df[COL_LEFT_LENGTH] == 1) & (df[COL_RIGHT_LENGTH] == 1)
+        same_class_path_larger_than_one = (df[COL_SAME_CLASS]) & (df[COL_LEFT_LENGTH] > 1) & (df[COL_RIGHT_LENGTH] > 1)
+        different_class_path_larger_than_one = (~df[COL_SAME_CLASS]) & (df[COL_LEFT_LENGTH] > 1) & (df[COL_RIGHT_LENGTH] > 1)
+
+        col[same_class_path_one] = "Same class, path size 1"
+        col[same_class_path_larger_than_one] = "Same class, path size larger than 1"
+        col[different_class_path_larger_than_one] = "Different class, path size larger than 1"
+        col[(col == "")] = "Other cases"
+        
+        # Convert to value counts and calculate percentages for pie chart
+        value_counts = col.value_counts()
+        total = len(df)
+        labels = value_counts.index.tolist()
+        values = value_counts.values
+        percentages = [(count/total)*100 for count in values]
+        
+        # Create a dict with all the pie chart data
+        return {
+            'values': values,
+            'labels': labels,
+            'percentages': percentages
+        }
+
     def _create_plots(self, df):
         # Depth and diff distributions
         self.visualizer.plot_histogram(
@@ -33,6 +58,12 @@ class ConflictAnalyzer:
             title='Conflicts Histogram of Depths',
             xlabel='Depths',
             filename=PLOT_DEPTH_HIST
+        )
+
+        self.visualizer.plot_pie_chart(
+            data=self._get_conflict_type_distribution(df),
+            title='Distribution of Conflict Types',
+            filename=PLOT_TYPES_HIST
         )
 
         self.visualizer.plot_histogram(
@@ -65,8 +96,8 @@ class ConflictAnalyzer:
         # Plot conflict depth lines
         self.visualizer.plot_conflict_depth_lines(
             df=df,
-            title='Conflict Depths Distribution',
-            filename='conflicts_depth_lines.png'
+            title='Conflict Depths Behavior',
+            filename=PLOT_DEPTH_LINES
         )
     
 

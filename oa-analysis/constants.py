@@ -18,8 +18,10 @@ COL_NUM_SCENARIOS = 'num_scenarios'
 
 # Plot filenames
 ANALYSIS_DIR = 'analysis/'
-PLOT_DEPTH_HIST = 'conflicts_depth_hist.png'
-PLOT_DIFF_HIST = 'conflicts_diffs_hist.png'
+PLOT_DEPTH_HIST = ANALYSIS_DIR + 'conflicts_depth_hist.png'
+PLOT_DIFF_HIST = ANALYSIS_DIR + 'conflicts_diffs_hist.png'
+PLOT_TYPES_HIST = ANALYSIS_DIR + 'conflicts_types_hist.png'
+PLOT_DEPTH_LINES = ANALYSIS_DIR + 'conflicts_depth_lines.png'
 PLOT_CONFLICTS_PER_SCENARIO = ANALYSIS_DIR + 'conflicts_per_scenario.png'
 PLOT_CONFLICTS_PER_JAR =  ANALYSIS_DIR +'conflicts_per_jar.png'
 PLOT_SCENARIOS_PER_JAR =  ANALYSIS_DIR +'scenarios_per_jar_hist.png'
@@ -34,4 +36,5 @@ PLOT_MIN_DIFF =  ANALYSIS_DIR +'min_diff_per_scenario.png'
 
 # Analysis thresholds and bins
 PERCENTAGE_BUCKETS = [20, 40, 60, 80, 100]
+CONFLICT_TYPES_BINS = 4
 DEFAULT_HIST_BINS = 30
