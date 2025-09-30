@@ -1,6 +1,5 @@
 package br.unb.cic.analysis.svfa.confluence;
 
-import br.unb.cic.analysis.model.TraversedLine;
 import br.unb.cic.soot.graph.StatementNode;
 
 import java.util.List;
@@ -105,10 +104,10 @@ public class ConfluenceConflict {
     private String nodeToJSON(StatementNode node) {
         return String.format(
                 "{" + "\n" +
-                    "\t" + "\"class\": \"%s\"," + "\n" +
-                    "\t" + "\"method\": \"%s\"," + "\n" +
-                    "\t" + "\"line\": %d" + "\n" +
-                "}",
+                        "\t" + "\"class\": \"%s\"," + "\n" +
+                        "\t" + "\"method\": \"%s\"," + "\n" +
+                        "\t" + "\"line\": %d" + "\n" +
+                        "}",
                 node.value().className(), node.value().method(), node.value().line()
         );
     }

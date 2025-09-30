@@ -1,17 +1,31 @@
 package br.unb.cic.analysis.samples.ioa;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 public class LoggingConflictSample {
-    private final Log logger = LogFactory.getLog(getClass());
+    private Logger logger = new Logger();
 
     public void logAutoConfigurationReport() {
-        this.logger.info("Error starting ApplicationContext.");
+        LoggingConflictSample l = new LoggingConflictSample();
+        l.logger.info("Error starting ApplicationContext."); // LEFT
 
-        if (this.logger.isDebugEnabled()) {
-            this.logger.debug("Unable to provide auto-configuration report");
+        if (l.logger.isDebugEnabled()) {
+            l.logger.debug("Unable to provide auto-configuration report"); // RIGHT
         }
     }
 
+}
+
+class Logger {
+    private String log;
+
+    void info(String o) {
+        this.log += o;
+    }
+
+    void debug(String o) {
+        this.log += o;
+    }
+
+    boolean isDebugEnabled() {
+        return true;
+    }
 }

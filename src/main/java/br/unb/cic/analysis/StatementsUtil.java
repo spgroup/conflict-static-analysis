@@ -1,15 +1,18 @@
 package br.unb.cic.analysis;
 
+import br.unb.cic.analysis.io.HasMainMethodCsvExporter;
 import br.unb.cic.analysis.model.Statement;
 import scala.collection.JavaConverters;
+import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
+import soot.Value;
+import soot.jimple.ArrayRef;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
 public class StatementsUtil {
 
     private AbstractMergeConflictDefinition definition;
@@ -19,6 +22,43 @@ public class StatementsUtil {
     public StatementsUtil(AbstractMergeConflictDefinition definition, List<String> entrypoints) {
         this.definition = definition;
         this.entrypoints = entrypoints;
+    }
+
+    public static List<SootMethod> findMainMethods() {
+        List<SootMethod> mainMethods = new ArrayList<>();
+
+        for (SootClass sootClass : Scene.v().getApplicationClasses()) {
+            for (SootMethod method : sootClass.getMethods()) {
+                if (isMainMethod(method)) {
+                    mainMethods.add(method);
+                }
+            }
+        }
+
+        return mainMethods;
+    }
+
+    private static boolean isMainMethod(SootMethod method) {
+
+        return method.getName().equals("main")
+                && method.isStatic()
+                && method.getReturnType().toString().equals("void")
+                && method.getParameterCount() == 1
+                && method.getParameterType(0).toString().equals("java.lang.String[]");
+    }
+
+    public static List<SootMethod> findPublicMethods() {
+        List<SootMethod> publicMethods = new ArrayList<>();
+
+        for (SootClass sootClass : Scene.v().getApplicationClasses()) {
+            for (SootMethod method : sootClass.getMethods()) {
+
+                publicMethods.add(method);
+
+            }
+        }
+
+        return publicMethods;
     }
 
     /**
@@ -40,7 +80,7 @@ public class StatementsUtil {
      * @return A Scala list of SootMethod instances representing the entry points.
      */
     private scala.collection.immutable.List<SootMethod> retrieveEntryPointsFromSource() {
-        SootMethod traversedMethod = getTraversedMethod();
+        SootMethod traversedMethod = getCallRealisticRunMethod();
 
         if (traversedMethod != null) {
             return JavaConverters.asScalaBuffer(Collections.singletonList(traversedMethod)).toList();
@@ -83,7 +123,23 @@ public class StatementsUtil {
         }
     }
 
-    private SootMethod getTraversedMethod() {
+    public final scala.collection.immutable.List<SootMethod> getCallgraphEntryPoints() {
+        List<SootMethod> mainMethods = findMainMethods();
+
+        if (mainMethods.isEmpty()) {
+            new HasMainMethodCsvExporter().export(false, "HasMainMethod.csv");
+            //throw new RuntimeException("Nenhum método 'main' foi encontrado no projeto.");
+            mainMethods = findPublicMethods();
+        } else {
+            new HasMainMethodCsvExporter().export(true, "HasMainMethod.csv");
+        }
+        //mainMethods.addAll(new ArrayList<>(JavaConverters.seqAsJavaList(getEntryPoints())));
+
+
+        return JavaConverters.asScalaBuffer(mainMethods).toList();
+    }
+
+    private SootMethod getCallRealisticRunMethod() {
         try {
             SootClass sootClass = this.definition.getSourceStatements().get(0).getSootClass();
             return sootClass.getMethodByName("callRealisticRun");
@@ -94,6 +150,25 @@ public class StatementsUtil {
 
     public AbstractMergeConflictDefinition getDefinition() {
         return this.definition;
+    }
+
+    private List<Statement> getStatmentsByType(Statement.Type type) {
+        if (type.equals(Statement.Type.SOURCE)) {
+            return this.definition.getSourceStatements();
+        } else if (type.equals(Statement.Type.SINK)) {
+            return this.definition.getSinkStatements();
+        }
+        return getAllSourceAndSinkStatements();
+    }
+
+    public Statement getArrayStatementInDefinitionByValue(Statement.Type type, Value value) {
+        Statement statement = null;
+        for (Statement s : getStatmentsByType(type)) {
+            if (s.getUnit().getDefBoxes().get(0).getValue().equals(((ArrayRef) value).getBase())) {
+                return s;
+            }
+        }
+        return statement;
     }
 
 }

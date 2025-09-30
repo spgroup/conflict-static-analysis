@@ -2,7 +2,10 @@ package br.unb.cic.analysis.oa;
 
 import br.unb.cic.analysis.AbstractAnalysis;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+import br.unb.cic.analysis.SootWrapper;
 import br.unb.cic.analysis.StatementsUtil;
+import br.unb.cic.analysis.io.OAAnalysisCsvExporter;
+import br.unb.cic.analysis.io.PANotResolveCsvExporter;
 import br.unb.cic.analysis.model.*;
 import scala.collection.JavaConverters;
 import soot.*;
@@ -13,13 +16,16 @@ import soot.jimple.toolkits.callgraph.CallGraph;
 import soot.jimple.toolkits.callgraph.Edge;
 import soot.util.Chain;
 
+import java.io.PrintWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class OverrideAssignment extends SceneTransformer implements AbstractAnalysis {
     private String classpath;
-    private int depthLimit;
     private final Boolean interprocedural;
+    protected List<Statement> pointerAnalysisMissingRefs;
+    List<OAAnalysisRecord> analysisRecords;
+    private int depthLimit;
     private OAConflictReport oaConflictReport;
     private TraversedMethodsWrapper<SootMethod> traversedMethodsWrapper;
     private List<TraversedLine> stacktraceList;
@@ -33,6 +39,8 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         this.depthLimit = depthLimit;
         this.interprocedural = interprocedural;
         this.statementsUtils = new StatementsUtil(definition, entrypoints);
+        this.pointerAnalysisMissingRefs = new ArrayList<>();
+        this.analysisRecords = new ArrayList<>();
         this.classpath = classpath;
 
         initDefaultFields();
@@ -49,6 +57,153 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
     public OverrideAssignment(AbstractMergeConflictDefinition definition) {
         this(definition, 5, true);
     }
+
+    /**
+     * Compara duas referências de campo em diferentes instruções para verificar se elas representam o mesmo campo,
+     * desconsiderando casos onde ambas estão associadas ao mesmo construtor.
+     * <p>
+     * O método verifica se:
+     * <ul>
+     *   <li>As referências de campo ({@code valueInAbs} e {@code valueInFlow}) apontam para o mesmo campo real.</li>
+     *   <li>Os tipos dos objetos base das referências são iguais.</li>
+     *   <li>As instruções não pertencem ao mesmo construtor (verificado por {@code isBothAreSameConstructor}).</li>
+     * </ul>
+     * Retorna {@code true} apenas se os dois primeiros critérios forem verdadeiros e o terceiro for falso.
+     * </p>
+     *
+     * @param stmtInAbs   a primeira instrução a ser comparada.
+     * @param stmtInFlow  a segunda instrução a ser comparada.
+     * @param valueInAbs  o valor associado à primeira instrução, esperado como {@code InstanceFieldRef}.
+     * @param valueInFlow o valor associado à segunda instrução, esperado como {@code InstanceFieldRef}.
+     * @return {@code true} se as referências de campo forem semanticamente equivalentes e não forem parte do mesmo construtor; caso contrário, {@code false}.
+     */
+    static boolean areFieldReferencesEqual(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
+        InstanceFieldRef abstractFieldRef = (InstanceFieldRef) valueInAbs;
+        InstanceFieldRef flowFieldRef = (InstanceFieldRef) valueInFlow;
+
+        boolean isSameOrSubtype = isSameOrSubtype(valueInAbs, valueInFlow);
+        boolean isSameFieldReference = abstractFieldRef.getFieldRef().equals(flowFieldRef.getFieldRef());
+        boolean bothAreSameConstructor = isBothAreSameConstructor(stmtInAbs, stmtInFlow);
+
+        return isSameOrSubtype && isSameFieldReference && !bothAreSameConstructor;
+    }
+
+    /**
+     * Compara duas referências de array em diferentes instruções para verificar se elas apontam para o mesmo elemento de array,
+     * considerando o índice e o tipo base, e excluindo casos onde ambas as referências estão no mesmo construtor
+     * ou são variáveis locais.
+     * <p>
+     * O método verifica se:
+     * <ul>
+     *   <li>Os índices das referências de array ({@code valueInAbs} e {@code valueInFlow}) são iguais.</li>
+     *   <li>Os tipos base dos arrays são iguais ou são subtipos.</li>
+     *   <li>As instruções não pertencem ao mesmo construtor (verificado por {@code isBothAreSameConstructor}).</li>
+     *   <li>As instruções não são originadas de variáveis locais em ambos os casos.</li>
+     * </ul>
+     * Retorna {@code true} somente se todas essas condições forem atendidas.
+     * </p>
+     *
+     * @param stmtInAbs   a primeira instrução a ser comparada.
+     * @param stmtInFlow  a segunda instrução a ser comparada.
+     * @param valueInAbs  o valor associado à primeira instrução, esperado como {@code ArrayRef}.
+     * @param valueInFlow o valor associado à segunda instrução, esperado como {@code ArrayRef}.
+     * @return {@code true} se as referências de array forem semanticamente equivalentes e não forem parte do mesmo construtor nem ambas variáveis locais; caso contrário, {@code false}.
+     */
+    static boolean areArrayReferencesEqual(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
+        ArrayRef abstractArrayRef = (ArrayRef) valueInAbs;
+        ArrayRef flowArrayRef = (ArrayRef) valueInFlow;
+
+
+        boolean isSameOrSubtype = isSameOrSubtype(abstractArrayRef, flowArrayRef);
+        boolean isSameIndexReference = abstractArrayRef.getIndex().equals(flowArrayRef.getIndex());
+        boolean bothAreSameConstructor = isBothAreSameConstructor(stmtInAbs, stmtInFlow);
+
+        return isSameOrSubtype && isSameIndexReference && !bothAreSameConstructor;
+    }
+
+    public static boolean isSameOrSubtype(Value valueInAbs, Value valueInFlow) {
+        Type typeInAbs = extractType(valueInAbs);
+        Type typeInFlow = extractType(valueInFlow);
+
+        // Verificação direta
+        if (typeInAbs.equals(typeInFlow)) {
+            return true;
+        }
+
+        FastHierarchy hierarchy = Scene.v().getOrMakeFastHierarchy();
+
+        // Se ambos são RefType (ex: objetos)
+        if (typeInAbs instanceof RefType && typeInFlow instanceof RefType) {
+            return hierarchy.canStoreType(typeInAbs, typeInFlow)
+                    || hierarchy.canStoreType(typeInFlow, typeInAbs);
+        }
+
+        // Se ambos são ArrayType (ex: String[], Object[], etc.)
+        if (typeInAbs instanceof ArrayType && typeInFlow instanceof ArrayType) {
+            Type baseA = ((ArrayType) typeInAbs).baseType;
+            Type baseB = ((ArrayType) typeInFlow).baseType;
+
+            // Se ambos são arrays de tipos referenciais
+            if (baseA instanceof RefType && baseB instanceof RefType) {
+                return hierarchy.canStoreType(baseA, baseB)
+                        || hierarchy.canStoreType(baseB, baseA);
+            }
+
+            // Arrays com tipos primitivos devem ser exatamente iguais
+            return baseA.equals(baseB);
+        }
+
+        return false; // Tipos incompatíveis
+    }
+
+    private static Type extractType(Value val) {
+        if (val instanceof ArrayRef) {
+            return ((ArrayRef) val).getBase().getType();
+        }
+        if (val instanceof FieldRef) {
+            return ((FieldRef) val).getField().getType();
+        }
+        return null;
+    }
+
+    protected static void getPointToFromBase(Value value, Statement stmt) {
+        PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
+        PointsToSet points = pointsToAnalysis.reachingObjects((Local) value);
+        stmt.setPointsTo(points);
+    }
+
+    protected static void getPointToFromStaticField(SootField fieldRef, Statement stmt) {
+        PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
+        PointsToSet points = pointsToAnalysis.reachingObjects(fieldRef);
+        stmt.setPointsTo(points);
+    }
+
+    private static boolean isBothAreSameConstructor(Statement stmtInAbs, Statement stmtInFlow) {
+        boolean bothAreSameConstructor =
+                stmtInAbs.getSootMethod().isConstructor()
+                        && stmtInFlow.getSootMethod().isConstructor()
+                        && stmtInAbs.getSootMethod().equals(stmtInFlow.getSootMethod());
+        return bothAreSameConstructor;
+    }
+
+    public void printCallGraph(CallGraph cg) {
+        if (cg == null) {
+            cg = Scene.v().getCallGraph();
+        }
+        List<String> graphEdges = new ArrayList<>();
+
+        // Percorre todos os nós do Call Graph e imprime em formato DOT
+        for (Edge edge : cg) {
+            SootMethod source = edge.src();
+            SootMethod target = edge.tgt();
+            graphEdges.add("    \"" + source.getSignature() + "\" -> \"" + target.getSignature() + "\";");
+        }
+        exportCallGraphToDot(graphEdges, "callgraph.dot");
+    }
+
+    protected abstract void gen(OverrideAssignmentAbstraction in, Statement stmt);
+
+    protected abstract boolean isSameStateElement(Statement stmtInAbs, Statement stmtInFlow);
 
     private void initDefaultFields() {
         this.oaConflictReport = new OAConflictReport();
@@ -72,10 +227,15 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
 
     @Override
     protected void internalTransform(String s, Map<String, String> map) {
+        System.out.println("countEdges: " + SootWrapper.countEdges(Scene.v().getCallGraph()));
         long startTime = System.currentTimeMillis();
+        // List<SootMethod> methods = Scene.v().getEntryPoints();
+        scala.collection.immutable.List<SootMethod> scalaList = this.statementsUtils.getEntryPoints();
+        List<SootMethod> methods = new ArrayList<>(JavaConverters.seqAsJavaList(scalaList));
 
-        List<SootMethod> methods = Scene.v().getEntryPoints();
         methods.forEach(sootMethod -> traverse(new OverrideAssignmentAbstraction(), sootMethod, Statement.Type.IN_BETWEEN));
+        new PANotResolveCsvExporter().export(pointerAnalysisMissingRefs, "PANotResolve.csv");
+        new OAAnalysisCsvExporter().export(analysisRecords, "AnalysisRecords.csv");
 
         long finalTime = System.currentTimeMillis();
         System.out.println("Runtime: " + ((finalTime - startTime) / 1000d) + "s");
@@ -84,8 +244,9 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
     }
 
     public void configureEntryPoints() {
-        scala.collection.immutable.List<SootMethod> scalaList = this.statementsUtils.getEntryPoints();
+        scala.collection.immutable.List<SootMethod> scalaList = this instanceof OverrideAssignmentWithPointerAnalysis ? this.statementsUtils.getCallgraphEntryPoints() : this.statementsUtils.getEntryPoints();
         List<SootMethod> entryPoints = new ArrayList<>(JavaConverters.seqAsJavaList(scalaList));
+        //List<SootMethod> methods = new ArrayList<>(Collections.singleton(entryPoints.get(1).getDeclaringClass().getMethodByName("main")));
 
         Scene.v().setEntryPoints(entryPoints);
     }
@@ -107,7 +268,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
 
         this.traversedMethodsWrapper.add(sootMethod);
 
-        //System.out.println(sootMethod + " - " + this.traversedMethodsWrapper.size());
+        System.out.println(sootMethod + " - " + this.traversedMethodsWrapper.size());
         Body body = this.statementsUtils.getDefinition().retrieveActiveBodySafely(sootMethod);
 
         if (body != null) {
@@ -129,8 +290,23 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         boolean hasRelativeBeenTraversed = this.traversedMethodsWrapper.hasRelativeBeenTraversed(sootMethod);
         boolean isSizeGreaterThanDepthLimit = this.traversedMethodsWrapper.size() >= this.depthLimit;
         boolean isPhantom = sootMethod.isPhantom();
+        boolean isMethodInObjectClass = isMethodDefinedInObject(sootMethod);
+        //boolean isJavaLibraryMethod = sootMethod.isJavaLibraryMethod();
 
-        return hasRelativeBeenTraversed || isSizeGreaterThanDepthLimit || isPhantom;
+        return hasRelativeBeenTraversed || isSizeGreaterThanDepthLimit || isPhantom || isMethodInObjectClass;
+    }
+
+    private boolean isMethodDefinedInObject(SootMethod sootMethod) {
+        String methodName = sootMethod.getName();
+        return (
+                methodName.equals("toString") ||
+                        methodName.equals("hashCode") ||
+                        methodName.equals("equals") ||
+                        methodName.equals("getClass") ||
+                        methodName.equals("notify") ||
+                        methodName.equals("notifyAll") ||
+                        methodName.equals("wait")
+        );
     }
 
     private boolean isTagged(Statement.Type flowChangeTag, Unit unit) {
@@ -139,7 +315,6 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
                 || isInRightStatementFlow(flowChangeTag)
                 || isInLeftAndRightStatementFlow(flowChangeTag));
     }
-
 
     private OverrideAssignmentAbstraction runAnalysis(OverrideAssignmentAbstraction in, Statement stmt) {
         /* Are there other possible cases? Yes, see follow links:
@@ -190,7 +365,6 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         return in;
     }
 
-
     private OverrideAssignmentAbstraction runAnalysisWithTaggedUnit(OverrideAssignmentAbstraction in, Statement stmt) {
         stmt.setTraversedLine(new ArrayList<>(this.stacktraceList));
         gen(in, stmt);
@@ -228,7 +402,16 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
                 if (addConflict) {
                     addConflict(statement, stmt);
                 }
+                // Adiciona o statement principal
                 statementsToRemove.add(statement);
+
+                // Adiciona todos os statements com a mesma linha de código
+                int line = statement.getSourceCodeLineNumber();
+                abstraction.forEach(other -> {
+                    if (!statementsToRemove.contains(other) && other.getSourceCodeLineNumber() == line) {
+                        statementsToRemove.add(other);
+                    }
+                });
             }
         });
     }
@@ -242,43 +425,210 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         if (!stmtInAbs.getSootMethod().equals(stmtInFlow.getSootMethod())) {
             return false;
         }
-        return valueInAbs.toString().equals(valueInFlow.toString());
+        if (isLikelyRedundantLocalAssignment(stmtInAbs, stmtInFlow)) {
+            return false;
+        }
+        String normalizedValueInAbs = normalizeValue(valueInAbs);
+        String normalizedValueInFlow = normalizeValue(valueInFlow);
+
+        boolean isSameValue = normalizedValueInAbs.equals(normalizedValueInFlow);
+
+        return isSameValue;
     }
+
+    /**
+     * Verifica se uma possível interferência entre duas atribuições é, na verdade, um falso positivo.
+     * <p>
+     * Essa situação ocorre quando ambas as atribuições são locais (isto é, atribuídas dentro do mesmo fluxo de execução)
+     * e apontam para a mesma linha de código. Um exemplo típico ocorre durante alterações simultâneas nos dois lados do diff:
+     *
+     * <pre>
+     *     foo(); // left
+     *     ...
+     *     foo(); // right
+     *
+     *     void foo() {
+     *         x = 1; // atribuição local
+     *     }
+     * </pre>
+     * <p>
+     * Nesse caso, como ambas as chamadas percorrem mais de uma linha (indicando execução de métodos),
+     * e a linha final da atribuição é a mesma, é provável que se trate de um falso positivo.
+     *
+     * @param stmtInAbs  a instrução do mapeamento abstrato (lado esquerdo ou original)
+     * @param stmtInFlow a instrução dentro do fluxo alterado (lado direito ou modificado)
+     * @return {@code false} se for detectado como falso positivo; {@code true} caso contrário
+     */
+    public boolean isLikelyRedundantLocalAssignment(Statement stmtInAbs, Statement stmtInFlow) {
+        boolean bothTraverseMultipleLines = stmtInAbs.getTraversedLine().size() > 1
+                && stmtInFlow.getTraversedLine().size() > 1;
+
+        boolean sameTargetLine = stmtInAbs.getSourceCodeLineNumber()
+                .equals(stmtInFlow.getSourceCodeLineNumber());
+
+        return bothTraverseMultipleLines && sameTargetLine;
+    }
+
+    /**
+     * Normaliza o valor fornecido extraindo apenas o nome simples do identificador.
+     * <p>
+     * Este método converte o objeto {@code Value} em uma string e remove qualquer
+     * conteúdo após o caractere '#' (inclusive), mantendo apenas a parte antes dele.
+     * Isso é útil para extrair o nome curto de URIs ou identificadores compostos.
+     * </p>
+     *
+     * @param value o objeto {@code Value} a ser normalizado.
+     * @return uma string contendo apenas a parte anterior ao caractere '#' na representação do valor.
+     */
+    private String normalizeValue(Value value) {
+        return value.toString().replaceAll("^(\\w+)#.*$", "$1");
+    }
+
+    /**
+     * Verifica se duas referências de campo, associadas a instruções diferentes, referenciam o mesmo campo de instância.
+     * <p>
+     * O método realiza uma comparação que considera os "points-to" das instruções para
+     * determinar se as referências são equivalentes no contexto da análise de fluxo.
+     * <ul>
+     *   <li>Se a primeira instrução ({@code stmtInAbs}) possui "points-to" e a segunda ({@code stmtInFlow}) não,
+     *       tenta obter os "points-to" da base da referência de fluxo.</li>
+     *   <li>Se qualquer instrução não possuir "points-to", é feita uma comparação básica (sem usar point-to) e a instrução é adicionada a um contador {@code pointerAnalysisMissingRefs} para fins de debug.</li>
+     *   <li>Se ambas possuem "points-to", verifica se possuem interseção não vazia, se os campos são iguais e se não pertencem ao mesmo construtor.</li>
+     * </ul>
+     * </p>
+     *
+     * @param stmtInAbs   a primeira instrução a ser comparada.
+     * @param stmtInFlow  a segunda instrução a ser comparada.
+     * @param valueInAbs  o valor associado à primeira instrução, esperado como {@code InstanceFieldRef}.
+     * @param valueInFlow o valor associado à segunda instrução, esperado como {@code InstanceFieldRef}.
+     * @return {@code true} se as referências de campo forem consideradas equivalentes conforme as condições acima; {@code false} caso contrário.
+     */
 
     protected boolean isSameFieldRef(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
         InstanceFieldRef abstractFieldRef = (InstanceFieldRef) valueInAbs;
         InstanceFieldRef flowFieldRef = (InstanceFieldRef) valueInFlow;
 
-        if (stmtInAbs.getPointsTo() != null && stmtInFlow.getPointsTo() == null) {
+        // Garante que stmtInFlow tenha points-to se stmtInAbs já tiver
+        if (hasPointsTo(stmtInAbs) && !hasPointsTo(stmtInFlow)) {
             getPointToFromBase(flowFieldRef.getBase(), stmtInFlow);
         }
-        return stmtInAbs.getPointsTo() != null
-                && areFieldReferencesEqual(stmtInAbs, stmtInFlow, abstractFieldRef, flowFieldRef);
-    }
 
-    private static boolean areFieldReferencesEqual(Statement stmtInAbs, Statement stmtInFlow, InstanceFieldRef abstractFieldRef, InstanceFieldRef flowFieldRef) {
-        boolean pointToIntersection = stmtInAbs.getPointsTo().hasNonEmptyIntersection(stmtInFlow.getPointsTo());
-        boolean typesEqual = abstractFieldRef.getType().equals(flowFieldRef.getType());
-        boolean fieldRefsEqual = abstractFieldRef.getFieldRef().equals(flowFieldRef.getFieldRef());
-
-        return (pointToIntersection || typesEqual) && fieldRefsEqual;
-    }
-
-    protected boolean isSameArrayRef(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
-        if (stmtInAbs.getPointsTo() != null) {
-            if (stmtInFlow.getPointsTo() == null) {
-                getPointToFromBase(((ArrayRef) valueInFlow).getBase(), stmtInFlow);
-            }
-            if (stmtInAbs.getPointsTo().isEmpty() && stmtInFlow.getPointsTo().isEmpty()) {
-                return valueInAbs.toString().equals(valueInFlow.toString());
-            }
-            return stmtInAbs.getPointsTo().hasNonEmptyIntersection(stmtInFlow.getPointsTo());
+        // Se qualquer um dos dois não tem points-to, usa comparação básica e adiciona ao pointerAnalysisMissingRefs
+        if (!hasPointsTo(stmtInFlow)) {
+            pointerAnalysisMissingRefs.add(stmtInFlow);
+            return areFieldReferencesEqual(stmtInAbs, stmtInFlow, abstractFieldRef, flowFieldRef);
         }
-        return false;
+
+        if (!hasPointsTo(stmtInAbs)) {
+            pointerAnalysisMissingRefs.add(stmtInAbs);
+            return areFieldReferencesEqual(stmtInAbs, stmtInFlow, abstractFieldRef, flowFieldRef);
+        }
+
+        // Comparação completa
+        boolean bothAreSameConstructor = isBothAreSameConstructor(stmtInAbs, stmtInFlow);
+        boolean isSameFieldReference = abstractFieldRef.getField().equals(flowFieldRef.getField());
+        boolean hasCommonTargets = stmtInAbs.getPointsTo().hasNonEmptyIntersection(stmtInFlow.getPointsTo());
+
+        return hasCommonTargets && isSameFieldReference && !bothAreSameConstructor;
     }
 
+    private boolean hasPointsTo(Statement stmt) {
+        return stmt.getPointsTo() != null && !stmt.getPointsTo().isEmpty();
+    }
+
+    /**
+     * Verifica se duas referências de array, associadas a instruções diferentes, referenciam o mesmo elemento de array.
+     * <p>
+     * O método considera os "points-to" das instruções para determinar se as referências são equivalentes.
+     * <ul>
+     *   <li>Se a primeira instrução ({@code stmtInAbs}) possui "points-to" e a segunda ({@code stmtInFlow}) não,
+     *       tenta obter os "points-to" da base da referência de array do fluxo.</li>
+     *   <li>Se qualquer uma das instruções não possuir "points-to", realiza uma comparação básica(sem usar point-to) e adiciona a instrução a um contador {@code pointerAnalysisMissingRefs} para fins de debug.</li>
+     *   <li>Se ambas possuem "points-to", verifica se há interseção não vazia entre os alvos, se os índices são iguais e se não pertencem ao mesmo construtor.</li>
+     * </ul>
+     * </p>
+     *
+     * @param stmtInAbs   a primeira instrução a ser comparada.
+     * @param stmtInFlow  a segunda instrução a ser comparada.
+     * @param valueInAbs  o valor associado à primeira instrução, esperado como {@code ArrayRef}.
+     * @param valueInFlow o valor associado à segunda instrução, esperado como {@code ArrayRef}.
+     * @return {@code true} se as referências de array forem consideradas equivalentes conforme as condições acima; {@code false} caso contrário.
+     */
+    protected boolean isSameArrayRef(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
+        ArrayRef abstractArrayRef = (ArrayRef) valueInAbs;
+        ArrayRef flowArrayRef = (ArrayRef) valueInFlow;
+
+        // Garante que stmtInFlow tenha points-to se stmtInAbs já tiver
+        if (hasPointsTo(stmtInAbs) && !hasPointsTo(stmtInFlow)) {
+            getPointToFromBase(flowArrayRef.getBase(), stmtInFlow);
+        }
+
+        // Se qualquer um dos dois não tem points-to, usa comparação básica e adiciona ao pointerAnalysisMissingRefs
+        if (!hasPointsTo(stmtInFlow)) {
+            pointerAnalysisMissingRefs.add(stmtInFlow);
+            return areArrayReferencesEqual(stmtInAbs, stmtInFlow, abstractArrayRef, flowArrayRef);
+        }
+
+        if (!hasPointsTo(stmtInAbs)) {
+            pointerAnalysisMissingRefs.add(stmtInAbs);
+            return areArrayReferencesEqual(stmtInAbs, stmtInFlow, abstractArrayRef, flowArrayRef);
+        }
+
+        boolean bothAreSameConstructor = isBothAreSameConstructor(stmtInAbs, stmtInFlow);
+        boolean isSameIndexReference = abstractArrayRef.getIndex().equals(flowArrayRef.getIndex());
+        boolean hasCommonTargets = stmtInAbs.getPointsTo().hasNonEmptyIntersection(stmtInFlow.getPointsTo());
+
+        // Comparação completa
+        return hasCommonTargets && isSameIndexReference && !bothAreSameConstructor;
+    }
+
+    protected boolean areArrayAndLocalCompatible(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
+        if (!stmtInAbs.getSootMethod().equals(stmtInFlow.getSootMethod())) {
+            return false;
+        }
+
+        // Garante que stmtInFlow tenha points-to se stmtInAbs já tiver
+        if (hasPointsTo(stmtInAbs) && !hasPointsTo(stmtInFlow)) {
+            getPointToFromBase(valueInFlow, stmtInFlow);
+        }
+
+        // Se nenhum dos dois tem points-to, só compara por nome
+        if (!hasPointsTo(stmtInAbs) || !hasPointsTo(stmtInFlow)) {
+            pointerAnalysisMissingRefs.add(stmtInFlow);
+            return valueInAbs.toString().contains(valueInFlow.toString());
+        }
+        boolean isPointToIntersection = stmtInAbs.getPointsTo().hasNonEmptyIntersection(stmtInFlow.getPointsTo());
+        boolean containsSameName = valueInAbs.toString().contains(valueInFlow.toString());
+
+        return isPointToIntersection && containsSameName;
+    }
+
+    protected boolean isLocalAndArrayCompatible(Statement stmtInAbs, Statement stmtInFlow, Local valueInAbs, ArrayRef valueInFlow) {
+        return areArrayAndLocalCompatible(stmtInFlow, stmtInAbs, valueInFlow, valueInAbs);
+    }
+
+    /**
+     * Verifica se duas referências a campos estáticos representam o mesmo campo.
+     * O método {@code equals}, aplicado a {@code FieldRef} (implementado por {@code AbstractSootFieldRef}),
+     * considera os seguintes critérios de igualdade:
+     * <ul>
+     *   <li><strong>declaringClass</strong> – a classe que declara o campo</li>
+     *   <li><strong>isStatic</strong> – se o campo é estático</li>
+     *   <li><strong>name</strong> – o nome do campo</li>
+     *   <li><strong>type</strong> – o tipo do campo</li>
+     * </ul>
+     * Se todos esses atributos forem iguais (ou ambos {@code null}, quando aplicável), os {@code FieldRef}
+     * são considerados iguais.
+     *
+     * @param valueInAbs  o primeiro valor a ser comparado
+     * @param valueInFlow o segundo valor a ser comparado
+     * @return {@code true} se ambos os {@code FieldRef} forem considerados iguais; {@code false} caso contrário
+     */
     protected boolean isSameStaticFieldRef(Value valueInAbs, Value valueInFlow) {
-        return ((StaticFieldRef) valueInAbs).getFieldRef().getSignature().equals(((StaticFieldRef) valueInFlow).getFieldRef().getSignature());
+        StaticFieldRef abstractFieldRef = (StaticFieldRef) valueInAbs;
+        StaticFieldRef flowFieldRef = (StaticFieldRef) valueInFlow;
+
+        return abstractFieldRef.getFieldRef().equals(flowFieldRef.getFieldRef());
     }
 
     private void addConflict(Statement left, Statement right) {
@@ -287,18 +637,6 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
             this.oaConflictReport.addConflict(conflict);
 
         }
-    }
-
-    protected static void getPointToFromBase(Value value, Statement stmt) {
-        PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
-        PointsToSet points = pointsToAnalysis.reachingObjects((Local) value);
-        stmt.setPointsTo(points);
-    }
-
-    protected static void getPointToFromStaticField(SootField fieldRef, Statement stmt) {
-        PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
-        PointsToSet points = pointsToAnalysis.reachingObjects(fieldRef);
-        stmt.setPointsTo(points);
     }
 
     private void kill(OverrideAssignmentAbstraction in, Statement stmt) {
@@ -340,23 +678,20 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
     }
 
     private OverrideAssignmentAbstraction calculateMergedOverrideAssignment(OverrideAssignmentAbstraction inputAbstraction, Statement currentStatement) {
+        List<OverrideAssignmentAbstraction> flowSetList = new ArrayList<>();
+        List<String> graphEdges = new ArrayList<>();
+
         CallGraph callGraph = Scene.v().getCallGraph();
         Iterator<Edge> edges = callGraph.edgesOutOf(currentStatement.getUnit());
 
-        List<OverrideAssignmentAbstraction> flowSetList = new ArrayList<>();
-
-        while (edges.hasNext()) {
-            Edge edge = edges.next();
-            SootMethod targetMethod = edge.getTgt().method();
-
-            try {
-                OverrideAssignmentAbstraction clonedAbstraction = (OverrideAssignmentAbstraction) inputAbstraction.clone();
-                OverrideAssignmentAbstraction traverseResult = traverse(clonedAbstraction, targetMethod, currentStatement.getType());
-                flowSetList.add(traverseResult);
-            } catch (CloneNotSupportedException ex) {
-                throw new RuntimeException(ex);
-            }
+        if (!edges.hasNext()) {
+            handleEdgesNotFound(inputAbstraction, currentStatement, flowSetList);
+            addOAAnalysisRecord(currentStatement, callGraph, 0);
+        } else {
+            processEdges(inputAbstraction, currentStatement, edges, flowSetList, graphEdges, callGraph);
         }
+
+        //exportCallGraphToDot(graphEdges, "calculateMergedOverrideAssignment.dot");
 
         if (flowSetList.isEmpty()) {
             return inputAbstraction;
@@ -366,6 +701,63 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         flowSetList.forEach(newOverrideAssignmentAbstraction::union);
 
         return newOverrideAssignmentAbstraction;
+    }
+
+    private void handleEdgesNotFound(OverrideAssignmentAbstraction inputAbstraction, Statement currentStatement, List<OverrideAssignmentAbstraction> flowSetList) {
+        try {
+            pointerAnalysisMissingRefs.add(currentStatement);
+            SootMethod targetMethod = ((Stmt) currentStatement.getUnit()).getInvokeExpr().getMethod();
+            cloneAndTraverse(inputAbstraction, currentStatement, flowSetList, targetMethod);
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void processEdges(OverrideAssignmentAbstraction inputAbstraction, Statement currentStatement, Iterator<Edge> edges, List<OverrideAssignmentAbstraction> flowSetList, List<String> graphEdges, CallGraph callGraph) {
+        int callGraphEdgesSize = 0;
+        while (edges.hasNext()) {
+            callGraphEdgesSize++;
+            Edge edge = edges.next();
+            SootMethod srcMethod = edge.getSrc().method();
+            SootMethod targetMethod = edge.getTgt().method();
+
+            graphEdges.add("\"" + srcMethod.getSignature() + "\" -> \"" + targetMethod.getSignature() + "\";");
+            try {
+                cloneAndTraverse(inputAbstraction, currentStatement, flowSetList, targetMethod);
+            } catch (CloneNotSupportedException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+        addOAAnalysisRecord(currentStatement, callGraph, callGraphEdgesSize);
+    }
+
+    private void addOAAnalysisRecord(Statement currentStatement, CallGraph callGraph, int callGraphEdgesSize) {
+        OAAnalysisRecord oaAnalysisRecord = new OAAnalysisRecord(
+                this.traversedMethodsWrapper.size(),
+                currentStatement, callGraphEdgesSize,
+                (this instanceof OverrideAssignmentWithPointerAnalysis ? OAAnalysisRecord.CallGraphType.SPARK : OAAnalysisRecord.CallGraphType.CHA),
+                null);
+        analysisRecords.add(oaAnalysisRecord);
+    }
+
+    private void cloneAndTraverse(OverrideAssignmentAbstraction inputAbstraction, Statement currentStatement, List<OverrideAssignmentAbstraction> flowSetList, SootMethod targetMethod) throws CloneNotSupportedException {
+        OverrideAssignmentAbstraction clonedAbstraction = (OverrideAssignmentAbstraction) inputAbstraction.clone();
+        OverrideAssignmentAbstraction traverseResult = traverse(clonedAbstraction, targetMethod, currentStatement.getType());
+        flowSetList.add(traverseResult);
+    }
+
+
+    // Método para exportar o grafo para um arquivo DOT
+    private void exportCallGraphToDot(List<String> graphEdges, String filename) {
+        try (PrintWriter out = new PrintWriter(filename)) {
+            out.println("digraph CallGraph {");
+            for (String edge : graphEdges) {
+                out.println("    " + edge);
+            }
+            out.println("}");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private Value createFieldValueReference(JimpleLocal base, SootFieldRef fieldRef) {

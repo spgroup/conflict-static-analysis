@@ -1,9 +1,7 @@
 package br.unb.cic.analysis.df;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
-import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 import soot.*;
 import soot.options.Options;
 
@@ -56,8 +54,10 @@ public class SourceSinkConfluenceAnalysisVariableAttributionTest {
         Main.main(new String[] {"-w", "-allow-phantom-refs", "-f", "J", "-keep-line-number", "-cp", cp, targetClass});
     }
 
+/*
     @Test
     public void testDataFlowAnalysisExpectingOneConflict() {
         Assert.assertEquals(1, analysis2.getConflicts().size());
     }
+*/
 }

@@ -58,11 +58,6 @@ public class OverrideAssignmentWithPointerAnalysis extends OverrideAssignment im
                     return isSameArrayRef(stmtInAbs, stmtInFlow, valueInAbs, valueInFlow);
                 } else if (valueInAbs instanceof StaticFieldRef && valueInFlow instanceof StaticFieldRef) {
                     return isSameStaticFieldRef(valueInAbs, valueInFlow);
-                } else if (valueInAbs instanceof ArrayRef && valueInFlow instanceof Local) {
-                    if (!stmtInAbs.getSootMethod().equals(stmtInFlow.getSootMethod())) {
-                        return false;
-                    }
-                    return valueInAbs.toString().contains(valueInFlow.toString());
                 }
 
             }

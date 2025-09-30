@@ -44,21 +44,34 @@ public class OverrideAssignmentWithoutPointerAnalysis extends OverrideAssignment
                 if (valueInAbs instanceof Local && valueInFlow instanceof Local) {
                     return isSameLocal(stmtInAbs, stmtInFlow, valueInAbs, valueInFlow);
                 } else if (valueInAbs instanceof InstanceFieldRef && valueInFlow instanceof InstanceFieldRef) {
-                    InstanceFieldRef abstractFieldRef = (InstanceFieldRef) valueInAbs;
-                    InstanceFieldRef flowFieldRef = (InstanceFieldRef) valueInFlow;
-                    return abstractFieldRef.getFieldRef().getSignature().equals(flowFieldRef.getFieldRef().getSignature());
+                    return isSameFieldRef(stmtInAbs, stmtInFlow, valueInAbs, valueInFlow);
                 } else if (valueInAbs instanceof ArrayRef && valueInFlow instanceof ArrayRef) {
-                    return valueInAbs.equals(valueInFlow);
+                    return isSameArrayRef(stmtInAbs, stmtInFlow, valueInAbs, valueInFlow);
                 } else if (valueInAbs instanceof StaticFieldRef && valueInFlow instanceof StaticFieldRef) {
                     return isSameStaticFieldRef(valueInAbs, valueInFlow);
-                } else if (valueInAbs instanceof ArrayRef && valueInFlow instanceof Local) {
-                    if (!stmtInAbs.getSootMethod().equals(stmtInFlow.getSootMethod())) {
-                        return false;
-                    }
-                    return valueInAbs.toString().contains(valueInFlow.toString());
                 }
             }
         }
         return false;
+    }
+
+    protected boolean isSameArrayRef(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
+        return areArrayReferencesEqual(stmtInAbs, stmtInFlow, valueInAbs, valueInFlow);
+    }
+
+    protected boolean isSameFieldRef(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
+        return areFieldReferencesEqual(stmtInAbs, stmtInFlow, valueInAbs, valueInFlow);
+    }
+
+    private boolean isLocalAndArrayCompatible(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, ArrayRef valueInFlow) {
+        return areArrayAndLocalCompatible(stmtInFlow, stmtInAbs, valueInFlow, valueInAbs);
+    }
+
+
+    protected boolean areArrayAndLocalCompatible(Statement stmtInAbs, Statement stmtInFlow, Value valueInAbs, Value valueInFlow) {
+        if (!stmtInAbs.getSootMethod().equals(stmtInFlow.getSootMethod())) {
+            return false;
+        }
+        return valueInAbs.toString().contains(valueInFlow.toString());
     }
 }
