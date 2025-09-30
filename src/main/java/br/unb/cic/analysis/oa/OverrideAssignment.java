@@ -1,9 +1,6 @@
 package br.unb.cic.analysis.oa;
 
-import br.unb.cic.analysis.AbstractAnalysis;
-import br.unb.cic.analysis.AbstractMergeConflictDefinition;
-import br.unb.cic.analysis.SootWrapper;
-import br.unb.cic.analysis.StatementsUtil;
+import br.unb.cic.analysis.*;
 import br.unb.cic.analysis.io.OAAnalysisCsvExporter;
 import br.unb.cic.analysis.io.PANotResolveCsvExporter;
 import br.unb.cic.analysis.model.*;
@@ -233,7 +230,9 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
     }
 
     public void configureEntryPoints() {
-        scala.collection.immutable.List<SootMethod> scalaList = this instanceof OverrideAssignmentWithPointerAnalysis ? this.statementsUtils.getCallgraphEntryPoints() : this.statementsUtils.getEntryPoints();
+        scala.collection.immutable.List<SootMethod> scalaList = SootWrapper.getCallGraphAlgorithm().equals(CallGraphAlgorithm.CHA) ?
+                this.statementsUtils.getEntryPoints()
+                : this.statementsUtils.getCallgraphEntryPoints();
         List<SootMethod> entryPoints = new ArrayList<>(JavaConverters.seqAsJavaList(scalaList));
         //List<SootMethod> methods = new ArrayList<>(Collections.singleton(entryPoints.get(1).getDeclaringClass().getMethodByName("main")));
 

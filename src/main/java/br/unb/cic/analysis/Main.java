@@ -213,8 +213,10 @@ public class Main {
         Option entrypointsOption = Option.builder("entrypoints").argName("entrypoints").hasArg()
                 .desc("entrypoints")
                 .build();
-        Option oaPointerAnalysisOption = Option.builder("oaPointerAnalysis").argName("oaPointerAnalysis").hasArg()
-                .desc("enable pointer analysis in overloading assignment")
+
+        Option callGraphOption = Option.builder("cg").argName("cg")
+                .hasArg()
+                .desc("call graph algorithm [CHA, RTA, VTA, SPARK]")
                 .build();
 
         options.addOption(classPathOption);
@@ -227,7 +229,7 @@ public class Main {
         options.addOption(depthLimitOption);
         options.addOption(depthMethodsVisitedSVFAOption);
         options.addOption(entrypointsOption);
-        options.addOption(oaPointerAnalysisOption);
+        options.addOption(callGraphOption);
     }
 
     private void runAnalysis(String mode, String classpath) {
@@ -393,15 +395,19 @@ public class Main {
             List<String> entrypoints,
             String classpath
     ) {
+        String cg = cmd.getOptionValue(
+                "cg",
+                type.equals(AnalysisType.WITH_POINTER_ANALYSIS) ? "SPARK" : "CHA"
+        );
         OverrideAssignment overrideAssignment;
         switch (type) {
             case WITH_POINTER_ANALYSIS:
                 overrideAssignment = new OverrideAssignmentWithPointerAnalysis(definition, depthLimit, interprocedural, entrypoints);
-                SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath, true);
+                SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath, cg);
                 return overrideAssignment;
             case WITHOUT_POINTER_ANALYSIS:
                 overrideAssignment = new OverrideAssignmentWithoutPointerAnalysis(definition, depthLimit, interprocedural, entrypoints);
-                SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath, false);
+                SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath, cg);
                 return overrideAssignment;
             default:
                 throw new IllegalArgumentException("Unknown analysis type: " + type);

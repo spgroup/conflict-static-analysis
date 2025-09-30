@@ -32,7 +32,7 @@ public class OAInterWithoutPointerAnalysisTest {
         stopwatch = Stopwatch.createStarted();
         G.reset();
 
-        SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis("target/test-classes/", false);
+        SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis("target/test-classes/", "CHA");
 
 
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
@@ -391,13 +391,12 @@ public class OAInterWithoutPointerAnalysisTest {
         //Options.v().setPhaseOption("jb.ls", "off"); // remove x = 1; x#2 = 2
         Options.v().setPhaseOption("jb", "use-original-names:true");
 
-        enableCallGraph(false);
+        enableCallGraph("CHA");
 
         Scene.v().loadNecessaryClasses();
 
         applyPackage("cg");
 
-        SootWrapper.setChaCG(Scene.v().getCallGraph());
 
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
         analysis.configureEntryPoints();
@@ -458,13 +457,11 @@ public class OAInterWithoutPointerAnalysisTest {
         //Options.v().setPhaseOption("jb.ls", "off"); // remove x = 1; x#2 = 2
         Options.v().setPhaseOption("jb", "use-original-names:true");
 
-        enableCallGraph(false);
+        enableCallGraph("CHA");
 
         Scene.v().loadNecessaryClasses();
 
         applyPackage("cg");
-
-        SootWrapper.setChaCG(Scene.v().getCallGraph());
 
         PackManager.v().getPack("wjtp").add(new Transform("wjtp.analysis", analysis));
         analysis.configureEntryPoints();

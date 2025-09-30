@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  * analysis tool.
  */
 public class SootWrapper {
-    static CallGraph sparkCG, chaCG;
+    private static CallGraphAlgorithm callGraphAlgorithm;
     private String classPath;
     private String classes;
 
@@ -53,10 +53,10 @@ public class SootWrapper {
     }
 
     public static void configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(String classpath) {
-        configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath, true);
+        configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath, "SPARK");
     }
 
-    public static void configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(String classpath, boolean usePointsToAnalysis) {
+    public static void configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(String classpath, String cgAlgorithm) {
         G.reset();
         List<String> classes = Collections.singletonList(classpath);
 
@@ -84,7 +84,7 @@ public class SootWrapper {
         }
         configureSootJBOptions();
 
-        enableCallGraph(usePointsToAnalysis);
+        enableCallGraph(cgAlgorithm);
 
         Scene.v().loadNecessaryClasses();
         //applyPackage("cg");
@@ -124,19 +124,29 @@ public class SootWrapper {
     }
 
     public static void enableCallGraph() {
-        enableCallGraph(true);
+        enableCallGraph("SPARK");
     }
 
-    public static void enableCallGraph(boolean usePointsToAnalysis) {
-        System.out.println("CG configuration init.");
+    public static void enableCallGraph(String cgAlgorithm) {
+        callGraphAlgorithm = CallGraphAlgorithm.fromString(cgAlgorithm);
 
-        if (usePointsToAnalysis) {
-            //enableRtaCallGraph();
-            enableSparkCallGraph();
-            //enableVtaCallGraph();
-        } else {
-            enableCHACallGraph();
+        System.out.println("CG configuration init");
+
+        switch (callGraphAlgorithm) {
+            case CHA:
+                enableCHACallGraph();
+                break;
+            case RTA:
+                enableRtaCallGraph();
+                break;
+            case VTA:
+                enableVtaCallGraph();
+                break;
+            case SPARK:
+                enableSparkCallGraph();
+                break;
         }
+
         System.out.println("CG configuration completed.");
     }
 
@@ -155,14 +165,17 @@ public class SootWrapper {
 
 
     private static void enableVtaCallGraph() {
-        Options.v().setPhaseOption("cg", "vta");
+        System.out.println("Enable VTA CG");
+        Options.v().setPhaseOption("cg.spark", "enabled:true");
+        Options.v().setPhaseOption("cg.spark", "vta:true");
     }
 
     private static void enableRtaCallGraph() {
-        Options.v().setPhaseOption("cg", "rta");
+        System.out.println("Enable RTA CG");
+        Options.v().setPhaseOption("cg.spark", "enabled:true");
+        Options.v().setPhaseOption("cg.spark", "rta:true");
+        Options.v().setPhaseOption("cg.spark", "on-fly-cg:false");
     }
-
-
 
     private static List<String> configurePackagesWithCallGraph() {
         List<String> packages = new ArrayList<String>();
@@ -207,6 +220,10 @@ public class SootWrapper {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
+    }
+
+    public static CallGraphAlgorithm getCallGraphAlgorithm() {
+        return callGraphAlgorithm;
     }
 
     public static class Builder {
@@ -284,20 +301,5 @@ public class SootWrapper {
         return Integer.parseInt(version);
     }
 
-    public static CallGraph getSparkCG() {
-        return sparkCG;
-    }
-
-    public static void setSparkCG(CallGraph sparkCG) {
-        SootWrapper.sparkCG = sparkCG;
-    }
-
-    public static CallGraph getChaCG() {
-        return chaCG;
-    }
-
-    public static void setChaCG(CallGraph chaCG) {
-        SootWrapper.chaCG = chaCG;
-    }
 }
 
