@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class SootWrapper {
     private static CallGraphAlgorithm callGraphAlgorithm;
+    private static Map<String, Long> packageExecutionTimes = new HashMap<>();
     private String classPath;
     private String classes;
 
@@ -197,29 +198,32 @@ public class SootWrapper {
         System.out.println("Applying package: " + p);
         try {
             PackManager.v().getPack(p).apply();
-            //System.out.println("Successfully applied package: " + p);
         } catch (Exception e) {
             System.err.println("Error applying package: " + p);
             e.printStackTrace();
         } finally {
-            saveExecutionTime("Successfully applied package: " + p, stopwatch);
+            long elapsedMs = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+            packageExecutionTimes.put(p, elapsedMs);
+
+            saveExecutionTime("Successfully applied package: " + p, elapsedMs);
         }
     }
 
-    public static void saveExecutionTime(String description, Stopwatch stopwatch) {
-
+    public static void saveExecutionTime(String description, long elapsedMs) {
         NumberFormat formatter = new DecimalFormat("#0.00000");
 
-        long time = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-        try {
-            FileWriter myWriter = new FileWriter("time.txt", true);
-            myWriter.write(description + ";" + formatter.format(time / 1000d) + "\n");
-            System.out.println(description + " " + formatter.format(time / 1000d));
-            myWriter.close();
+        try (FileWriter myWriter = new FileWriter("time.txt", true)) {
+            myWriter.write(description + ";" + formatter.format(elapsedMs / 1000d) + "\n");
+            System.out.println(description + " " + formatter.format(elapsedMs / 1000d));
         } catch (IOException e) {
-            System.out.println("An error occurred.");
+            System.out.println("An error occurred while saving execution time.");
             e.printStackTrace();
         }
+    }
+
+
+    public static Map<String, Long> getPackageExecutionTimes() {
+        return Collections.unmodifiableMap(packageExecutionTimes);
     }
 
     public static CallGraphAlgorithm getCallGraphAlgorithm() {

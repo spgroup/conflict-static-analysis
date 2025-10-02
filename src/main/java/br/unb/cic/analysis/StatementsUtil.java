@@ -1,6 +1,5 @@
 package br.unb.cic.analysis;
 
-import br.unb.cic.analysis.io.HasMainMethodCsvExporter;
 import br.unb.cic.analysis.model.Statement;
 import scala.collection.JavaConverters;
 import soot.Scene;
@@ -127,11 +126,11 @@ public class StatementsUtil {
         List<SootMethod> mainMethods = findMainMethods();
 
         if (mainMethods.isEmpty()) {
-            new HasMainMethodCsvExporter().export(false, "HasMainMethod.csv");
+            //new HasMainMethodCsvExporter().export(false, "HasMainMethod.csv");
             //throw new RuntimeException("Nenhum método 'main' foi encontrado no projeto.");
             mainMethods = findPublicMethods();
         } else {
-            new HasMainMethodCsvExporter().export(true, "HasMainMethod.csv");
+            //new HasMainMethodCsvExporter().export(true, "HasMainMethod.csv");
         }
         //mainMethods.addAll(new ArrayList<>(JavaConverters.seqAsJavaList(getEntryPoints())));
 

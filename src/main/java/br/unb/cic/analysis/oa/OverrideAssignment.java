@@ -1,8 +1,7 @@
 package br.unb.cic.analysis.oa;
 
+import br.unb.cic.analysis.Main;
 import br.unb.cic.analysis.*;
-import br.unb.cic.analysis.io.OAAnalysisCsvExporter;
-import br.unb.cic.analysis.io.PANotResolveCsvExporter;
 import br.unb.cic.analysis.model.*;
 import scala.collection.JavaConverters;
 import soot.*;
@@ -20,7 +19,6 @@ import java.util.stream.Collectors;
 public abstract class OverrideAssignment extends SceneTransformer implements AbstractAnalysis {
     private final Boolean interprocedural;
     protected List<Statement> pointerAnalysisMissingRefs;
-    List<OAAnalysisRecord> analysisRecords;
     private int depthLimit;
     private OAConflictReport oaConflictReport;
     private TraversedMethodsWrapper<SootMethod> traversedMethodsWrapper;
@@ -32,7 +30,6 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         this.interprocedural = interprocedural;
         this.statementsUtils = new StatementsUtil(definition, entrypoints);
         this.pointerAnalysisMissingRefs = new ArrayList<>();
-        this.analysisRecords = new ArrayList<>();
         initDefaultFields();
     }
 
@@ -213,24 +210,37 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
 
     @Override
     protected void internalTransform(String s, Map<String, String> map) {
-        System.out.println("countEdges: " + SootWrapper.countEdges(Scene.v().getCallGraph()));
-        long startTime = System.currentTimeMillis();
+        CallGraph callGraph = Scene.v().getCallGraph();
+        int countEdges = SootWrapper.countEdges(callGraph);
+        System.out.println("countEdges: " + countEdges);
+
         // List<SootMethod> methods = Scene.v().getEntryPoints();
         scala.collection.immutable.List<SootMethod> scalaList = this.statementsUtils.getEntryPoints();
         List<SootMethod> methods = new ArrayList<>(JavaConverters.seqAsJavaList(scalaList));
 
         methods.forEach(sootMethod -> traverse(new OverrideAssignmentAbstraction(), sootMethod, Statement.Type.IN_BETWEEN));
-        new PANotResolveCsvExporter().export(pointerAnalysisMissingRefs, "PANotResolve.csv");
-        new OAAnalysisCsvExporter().export(analysisRecords, "AnalysisRecords.csv");
-
-        long finalTime = System.currentTimeMillis();
-        System.out.println("Runtime: " + ((finalTime - startTime) / 1000d) + "s");
 
         oaConflictReport.report();
+
+        createAnalysisReportLog(countEdges, methods);
+    }
+
+    private void createAnalysisReportLog(int countEdges, List<SootMethod> methods) {
+        new OAAnalysisRecord.Builder()
+                .callGraphAlgorithm(SootWrapper.getCallGraphAlgorithm())
+                .callGraphEdgeCount(countEdges)
+                .depthLimit(this.depthLimit)
+                .visitedMethodsCount(getVisitedMethodsCount())
+                .analysisType(this instanceof OverrideAssignmentWithPointerAnalysis ?
+                        Main.AnalysisType.WITH_POINTER_ANALYSIS : Main.AnalysisType.WITHOUT_POINTER_ANALYSIS)
+                .callGraphBuildTimeMs(SootWrapper.getPackageExecutionTimes())
+                .callGraphEntryPoint(Scene.v().getEntryPoints()) // se quiser só 1 método
+                .analysisEntryPoint(methods)
+                .build();
     }
 
     public void configureEntryPoints() {
-        scala.collection.immutable.List<SootMethod> scalaList = SootWrapper.getCallGraphAlgorithm().equals(CallGraphAlgorithm.CHA) ?
+        scala.collection.immutable.List<SootMethod> scalaList = SootWrapper.getCallGraphAlgorithm().equals(CallGraphAlgorithm.VTA) ?
                 this.statementsUtils.getEntryPoints()
                 : this.statementsUtils.getCallgraphEntryPoints();
         List<SootMethod> entryPoints = new ArrayList<>(JavaConverters.seqAsJavaList(scalaList));
@@ -256,7 +266,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
 
         this.traversedMethodsWrapper.add(sootMethod);
 
-        System.out.println(sootMethod + " - " + this.traversedMethodsWrapper.size());
+        //System.out.println(sootMethod + " - " + this.traversedMethodsWrapper.size());
         Body body = this.statementsUtils.getDefinition().retrieveActiveBodySafely(sootMethod);
 
         if (body != null) {
@@ -674,7 +684,6 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
 
         if (!edges.hasNext()) {
             handleEdgesNotFound(inputAbstraction, currentStatement, flowSetList);
-            addOAAnalysisRecord(currentStatement, callGraph, 0);
         } else {
             processEdges(inputAbstraction, currentStatement, edges, flowSetList, graphEdges, callGraph);
         }
@@ -716,16 +725,6 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
                 throw new RuntimeException(ex);
             }
         }
-        addOAAnalysisRecord(currentStatement, callGraph, callGraphEdgesSize);
-    }
-
-    private void addOAAnalysisRecord(Statement currentStatement, CallGraph callGraph, int callGraphEdgesSize) {
-        OAAnalysisRecord oaAnalysisRecord = new OAAnalysisRecord(
-                this.traversedMethodsWrapper.size(),
-                currentStatement, callGraphEdgesSize,
-                (this instanceof OverrideAssignmentWithPointerAnalysis ? OAAnalysisRecord.CallGraphType.SPARK : OAAnalysisRecord.CallGraphType.CHA),
-                null);
-        analysisRecords.add(oaAnalysisRecord);
     }
 
     private void cloneAndTraverse(OverrideAssignmentAbstraction inputAbstraction, Statement currentStatement, List<OverrideAssignmentAbstraction> flowSetList, SootMethod targetMethod) throws CloneNotSupportedException {
@@ -733,7 +732,6 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         OverrideAssignmentAbstraction traverseResult = traverse(clonedAbstraction, targetMethod, currentStatement.getType());
         flowSetList.add(traverseResult);
     }
-
 
     // Método para exportar o grafo para um arquivo DOT
     private void exportCallGraphToDot(List<String> graphEdges, String filename) {
@@ -819,5 +817,9 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
 
     public void setDepthLimit(int depthLimit) {
         this.depthLimit = depthLimit;
+    }
+
+    public List<Statement> getPointerAnalysisMissingRefs() {
+        return pointerAnalysisMissingRefs;
     }
 }
