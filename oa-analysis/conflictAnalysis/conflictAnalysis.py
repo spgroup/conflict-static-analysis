@@ -50,14 +50,49 @@ class ConflictAnalyzer:
             'percentages': percentages
         }
 
+    def _get_boolean_pie_data(self, df, column, true_label='True', false_label='False'):
+
+        true_count = int(df[column].sum())
+        false_count = int((~df[column]).sum())
+        total = len(df)
+
+        labels = [true_label, false_label]
+        values = [true_count, false_count]
+        percentages = [ (true_count/total)*100 if total>0 else 0,
+                        (false_count/total)*100 if total>0 else 0 ]
+
+        return {
+            'values': values,
+            'labels': labels,
+            'percentages': percentages
+        }
+
     def _create_plots(self, df):
         # Depth and diff distributions
         self.visualizer.plot_histogram(
             data=df[COL_DEPTH],
-            bins=50,
+            bins=30,
             title='Conflicts Histogram of Depths',
             xlabel='Depths',
             filename=PLOT_DEPTH_HIST
+        )
+
+        same_class_df = df[df[COL_SAME_CLASS] == False]
+        self.visualizer.plot_histogram(
+            data=same_class_df[COL_DEPTH],
+            bins=DEFAULT_HIST_BINS,
+            title='Different Class Conflicts Histogram of Depths',
+            xlabel='Depths',
+            filename=PLOT_DIFFERENT_CLASS_DEPTH_HIST
+        )
+
+        same_method_df = df[df[COL_SAME_METHOD] == False]
+        self.visualizer.plot_histogram(
+            data=same_method_df[COL_DEPTH],
+            bins=DEFAULT_HIST_BINS,
+            title='Different Method Conflicts Histogram of Depths',
+            xlabel='Depths',
+            filename=PLOT_DIFFERENT_METHOD_DEPTH_HIST
         )
 
         self.visualizer.plot_pie_chart(
@@ -78,7 +113,7 @@ class ConflictAnalyzer:
         conflicts_per_scenario = df.groupby(COL_SCENARIO_INDEX).size()
         self.visualizer.plot_histogram(
             data=conflicts_per_scenario,
-            bins=DEFAULT_HIST_BINS,
+            bins=100,
             title='Number of Conflicts per Scenario',
             xlabel='Number of Conflicts',
             filename=PLOT_CONFLICTS_PER_SCENARIO
@@ -87,7 +122,7 @@ class ConflictAnalyzer:
         conflicts_per_jar = df.groupby(COL_SCENARIO_JAR).size()
         self.visualizer.plot_histogram(
             data=conflicts_per_jar,
-            bins=DEFAULT_HIST_BINS,
+            bins=100,
             title='Number of Conflicts per ScenarioJAR',
             xlabel='Number of Conflicts',
             filename=PLOT_CONFLICTS_PER_JAR
@@ -98,6 +133,20 @@ class ConflictAnalyzer:
             df=df,
             title='Conflict Depths Behavior',
             filename=PLOT_DEPTH_LINES
+        )
+
+        same_class_data = self._get_boolean_pie_data(df, COL_SAME_CLASS, true_label='Same class', false_label='Different class')
+        self.visualizer.plot_pie_chart(
+            data=same_class_data,
+            title='Proportion of Conflicts in Same Class',
+            filename=PLOT_SAME_CLASS_PIE
+        )
+
+        same_method_data = self._get_boolean_pie_data(df, COL_SAME_METHOD, true_label='Same method', false_label='Different method')
+        self.visualizer.plot_pie_chart(
+            data=same_method_data,
+            title='Proportion of Conflicts in Same Method',
+            filename=PLOT_SAME_METHOD_PIE
         )
     
 
