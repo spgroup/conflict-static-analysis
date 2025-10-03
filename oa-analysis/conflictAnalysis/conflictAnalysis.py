@@ -54,7 +54,7 @@ class ConflictAnalyzer:
         # Depth and diff distributions
         self.visualizer.plot_histogram(
             data=df[COL_DEPTH],
-            bins=DEFAULT_HIST_BINS,
+            bins=50,
             title='Conflicts Histogram of Depths',
             xlabel='Depths',
             filename=PLOT_DEPTH_HIST
