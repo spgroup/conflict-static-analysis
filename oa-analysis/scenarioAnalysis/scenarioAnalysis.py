@@ -29,6 +29,20 @@ class ScenarioAnalyzer:
         scenario_stats = self._calculate_scenario_stats(conflict_df)
         self._print_threshold_stats(scenario_stats)
 
+        # Print percentiles for average conflict depth per scenario
+        scenario_avg_depth = conflict_df.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].mean()
+        if scenario_avg_depth.empty:
+            print("\nNo scenario depth data available to compute percentiles.")
+            return
+
+        percentiles = [25, 50, 75, 90, 99]
+        quantiles = scenario_avg_depth.quantile([p / 100 for p in percentiles])
+
+        print("\nScenario average depth percentiles:")
+        for p in percentiles:
+            qval = quantiles.loc[p / 100]
+            print(f"  {p}th percentile: {qval:.2f}")
+
     def _calculate_scenario_stats(self, conflict_df):
         return conflict_df.groupby(COL_SCENARIO_INDEX).agg({
             COL_SAME_CLASS: 'mean',

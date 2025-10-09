@@ -31,10 +31,6 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
     private List<TraversedLine> stacktraceList;
     private StatementsUtil statementsUtils;
 
-    protected abstract void gen(OverrideAssignmentAbstraction in, Statement stmt);
-
-    protected abstract boolean isSameStateElement(Statement stmtInAbs, Statement stmtInFlow);
-
     public OverrideAssignment(AbstractMergeConflictDefinition definition, int depthLimit, Boolean interprocedural, List<String> entrypoints, String classpath) {
         this.depthLimit = depthLimit;
         this.interprocedural = interprocedural;

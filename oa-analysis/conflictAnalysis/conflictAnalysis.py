@@ -17,14 +17,30 @@ class ConflictAnalyzer:
         total_conflicts = len(df)
         same_depth_count = sum(df[COL_LEFT_LENGTH] == df[COL_RIGHT_LENGTH])
         same_class_count = sum(df[COL_SAME_CLASS])
-        same_method_count = sum(df[COL_SAME_METHOD])
+        same_method_count = sum(df[COL_SAME_METHOD])        
+        depth_mean = df[COL_DEPTH].mean()
+        depth_median = df[COL_DEPTH].median()
+        diff_mean = df[COL_DIFF].mean()
+        diff_median = df[COL_DIFF].median()
+
+        for deph_stat in range(5, 19):
+            count = sum(df[COL_DEPTH] >= deph_stat)
+            print(f"Conflicts with depth larger than {deph_stat}: {count} ({(count/total_conflicts*100):.2f}%)")
 
         print("\nConflict Analysis Results:")
         print(f"Total conflicts analyzed: {total_conflicts}")
         print(f"Conflicts with same depth: {same_depth_count} ({same_depth_count/total_conflicts*100:.2f}%)")
         print(f"Conflicts in same class: {same_class_count} ({same_class_count/total_conflicts*100:.2f}%)")
         print(f"Conflicts in same method: {same_method_count} ({same_method_count/total_conflicts*100:.2f}%)")
-    
+
+        print("\nDepth statistics:")
+        print(f"  Mean depth: {depth_mean:.2f}")
+        print(f"  Median depth: {depth_median:.2f}")
+
+        print("\nStacktrace diff statistics:")
+        print(f"  Mean diff: {diff_mean:.2f}")
+        print(f"  Median diff: {diff_median:.2f}")
+
     def _get_conflict_type_distribution(self, df):
         col = pd.Series("", index=df.index)
         same_class_path_one = (df[COL_SAME_CLASS]) & (df[COL_LEFT_LENGTH] == 1) & (df[COL_RIGHT_LENGTH] == 1)
