@@ -43,6 +43,11 @@ class ScenarioAnalyzer:
             qval = quantiles.loc[p / 100]
             print(f"  {p}th percentile: {qval:.2f}")
 
+        scenario_max_depth = conflict_df.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].max()
+        for depth_stat in range(DEFAULT_DEPTH, MAX_DEPTH + 1):
+            count = sum(scenario_max_depth > depth_stat)
+            print(f"Scenarios affected when depth is {depth_stat}: {count} ({(count/total_scenarios*100):.2f}%)")
+
     def _calculate_scenario_stats(self, conflict_df):
         return conflict_df.groupby(COL_SCENARIO_INDEX).agg({
             COL_SAME_CLASS: 'mean',

@@ -23,9 +23,9 @@ class ConflictAnalyzer:
         diff_mean = df[COL_DIFF].mean()
         diff_median = df[COL_DIFF].median()
 
-        for deph_stat in range(5, 19):
-            count = sum(df[COL_DEPTH] >= deph_stat)
-            print(f"Conflicts with depth larger than {deph_stat}: {count} ({(count/total_conflicts*100):.2f}%)")
+        for deph_stat in range(DEFAULT_DEPTH, MAX_DEPTH + 1):
+            count = sum(df[COL_DEPTH] > deph_stat)
+            print(f"Conflicts affected when depth is {deph_stat}: {count} ({(count/total_conflicts*100):.2f}%)")
 
         print("\nConflict Analysis Results:")
         print(f"Total conflicts analyzed: {total_conflicts}")
