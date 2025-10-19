@@ -47,6 +47,13 @@ class ScenarioAnalyzer:
         for depth_stat in range(DEFAULT_DEPTH, MAX_DEPTH + 1):
             count = sum(scenario_max_depth > depth_stat)
             print(f"Scenarios affected when depth is {depth_stat}: {count} ({(count/total_scenarios*100):.2f}%)")
+        
+        print('\n')
+
+        scenario_min_depth = conflict_df.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].min()
+        for depth_stat in range(DEFAULT_DEPTH, MAX_DEPTH + 1):
+            count = sum(depth_stat < scenario_min_depth)
+            print(f"Scenarios lost when depth is {depth_stat}: {count} ({(count/total_scenarios*100):.2f}%)")
 
     def _calculate_scenario_stats(self, conflict_df):
         return conflict_df.groupby(COL_SCENARIO_INDEX).agg({
