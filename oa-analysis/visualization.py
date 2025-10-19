@@ -22,16 +22,15 @@ class Visualizer:
 
     def plot_pie_chart(self, data, title, filename):
         plt.figure(figsize=(10, 6))
-        # Create pie chart with percentages and counts
         plt.pie(data['values'], labels=[f"{label}\n({int(count)} - {pct:.1f}%)" 
                 for label, count, pct in zip(data['labels'], 
                                             data['values'], 
                                             data['percentages'])],
-                autopct='', # We don't need autopct since we include it in labels
+                autopct='',
                 startangle=140,
                 colors=sns.color_palette("husl", len(data['labels']))
         )
-        plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle
+        plt.axis('equal')
         plt.title(title)
         plt.savefig(filename)
         plt.close()
@@ -42,9 +41,12 @@ class Visualizer:
         plt.title(title)
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
-
+        
+        plt.xticks(x)
+        
         for i, v in enumerate(y):
-            plt.text(i+5, v, f'{v:.1f}%', ha='center', va='bottom')
+            plt.text(x[i], v, f'{v:.1f}%', ha='center', va='bottom')
+        
         plt.grid(True, axis='y', linestyle='--', alpha=0.7)
         plt.tight_layout()
         plt.savefig(filename)

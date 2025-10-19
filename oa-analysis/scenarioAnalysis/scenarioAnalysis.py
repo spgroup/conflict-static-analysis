@@ -97,6 +97,32 @@ class ScenarioAnalyzer:
             )
 
         # Metrics per scenario
+        total_scenarios = len(scenario_df)
+        scenario_max_depth = conflict_df.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].max()
+        scenario_min_depth = conflict_df.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].min()
+
+        depths = list(range(DEFAULT_DEPTH, MAX_DEPTH + 1))
+        affect_percentages = [(sum(scenario_max_depth > d) / total_scenarios * 100) for d in depths]
+        loss_percentages = [(sum(d < scenario_min_depth) / total_scenarios * 100) for d in depths]
+
+        self.visualizer.plot_bar_chart(
+            x=depths,
+            y=affect_percentages,
+            title='Percentage of Scenarios Affected per Depth',
+            xlabel='Depth',
+            ylabel='Scenarios Affected (%)',
+            filename=PLOT_SCENARIO_DEPTH_AFFECT
+        )
+
+        self.visualizer.plot_bar_chart(
+            x=depths,
+            y=loss_percentages,
+            title='Percentage of Scenarios Lost per Depth',
+            xlabel='Depth',
+            ylabel='Scenarios Lost (%)',
+            filename=PLOT_SCENARIO_DEPTH_LOSS
+        )
+
         self._plot_scenario_metrics(conflict_df)
 
     def _plot_scenario_metrics(self, df):
