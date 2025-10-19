@@ -36,6 +36,20 @@ class Visualizer:
         plt.savefig(filename)
         plt.close()
 
+    def plot_bar_chart(self, x, y, title, xlabel, ylabel, filename):
+        plt.figure(figsize=(12, 6))
+        plt.bar(x, y)
+        plt.title(title)
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+
+        for i, v in enumerate(y):
+            plt.text(i+5, v, f'{v:.1f}%', ha='center', va='bottom')
+        plt.grid(True, axis='y', linestyle='--', alpha=0.7)
+        plt.tight_layout()
+        plt.savefig(filename)
+        plt.close()
+
     def plot_scenario_metric(self, df, metric_col, agg_func, title, filename):
         plt.figure(figsize=(12, 6))
         scenario_stats = df.groupby('scenario_index')[metric_col].agg(agg_func)

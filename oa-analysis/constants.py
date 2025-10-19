@@ -37,6 +37,7 @@ PLOT_MIN_DEPTH =  ANALYSIS_DIR +'min_depth_per_scenario.png'
 PLOT_MEDIAN_DIFF =  ANALYSIS_DIR +'median_diff_per_scenario.png'
 PLOT_MAX_DIFF =  ANALYSIS_DIR +'max_diff_per_scenario.png'
 PLOT_MIN_DIFF =  ANALYSIS_DIR +'min_diff_per_scenario.png'
+PLOT_DEPTH_LOSS = ANALYSIS_DIR + 'conflicts_depth_loss.png'
 
 # Analysis thresholds and bins
 PERCENTAGE_BUCKETS = [20, 40, 60, 80, 100]

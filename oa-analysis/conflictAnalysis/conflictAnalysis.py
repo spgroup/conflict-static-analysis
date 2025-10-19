@@ -84,6 +84,20 @@ class ConflictAnalyzer:
         }
 
     def _create_plots(self, df):
+        # Create depth loss bar chart
+        total_conflicts = len(df)
+        depths = list(range(DEFAULT_DEPTH, MAX_DEPTH + 1))
+        loss_percentages = [(sum(df[COL_DEPTH] > depth) / total_conflicts * 100) for depth in depths]
+        
+        self.visualizer.plot_bar_chart(
+            x=depths,
+            y=loss_percentages,
+            title='Percentage of Conflicts Lost per Depth',
+            xlabel='Depth',
+            ylabel='Conflicts Lost (%)',
+            filename=PLOT_DEPTH_LOSS
+        )
+
         # Depth and diff distributions
         self.visualizer.plot_histogram(
             data=df[COL_DEPTH],
