@@ -46,7 +46,21 @@ public class OAAnalysisCsvExporter {
         writer.append(String.valueOf(record.getAnalysisExecutionTimeMs())).append(";");
         writer.append(String.valueOf(record.getCallGraphEntryPoint().size())).append(";");
         writer.append(String.valueOf(record.getAnalysisEntryPoint().size())).append(";");
-        writer.append(record.getCallGraphEntryPoint().toString()).append(";");
-        writer.append(record.getAnalysisEntryPoint().toString()).append("\n");
+        writer.append(sanitize(record.getCallGraphEntryPoint().toString())).append(";");
+        writer.append(sanitize(record.getAnalysisEntryPoint().toString())).append("\n");
+    }
+
+    private String sanitize(String value) {
+        if (value == null) return "";
+        // Remove quebras de linha
+        String sanitized = value.replace("\n", " ")
+                .replace("\r", " ");
+        // Escapa aspas duplas
+        sanitized = sanitized.replace("\"", "\"\"");
+        // Se tiver ; ou aspas, envolve o campo em aspas duplas
+        if (sanitized.contains(";") || sanitized.contains("\"") || sanitized.contains(" ")) {
+            sanitized = "\"" + sanitized + "\"";
+        }
+        return sanitized;
     }
 }
