@@ -1,11 +1,11 @@
 package br.unb.cic.analysis.io;
 
 import br.unb.cic.analysis.model.OAAnalysisRecord;
-import br.unb.cic.analysis.model.Statement;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 public class OAAnalysisCsvExporter {
@@ -17,20 +17,11 @@ public class OAAnalysisCsvExporter {
         try (FileWriter writer = new FileWriter(file, true)) {
             // Cabeçalho
             if (isNewFile) {
-                writer.append("DeepLimit;ClassName;MethodName;SourceCodeLine;TargetUnit;PossibleImplementations;CallGraphType\n"); //;CallGraphType;AnalysisType
+                writer.append("CallGraphAlgorithm;CallGraphEdgeCount;DepthLimit;VisitedMethodsCount;AnalysisType;CallGraphBuildTimeMs;AnalysisExecutionTimeMs;CallGraphEntryPointsCount;AnalysisEntryPointsCount;CallGraphEntryPoints;AnalysisEntryPoints;\n");
             }
 
             for (OAAnalysisRecord record : records) {
-                Statement s = record.getStatement();
-
-                writer.append(String.valueOf(record.getDeepLimit())).append(";");
-                writer.append(s.getSootClass().getName().replace(";", " ")).append(";");
-                writer.append(s.getSootMethod().getName().replace(";", " ")).append(";");
-                writer.append(String.valueOf(s.getSourceCodeLineNumber())).append(";");
-                writer.append(s.getUnit().toString().replace("\n", " ").replace("\r", " ").replace(";", " ")).append(";");
-                writer.append(String.valueOf(record.getCallGraphEdgesSize())).append(";");
-                writer.append(record.getCallGraphType().name()).append("\n");
-                //writer.append(record.getAnalysisType().name()).append("\n");
+                writeRecord(writer, record);
             }
 
             writer.flush();
@@ -39,5 +30,37 @@ public class OAAnalysisCsvExporter {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void export(OAAnalysisRecord record, String filePath) {
+        export(Collections.singletonList(record), filePath);
+    }
+
+    private void writeRecord(FileWriter writer, OAAnalysisRecord record) throws IOException {
+        writer.append(record.getCallGraphAlgorithm() != null ? record.getCallGraphAlgorithm().name() : "").append(";");
+        writer.append(String.valueOf(record.getCallGraphEdgeCount())).append(";");
+        writer.append(String.valueOf(record.getDepthLimit())).append(";");
+        writer.append(String.valueOf(record.getVisitedMethodsCount())).append(";");
+        writer.append(record.getAnalysisType() != null ? record.getAnalysisType().name() : "").append(";");
+        writer.append(String.valueOf(record.getCallGraphBuildTimeMs().get("cg"))).append(";");
+        writer.append(String.valueOf(record.getAnalysisExecutionTimeMs())).append(";");
+        writer.append(String.valueOf(record.getCallGraphEntryPoint().size())).append(";");
+        writer.append(String.valueOf(record.getAnalysisEntryPoint().size())).append(";");
+        writer.append(sanitize(record.getCallGraphEntryPoint().toString())).append(";");
+        writer.append(sanitize(record.getAnalysisEntryPoint().toString())).append("\n");
+    }
+
+    private String sanitize(String value) {
+        if (value == null) return "";
+        // Remove quebras de linha
+        String sanitized = value.replace("\n", " ")
+                .replace("\r", " ");
+        // Escapa aspas duplas
+        sanitized = sanitized.replace("\"", "\"\"");
+        // Se tiver ; ou aspas, envolve o campo em aspas duplas
+        if (sanitized.contains(";") || sanitized.contains("\"") || sanitized.contains(" ")) {
+            sanitized = "\"" + sanitized + "\"";
+        }
+        return sanitized;
     }
 }

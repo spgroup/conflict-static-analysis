@@ -50,7 +50,7 @@ public class PANotResolveCsvExporter {
             }
 
             writer.flush();
-            System.out.println("CSV file generated successfully!");
+            System.out.println("PA Not Resolve CSV file generated successfully!");
 
         } catch (IOException e) {
             e.printStackTrace();

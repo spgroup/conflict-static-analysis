@@ -27,6 +27,21 @@
                     <url>https://maven.pkg.github.com/spgroup/soot</url>
                 </repository>
                 <repository>
+                    <id>github</id>
+                    <name>barbosamaatheus</name>
+                    <url>https://maven.pkg.github.com/barbosamaatheus/soot</url>
+                </repository>
+                <repository>
+                    <id>svfa</id>
+                    <name>svfa repository</name>
+                    <url>https://maven.pkg.github.com/galilasmb/svfa-scala</url>
+                </repository>
+                <repository>
+                    <id>svfa</id>
+                    <name>svfa repository</name>
+                    <url>https://maven.pkg.github.com/barbosamaatheus/svfa-scala</url>
+                </repository>
+                <repository>
                     <id>svfa</id>
                     <name>svfa repository</name>
                     <url>https://maven.pkg.github.com/spgroup/svfa-scala</url>
