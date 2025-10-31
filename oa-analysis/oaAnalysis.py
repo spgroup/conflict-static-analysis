@@ -1,5 +1,6 @@
 import json
 import csv
+import sys
 from collections import defaultdict
 from constants import *
 from conflictAnalysis.conflictAnalysis import ConflictAnalyzer
@@ -97,6 +98,13 @@ class ConflictProcessor:
                 writer.writerow([jar, jar_conflict_counts[jar], jar_scenario_counts[jar]])
 
 def main():
+    # Parse command line arguments
+    plot_enabled = False
+    for arg in sys.argv[1:]:
+        if arg.lower().startswith('plot='):
+            plot_value = arg.split('=')[1].lower()
+            plot_enabled = plot_value == 'true'
+
     processor = ConflictProcessor()
     
     with open(JSON_INPUT_FILE) as f:
@@ -120,8 +128,8 @@ def main():
     conflict_analyzer = ConflictAnalyzer()
     scenario_analyzer = ScenarioAnalyzer()
     
-    conflict_analyzer.analyze(plot=True)
-    scenario_analyzer.analyze(plot=True)
+    conflict_analyzer.analyze(plot=plot_enabled)
+    scenario_analyzer.analyze(plot=plot_enabled)
 
 if __name__ == "__main__":
     main()
