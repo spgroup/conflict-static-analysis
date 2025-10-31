@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from visualization import Visualizer
 from constants import *
@@ -5,9 +6,11 @@ from constants import *
 class ConflictAnalyzer:
     def __init__(self):
         self.visualizer = Visualizer()
+        self.output_dir = '.'
         
-    def analyze(self, plot=True):
-        df = pd.read_csv(CONFLICT_STATS_CSV)
+    def analyze(self, plot=True, output_dir='.'):
+        self.output_dir = output_dir
+        df = pd.read_csv(os.path.join(output_dir, CONFLICT_STATS_CSV))
         self._print_statistics(df)
         
         if plot:
@@ -96,16 +99,15 @@ class ConflictAnalyzer:
             title='Percentage of Conflicts Lost per Depth',
             xlabel='Depth',
             ylabel='Conflicts Lost (%)',
-            filename=PLOT_DEPTH_LOSS
+            filename=os.path.join(self.output_dir, PLOT_DEPTH_LOSS)
         )
 
-        # Depth and diff distributions
         self.visualizer.plot_histogram(
             data=df[COL_DEPTH],
             bins=30,
             title='Conflicts Histogram of Depths',
             xlabel='Depths',
-            filename=PLOT_DEPTH_HIST
+            filename=os.path.join(self.output_dir, PLOT_DEPTH_HIST)
         )
 
         same_class_df = df[df[COL_SAME_CLASS] == False]
@@ -114,7 +116,7 @@ class ConflictAnalyzer:
             bins=DEFAULT_HIST_BINS,
             title='Different Class Conflicts Histogram of Depths',
             xlabel='Depths',
-            filename=PLOT_DIFFERENT_CLASS_DEPTH_HIST
+            filename=os.path.join(self.output_dir, PLOT_DIFFERENT_CLASS_DEPTH_HIST)
         )
 
         same_method_df = df[df[COL_SAME_METHOD] == False]
@@ -123,13 +125,13 @@ class ConflictAnalyzer:
             bins=DEFAULT_HIST_BINS,
             title='Different Method Conflicts Histogram of Depths',
             xlabel='Depths',
-            filename=PLOT_DIFFERENT_METHOD_DEPTH_HIST
+            filename=os.path.join(self.output_dir, PLOT_DIFFERENT_METHOD_DEPTH_HIST)
         )
 
         self.visualizer.plot_pie_chart(
             data=self._get_conflict_type_distribution(df),
             title='Distribution of Conflict Types',
-            filename=PLOT_TYPES_HIST
+            filename=os.path.join(self.output_dir, PLOT_TYPES_HIST)
         )
 
         self.visualizer.plot_histogram(
@@ -137,7 +139,7 @@ class ConflictAnalyzer:
             bins=DEFAULT_HIST_BINS,
             title='Conflicts Histogram of Diffs (Stacktrace)',
             xlabel='Absolute difference (L-R)',
-            filename=PLOT_DIFF_HIST
+            filename=os.path.join(self.output_dir, PLOT_DIFF_HIST)
         )
 
         conflicts_per_scenario = df.groupby(COL_SCENARIO_INDEX).size()
@@ -146,7 +148,7 @@ class ConflictAnalyzer:
             bins=100,
             title='Number of Conflicts per Scenario',
             xlabel='Number of Conflicts',
-            filename=PLOT_CONFLICTS_PER_SCENARIO
+            filename=os.path.join(self.output_dir, PLOT_CONFLICTS_PER_SCENARIO)
         )
 
         conflicts_per_jar = df.groupby(COL_SCENARIO_JAR).size()
@@ -155,27 +157,27 @@ class ConflictAnalyzer:
             bins=100,
             title='Number of Conflicts per ScenarioJAR',
             xlabel='Number of Conflicts',
-            filename=PLOT_CONFLICTS_PER_JAR
+            filename=os.path.join(self.output_dir, PLOT_CONFLICTS_PER_JAR)
         )
         
         self.visualizer.plot_conflict_depth_lines(
             df=df,
             title='Conflict Depths Behavior',
-            filename=PLOT_DEPTH_LINES
+            filename=os.path.join(self.output_dir, PLOT_DEPTH_LINES)
         )
 
         same_class_data = self._get_boolean_pie_data(df, COL_SAME_CLASS, true_label='Same class', false_label='Different class')
         self.visualizer.plot_pie_chart(
             data=same_class_data,
             title='Proportion of Conflicts in Same Class',
-            filename=PLOT_SAME_CLASS_PIE
+            filename=os.path.join(self.output_dir, PLOT_SAME_CLASS_PIE)
         )
 
         same_method_data = self._get_boolean_pie_data(df, COL_SAME_METHOD, true_label='Same method', false_label='Different method')
         self.visualizer.plot_pie_chart(
             data=same_method_data,
             title='Proportion of Conflicts in Same Method',
-            filename=PLOT_SAME_METHOD_PIE
+            filename=os.path.join(self.output_dir, PLOT_SAME_METHOD_PIE)
         )
     
 

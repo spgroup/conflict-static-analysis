@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from visualization import Visualizer
 from constants import *
@@ -5,10 +6,12 @@ from constants import *
 class ScenarioAnalyzer:
     def __init__(self):
         self.visualizer = Visualizer()
+        self.output_dir = '.'
 
-    def analyze(self, plot=True):
-        conflict_df = pd.read_csv(CONFLICT_STATS_CSV)
-        scenarioJAR_df = pd.read_csv(SCENARIO_STATS_CSV)
+    def analyze(self, plot=True, output_dir='.'):
+        self.output_dir = output_dir
+        conflict_df = pd.read_csv(os.path.join(output_dir, CONFLICT_STATS_CSV))
+        scenarioJAR_df = pd.read_csv(os.path.join(output_dir, SCENARIO_STATS_CSV))
 
         self._print_statistics(conflict_df, scenarioJAR_df)
         
@@ -77,7 +80,7 @@ class ScenarioAnalyzer:
             bins=DEFAULT_HIST_BINS,
             title='Number of Scenarios per ScenarioJAR',
             xlabel='Number of Scenarios',
-            filename=PLOT_SCENARIOS_PER_JAR
+            filename=os.path.join(self.output_dir, PLOT_SCENARIOS_PER_JAR)
         )
 
         # Plot same class/method percentage distributions
@@ -93,7 +96,7 @@ class ScenarioAnalyzer:
                 bins=len(PERCENTAGE_BUCKETS),
                 title=f'{title} % Distribution',
                 xlabel='Percentage',
-                filename=filename
+                filename=os.path.join(self.output_dir, filename)
             )
 
         # Metrics per scenario
@@ -111,7 +114,7 @@ class ScenarioAnalyzer:
             title='Percentage of Scenarios Affected per Depth',
             xlabel='Depth',
             ylabel='Scenarios Affected (%)',
-            filename=PLOT_SCENARIO_DEPTH_AFFECT
+            filename=os.path.join(self.output_dir, PLOT_SCENARIO_DEPTH_AFFECT)
         )
 
         self.visualizer.plot_bar_chart(
@@ -120,7 +123,7 @@ class ScenarioAnalyzer:
             title='Percentage of Scenarios Lost per Depth',
             xlabel='Depth',
             ylabel='Scenarios Lost (%)',
-            filename=PLOT_SCENARIO_DEPTH_LOSS
+            filename=os.path.join(self.output_dir, PLOT_SCENARIO_DEPTH_LOSS)
         )
 
         self._plot_scenario_metrics(conflict_df)
@@ -139,7 +142,7 @@ class ScenarioAnalyzer:
                     metric_col=metric_col,
                     agg_func=agg_func,
                     title=f'{prefix} {title} per Scenario',
-                    filename=filename
+                    filename=os.path.join(self.output_dir, filename)
                 )
 
 if __name__ == "__main__":

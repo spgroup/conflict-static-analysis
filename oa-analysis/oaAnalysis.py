@@ -1,13 +1,15 @@
 import json
 import csv
 import sys
+import os
 from collections import defaultdict
 from constants import *
 from conflictAnalysis.conflictAnalysis import ConflictAnalyzer
 from scenarioAnalysis.scenarioAnalysis import ScenarioAnalyzer
 
 class ConflictProcessor:
-    def __init__(self):
+    def __init__(self, output_dir='.'):
+        self.output_dir = output_dir
         self.conflict_data = {
             'l_lengths': defaultdict(list),
             'r_lengths': defaultdict(list),
@@ -73,7 +75,8 @@ class ConflictProcessor:
         data['conflict_idx'] += 1
 
     def save_results(self):
-        with open(CONFLICT_STATS_CSV, 'w', newline='') as csvfile:
+        conflict_stats_path = os.path.join(self.output_dir, CONFLICT_STATS_CSV)
+        with open(conflict_stats_path, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow([
                 COL_CONFLICT_INDEX, COL_LEFT_LENGTH, COL_RIGHT_LENGTH,
@@ -91,23 +94,36 @@ class ConflictProcessor:
             jar_conflict_counts[jar] += len(self.conflict_data['depth'][idx])
             jar_scenario_counts[jar] += 1
 
-        with open(SCENARIO_STATS_CSV, 'w', newline='') as csvfile:
+        scenario_stats_path = os.path.join(self.output_dir, SCENARIO_STATS_CSV)
+        with open(scenario_stats_path, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow([COL_SCENARIO_JAR, COL_NUM_CONFLICTS, COL_NUM_SCENARIOS])
             for jar in jar_conflict_counts:
                 writer.writerow([jar, jar_conflict_counts[jar], jar_scenario_counts[jar]])
 
-def main():
-    # Parse command line arguments
+def parse_args():
     plot_enabled = False
+    input_json = JSON_INPUT_FILE
+    
     for arg in sys.argv[1:]:
         if arg.lower().startswith('plot='):
             plot_value = arg.split('=')[1].lower()
             plot_enabled = plot_value == 'true'
+        elif arg.lower().startswith('out.json'):
+            input_json = arg.split('=')[1].lower()
+            
+    return plot_enabled, input_json
 
-    processor = ConflictProcessor()
+def main():
+    plot_enabled, input_json = parse_args()
     
-    with open(JSON_INPUT_FILE) as f:
+    output_dir = os.path.dirname(os.path.abspath(input_json))
+    if not output_dir:
+        output_dir = '.'
+        
+    processor = ConflictProcessor(output_dir)
+    
+    with open(input_json) as f:
         data = json.load(f)
 
     if data and isinstance(data, list):
@@ -128,8 +144,8 @@ def main():
     conflict_analyzer = ConflictAnalyzer()
     scenario_analyzer = ScenarioAnalyzer()
     
-    conflict_analyzer.analyze(plot=plot_enabled)
-    scenario_analyzer.analyze(plot=plot_enabled)
+    conflict_analyzer.analyze(plot=plot_enabled, output_dir=output_dir)
+    scenario_analyzer.analyze(plot=plot_enabled, output_dir=output_dir)
 
 if __name__ == "__main__":
     main()
