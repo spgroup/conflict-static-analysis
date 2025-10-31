@@ -38,7 +38,7 @@ public class DFPConfluenceAnalysisBaseTest2 {
 
     @Test
     public void testSVFAConfluentAnalysisExpectingOneConflict() {
-        analysis.execute(false, true);
+        analysis.execute(false, "SPARK");
         Set<ConfluenceConflict> conflicts = analysis.getConfluentConflicts();
         System.out.println(conflicts);
         Assert.assertEquals(1, conflicts.size());

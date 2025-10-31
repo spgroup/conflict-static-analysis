@@ -1,7 +1,6 @@
 package br.unb.cic.analysis.svfa.confluence;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,7 +37,7 @@ public class ConfluenceFlowTest4 {
 
     @Test
     public void testSVFAConfluentAnalysisExpectingOneConflict() {
-        analysis.execute(false, true);
+        analysis.execute(false, "SPARK");
         Set<ConfluenceConflict> conflicts = analysis.getConfluentConflicts();
         System.out.println("Conflicts: "+conflicts.size());
 //        Assert.assertTrue(conflicts.size() >= 1);

@@ -38,7 +38,7 @@ public class DFPConfluenceAnalysisTest {
 
     @Test
     public void testDFPConfluentAnalysisExpectingTwoConflicts() {
-        analysis.execute(false, true);
+        analysis.execute(false, "SPARK");
         Set<ConfluenceConflict> conflicts = analysis.getConfluentConflicts();
         Assert.assertEquals(1, conflicts.size());
         ConfluenceConflict conflict = conflicts.iterator().next();

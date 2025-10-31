@@ -38,7 +38,7 @@ public class DFPConfluenceAnalysisWithoutConflictTest {
 
     @Test
     public void testSVFAConfluentAnalysisExpectingNoConflicts() {
-        analysis.execute(false, true);
+        analysis.execute(false, "SPARK");
         Set<ConfluenceConflict> conflicts = analysis.getConfluentConflicts();
         Assert.assertEquals(conflicts.size(), 0);
     }
