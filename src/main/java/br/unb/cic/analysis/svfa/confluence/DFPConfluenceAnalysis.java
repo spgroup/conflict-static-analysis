@@ -113,19 +113,15 @@ public class DFPConfluenceAnalysis {
     }
 
 
-    public void setCallGraph(DFPAnalysisSemanticConflicts instance, boolean spark){
-        if (spark){
-            instance.setCallGraph("SPARK");
-        }else{
-            instance.setCallGraph("CHA");
-        }
+    public void setCallGraph(DFPAnalysisSemanticConflicts instance, String callGraph) {
+        instance.setCallGraph(callGraph);
     }
 
     /**
      * Executes both source -> base and sink -> base SVFA analysis intersects then populating
      * the confluentFlows attribute with the results
      */
-    public void execute(boolean depthMethodsVisited, boolean spark) {
+    public void execute(boolean depthMethodsVisited, String callGraph) {
         DFPAnalysisSemanticConflicts sourceBaseAnalysis = sourceBaseAnalysis(interprocedural);
         String type_analysis;
         if (this.interprocedural) {
@@ -135,44 +131,41 @@ public class DFPConfluenceAnalysis {
         }
 
         Main m = new Main();
-        m.stopwatch = Stopwatch.createStarted();
+        Main.stopwatch = Stopwatch.createStarted();
         sourceBaseAnalysis.setPrintDepthVisitedMethods(depthMethodsVisited);
 
-        setCallGraph(sourceBaseAnalysis, spark);
+        setCallGraph(sourceBaseAnalysis, callGraph);
 
         sourceBaseAnalysis.configureSoot();
 
-        System.out.println("CallGraph: "+sourceBaseAnalysis.callGraph());
+        System.out.println("CallGraph: " + sourceBaseAnalysis.callGraph());
 
         Options.v().ignore_resolution_errors();
-        m.saveExecutionTime("Configure Soot Confluence 1 "+type_analysis);
+        m.saveExecutionTime("Configure Soot Confluence 1 " + type_analysis);
 
-        m.stopwatch = Stopwatch.createStarted();
+        Main.stopwatch = Stopwatch.createStarted();
 
         sourceBaseAnalysis.buildDFP();
         Set<List<StatementNode>> sourceBasePaths = sourceBaseAnalysis.findSourceSinkPaths();
 
-        m.saveExecutionTime("Time to perform Confluence 1 "+type_analysis);
+        m.saveExecutionTime("Time to perform Confluence 1 " + type_analysis);
 
-        System.out.println("No edges source:"+sourceBaseAnalysis.getCountNoEdges());
-        System.out.println("With edges source:"+sourceBaseAnalysis.getCountWithEdges());
+        Main.stopwatch = Stopwatch.createStarted();
 
-        m.stopwatch = Stopwatch.createStarted();
-
-        G.v().reset();
+        G.reset();
 
         DFPAnalysisSemanticConflicts sinkBaseAnalysis = sinkBaseAnalysis(this.interprocedural);
         sinkBaseAnalysis.setPrintDepthVisitedMethods(depthMethodsVisited);
 
-        setCallGraph(sinkBaseAnalysis, spark);
+        setCallGraph(sinkBaseAnalysis, callGraph);
 
         sinkBaseAnalysis.configureSoot();
 
-        System.out.println("CallGraph: "+sourceBaseAnalysis.callGraph());
+        System.out.println("CallGraph: " + sourceBaseAnalysis.callGraph());
 
-        m.saveExecutionTime("Configure Soot Confluence 2 "+type_analysis);
+        m.saveExecutionTime("Configure Soot Confluence 2 " + type_analysis);
 
-        m.stopwatch = Stopwatch.createStarted();
+        Main.stopwatch = Stopwatch.createStarted();
 
         sinkBaseAnalysis.buildDFP();
 
@@ -180,29 +173,26 @@ public class DFPConfluenceAnalysis {
 
         this.confluentFlows = intersectPathsByLastNode(sourceBasePaths, sinkBasePaths);
 
-        m.saveExecutionTime("Time to perform Confluence 2 "+type_analysis);
+        m.saveExecutionTime("Time to perform Confluence 2 " + type_analysis);
 
-        System.out.println("No edges sink:"+sinkBaseAnalysis.getCountNoEdges());
-        System.out.println("With edges sink:"+sinkBaseAnalysis.getCountWithEdges());
-
-        System.out.println("Visited methods: "+ (sourceBaseAnalysis.getNumberVisitedMethods()+sinkBaseAnalysis.getNumberVisitedMethods()));
-        setVisitedMethods(sourceBaseAnalysis.getNumberVisitedMethods()+sinkBaseAnalysis.getNumberVisitedMethods());
+        System.out.println("Visited methods: " + (sourceBaseAnalysis.getNumberVisitedMethods() + sinkBaseAnalysis.getNumberVisitedMethods()));
+        setVisitedMethods(sourceBaseAnalysis.getNumberVisitedMethods() + sinkBaseAnalysis.getNumberVisitedMethods());
         setGraphSize(sourceBaseAnalysis, sinkBaseAnalysis);
     }
 
-     public List<String> reportConflictsConfluence(){
+    public List<String> reportConflictsConfluence() {
         List<String> conflicts_report = new ArrayList<>();
-         List<Integer> left_lines = new ArrayList<>();
-         List<Integer> right_lines = new ArrayList<>();
-         List<Integer> cf_lines = new ArrayList<>();
+        List<Integer> left_lines = new ArrayList<>();
+        List<Integer> right_lines = new ArrayList<>();
+        List<Integer> cf_lines = new ArrayList<>();
 
-         for (ConfluenceConflict conflict : this.confluentFlows) {
-             try {
+        for (ConfluenceConflict conflict : this.confluentFlows) {
+            try {
 
-                 StatementNode df1 = conflict.getSourceNodePath().get(0);
-                 StatementNode df2 = conflict.getSinkNodePath().get(0);
+                StatementNode df1 = conflict.getSourceNodePath().get(0);
+                StatementNode df2 = conflict.getSinkNodePath().get(0);
 
-                 StatementNode confluence = conflict.getSinkNodePath().get(conflict.getSinkNodePath().size()-1);
+                StatementNode confluence = conflict.getSinkNodePath().get(conflict.getSinkNodePath().size() - 1);
 
 //                 Integer left_line = df1.getPathVisitedMethods().head().line();
 //                 Integer right_line = df2.getPathVisitedMethods().head().line();
@@ -216,36 +206,37 @@ public class DFPConfluenceAnalysis {
                         && right_lines.contains(right_line)
                         && cf_lines.contains(cf_line);
 
-                if (!contains_lines){
-                    System.out.println("Confluence interference in "+ df1.getPathVisitedMethods().head().getMethod().method());
-                    System.out.println("Confluence flows from execution of lines "+left_line +" and "+right_line+
-                            " to line "+confluence.getPathVisitedMethods().head().line()+", defined in "+df1.value().sootUnit()+" and "+df2.value().sootUnit()+" and used in "+confluence.getPathVisitedMethods().head().getUnit());
-                    System.out.println("Caused by line "+left_line+ " flow: "+df1.value());
-                    System.out.println("Caused by line "+right_line+ " flow: "+df2.value());
-                    System.out.println("Caused by line "+cf_line+ " flow: "+confluence.value());
+                if (!contains_lines) {
+                    System.out.println("Confluence interference in " + df1.getPathVisitedMethods().head().getMethod().method());
+                    System.out.println("Confluence flows from execution of lines " + left_line + " and " + right_line +
+                            " to line " + confluence.getPathVisitedMethods().head().line() + ", defined in " + df1.value().sootUnit() + " and " + df2.value().sootUnit() + " and used in " + confluence.getPathVisitedMethods().head().getUnit());
+                    System.out.println("Caused by line " + left_line + " flow: " + df1.value());
+                    System.out.println("Caused by line " + right_line + " flow: " + df2.value());
+                    System.out.println("Caused by line " + cf_line + " flow: " + confluence.value());
 
-                    conflicts_report.add("Confluence interference in "+ df1.getPathVisitedMethods().head().getMethod().method());
-                    conflicts_report.add("Confluence flows from execution of lines "+left_line+" and "+right_line+
-                            " to line "+confluence.getPathVisitedMethods().head().line()+", defined in "+df1.value().sootUnit()+" and "+df2.value().sootUnit()+" and used in "+confluence.getPathVisitedMethods().head().getUnit());
-                    conflicts_report.add("Caused by line "+left_line+ " flow: "+df1.value());
-                    conflicts_report.add("Caused by line "+right_line+ " flow: "+df2.value());
-                    conflicts_report.add("Caused by line "+cf_line+ " flow: "+confluence.value()+"\n");
+                    conflicts_report.add("Confluence interference in " + df1.getPathVisitedMethods().head().getMethod().method());
+                    conflicts_report.add("Confluence flows from execution of lines " + left_line + " and " + right_line +
+                            " to line " + confluence.getPathVisitedMethods().head().line() + ", defined in " + df1.value().sootUnit() + " and " + df2.value().sootUnit() + " and used in " + confluence.getPathVisitedMethods().head().getUnit());
+                    conflicts_report.add("Caused by line " + left_line + " flow: " + df1.value());
+                    conflicts_report.add("Caused by line " + right_line + " flow: " + df2.value());
+                    conflicts_report.add("Caused by line " + cf_line + " flow: " + confluence.value() + "\n");
 
                     left_lines.add(left_line);
                     right_lines.add(right_line);
                     cf_lines.add(cf_line);
                 }
 
-             } catch (Exception e) {
+            } catch (Exception e) {
                 System.err.println("Error accessing visited methods: " + e.getMessage());
             }
-         }
+        }
         return conflicts_report;
     }
 
     /**
      * Intersects the list of paths looking for paths that have the same last nodes
      * also ignores redundant node (that represent different jimple lines but the same Java line)
+     *
      * @param paths1 A set of lists of nodes with at least 2 nodes
      * @param paths2 A set of lists of nodes with at least 2 nodes
      * @return A set of confluence conflicts
@@ -253,7 +244,7 @@ public class DFPConfluenceAnalysis {
     private Set<ConfluenceConflict> intersectPathsByLastNode(Set<List<StatementNode>> paths1, Set<List<StatementNode>> paths2) {
         Map<StatementNode, List<StatementNode>> pathEndHash = new HashMap<>();
 
-        for (List<StatementNode> path: paths1) {
+        for (List<StatementNode> path : paths1) {
             pathEndHash.put(getLastNode(path), path);
         }
 
@@ -262,7 +253,7 @@ public class DFPConfluenceAnalysis {
             StatementNode lastNode = getLastNode(path);
 
             StatementNode stmt = containsKey(pathEndHash, lastNode);
-            if (stmt!= null) {
+            if (stmt != null) {
                 result.add(new ConfluenceConflict(pathEndHash.get(stmt), path));
             }
         }
@@ -270,8 +261,8 @@ public class DFPConfluenceAnalysis {
         return result;
     }
 
-    public StatementNode containsKey(Map<StatementNode, List<StatementNode>> pathEndHash, StatementNode lastNode){
-        for (StatementNode stmt: pathEndHash.keySet()) {
+    public StatementNode containsKey(Map<StatementNode, List<StatementNode>> pathEndHash, StatementNode lastNode) {
+        for (StatementNode stmt : pathEndHash.keySet()) {
             if (lastNode.value().line() == stmt.value().line() &&
                     lastNode.value().method().equals(stmt.value().method()) &&
                     lastNode.value().className().equals(stmt.value().className())) {
@@ -426,17 +417,18 @@ public class DFPConfluenceAnalysis {
         return this.visitedMethods;
     }
 
-    public void setGraphSize(DFPAnalysisSemanticConflicts source, DFPAnalysisSemanticConflicts sink){
-        this.getGraphSize = (source.svg().graph().size()+","+source.svg().edges().size()+","+sink.svg().graph().size()+","+sink.svg().edges().size());
-    }
-
-    public String getGraphSize(){
-        return this.getGraphSize;
-    }
-
     public void setVisitedMethods(int visitedMethods) {
         this.visitedMethods = visitedMethods;
     }
+
+    public void setGraphSize(DFPAnalysisSemanticConflicts source, DFPAnalysisSemanticConflicts sink) {
+        this.getGraphSize = (source.svg().graph().size() + "," + source.svg().edges().size() + "," + sink.svg().graph().size() + "," + sink.svg().edges().size());
+    }
+
+    public String getGraphSize() {
+        return this.getGraphSize;
+    }
+
     public void setCp(String cp) {
         this.cp = cp;
     }

@@ -5,9 +5,7 @@ import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.StatementsUtil;
 import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.soot.graph.*;
-import br.unb.cic.soot.svfa.CG;
-import br.unb.cic.soot.svfa.CHA$;
-import br.unb.cic.soot.svfa.SPARK$;
+import br.unb.cic.soot.svfa.*;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
 import scala.collection.mutable.ListBuffer;
@@ -243,11 +241,18 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
         return this.callGraph;
     }
 
-    public void setCallGraph(String callGraph){
-        if (callGraph.toUpperCase().contains("SPARK")){
+    public void setCallGraph(String callGraph) {
+        String cg = callGraph.toUpperCase();
+
+        if (cg.contains("SPARK")) {
             this.callGraph = SPARK$.MODULE$;
-        }else{
+        } else if (cg.contains("VTA")) {
+            this.callGraph = VTA$.MODULE$;
+        } else if (cg.contains("RTA")) {
+            this.callGraph = RTA$.MODULE$;
+        } else {
             this.callGraph = CHA$.MODULE$;
         }
     }
+
 }

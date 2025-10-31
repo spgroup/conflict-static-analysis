@@ -485,6 +485,8 @@ public class Main {
                 : new DFPIntraProcedural(classpath, definition, entrypoints);
 
         boolean depthMethodsVisited = Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
+        String cg = cmd.getOptionValue("cg", "SPARK");
+        analysis.setCallGraph(cg);
         analysis.setPrintDepthVisitedMethods(depthMethodsVisited);
         String type_analysis = interprocedural ? "Inter" : "Intra";
         stopwatch = Stopwatch.createStarted();
@@ -494,7 +496,7 @@ public class Main {
         saveExecutionTime("Configure Soot DFP " + type_analysis);
 
         stopwatch = Stopwatch.createStarted();
-
+        System.out.println("CallGraph: " + analysis.callGraph());
         analysis.buildDFP();
 
         conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
@@ -591,8 +593,9 @@ public class Main {
         definition.setRecursiveMode(options.hasOption("recursive"));
         DFPConfluenceAnalysis analysis = new DFPConfluenceAnalysis(classpath, this.definition, interprocedural, depthLimit, entrypoints);
         boolean depthMethodsVisited = Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
+        String cg = cmd.getOptionValue("cg", "SPARK");
+        analysis.execute(depthMethodsVisited, cg);
 
-        analysis.execute(false);
         System.out.println("Depth limit: " + analysis.getDepthLimit());
         conflicts.addAll(analysis.getConfluentConflicts(false)
                 .stream()
