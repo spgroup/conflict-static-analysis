@@ -15,6 +15,7 @@ class ConflictAnalyzer:
     
     def _print_statistics(self, df):
         total_conflicts = len(df)
+        total_scenarios = df[COL_SCENARIO_INDEX].nunique()
         same_depth_count = sum(df[COL_LEFT_LENGTH] == df[COL_RIGHT_LENGTH])
         same_class_count = sum(df[COL_SAME_CLASS])
         same_method_count = sum(df[COL_SAME_METHOD])        
@@ -23,9 +24,10 @@ class ConflictAnalyzer:
         diff_mean = df[COL_DIFF].mean()
         diff_median = df[COL_DIFF].median()
 
-        for deph_stat in range(DEFAULT_DEPTH, MAX_DEPTH + 1):
-            count = sum(df[COL_DEPTH] > deph_stat)
-            print(f"Conflicts affected when depth is {deph_stat}: {count} ({(count/total_conflicts*100):.2f}%)")
+        conflicts_per_scenario = df.groupby(COL_SCENARIO_INDEX).size()
+        for deph_stat in range(0, MAX_DEPTH + 1):
+            count = sum(conflicts_per_scenario == deph_stat)
+            print(f"Scenarios with conflicts {deph_stat}: {count} ({(count/total_scenarios*100):.2f}%)")
 
         print("\nConflict Analysis Results:")
         print(f"Total conflicts analyzed: {total_conflicts}")
@@ -138,7 +140,6 @@ class ConflictAnalyzer:
             filename=PLOT_DIFF_HIST
         )
 
-        # Conflicts per scenario/jar
         conflicts_per_scenario = df.groupby(COL_SCENARIO_INDEX).size()
         self.visualizer.plot_histogram(
             data=conflicts_per_scenario,
@@ -157,7 +158,6 @@ class ConflictAnalyzer:
             filename=PLOT_CONFLICTS_PER_JAR
         )
         
-        # Plot conflict depth lines
         self.visualizer.plot_conflict_depth_lines(
             df=df,
             title='Conflict Depths Behavior',

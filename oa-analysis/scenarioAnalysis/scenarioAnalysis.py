@@ -8,23 +8,23 @@ class ScenarioAnalyzer:
 
     def analyze(self, plot=True):
         conflict_df = pd.read_csv(CONFLICT_STATS_CSV)
-        scenario_df = pd.read_csv(SCENARIO_STATS_CSV)
+        scenarioJAR_df = pd.read_csv(SCENARIO_STATS_CSV)
 
-        self._print_statistics(conflict_df, scenario_df)
+        self._print_statistics(conflict_df, scenarioJAR_df)
         
         if plot:
-            self._create_plots(conflict_df, scenario_df)
+            self._create_plots(conflict_df, scenarioJAR_df)
 
-    def _print_statistics(self, conflict_df, scenario_df):
-        total_scenarios = len(scenario_df)
-        total_jars = scenario_df[COL_SCENARIO_JAR].nunique()
+    def _print_statistics(self, conflict_df, scenarioJAR_df):
+        total_scenarios = conflict_df[COL_SCENARIO_INDEX].nunique()
+        total_jars = scenarioJAR_df[COL_SCENARIO_JAR].nunique()
 
         print("\nScenario Analysis Results:")
         print(f"Total scenario JARs: {total_jars}")
         print(f"Total scenarios: {total_scenarios}")
         print("\nScenario Statistics:")
-        print(f"Average conflicts per scenario: {scenario_df[COL_NUM_CONFLICTS].mean():.2f}")
-        print(f"Average scenarios per JAR: {scenario_df[COL_NUM_SCENARIOS].mean():.2f}")
+        print(f"Average conflicts per JAR: {scenarioJAR_df[COL_NUM_CONFLICTS].mean():.2f}")
+        print(f"Average scenarios per JAR: {scenarioJAR_df[COL_NUM_SCENARIOS].mean():.2f}")
 
         scenario_stats = self._calculate_scenario_stats(conflict_df)
         self._print_threshold_stats(scenario_stats)
@@ -70,10 +70,10 @@ class ScenarioAnalyzer:
             print(f">{threshold}% same class: {class_pct:.1f}%")
             print(f">{threshold}% same method: {method_pct:.1f}%")
 
-    def _create_plots(self, conflict_df, scenario_df):
+    def _create_plots(self, conflict_df, scenarioJAR_df):
         # Plot scenarios per jar distribution
         self.visualizer.plot_histogram(
-            data=scenario_df[COL_NUM_SCENARIOS],
+            data=scenarioJAR_df[COL_NUM_SCENARIOS],
             bins=DEFAULT_HIST_BINS,
             title='Number of Scenarios per ScenarioJAR',
             xlabel='Number of Scenarios',
@@ -97,7 +97,7 @@ class ScenarioAnalyzer:
             )
 
         # Metrics per scenario
-        total_scenarios = len(scenario_df)
+        total_scenarios = conflict_df[COL_SCENARIO_INDEX].nunique()
         scenario_max_depth = conflict_df.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].max()
         scenario_min_depth = conflict_df.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].min()
 
