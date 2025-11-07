@@ -27,17 +27,12 @@ class ConflictAnalyzer:
         diff_mean = df[COL_DIFF].mean()
         diff_median = df[COL_DIFF].median()
 
-        conflicts_per_scenario = df.groupby(COL_SCENARIO_INDEX).size()
-        for deph_stat in range(0, MAX_DEPTH + 1):
-            count = sum(conflicts_per_scenario == deph_stat)
-            print(f"Scenarios with conflicts {deph_stat}: {count} ({(count/total_scenarios*100):.2f}%)")
-
         print("\nConflict Analysis Results:")
         print(f"Total conflicts analyzed: {total_conflicts}")
         print(f"Conflicts with same depth: {same_depth_count} ({same_depth_count/total_conflicts*100:.2f}%)")
         print(f"Conflicts in same class: {same_class_count} ({same_class_count/total_conflicts*100:.2f}%)")
         print(f"Conflicts in same method: {same_method_count} ({same_method_count/total_conflicts*100:.2f}%)")
-
+        
         print("\nDepth statistics:")
         print(f"  Mean depth: {depth_mean:.2f}")
         print(f"  Median depth: {depth_median:.2f}")
@@ -45,6 +40,23 @@ class ConflictAnalyzer:
         print("\nStacktrace diff statistics:")
         print(f"  Mean diff: {diff_mean:.2f}")
         print(f"  Median diff: {diff_median:.2f}")
+
+        print("\nConflicts per scenario distribution:")
+        conflicts_per_scenario = df.groupby(COL_SCENARIO_INDEX).size()
+        for num_conflicts in range(0, MAX_DEPTH + 1):
+            count = sum(conflicts_per_scenario == num_conflicts)
+            print(f"Scenarios with {num_conflicts} conflicts: {count} ({(count/total_scenarios*100):.2f}%)")
+        
+        print("\nConflict Depth Distribution:")
+
+        for depth in range(0, MAX_DEPTH + 1):
+            count = sum(df[COL_DEPTH] == depth)
+            print(f"Conflicts with depth {depth}: {count} ({(count/total_conflicts*100):.2f}%)")
+
+        print("\nConflicts diff Distribution:")
+        for diff in range(0, 10):
+            count = sum(df[COL_DIFF] == diff)
+            print(f"Conflicts with diff {diff}: {count} ({(count/total_conflicts*100):.2f}%)")
 
     def _get_conflict_type_distribution(self, df):
         col = pd.Series("", index=df.index)
