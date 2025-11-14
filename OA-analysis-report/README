@@ -1,0 +1,29 @@
+# OA Analysis Report
+
+Analysis tool for generating reports from Overriding Assignment (OA) analysis results.
+
+## Quick Start
+
+To generate a report with visualization:
+
+```bash
+python oaAnalysis.py out.json=analysisReport/depth20MergeDataset/out.json plot=true
+```
+
+## Files
+
+- `oaAnalysis.py` - Main analysis script
+- `constants.py` - Configuration constants
+- `visualization.py` - Report visualization utilities
+- `requirements.txt` - Python dependencies
+- `analysisReport/` - Analysis results organized by depth and configuration
+- `conflictAnalysis/` - Conflict-specific analysis
+- `scenarioAnalysis/` - Scenario-specific analysis
+
+## Dependencies
+
+Install requirements:
+
+```bash
+pip install -r requirements.txt
+```
