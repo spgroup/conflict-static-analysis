@@ -31,7 +31,8 @@ class Visualizer:
                 colors=sns.color_palette("husl", len(data['labels']))
         )
         plt.axis('equal')
-        plt.title(title)
+        plt.title(title, pad=20)
+        plt.subplots_adjust(top=0.85)
         plt.savefig(filename)
         plt.close()
 
