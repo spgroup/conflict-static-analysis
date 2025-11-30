@@ -60,13 +60,17 @@ class ConflictAnalyzer:
 
     def _get_conflict_type_distribution(self, df):
         col = pd.Series("", index=df.index)
-        same_class_path_one = (df[COL_SAME_CLASS]) & (df[COL_LEFT_LENGTH] == 1) & (df[COL_RIGHT_LENGTH] == 1)
-        same_class_path_larger_than_one = (df[COL_SAME_CLASS]) & (df[COL_LEFT_LENGTH] > 1) & (df[COL_RIGHT_LENGTH] > 1)
-        different_class_path_larger_than_one = (~df[COL_SAME_CLASS]) & (df[COL_LEFT_LENGTH] > 1) & (df[COL_RIGHT_LENGTH] > 1)
-
-        col[same_class_path_one] = "Same class, path size 1"
-        col[same_class_path_larger_than_one] = "Same class, path size larger than 1"
-        col[different_class_path_larger_than_one] = "Different class, path size larger than 1"
+        A1_same_depth_same_class_depth_equal_1 = (df[COL_SAME_CLASS]) & (df[COL_LEFT_LENGTH] ==  df[COL_RIGHT_LENGTH]) & (df[COL_DEPTH] == 1)
+        F2_same_depth_same_class_depth_larger_1 = (df[COL_SAME_CLASS]) & (df[COL_LEFT_LENGTH] ==  df[COL_RIGHT_LENGTH]) & (df[COL_DEPTH] > 1)
+        D3_same_depth_different_class_depth_large_1 = (~df[COL_SAME_CLASS]) & (df[COL_LEFT_LENGTH] ==  df[COL_RIGHT_LENGTH]) & (df[COL_DEPTH] > 1)
+        B2_C2_different_depth_different_class_depth_larger_1 = (~df[COL_SAME_CLASS]) & (df[COL_LEFT_LENGTH] !=  df[COL_RIGHT_LENGTH]) & (df[COL_DEPTH] > 1)
+        B1_different_depth_same_class_depth_larger_1 = (df[COL_SAME_CLASS]) & (df[COL_LEFT_LENGTH] !=  df[COL_RIGHT_LENGTH]) & (df[COL_DEPTH] > 1)
+        
+        col[A1_same_depth_same_class_depth_equal_1] = "A1: Same depth, same class, depth = 1"
+        col[F2_same_depth_same_class_depth_larger_1] = "F2: Same depth, same class, depth > 1"
+        col[D3_same_depth_different_class_depth_large_1] = "D3: Same depth, different class, depth > 1"
+        col[B2_C2_different_depth_different_class_depth_larger_1] = "B2/C2: Different depth, different class, depth > 1"
+        col[B1_different_depth_same_class_depth_larger_1] = "B1: Different depth, same class, depth > 1"
         col[(col == "")] = "Other cases"
         
         # Convert to value counts and calculate percentages for pie chart

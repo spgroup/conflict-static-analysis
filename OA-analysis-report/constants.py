@@ -19,7 +19,7 @@ COL_NUM_SCENARIOS = 'num_scenarios'
 # Plot filenames
 PLOT_DEPTH_HIST = 'conflicts_depth_hist.png'
 PLOT_DIFF_HIST = 'conflicts_diffs_hist.png'
-PLOT_TYPES_HIST = 'conflicts_types_hist.png'
+PLOT_TYPES_HIST = 'conflicts_types_pie.png'
 PLOT_DEPTH_LINES = 'conflicts_depth_lines.png'
 PLOT_CONFLICTS_PER_SCENARIO = 'conflicts_per_scenario.png'
 PLOT_CONFLICTS_PER_JAR = 'conflicts_per_jar.png'
