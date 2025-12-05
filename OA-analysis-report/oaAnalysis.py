@@ -15,6 +15,8 @@ class ConflictProcessor:
             'r_lengths': defaultdict(list),
             'same_class': defaultdict(list),
             'same_method': defaultdict(list),
+            'start_same_class': defaultdict(list),
+            'start_same_method': defaultdict(list),
             'diffs': defaultdict(list),
             'depth': defaultdict(list),
             'jar_map': defaultdict(set),
@@ -51,15 +53,23 @@ class ConflictProcessor:
 
         same_class = l_class == r_class and l_class is not None
         same_method = same_class and l_method == r_method and l_method is not None
+        
+        l_start_class = l_stack[0].get('class') if l_stack else None
+        r_start_class = r_stack[0].get('class') if r_stack else None
+        same_start_class = l_start_class == r_start_class and l_start_class is not None
+        
+        l_start_method = l_stack[0].get('method') if l_stack else None
+        r_start_method = r_stack[0].get('method') if r_stack else None
+        same_start_method = l_start_method == r_start_method and l_start_method is not None
 
         if l_len == r_len:
             self.conflict_data['same_depth_count'] += 1
 
         self._store_metrics(l_len, r_len, diff, max_len, same_class, 
-                          same_method, scenario_jar, start_idx)
+                          same_method, same_start_class, same_start_method, scenario_jar, start_idx)
 
     def _store_metrics(self, l_len, r_len, diff, max_len, same_class, 
-                      same_method, scenario_jar, start_idx):
+                      same_method, same_start_class, same_start_method, scenario_jar, start_idx):
         data = self.conflict_data
         data['l_lengths'][start_idx].append(l_len)
         data['r_lengths'][start_idx].append(r_len)
@@ -67,10 +77,12 @@ class ConflictProcessor:
         data['depth'][start_idx].append(max_len)
         data['same_class'][start_idx].append(same_class)
         data['same_method'][start_idx].append(same_method)
+        data['start_same_class'][start_idx].append(same_start_class)
+        data['start_same_method'][start_idx].append(same_start_method)
 
         data['rows'].append([
             data['conflict_idx'], l_len, r_len, max_len, 
-            diff, same_class, same_method, scenario_jar, start_idx
+            diff, same_class, same_method, same_start_class, same_start_method, scenario_jar, start_idx
         ])
         data['conflict_idx'] += 1
 
@@ -81,7 +93,7 @@ class ConflictProcessor:
             writer.writerow([
                 COL_CONFLICT_INDEX, COL_LEFT_LENGTH, COL_RIGHT_LENGTH,
                 COL_DEPTH, COL_DIFF, COL_SAME_CLASS, COL_SAME_METHOD, 
-                COL_SCENARIO_JAR, COL_SCENARIO_INDEX
+                COL_SAME_START_CLASS, COL_SAME_START_METHOD, COL_SCENARIO_JAR, COL_SCENARIO_INDEX
             ])
             writer.writerows(self.conflict_data['rows'])
 
