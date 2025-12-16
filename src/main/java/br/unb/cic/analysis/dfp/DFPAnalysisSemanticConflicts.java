@@ -3,19 +3,18 @@ package br.unb.cic.analysis.dfp;
 import br.ufpe.cin.soot.analysis.jimple.JDFP;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.StatementsUtil;
-import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.soot.graph.*;
 import br.unb.cic.soot.svfa.*;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
 import scala.collection.mutable.ListBuffer;
+import soot.Scene;
 import soot.SootMethod;
 import soot.Transform;
 import soot.Unit;
 
 import java.io.File;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 /**
@@ -74,10 +73,10 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
 
     @Override
     public Tuple2<String, Transform> createSceneTransformDFP() {
-
         return new Tuple2<>("wjtp", new Transform("wjtp.dfp", new soot.SceneTransformer() {
             @Override
             protected void internalTransform(String phaseName, Map<String, String> options) {
+                System.out.println("countEdges: " + Scene.v().getCallGraph().size());
                 List<SootMethod> methods = JavaConverters.seqAsJavaList(getAnalysisEntryPoints());
                 methods.forEach(sootMethod -> traverseDFP(sootMethod, new ListBuffer<>(), false));
             }
@@ -122,21 +121,9 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
 
         this.statementsUtils.getDefinition().loadSourceStatements();
         this.statementsUtils.getDefinition().loadSinkStatements();
-//        scala.collection.immutable.List<SootMethod> entrypoints0 = JavaConverters.asScalaBuffer(this.statementsUtils.getDefinition().getSourceStatements()
-//                .stream()
-//                .map(Statement::getSootMethod)
-//                .collect(Collectors.toList())).toList();
-//
-        List<Statement> allStatements = this.statementsUtils.getAllSourceAndSinkStatements();
-        scala.collection.immutable.List<SootMethod> entrypoints = JavaConverters.asScalaBuffer(allStatements
-                .stream()
-                .map(Statement::getSootMethod)
-                .collect(Collectors.toList())).toList();
 
-        //scala.collection.immutable.List<SootMethod> entrypoints2  = this.statementsUtils.getEntryPoints();
-
-        scala.collection.immutable.List<SootMethod> entrypoints3 = this.statementsUtils.getCallgraphEntryPoints();
-        return entrypoints3;
+        scala.collection.immutable.List<SootMethod> entrypoints = this.statementsUtils.getCallgraphEntryPoints();
+        return entrypoints;
 
     }
 
@@ -145,19 +132,7 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
         this.statementsUtils.getDefinition().loadSourceStatements();
         this.statementsUtils.getDefinition().loadSinkStatements();
 
-//        scala.collection.immutable.List<SootMethod> entrypoints0 = JavaConverters.asScalaBuffer(this.statementsUtils.getDefinition().getSourceStatements()
-//                .stream()
-//                .map(Statement::getSootMethod)
-//                .collect(Collectors.toList())).toList();
-//
-        List<Statement> allStatements = this.statementsUtils.getAllSourceAndSinkStatements();
-        scala.collection.immutable.List<SootMethod> entrypoints = JavaConverters.asScalaBuffer(allStatements
-                .stream()
-                .map(Statement::getSootMethod)
-                .collect(Collectors.toList())).toList();
-
-        scala.collection.immutable.List<SootMethod> entrypoints2 = this.statementsUtils.getEntryPoints();
-        // scala.collection.immutable.List<SootMethod> entrypoints3 = this.statementsUtils.getCallgraphEntryPoints();
+        scala.collection.immutable.List<SootMethod> entrypoints = this.statementsUtils.getEntryPoints();
         return entrypoints;
     }
 
