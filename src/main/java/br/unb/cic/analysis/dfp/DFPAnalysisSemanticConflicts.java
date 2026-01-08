@@ -184,32 +184,71 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
         this.depthLimit = depthLimit;
     }
 
-    public List<String> reportDFConflicts(){
-        Set<List<StatementNode>>  conflicts = findSourceSinkPaths();
-        List<String> conflicts_report = new ArrayList<>();
-        for (List<StatementNode> conflict: conflicts){
-            try{
+    public List<String> reportDFConflicts() {
+        Set<List<StatementNode>> conflicts = findSourceSinkPaths();
+        List<String> report = new ArrayList<>();
 
-                StatementNode p1 = conflict.get(0);
-                StatementNode p2 = conflict.get(conflict.size()-1);
-
-                System.out.println("DF interference in "+ p1.getPathVisitedMethods().head().getMethod().method());
-                System.out.println("Data flows from execution of line "+p1.getPathVisitedMethods().head().line()+" to "+p2.getPathVisitedMethods().head().line()+", defined in "+p1.unit()+" and propagated in "+p2.unit());
-                System.out.println("Caused by line "+p1.getPathVisitedMethods().head().line()+ " flow: "+p1.pathVisitedMethodsToString());
-                System.out.println("Caused by line "+p2.getPathVisitedMethods().head().line()+ " flow: "+p2.pathVisitedMethodsToString());
-
-                conflicts_report.add("DF interference in "+ p1.getPathVisitedMethods().head().getMethod().method());
-                conflicts_report.add("Data flows from execution of line "+p1.getPathVisitedMethods().head().line()+" to "+p2.getPathVisitedMethods().head().line()+", defined in "+p1.unit()+" and propagated in "+p2.unit());
-                conflicts_report.add("Caused by line "+p1.getPathVisitedMethods().head().line()+ " flow: "+p1.pathVisitedMethodsToString());
-                conflicts_report.add("Caused by line "+p2.getPathVisitedMethods().head().line()+ " flow: "+p2.pathVisitedMethodsToString()+"\n");
-            }catch (Exception e){
-                System.out.println("Empty list for reporting data flow! Error: "+ e.getMessage());
-            }
+        for (List<StatementNode> conflict : conflicts) {
+            buildConflictReport(conflict).ifPresent(report::addAll);
         }
 
-        return conflicts_report;
+        if (!report.isEmpty()) {
+            System.out.println(report.get(0));
+        }
+        return report;
     }
 
+    private Optional<List<String>> buildConflictReport(List<StatementNode> conflict) {
+
+        if (!isValidConflict(conflict)) {
+            return Optional.empty();
+        }
+
+        StatementNode src = conflict.get(0);
+        StatementNode sink = conflict.get(conflict.size() - 1);
+
+        VisitedMethods srcStep = src.getPathVisitedMethods().head();
+        VisitedMethods sinkStep = sink.getPathVisitedMethods().head();
+
+
+        int lineSrc = srcStep.line();
+        int lineSink = sinkStep.line();
+
+
+        return Optional.of(
+                Collections.singletonList(
+                        String.join("\n",
+                                "DF interference in " + srcStep.getMethod().method(),
+                                "Data flows from execution of line " + lineSrc + " to " + lineSink +
+                                        ", defined in " + src.unit() + " and propagated in " + sink.unit(),
+                                "Caused by line " + lineSrc + " flow: " + src.pathVisitedMethodsToString(),
+                                "Caused by line " + lineSink + " flow: " + sink.pathVisitedMethodsToString()
+                        )
+                )
+        );
+
+    }
+
+    private boolean isValidConflict(List<StatementNode> conflict) {
+
+        if (conflict == null || conflict.isEmpty()) {
+            return false;
+        }
+
+        StatementNode src = conflict.get(0);
+        StatementNode sink = conflict.get(conflict.size() - 1);
+
+        if (src == null || sink == null) {
+            return false;
+        }
+
+        return hasValidPath(src) && hasValidPath(sink);
+    }
+
+    private boolean hasValidPath(StatementNode node) {
+        return node.getPathVisitedMethods() != null &&
+                !node.getPathVisitedMethods().isEmpty();
+    }
 
     @Override
     public CG callGraph() {

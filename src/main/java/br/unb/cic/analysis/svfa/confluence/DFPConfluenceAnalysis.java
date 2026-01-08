@@ -5,6 +5,7 @@ import br.unb.cic.analysis.Main;
 import br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts;
 import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.soot.graph.StatementNode;
+import br.unb.cic.soot.graph.VisitedMethods;
 import com.google.common.base.Stopwatch;
 import soot.G;
 import soot.Unit;
@@ -180,57 +181,122 @@ public class DFPConfluenceAnalysis {
         setGraphSize(sourceBaseAnalysis, sinkBaseAnalysis);
     }
 
+
     public List<String> reportConflictsConfluence() {
-        List<String> conflicts_report = new ArrayList<>();
-        List<Integer> left_lines = new ArrayList<>();
-        List<Integer> right_lines = new ArrayList<>();
-        List<Integer> cf_lines = new ArrayList<>();
+        List<String> report = new ArrayList<>();
 
         for (ConfluenceConflict conflict : this.confluentFlows) {
-            try {
+            buildConfluenceConflictReport(conflict).ifPresent(report::addAll);
 
-                StatementNode df1 = conflict.getSourceNodePath().get(0);
-                StatementNode df2 = conflict.getSinkNodePath().get(0);
-
-                StatementNode confluence = conflict.getSinkNodePath().get(conflict.getSinkNodePath().size() - 1);
-
-//                 Integer left_line = df1.getPathVisitedMethods().head().line();
-//                 Integer right_line = df2.getPathVisitedMethods().head().line();
-//                 Integer cf_line = confluence.getPathVisitedMethods().head().line();
-
-                Integer left_line = df1.line();
-                Integer right_line = df2.line();
-                Integer cf_line = confluence.line();
-
-                Boolean contains_lines = left_lines.contains(left_line)
-                        && right_lines.contains(right_line)
-                        && cf_lines.contains(cf_line);
-
-                if (!contains_lines) {
-                    System.out.println("Confluence interference in " + df1.getPathVisitedMethods().head().getMethod().method());
-                    System.out.println("Confluence flows from execution of lines " + left_line + " and " + right_line +
-                            " to line " + confluence.getPathVisitedMethods().head().line() + ", defined in " + df1.value().sootUnit() + " and " + df2.value().sootUnit() + " and used in " + confluence.getPathVisitedMethods().head().getUnit());
-                    System.out.println("Caused by line " + left_line + " flow: " + df1.value());
-                    System.out.println("Caused by line " + right_line + " flow: " + df2.value());
-                    System.out.println("Caused by line " + cf_line + " flow: " + confluence.value());
-
-                    conflicts_report.add("Confluence interference in " + df1.getPathVisitedMethods().head().getMethod().method());
-                    conflicts_report.add("Confluence flows from execution of lines " + left_line + " and " + right_line +
-                            " to line " + confluence.getPathVisitedMethods().head().line() + ", defined in " + df1.value().sootUnit() + " and " + df2.value().sootUnit() + " and used in " + confluence.getPathVisitedMethods().head().getUnit());
-                    conflicts_report.add("Caused by line " + left_line + " flow: " + df1.value());
-                    conflicts_report.add("Caused by line " + right_line + " flow: " + df2.value());
-                    conflicts_report.add("Caused by line " + cf_line + " flow: " + confluence.value() + "\n");
-
-                    left_lines.add(left_line);
-                    right_lines.add(right_line);
-                    cf_lines.add(cf_line);
-                }
-
-            } catch (Exception e) {
-                System.err.println("Error accessing visited methods: " + e.getMessage());
-            }
         }
-        return conflicts_report;
+        if (!report.isEmpty()) {
+            System.out.println(report.get(0));
+        }
+
+        return report;
+    }
+
+    private Optional<List<String>> buildConfluenceConflictReport(ConfluenceConflict conflict) {
+
+        if (!isValidConfluenceConflict(conflict)) {
+            return Optional.empty();
+        }
+
+        StatementNode df1 = conflict.getSourceNodePath().get(0);
+        StatementNode df2 = conflict.getSinkNodePath().get(0);
+
+        List<StatementNode> sinkPath = conflict.getSinkNodePath();
+        StatementNode confluence = sinkPath.get(sinkPath.size() - 1);
+
+        int leftLine = df1.line();
+        int rightLine = df2.line();
+        int cfLine = confluence.line();
+
+        Optional<VisitedMethods> df1VM = safeHead(df1);
+        Optional<VisitedMethods> df2VM = safeHead(df2);
+        Optional<VisitedMethods> cfVM = safeHead(confluence);
+
+        // Método (igual ao srcStep.getMethod().method())
+        String methodName = df1VM.isPresent()
+                ? String.valueOf(df1VM.get().getMethod().method())
+                : "<unknown method>";
+
+        // Units (equivalente a src.unit() / sink.unit())
+        String leftUnit = df1.value().sootUnit().toString();
+        String rightUnit = df2.value().sootUnit().toString();
+        String confluenceUnit = cfVM.isPresent()
+                ? cfVM.get().getUnit().toString()
+                : confluence.value().toString();
+
+        // Path (equivalente a pathVisitedMethodsToString())
+        String leftPath = df1VM.isPresent()
+                ? df1.pathVisitedMethodsToString()
+                : "<no path>";
+
+        String rightPath = df2VM.isPresent()
+                ? df2.pathVisitedMethodsToString()
+                : "<no path>";
+
+        return Optional.of(
+                Collections.singletonList(
+                        String.join("\n",
+                                "Confluence interference in " + methodName,
+
+                                "Data flows from execution of lines " +
+                                        leftLine + " and " + rightLine +
+                                        " to " + cfLine +
+                                        ", defined in " + leftUnit +
+                                        " and " + rightUnit +
+                                        " and propagated in " + confluenceUnit,
+
+                                "Caused by line " + leftLine +
+                                        " flow: " + leftPath,
+
+                                "Caused by line " + rightLine +
+                                        " flow: " + rightPath
+                        )
+                )
+        );
+    }
+
+    private boolean isValidConfluenceConflict(ConfluenceConflict conflict) {
+
+        if (conflict == null) {
+            return false;
+        }
+
+        if (conflict.getSourceNodePath() == null ||
+                conflict.getSinkNodePath() == null) {
+            return false;
+        }
+
+        if (conflict.getSourceNodePath().isEmpty() ||
+                conflict.getSinkNodePath().isEmpty()) {
+            return false;
+        }
+
+        StatementNode df1 = conflict.getSourceNodePath().get(0);
+        StatementNode df2 = conflict.getSinkNodePath().get(0);
+
+        return hasValidPath(df1) && hasValidPath(df2);
+    }
+
+    private boolean hasValidPath(StatementNode node) {
+        return node.getPathVisitedMethods() != null &&
+                !node.getPathVisitedMethods().isEmpty();
+    }
+
+    private Optional<VisitedMethods> safeHead(StatementNode node) {
+        if (node == null) {
+            return Optional.empty();
+        }
+
+        if (node.getPathVisitedMethods() == null ||
+                node.getPathVisitedMethods().isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(node.getPathVisitedMethods().head());
     }
 
     /**

@@ -213,7 +213,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         CallGraph callGraph = Scene.v().getCallGraph();
         int countEdges = SootWrapper.countEdges(callGraph);
         System.out.println("countEdges: " + countEdges);
-
+        //printCallGraph(callGraph);
         // List<SootMethod> methods = Scene.v().getEntryPoints();
         scala.collection.immutable.List<SootMethod> scalaList = this.statementsUtils.getEntryPoints();
         List<SootMethod> methods = new ArrayList<>(JavaConverters.seqAsJavaList(scalaList));
