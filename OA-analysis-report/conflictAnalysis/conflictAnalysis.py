@@ -127,96 +127,199 @@ class ConflictAnalyzer:
         }
 
     def _create_plots(self, df):
+        self._create_all_plots(df)
+
+    def _create_all_plots(self, df, compare_df=None, label1='Data 1', label2='Data 2', output_dir=None):
+        """Generic method to create all plots in single or comparison mode"""
+        if output_dir is None:
+            output_dir = self.output_dir
+        
+        # Depth loss bar charts
+        self._plot_depth_loss(df, output_dir, compare_df, label1, label2)
+        
+        # Histograms
+        self._plot_histograms(df, output_dir, compare_df, label1, label2)
+        
+        # Line plots
+        self._plot_depth_lines(df, output_dir, compare_df, label1, label2)
+        
+        # Pie charts (comparison or single)
+        self._plot_pie_charts(df, output_dir, compare_df, label1, label2)
+
+    def _plot_depth_loss(self, df, output_dir, compare_df=None, label1='Data 1', label2='Data 2'):
+        """Plot depth loss - bar chart (single or comparison)"""
         total_conflicts = len(df)
         depths = list(range(DEFAULT_DEPTH, MAX_DEPTH + 1))
         loss_percentages = [(sum(df[COL_DEPTH] > depth) / total_conflicts * 100) for depth in depths]
         
-        self.visualizer.plot_bar_chart(
-            x=depths,
-            y=loss_percentages,
-            title='Percentage of Conflicts Lost per Depth',
-            xlabel='Depth',
-            ylabel='Conflicts Lost (%)',
-            filename=os.path.join(self.output_dir, PLOT_DEPTH_LOSS)
-        )
+        if compare_df is not None:
+            total_conflicts2 = len(compare_df)
+            loss_percentages2 = [(sum(compare_df[COL_DEPTH] > depth) / total_conflicts2 * 100) for depth in depths]
+            
+            self.visualizer.plot_bar_chart_compare(
+                x=depths,
+                y1=loss_percentages,
+                y2=loss_percentages2,
+                label1=label1,
+                label2=label2,
+                title='Percentage of Conflicts Lost per Depth',
+                xlabel='Depth',
+                ylabel='Conflicts Lost (%)',
+                filename=os.path.join(output_dir, 'compare_' + PLOT_DEPTH_LOSS)
+            )
+        else:
+            self.visualizer.plot_bar_chart(
+                x=depths,
+                y=loss_percentages,
+                title='Percentage of Conflicts Lost per Depth',
+                xlabel='Depth',
+                ylabel='Conflicts Lost (%)',
+                filename=os.path.join(output_dir, PLOT_DEPTH_LOSS)
+            )
 
-        self.visualizer.plot_histogram(
-            data=df[COL_DEPTH],
-            bins=30,
-            title='Conflicts Histogram of Depths',
-            xlabel='Depths',
-            filename=os.path.join(self.output_dir, PLOT_DEPTH_HIST)
-        )
-
-        same_class_df = df[df[COL_SAME_CLASS] == False]
-        self.visualizer.plot_histogram(
-            data=same_class_df[COL_DEPTH],
-            bins=DEFAULT_HIST_BINS,
-            title='Different Class Conflicts Histogram of Depths',
-            xlabel='Depths',
-            filename=os.path.join(self.output_dir, PLOT_DIFFERENT_CLASS_DEPTH_HIST)
-        )
-
-        same_method_df = df[df[COL_SAME_METHOD] == False]
-        self.visualizer.plot_histogram(
-            data=same_method_df[COL_DEPTH],
-            bins=DEFAULT_HIST_BINS,
-            title='Different Method Conflicts Histogram of Depths',
-            xlabel='Depths',
-            filename=os.path.join(self.output_dir, PLOT_DIFFERENT_METHOD_DEPTH_HIST)
-        )
-
-        self.visualizer.plot_pie_chart(
-            data=self._get_conflict_type_distribution(df),
-            title='Distribution of Conflict Types',
-            filename=os.path.join(self.output_dir, PLOT_TYPES_HIST)
-        )
-
-        self.visualizer.plot_histogram(
-            data=df[COL_DIFF],
-            bins=DEFAULT_HIST_BINS,
-            title='Conflicts Histogram of Diffs (Stacktrace)',
-            xlabel='Absolute difference (L-R)',
-            filename=os.path.join(self.output_dir, PLOT_DIFF_HIST)
-        )
-
-        conflicts_per_scenario = df.groupby(COL_SCENARIO_INDEX).size()
-        self.visualizer.plot_histogram(
-            data=conflicts_per_scenario,
-            bins=100,
-            title='Number of Conflicts per Scenario',
-            xlabel='Number of Conflicts',
-            filename=os.path.join(self.output_dir, PLOT_CONFLICTS_PER_SCENARIO)
-        )
-
-        conflicts_per_jar = df.groupby(COL_SCENARIO_JAR).size()
-        self.visualizer.plot_histogram(
-            data=conflicts_per_jar,
-            bins=100,
-            title='Number of Conflicts per ScenarioJAR',
-            xlabel='Number of Conflicts',
-            filename=os.path.join(self.output_dir, PLOT_CONFLICTS_PER_JAR)
+    def _plot_histograms(self, df, output_dir, compare_df=None, label1='Data 1', label2='Data 2'):
+        """Plot all histograms - depth, diff, etc."""
+        # Depth distribution (discrete values - use side-by-side bars)
+        self._plot_distribution_bars(
+            df=df, compare_df=compare_df, col=COL_DEPTH, 
+            max_val=MAX_DEPTH, title='Conflict Depth Distribution', 
+            xlabel='Depth', filename=PLOT_DEPTH_HIST,
+            output_dir=output_dir, label1=label1, label2=label2
         )
         
-        self.visualizer.plot_conflict_depth_lines(
-            df=df,
-            title='Conflict Depths Behavior',
-            filename=os.path.join(self.output_dir, PLOT_DEPTH_LINES)
+        # Diff distribution (discrete values up to 10 - use side-by-side bars)
+        self._plot_distribution_bars(
+            df=df, compare_df=compare_df, col=COL_DIFF,
+            max_val=10, title='Conflicts Diff Distribution',
+            xlabel='Absolute difference (L-R)', filename=PLOT_DIFF_HIST,
+            output_dir=output_dir, label1=label1, label2=label2
         )
+        
+        # Filtered histograms (only in single mode)
+        if compare_df is None:
+            same_class_df = df[df[COL_SAME_CLASS] == False]
+            self.visualizer.plot_histogram(
+                data=same_class_df[COL_DEPTH],
+                bins=30,
+                title='Different Class Conflicts Histogram of Depths',
+                xlabel='Depths',
+                filename=os.path.join(output_dir, PLOT_DIFFERENT_CLASS_DEPTH_HIST)
+            )
 
-        same_class_data = self._get_boolean_pie_data(df, COL_SAME_CLASS, true_label='Same class', false_label='Different class')
-        self.visualizer.plot_pie_chart(
-            data=same_class_data,
-            title='Proportion of Conflicts in Same Class',
-            filename=os.path.join(self.output_dir, PLOT_SAME_CLASS_PIE)
-        )
+            same_method_df = df[df[COL_SAME_METHOD] == False]
+            self.visualizer.plot_histogram(
+                data=same_method_df[COL_DEPTH],
+                bins=30,
+                title='Different Method Conflicts Histogram of Depths',
+                xlabel='Depths',
+                filename=os.path.join(output_dir, PLOT_DIFFERENT_METHOD_DEPTH_HIST)
+            )
 
-        same_method_data = self._get_boolean_pie_data(df, COL_SAME_METHOD, true_label='Same method', false_label='Different method')
-        self.visualizer.plot_pie_chart(
-            data=same_method_data,
-            title='Proportion of Conflicts in Same Method',
-            filename=os.path.join(self.output_dir, PLOT_SAME_METHOD_PIE)
-        )
+            # Conflicts per scenario (discrete values - use side-by-side bars if comparing)
+            conflicts_per_scenario = df.groupby(COL_SCENARIO_INDEX).size()
+            self.visualizer.plot_histogram(
+                data=conflicts_per_scenario,
+                bins=100,
+                title='Number of Conflicts per Scenario',
+                xlabel='Number of Conflicts',
+                filename=os.path.join(output_dir, PLOT_CONFLICTS_PER_SCENARIO)
+            )
+
+            conflicts_per_jar = df.groupby(COL_SCENARIO_JAR).size()
+            self.visualizer.plot_histogram(
+                data=conflicts_per_jar,
+                bins=100,
+                title='Number of Conflicts per ScenarioJAR',
+                xlabel='Number of Conflicts',
+                filename=os.path.join(output_dir, PLOT_CONFLICTS_PER_JAR)
+            )
+
+    def _plot_distribution_bars(self, df, col, max_val, title, xlabel, filename, output_dir, 
+                                compare_df=None, label1='Data 1', label2='Data 2'):
+        """Plot discrete distribution as side-by-side bars for comparison or single bar chart"""
+        x_vals = list(range(0, max_val + 1))
+        counts1 = [sum(df[col] == val) for val in x_vals]
+        total1 = len(df)
+        percentages1 = [(count / total1 * 100) if total1 > 0 else 0 for count in counts1]
+        
+        if compare_df is not None:
+            counts2 = [sum(compare_df[col] == val) for val in x_vals]
+            total2 = len(compare_df)
+            percentages2 = [(count / total2 * 100) if total2 > 0 else 0 for count in counts2]
+            
+            self.visualizer.plot_bar_chart_compare(
+                x=x_vals,
+                y1=percentages1,
+                y2=percentages2,
+                label1=label1,
+                label2=label2,
+                title=title,
+                xlabel=xlabel,
+                ylabel='Percentage (%)',
+                filename=os.path.join(output_dir, 'compare_' + filename)
+            )
+        else:
+            self.visualizer.plot_bar_chart(
+                x=x_vals,
+                y=percentages1,
+                title=title,
+                xlabel=xlabel,
+                ylabel='Percentage (%)',
+                filename=os.path.join(output_dir, filename)
+            )
+
+    def _plot_depth_lines(self, df, output_dir, compare_df=None, label1='Data 1', label2='Data 2'):
+        """Plot conflict depth lines"""
+        if compare_df is not None:
+            self.visualizer.plot_conflict_depth_lines_compare(
+                df1=df,
+                df2=compare_df,
+                title='Conflict Depths Behavior',
+                label1=label1,
+                label2=label2,
+                filename=os.path.join(output_dir, 'compare_' + PLOT_DEPTH_LINES)
+            )
+        else:
+            self.visualizer.plot_conflict_depth_lines(
+                df=df,
+                title='Conflict Depths Behavior',
+                filename=os.path.join(output_dir, PLOT_DEPTH_LINES)
+            )
+
+    def _plot_pie_charts(self, df, output_dir, compare_df=None, label1='Data 1', label2='Data 2'):
+        """Plot pie charts - conflict types and boolean data"""
+        # Conflict type distribution
+        if compare_df is not None:
+            data1 = self._get_conflict_type_distribution(df)
+            data2 = self._get_conflict_type_distribution(compare_df)
+            self.visualizer.plot_pie_chart_compare(
+                data1=data1,
+                data2=data2,
+                title1=f'{label1} - Conflict Types',
+                title2=f'{label2} - Conflict Types',
+                filename=os.path.join(output_dir, 'compare_' + PLOT_TYPES_HIST)
+            )
+            self._create_compare_pie_charts(df, compare_df, label1, label2, output_dir)
+        else:
+            self.visualizer.plot_pie_chart(
+                data=self._get_conflict_type_distribution(df),
+                title='Distribution of Conflict Types',
+                filename=os.path.join(output_dir, PLOT_TYPES_HIST)
+            )
+            
+            same_class_data = self._get_boolean_pie_data(df, COL_SAME_CLASS, true_label='Same class', false_label='Different class')
+            self.visualizer.plot_pie_chart(
+                data=same_class_data,
+                title='Proportion of Conflicts in Same Class',
+                filename=os.path.join(output_dir, PLOT_SAME_CLASS_PIE)
+            )
+
+            same_method_data = self._get_boolean_pie_data(df, COL_SAME_METHOD, true_label='Same method', false_label='Different method')
+            self.visualizer.plot_pie_chart(
+                data=same_method_data,
+                title='Proportion of Conflicts in Same Method',
+                filename=os.path.join(output_dir, PLOT_SAME_METHOD_PIE)
+            )
 
     def analyze_compare(self, plot=True, output_dir='.', output_dir2='.'):
         """Analyze and compare two JSON file results"""
@@ -239,26 +342,7 @@ class ConflictAnalyzer:
 
     def _create_compare_plots(self, df1, df2, label1, label2, output_dir):
         """Create comparison plots for two datasets"""
-        total_conflicts1 = len(df1)
-        total_conflicts2 = len(df2)
-        depths = list(range(DEFAULT_DEPTH, MAX_DEPTH + 1))
-        loss_percentages1 = [(sum(df1[COL_DEPTH] > depth) / total_conflicts1 * 100) for depth in depths]
-        loss_percentages2 = [(sum(df2[COL_DEPTH] > depth) / total_conflicts2 * 100) for depth in depths]
-        
-        self.visualizer.plot_bar_chart_compare(
-            x=depths,
-            y1=loss_percentages1,
-            y2=loss_percentages2,
-            label1=label1,
-            label2=label2,
-            title='Percentage of Conflicts Lost per Depth (Comparison)',
-            xlabel='Depth',
-            ylabel='Conflicts Lost (%)',
-            filename=os.path.join(output_dir, 'compare_' + PLOT_DEPTH_LOSS)
-        )
-
-        # Pie charts comparison
-        self._create_compare_pie_charts(df1, df2, label1, label2, output_dir)
+        self._create_all_plots(df1, compare_df=df2, label1=label1, label2=label2, output_dir=output_dir)
 
     def _create_compare_pie_charts(self, df1, df2, label1, label2, output_dir):
         """Create side-by-side pie chart comparisons"""

@@ -21,6 +21,24 @@ class Visualizer:
         plt.savefig(filename)
         plt.close()
 
+    def plot_histogram_compare(self, data1, data2, bins, title, xlabel, label1, label2, filename):
+        """Plot two histograms side by side for comparison"""
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
+        
+        ax1.hist(data1, bins=bins, color='steelblue', alpha=0.7, edgecolor='black')
+        ax1.set_xlabel(xlabel)
+        ax1.set_ylabel('Frequency')
+        ax1.set_title(f'{title} - {label1}')
+        
+        ax2.hist(data2, bins=bins, color='coral', alpha=0.7, edgecolor='black')
+        ax2.set_xlabel(xlabel)
+        ax2.set_ylabel('Frequency')
+        ax2.set_title(f'{title} - {label2}')
+        
+        plt.tight_layout()
+        plt.savefig(filename)
+        plt.close()
+
     def plot_pie_chart(self, data, title, filename):
         plt.figure(figsize=(12, 6))
 
@@ -67,6 +85,80 @@ class Visualizer:
         plt.savefig(filename)
         plt.close()
 
+    def plot_scenario_metric_compare(self, df1, df2, metric_col, agg_func, title, label1, label2, filename):
+        """Plot scenario metrics as side-by-side bars with bucketed ranges"""
+        fig, ax = plt.subplots(figsize=(14, 6))
+        
+        stats1 = df1.groupby('scenario_index')[metric_col].agg(agg_func)
+        stats2 = df2.groupby('scenario_index')[metric_col].agg(agg_func)
+        
+        # Create buckets based on data range
+        max_val = max(stats1.max(), stats2.max())
+        buckets = self._create_buckets(max_val)
+        bucket_labels = self._get_bucket_labels(buckets)
+        
+        # Count frequencies in each bucket
+        counts1 = self._count_in_buckets(stats1.values, buckets)
+        counts2 = self._count_in_buckets(stats2.values, buckets)
+        
+        # Create x positions for bars
+        x_pos = np.arange(len(bucket_labels))
+        width = 0.35
+        
+        ax.bar(x_pos - width/2, counts1, width, label=label1, color='steelblue', alpha=0.8)
+        ax.bar(x_pos + width/2, counts2, width, label=label2, color='coral', alpha=0.8)
+        
+        ax.set_title(title)
+        ax.set_xlabel(metric_col)
+        ax.set_ylabel('Frequency')
+        ax.set_xticks(x_pos)
+        ax.set_xticklabels(bucket_labels, rotation=45, ha='right')
+        ax.legend()
+        ax.grid(True, axis='y', linestyle='--', alpha=0.7)
+        
+        plt.tight_layout()
+        plt.savefig(filename)
+        plt.close()
+
+    def _create_buckets(self, max_val):
+        """Create intelligent buckets based on max value"""
+        if max_val <= 5:
+            return [0, 1, 2, 3, 4, 5, float('inf')]
+        elif max_val <= 10:
+            return [0, 1, 3, 5, 8, 10, float('inf')]
+        elif max_val <= 20:
+            return [0, 2, 5, 10, 15, 20, float('inf')]
+        elif max_val <= 50:
+            return [0, 5, 10, 20, 30, 50, float('inf')]
+        else:
+            return [0, 10, 20, 50, 100, 200, float('inf')]
+
+    def _get_bucket_labels(self, buckets):
+        """Generate readable labels for buckets"""
+        labels = []
+        for i in range(len(buckets) - 1):
+            start = int(buckets[i])
+            end = int(buckets[i + 1]) if buckets[i + 1] != float('inf') else None
+            
+            if end is None:
+                labels.append(f'>{start}')
+            elif start == 0:
+                labels.append(f'0-{end}')
+            else:
+                labels.append(f'{start}-{end}')
+        return labels
+
+    def _count_in_buckets(self, values, buckets):
+        """Count values that fall into each bucket"""
+        counts = []
+        for i in range(len(buckets) - 1):
+            if buckets[i + 1] == float('inf'):
+                count = sum(values > buckets[i])
+            else:
+                count = sum((values > buckets[i]) & (values <= buckets[i + 1]))
+            counts.append(count)
+        return counts
+
     def plot_jar_metrics(self, df, title, filename):
         plt.figure(figsize=(10, 6))
         df.plot(kind='bar')
@@ -95,6 +187,26 @@ class Visualizer:
         plt.savefig(filename)
         plt.close()
 
+    def plot_conflict_depth_lines_compare(self, df1, df2, title, label1, label2, filename):
+        """Plot conflict depth lines side by side for comparison"""
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))
+        
+        for df, ax, label in [(df1, ax1, label1), (df2, ax2, label2)]:
+            depths = df[COL_DEPTH].values
+            num_conflicts = len(depths)
+            
+            for i in range(num_conflicts):
+                ax.plot([0, depths[i]], [i, i], '-', linewidth=1.5)
+            
+            ax.set_title(f'{title} - {label}')
+            ax.set_xlabel('Depth')
+            ax.set_ylabel('Conflict Index')
+            ax.grid(True, linestyle='--', alpha=0.7)
+        
+        plt.tight_layout()
+        plt.savefig(filename)
+        plt.close()
+
     def plot_bar_chart_compare(self, x, y1, y2, label1, label2, title, xlabel, ylabel, filename):
         """Plot two bar charts side by side for comparison"""
         fig, ax = plt.subplots(figsize=(14, 6))
@@ -115,6 +227,48 @@ class Visualizer:
         plt.tight_layout()
         plt.savefig(filename)
         plt.close()
+
+    def plot_distribution_buckets_compare(self, data1, data2, title, label1, label2, filename):
+        """Plot bucketed distribution comparison for percentages (0-100) with side-by-side bars"""
+        fig, ax = plt.subplots(figsize=(14, 6))
+        
+        # Create percentage buckets: 0-20, 20-40, 40-60, 60-80, 80-100
+        buckets = [0, 20, 40, 60, 80, 100]
+        bucket_labels = ['0-20', '20-40', '40-60', '60-80', '80-100']
+        
+        # Count values in each bucket
+        counts1 = self._count_in_percentage_buckets(data1, buckets)
+        counts2 = self._count_in_percentage_buckets(data2, buckets)
+        
+        x = np.arange(len(bucket_labels))
+        width = 0.35
+        
+        ax.bar(x - width/2, counts1, width, label=label1, color='steelblue')
+        ax.bar(x + width/2, counts2, width, label=label2, color='coral')
+        
+        ax.set_title(title)
+        ax.set_xlabel('Percentage Range')
+        ax.set_ylabel('Count')
+        ax.set_xticks(x)
+        ax.set_xticklabels(bucket_labels)
+        ax.legend()
+        ax.grid(True, axis='y', linestyle='--', alpha=0.7)
+        
+        plt.tight_layout()
+        plt.savefig(filename)
+        plt.close()
+
+    def _count_in_percentage_buckets(self, values, buckets):
+        """Count percentage values that fall into each bucket (0-100 range)"""
+        counts = []
+        for i in range(len(buckets) - 1):
+            # Last bucket includes values equal to upper bound
+            if i == len(buckets) - 2:
+                count = sum((values >= buckets[i]) & (values <= buckets[i + 1]))
+            else:
+                count = sum((values >= buckets[i]) & (values < buckets[i + 1]))
+            counts.append(count)
+        return counts
 
     def plot_pie_chart_compare(self, data1, data2, title1, title2, filename):
         """Plot two pie charts side by side"""

@@ -94,14 +94,20 @@ class ScenarioAnalyzer:
             print(f">{threshold}% same method: {method_pct:.1f}%")
 
     def _create_plots(self, conflict_df, scenarioJAR_df):
-        # Plot scenarios per jar distribution
-        self.visualizer.plot_histogram(
-            data=scenarioJAR_df[COL_NUM_SCENARIOS],
-            bins=DEFAULT_HIST_BINS,
-            title='Number of Scenarios per ScenarioJAR',
-            xlabel='Number of Scenarios',
-            filename=os.path.join(self.output_dir, PLOT_SCENARIOS_PER_JAR)
-        )
+        self._create_all_plots(conflict_df, scenarioJAR_df)
+
+    def _create_all_plots(self, conflict_df, scenarioJAR_df, compare_conflict_df=None, 
+                          compare_jar_df=None, label1='Data 1', label2='Data 2'):
+        """Generic method to create all scenario plots in single or comparison mode"""
+        # Plot scenarios per jar distribution (single mode only)
+        if compare_conflict_df is None:
+            self.visualizer.plot_histogram(
+                data=scenarioJAR_df[COL_NUM_SCENARIOS],
+                bins=DEFAULT_HIST_BINS,
+                title='Number of Scenarios per ScenarioJAR',
+                xlabel='Number of Scenarios',
+                filename=os.path.join(self.output_dir, PLOT_SCENARIOS_PER_JAR)
+            )
 
         # Plot same class/method percentage distributions
         scenario_stats = self._calculate_scenario_stats(conflict_df)
@@ -110,16 +116,35 @@ class ScenarioAnalyzer:
             COL_SAME_METHOD: ('Same Method', PLOT_SAME_METHOD_DIST)
         }
         
-        for metric, (title, filename) in metrics.items():
-            self.visualizer.plot_histogram(
-                data=scenario_stats[metric],
-                bins=len(PERCENTAGE_BUCKETS),
-                title=f'{title} % Distribution',
-                xlabel='Percentage',
-                filename=os.path.join(self.output_dir, filename)
-            )
+        if compare_conflict_df is not None:
+            compare_scenario_stats = self._calculate_scenario_stats(compare_conflict_df)
+            for metric, (title, filename) in metrics.items():
+                self.visualizer.plot_distribution_buckets_compare(
+                    data1=scenario_stats[metric],
+                    data2=compare_scenario_stats[metric],
+                    title=f'{title} % Distribution',
+                    label1=label1,
+                    label2=label2,
+                    filename=os.path.join(self.output_dir, 'compare_' + filename)
+                )
+        else:
+            for metric, (title, filename) in metrics.items():
+                self.visualizer.plot_histogram(
+                    data=scenario_stats[metric],
+                    bins=len(PERCENTAGE_BUCKETS),
+                    title=f'{title} % Distribution',
+                    xlabel='Percentage',
+                    filename=os.path.join(self.output_dir, filename)
+                )
 
-        # Metrics per scenario
+        # Metrics per scenario - depth affected/lost
+        self._plot_scenario_depth_metrics(conflict_df, compare_conflict_df, label1, label2)
+        
+        # Metric histograms - median/max/min per scenario
+        self._plot_scenario_metric_histograms(conflict_df, compare_conflict_df, label1, label2)
+
+    def _plot_scenario_depth_metrics(self, conflict_df, compare_conflict_df=None, label1='Data 1', label2='Data 2'):
+        """Plot scenario depth affected and lost per depth"""
         total_scenarios = conflict_df[COL_SCENARIO_INDEX].nunique()
         scenario_max_depth = conflict_df.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].max()
         scenario_min_depth = conflict_df.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].min()
@@ -128,27 +153,58 @@ class ScenarioAnalyzer:
         affect_percentages = [(sum(scenario_max_depth > d) / total_scenarios * 100) for d in depths]
         loss_percentages = [(sum(d < scenario_min_depth) / total_scenarios * 100) for d in depths]
 
-        self.visualizer.plot_bar_chart(
-            x=depths,
-            y=affect_percentages,
-            title='Percentage of Scenarios Affected per Depth',
-            xlabel='Depth',
-            ylabel='Scenarios Affected (%)',
-            filename=os.path.join(self.output_dir, PLOT_SCENARIO_DEPTH_AFFECT)
-        )
+        if compare_conflict_df is not None:
+            total_scenarios2 = compare_conflict_df[COL_SCENARIO_INDEX].nunique()
+            scenario_max_depth2 = compare_conflict_df.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].max()
+            scenario_min_depth2 = compare_conflict_df.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].min()
+            
+            affect_percentages2 = [(sum(scenario_max_depth2 > d) / total_scenarios2 * 100) for d in depths]
+            loss_percentages2 = [(sum(d < scenario_min_depth2) / total_scenarios2 * 100) for d in depths]
+            
+            self.visualizer.plot_bar_chart_compare(
+                x=depths,
+                y1=affect_percentages,
+                y2=affect_percentages2,
+                label1=label1,
+                label2=label2,
+                title='Percentage of Scenarios Affected per Depth',
+                xlabel='Depth',
+                ylabel='Scenarios Affected (%)',
+                filename=os.path.join(self.output_dir, 'compare_' + PLOT_SCENARIO_DEPTH_AFFECT)
+            )
 
-        self.visualizer.plot_bar_chart(
-            x=depths,
-            y=loss_percentages,
-            title='Percentage of Scenarios Lost per Depth',
-            xlabel='Depth',
-            ylabel='Scenarios Lost (%)',
-            filename=os.path.join(self.output_dir, PLOT_SCENARIO_DEPTH_LOSS)
-        )
+            self.visualizer.plot_bar_chart_compare(
+                x=depths,
+                y1=loss_percentages,
+                y2=loss_percentages2,
+                label1=label1,
+                label2=label2,
+                title='Percentage of Scenarios Lost per Depth',
+                xlabel='Depth',
+                ylabel='Scenarios Lost (%)',
+                filename=os.path.join(self.output_dir, 'compare_' + PLOT_SCENARIO_DEPTH_LOSS)
+            )
+        else:
+            self.visualizer.plot_bar_chart(
+                x=depths,
+                y=affect_percentages,
+                title='Percentage of Scenarios Affected per Depth',
+                xlabel='Depth',
+                ylabel='Scenarios Affected (%)',
+                filename=os.path.join(self.output_dir, PLOT_SCENARIO_DEPTH_AFFECT)
+            )
 
-        self._plot_scenario_metrics(conflict_df)
+            self.visualizer.plot_bar_chart(
+                x=depths,
+                y=loss_percentages,
+                title='Percentage of Scenarios Lost per Depth',
+                xlabel='Depth',
+                ylabel='Scenarios Lost (%)',
+                filename=os.path.join(self.output_dir, PLOT_SCENARIO_DEPTH_LOSS)
+            )
 
-    def _plot_scenario_metrics(self, df):
+    def _plot_scenario_metric_histograms(self, df, compare_df=None, label1='Data 1', label2='Data 2'):
+        """Plot histograms for median/max/min metrics per scenario"""
         metrics = {
             COL_DEPTH: ('Conflict Depth', [PLOT_MEDIAN_DEPTH, PLOT_MAX_DEPTH, PLOT_MIN_DEPTH]),
             COL_DIFF: ('StackTrace Diff', [PLOT_MEDIAN_DIFF, PLOT_MAX_DIFF, PLOT_MIN_DIFF])
@@ -157,13 +213,26 @@ class ScenarioAnalyzer:
         for metric_col, (title, filenames) in metrics.items():
             for agg_func, filename in zip(['median', 'max', 'min'], filenames):
                 prefix = agg_func.capitalize()
-                self.visualizer.plot_scenario_metric(
-                    df=df,
-                    metric_col=metric_col,
-                    agg_func=agg_func,
-                    title=f'{prefix} {title} per Scenario',
-                    filename=os.path.join(self.output_dir, filename)
-                )
+                
+                if compare_df is not None:
+                    self.visualizer.plot_scenario_metric_compare(
+                        df1=df,
+                        df2=compare_df,
+                        metric_col=metric_col,
+                        agg_func=agg_func,
+                        title=f'{prefix} {title} per Scenario',
+                        label1=label1,
+                        label2=label2,
+                        filename=os.path.join(self.output_dir, 'compare_' + filename)
+                    )
+                else:
+                    self.visualizer.plot_scenario_metric(
+                        df=df,
+                        metric_col=metric_col,
+                        agg_func=agg_func,
+                        title=f'{prefix} {title} per Scenario',
+                        filename=os.path.join(self.output_dir, filename)
+                    )
 
     def analyze_compare(self, plot=True, output_dir='.', output_dir2='.'):
         """Analyze and compare two JSON file results"""
@@ -186,54 +255,14 @@ class ScenarioAnalyzer:
 
     def _create_compare_plots(self, conflict_df1, conflict_df2, label1, label2, output_dir):
         """Create comparison plots for two datasets"""
-        total_scenarios1 = conflict_df1[COL_SCENARIO_INDEX].nunique()
-        total_scenarios2 = conflict_df2[COL_SCENARIO_INDEX].nunique()
-        
-        depths = list(range(DEFAULT_DEPTH, MAX_DEPTH + 1))
-        
-        # Bar charts for scenarios affected and lost
-        self._create_scenario_comparison_bar_charts(
-            conflict_df1, conflict_df2, total_scenarios1, total_scenarios2, 
-            depths, label1, label2, output_dir
-        )
-
-    def _create_scenario_comparison_bar_charts(self, conflict_df1, conflict_df2, total_scenarios1, 
-                                               total_scenarios2, depths, label1, label2, output_dir):
-        """Create bar chart comparisons for scenarios affected and lost"""
-        scenario_max_depth1 = conflict_df1.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].max()
-        scenario_max_depth2 = conflict_df2.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].max()
-        
-        affect_percentages1 = [(sum(scenario_max_depth1 > d) / total_scenarios1 * 100) for d in depths]
-        affect_percentages2 = [(sum(scenario_max_depth2 > d) / total_scenarios2 * 100) for d in depths]
-        
-        self.visualizer.plot_bar_chart_compare(
-            x=depths,
-            y1=affect_percentages1,
-            y2=affect_percentages2,
+        self._create_all_plots(
+            conflict_df1, None,
+            compare_conflict_df=conflict_df2,
+            compare_jar_df=None,
             label1=label1,
-            label2=label2,
-            title='Percentage of Scenarios Affected per Depth (Comparison)',
-            xlabel='Depth',
-            ylabel='Scenarios Affected (%)',
-            filename=os.path.join(output_dir, 'compare_' + PLOT_SCENARIO_DEPTH_AFFECT)
+            label2=label2
         )
 
-        # Bar chart comparison for scenarios lost
-        scenario_min_depth1 = conflict_df1.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].min()
-        scenario_min_depth2 = conflict_df2.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].min()
-        
-        loss_percentages1 = [(sum(d < scenario_min_depth1) / total_scenarios1 * 100) for d in depths]
-        loss_percentages2 = [(sum(d < scenario_min_depth2) / total_scenarios2 * 100) for d in depths]
-        
-        self.visualizer.plot_bar_chart_compare(
-            x=depths,
-            y1=loss_percentages1,
-            y2=loss_percentages2,
-            label1=label1,
-            label2=label2,
-            title='Percentage of Scenarios Lost per Depth (Comparison)',
-            xlabel='Depth',
-            ylabel='Scenarios Lost (%)',
-            filename=os.path.join(output_dir, 'compare_' + PLOT_SCENARIO_DEPTH_LOSS)
-        )
-
+if __name__ == "__main__":
+    analyzer = ScenarioAnalyzer()
+    analyzer.analyze(plot=True)
