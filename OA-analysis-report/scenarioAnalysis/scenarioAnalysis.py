@@ -29,6 +29,10 @@ class ScenarioAnalyzer:
         print(f"Average conflicts per JAR: {scenarioJAR_df[COL_NUM_CONFLICTS].mean():.2f}")
         print(f"Average scenarios per JAR: {scenarioJAR_df[COL_NUM_SCENARIOS].mean():.2f}")
 
+        self._print_threshold_stats_common(conflict_df)
+
+    def _print_threshold_stats_common(self, conflict_df):
+        """Common statistics printing logic for both single and comparison modes"""
         scenario_stats = self._calculate_scenario_stats(conflict_df)
         self._print_threshold_stats(scenario_stats)
 
@@ -46,6 +50,12 @@ class ScenarioAnalyzer:
             qval = quantiles.loc[p / 100]
             print(f"  {p}th percentile: {qval:.2f}")
 
+        # Count scenarios with mean depth greater than DEFAULT_DEPTH
+        scenarios_above_default = (scenario_avg_depth > DEFAULT_DEPTH).sum()
+        pct_above_default = (scenarios_above_default / len(scenario_avg_depth)) * 100
+        print(f"\nScenarios with mean depth > {DEFAULT_DEPTH}: {scenarios_above_default} ({pct_above_default:.2f}%)")
+
+        total_scenarios = conflict_df[COL_SCENARIO_INDEX].nunique()
         scenario_max_depth = conflict_df.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].max()
         for depth_stat in range(DEFAULT_DEPTH, MAX_DEPTH + 1):
             count = sum(scenario_max_depth > depth_stat)
@@ -145,6 +155,80 @@ class ScenarioAnalyzer:
                     filename=os.path.join(self.output_dir, filename)
                 )
 
-if __name__ == "__main__":
-    analyzer = ScenarioAnalyzer()
-    analyzer.analyze(plot=True)
+    def analyze_compare(self, plot=True, output_dir='.', output_dir2='.'):
+        """Analyze and compare two JSON file results"""
+        conflict_df1 = pd.read_csv(os.path.join(output_dir, CONFLICT_STATS_CSV))
+        scenarioJAR_df1 = pd.read_csv(os.path.join(output_dir, SCENARIO_STATS_CSV))
+        
+        conflict_df2 = pd.read_csv(os.path.join(output_dir2, CONFLICT_STATS_CSV))
+        scenarioJAR_df2 = pd.read_csv(os.path.join(output_dir2, SCENARIO_STATS_CSV))
+        
+        # Extract JSON file names from paths for titles
+        json_name1 = os.path.basename(output_dir)
+        json_name2 = os.path.basename(output_dir2)
+        
+        self._print_statistics_with_title(conflict_df1, scenarioJAR_df1, json_name1)
+        print("\n" + "="*60)
+        self._print_statistics_with_title(conflict_df2, scenarioJAR_df2, json_name2)
+        
+        if plot:
+            self._create_compare_plots(conflict_df1, conflict_df2, json_name1, json_name2, output_dir)
+
+    def _print_statistics_with_title(self, conflict_df, scenarioJAR_df, title):
+        total_scenarios = conflict_df[COL_SCENARIO_INDEX].nunique()
+        total_jars = scenarioJAR_df[COL_SCENARIO_JAR].nunique()
+
+        print(f"\n{title}")
+        print("-" * 60)
+        print(f"Total scenario JARs: {total_jars}")
+        print(f"Total scenarios: {total_scenarios}")
+        print("\nScenario Statistics:")
+        print(f"Average conflicts per JAR: {scenarioJAR_df[COL_NUM_CONFLICTS].mean():.2f}")
+        print(f"Average scenarios per JAR: {scenarioJAR_df[COL_NUM_SCENARIOS].mean():.2f}")
+
+        self._print_threshold_stats_common(conflict_df)
+
+    def _create_compare_plots(self, conflict_df1, conflict_df2, label1, label2, output_dir):
+        """Create comparison plots for two datasets"""
+        total_scenarios1 = conflict_df1[COL_SCENARIO_INDEX].nunique()
+        total_scenarios2 = conflict_df2[COL_SCENARIO_INDEX].nunique()
+        
+        # Bar chart comparison for scenarios affected
+        scenario_max_depth1 = conflict_df1.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].max()
+        scenario_max_depth2 = conflict_df2.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].max()
+        
+        depths = list(range(DEFAULT_DEPTH, MAX_DEPTH + 1))
+        affect_percentages1 = [(sum(scenario_max_depth1 > d) / total_scenarios1 * 100) for d in depths]
+        affect_percentages2 = [(sum(scenario_max_depth2 > d) / total_scenarios2 * 100) for d in depths]
+        
+        self.visualizer.plot_bar_chart_compare(
+            x=depths,
+            y1=affect_percentages1,
+            y2=affect_percentages2,
+            label1=label1,
+            label2=label2,
+            title='Percentage of Scenarios Affected per Depth (Comparison)',
+            xlabel='Depth',
+            ylabel='Scenarios Affected (%)',
+            filename=os.path.join(output_dir, 'compare_' + PLOT_SCENARIO_DEPTH_AFFECT)
+        )
+
+        # Bar chart comparison for scenarios lost
+        scenario_min_depth1 = conflict_df1.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].min()
+        scenario_min_depth2 = conflict_df2.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].min()
+        
+        loss_percentages1 = [(sum(d < scenario_min_depth1) / total_scenarios1 * 100) for d in depths]
+        loss_percentages2 = [(sum(d < scenario_min_depth2) / total_scenarios2 * 100) for d in depths]
+        
+        self.visualizer.plot_bar_chart_compare(
+            x=depths,
+            y1=loss_percentages1,
+            y2=loss_percentages2,
+            label1=label1,
+            label2=label2,
+            title='Percentage of Scenarios Lost per Depth (Comparison)',
+            xlabel='Depth',
+            ylabel='Scenarios Lost (%)',
+            filename=os.path.join(output_dir, 'compare_' + PLOT_SCENARIO_DEPTH_LOSS)
+        )
+

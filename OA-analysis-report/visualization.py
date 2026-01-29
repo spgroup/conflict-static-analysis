@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+import numpy as np
 from constants import COL_DEPTH
 
 class Visualizer:
@@ -90,6 +91,58 @@ class Visualizer:
         plt.xlabel('Depth')
         plt.ylabel('Conflict Index')
         plt.grid(True, linestyle='--', alpha=0.7)
+        plt.tight_layout()
+        plt.savefig(filename)
+        plt.close()
+
+    def plot_bar_chart_compare(self, x, y1, y2, label1, label2, title, xlabel, ylabel, filename):
+        """Plot two bar charts side by side for comparison"""
+        fig, ax = plt.subplots(figsize=(14, 6))
+        
+        x_arr = np.array(x)
+        width = 0.35
+        
+        ax.bar(x_arr - width/2, y1, width, label=label1, color='steelblue')
+        ax.bar(x_arr + width/2, y2, width, label=label2, color='coral')
+        
+        ax.set_title(title)
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+        ax.set_xticks(x_arr)
+        ax.legend()
+        ax.grid(True, axis='y', linestyle='--', alpha=0.7)
+        
+        plt.tight_layout()
+        plt.savefig(filename)
+        plt.close()
+
+    def plot_pie_chart_compare(self, data1, data2, title1, title2, filename):
+        """Plot two pie charts side by side"""
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
+        
+        colors1 = data1.get('colors', None)
+        colors2 = data2.get('colors', None)
+        
+        ax1.pie(data1['values'], labels=[f"{label}\n({int(count)} - {pct:.1f}%)" 
+                for label, count, pct in zip(data1['labels'], 
+                                            data1['values'], 
+                                            data1['percentages'])],
+                autopct='',
+                startangle=140,
+                colors=colors1)
+        ax1.set_title(title1)
+        ax1.axis('equal')
+        
+        ax2.pie(data2['values'], labels=[f"{label}\n({int(count)} - {pct:.1f}%)" 
+                for label, count, pct in zip(data2['labels'], 
+                                            data2['values'], 
+                                            data2['percentages'])],
+                autopct='',
+                startangle=140,
+                colors=colors2)
+        ax2.set_title(title2)
+        ax2.axis('equal')
+        
         plt.tight_layout()
         plt.savefig(filename)
         plt.close()

@@ -116,24 +116,28 @@ class ConflictProcessor:
 def parse_args():
     plot_enabled = False
     input_json = JSON_INPUT_FILE
+    input_json2 = None
     
     for arg in sys.argv[1:]:
         if arg.lower().startswith('plot='):
             plot_value = arg.split('=')[1].lower()
             plot_enabled = plot_value == 'true'
-        elif arg.lower().startswith('out.json'):
-            input_json = arg.split('=')[1].lower()
+        elif arg.lower().startswith('out.json='):
+            input_json = arg.split('=', 1)[1]
+        elif arg.lower().startswith('out.json2='):
+            input_json2 = arg.split('=', 1)[1]
             
-    return plot_enabled, input_json
+    return plot_enabled, input_json, input_json2
 
 def main():
-    plot_enabled, input_json = parse_args()
+    plot_enabled, input_json, input_json2 = parse_args()
     
     output_dir = os.path.dirname(os.path.abspath(input_json))
     if not output_dir:
         output_dir = '.'
-        
-    processor = ConflictProcessor(output_dir)
+    
+    # Process first JSON file
+    processor1 = ConflictProcessor(output_dir)
     
     with open(input_json) as f:
         data = json.load(f)
@@ -142,22 +146,55 @@ def main():
         for idx, entry in enumerate(data):
             if isinstance(entry, dict) and 'conflicts' in entry:
                 conflicts = entry.get('conflicts', [])
-                processor.process_conflicts(conflicts, start_idx=idx)
+                processor1.process_conflicts(conflicts, start_idx=idx)
             else:
                 raise Exception("Invalid conflict data format")
 
-    for idx in processor.conflict_data['jar_map']:
-        if len(processor.conflict_data['jar_map'][idx]) > 1:
+    for idx in processor1.conflict_data['jar_map']:
+        if len(processor1.conflict_data['jar_map'][idx]) > 1:
             raise Exception("Multiple scenario jars found", 
-                          processor.conflict_data['jar_map'][idx], idx)
+                          processor1.conflict_data['jar_map'][idx], idx)
 
-    processor.save_results()
+    processor1.save_results()
+    
+    # Process second JSON file if provided
+    processor2 = None
+    if input_json2:
+        output_dir2 = os.path.dirname(os.path.abspath(input_json2))
+        if not output_dir2:
+            output_dir2 = '.'
+        
+        processor2 = ConflictProcessor(output_dir2)
+        
+        with open(input_json2) as f:
+            data = json.load(f)
+
+        if data and isinstance(data, list):
+            for idx, entry in enumerate(data):
+                if isinstance(entry, dict) and 'conflicts' in entry:
+                    conflicts = entry.get('conflicts', [])
+                    processor2.process_conflicts(conflicts, start_idx=idx)
+                else:
+                    raise Exception("Invalid conflict data format")
+
+        for idx in processor2.conflict_data['jar_map']:
+            if len(processor2.conflict_data['jar_map'][idx]) > 1:
+                raise Exception("Multiple scenario jars found", 
+                              processor2.conflict_data['jar_map'][idx], idx)
+
+        processor2.save_results()
     
     conflict_analyzer = ConflictAnalyzer()
     scenario_analyzer = ScenarioAnalyzer()
     
-    conflict_analyzer.analyze(plot=plot_enabled, output_dir=output_dir)
-    scenario_analyzer.analyze(plot=plot_enabled, output_dir=output_dir)
+    if processor2:
+        # Comparison mode
+        conflict_analyzer.analyze_compare(plot=plot_enabled, output_dir=output_dir, output_dir2=output_dir2)
+        scenario_analyzer.analyze_compare(plot=plot_enabled, output_dir=output_dir, output_dir2=output_dir2)
+    else:
+        # Single file mode
+        conflict_analyzer.analyze(plot=plot_enabled, output_dir=output_dir)
+        scenario_analyzer.analyze(plot=plot_enabled, output_dir=output_dir)
 
 if __name__ == "__main__":
     main()
