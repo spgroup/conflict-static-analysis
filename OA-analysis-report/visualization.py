@@ -21,14 +21,16 @@ class Visualizer:
         plt.close()
 
     def plot_pie_chart(self, data, title, filename):
-        plt.figure(figsize=(10, 6))
+        plt.figure(figsize=(12, 6))
+
+        colors = data.get('colors', sns.color_palette("husl", len(data['labels'])))
         plt.pie(data['values'], labels=[f"{label}\n({int(count)} - {pct:.1f}%)" 
                 for label, count, pct in zip(data['labels'], 
                                             data['values'], 
                                             data['percentages'])],
                 autopct='',
                 startangle=140,
-                colors=sns.color_palette("husl", len(data['labels']))
+                colors=colors
         )
         plt.axis('equal')
         plt.title(title, pad=20)

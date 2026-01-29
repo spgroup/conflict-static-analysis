@@ -80,11 +80,23 @@ class ConflictAnalyzer:
         values = value_counts.values
         percentages = [(count/total)*100 for count in values]
         
+        # Define specific colors for each conflict type
+        color_map = {
+            "A1: Same depth, same class, depth = 1": "#FF6B6B",  # Red
+            "F2: Same depth, same class, depth > 1":  "#45B7D1",   # Blue
+            "D3: Same depth, different class, depth > 1": "#F0F407",   # Yellow,
+            "B2/C2: Different depth, different class, depth > 1": "#12F02F",  # Green
+            "B1: Different depth, same class, depth > 1": "#6D07EA",  # Purple
+            "Other cases": "#C7CEEA"  # Lavender
+        }
+        colors = [color_map.get(label, "#CCCCCC") for label in labels]
+        
         # Create a dict with all the pie chart data
         return {
             'values': values,
             'labels': labels,
-            'percentages': percentages
+            'percentages': percentages,
+            'colors': colors
         }
 
     def _get_boolean_pie_data(self, df, column, true_label='True', false_label='False'):
