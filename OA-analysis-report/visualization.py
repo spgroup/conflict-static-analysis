@@ -120,29 +120,23 @@ class Visualizer:
         """Plot two pie charts side by side"""
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
         
-        colors1 = data1.get('colors', None)
-        colors2 = data2.get('colors', None)
-        
-        ax1.pie(data1['values'], labels=[f"{label}\n({int(count)} - {pct:.1f}%)" 
-                for label, count, pct in zip(data1['labels'], 
-                                            data1['values'], 
-                                            data1['percentages'])],
-                autopct='',
-                startangle=140,
-                colors=colors1)
-        ax1.set_title(title1)
-        ax1.axis('equal')
-        
-        ax2.pie(data2['values'], labels=[f"{label}\n({int(count)} - {pct:.1f}%)" 
-                for label, count, pct in zip(data2['labels'], 
-                                            data2['values'], 
-                                            data2['percentages'])],
-                autopct='',
-                startangle=140,
-                colors=colors2)
-        ax2.set_title(title2)
-        ax2.axis('equal')
+        self._plot_pie_on_axis(ax1, data1, title1)
+        self._plot_pie_on_axis(ax2, data2, title2)
         
         plt.tight_layout()
         plt.savefig(filename)
         plt.close()
+
+    def _plot_pie_on_axis(self, ax, data, title):
+        """Helper method to plot a single pie chart on given axis"""
+        colors = data.get('colors', None)
+        
+        ax.pie(data['values'], labels=[f"{label}\n({int(count)} - {pct:.1f}%)" 
+                for label, count, pct in zip(data['labels'], 
+                                            data['values'], 
+                                            data['percentages'])],
+                autopct='',
+                startangle=140,
+                colors=colors)
+        ax.set_title(title)
+        ax.axis('equal')

@@ -13,16 +13,26 @@ class ScenarioAnalyzer:
         conflict_df = pd.read_csv(os.path.join(output_dir, CONFLICT_STATS_CSV))
         scenarioJAR_df = pd.read_csv(os.path.join(output_dir, SCENARIO_STATS_CSV))
 
-        self._print_statistics(conflict_df, scenarioJAR_df)
+        self._print_scenario_stats(conflict_df, scenarioJAR_df, title=None)
         
         if plot:
             self._create_plots(conflict_df, scenarioJAR_df)
 
     def _print_statistics(self, conflict_df, scenarioJAR_df):
+        self._print_scenario_stats(conflict_df, scenarioJAR_df, title=None)
+
+    def _print_scenario_stats(self, conflict_df, scenarioJAR_df, title=None):
+        """Print scenario statistics with optional title for comparison mode"""
+        if title:
+            print("-" * 60)
+            print(f"\n{title}")
+            print("-" * 60)
+        else:
+            print("\nScenario Analysis Results:")
+        
         total_scenarios = conflict_df[COL_SCENARIO_INDEX].nunique()
         total_jars = scenarioJAR_df[COL_SCENARIO_JAR].nunique()
 
-        print("\nScenario Analysis Results:")
         print(f"Total scenario JARs: {total_jars}")
         print(f"Total scenarios: {total_scenarios}")
         print("\nScenario Statistics:")
@@ -167,37 +177,32 @@ class ScenarioAnalyzer:
         json_name1 = os.path.basename(output_dir)
         json_name2 = os.path.basename(output_dir2)
         
-        self._print_statistics_with_title(conflict_df1, scenarioJAR_df1, json_name1)
+        self._print_scenario_stats(conflict_df1, scenarioJAR_df1, title=json_name1)
         print("\n" + "="*60)
-        self._print_statistics_with_title(conflict_df2, scenarioJAR_df2, json_name2)
+        self._print_scenario_stats(conflict_df2, scenarioJAR_df2, title=json_name2)
         
         if plot:
             self._create_compare_plots(conflict_df1, conflict_df2, json_name1, json_name2, output_dir)
-
-    def _print_statistics_with_title(self, conflict_df, scenarioJAR_df, title):
-        total_scenarios = conflict_df[COL_SCENARIO_INDEX].nunique()
-        total_jars = scenarioJAR_df[COL_SCENARIO_JAR].nunique()
-
-        print(f"\n{title}")
-        print("-" * 60)
-        print(f"Total scenario JARs: {total_jars}")
-        print(f"Total scenarios: {total_scenarios}")
-        print("\nScenario Statistics:")
-        print(f"Average conflicts per JAR: {scenarioJAR_df[COL_NUM_CONFLICTS].mean():.2f}")
-        print(f"Average scenarios per JAR: {scenarioJAR_df[COL_NUM_SCENARIOS].mean():.2f}")
-
-        self._print_threshold_stats_common(conflict_df)
 
     def _create_compare_plots(self, conflict_df1, conflict_df2, label1, label2, output_dir):
         """Create comparison plots for two datasets"""
         total_scenarios1 = conflict_df1[COL_SCENARIO_INDEX].nunique()
         total_scenarios2 = conflict_df2[COL_SCENARIO_INDEX].nunique()
         
-        # Bar chart comparison for scenarios affected
+        depths = list(range(DEFAULT_DEPTH, MAX_DEPTH + 1))
+        
+        # Bar charts for scenarios affected and lost
+        self._create_scenario_comparison_bar_charts(
+            conflict_df1, conflict_df2, total_scenarios1, total_scenarios2, 
+            depths, label1, label2, output_dir
+        )
+
+    def _create_scenario_comparison_bar_charts(self, conflict_df1, conflict_df2, total_scenarios1, 
+                                               total_scenarios2, depths, label1, label2, output_dir):
+        """Create bar chart comparisons for scenarios affected and lost"""
         scenario_max_depth1 = conflict_df1.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].max()
         scenario_max_depth2 = conflict_df2.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].max()
         
-        depths = list(range(DEFAULT_DEPTH, MAX_DEPTH + 1))
         affect_percentages1 = [(sum(scenario_max_depth1 > d) / total_scenarios1 * 100) for d in depths]
         affect_percentages2 = [(sum(scenario_max_depth2 > d) / total_scenarios2 * 100) for d in depths]
         

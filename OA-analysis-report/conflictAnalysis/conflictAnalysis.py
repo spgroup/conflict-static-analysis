@@ -17,6 +17,17 @@ class ConflictAnalyzer:
             self._create_plots(df)
     
     def _print_statistics(self, df):
+        self._print_conflict_stats(df, title=None)
+    
+    def _print_conflict_stats(self, df, title=None):
+        """Print conflict statistics with optional title for comparison mode"""
+        if title:
+            print("-" * 60)
+            print(f"\n{title}")
+            print("-" * 60)
+        else:
+            print("\nConflict Analysis Results:")
+        
         total_conflicts = len(df)
         total_scenarios = df[COL_SCENARIO_INDEX].nunique()
         same_depth_count = sum(df[COL_LEFT_LENGTH] == df[COL_RIGHT_LENGTH])
@@ -27,7 +38,6 @@ class ConflictAnalyzer:
         diff_mean = df[COL_DIFF].mean()
         diff_median = df[COL_DIFF].median()
 
-        print("\nConflict Analysis Results:")
         print(f"Total conflicts analyzed: {total_conflicts}")
         print(f"Conflicts with same depth: {same_depth_count} ({same_depth_count/total_conflicts*100:.2f}%)")
         print(f"Conflicts in same class: {same_class_count} ({same_class_count/total_conflicts*100:.2f}%)")
@@ -217,55 +227,15 @@ class ConflictAnalyzer:
         json_name1 = os.path.basename(output_dir)
         json_name2 = os.path.basename(output_dir2)
         
-        self._print_statistics_with_title(df1, json_name1)
+        self._print_conflict_stats(df1, title=json_name1)
         print("\n" + "="*60)
-        self._print_statistics_with_title(df2, json_name2)
+        self._print_conflict_stats(df2, title=json_name2)
         
         if plot:
             self._create_compare_plots(df1, df2, json_name1, json_name2, output_dir)
 
     def _print_statistics_with_title(self, df, title):
-        total_conflicts = len(df)
-        total_scenarios = df[COL_SCENARIO_INDEX].nunique()
-        same_depth_count = sum(df[COL_LEFT_LENGTH] == df[COL_RIGHT_LENGTH])
-        same_class_count = sum(df[COL_SAME_CLASS])
-        same_method_count = sum(df[COL_SAME_METHOD])        
-        depth_mean = df[COL_DEPTH].mean()
-        depth_median = df[COL_DEPTH].median()
-        diff_mean = df[COL_DIFF].mean()
-        diff_median = df[COL_DIFF].median()
-
-        print(f"\n{title}")
-        print("-" * 60)
-        print(f"Total conflicts analyzed: {total_conflicts}")
-        print(f"Conflicts with same depth: {same_depth_count} ({same_depth_count/total_conflicts*100:.2f}%)")
-        print(f"Conflicts in same class: {same_class_count} ({same_class_count/total_conflicts*100:.2f}%)")
-        print(f"Conflicts in same method: {same_method_count} ({same_method_count/total_conflicts*100:.2f}%)")
-        
-        print("\nDepth statistics:")
-        print(f"  Mean depth: {depth_mean:.2f}")
-        print(f"  Median depth: {depth_median:.2f}")
-
-        print("\nStacktrace diff statistics:")
-        print(f"  Mean diff: {diff_mean:.2f}")
-        print(f"  Median diff: {diff_median:.2f}")
-
-        print("\nConflicts per scenario distribution:")
-        conflicts_per_scenario = df.groupby(COL_SCENARIO_INDEX).size()
-        for num_conflicts in range(0, MAX_DEPTH + 1):
-            count = sum(conflicts_per_scenario == num_conflicts)
-            print(f"Scenarios with {num_conflicts} conflicts: {count} ({(count/total_scenarios*100):.2f}%)")
-        
-        print("\nConflict Depth Distribution:")
-
-        for depth in range(0, MAX_DEPTH + 1):
-            count = sum(df[COL_DEPTH] == depth)
-            print(f"Conflicts with depth {depth}: {count} ({(count/total_conflicts*100):.2f}%)")
-
-        print("\nConflicts diff Distribution:")
-        for diff in range(0, 10):
-            count = sum(df[COL_DIFF] == diff)
-            print(f"Conflicts with diff {diff}: {count} ({(count/total_conflicts*100):.2f}%)")
+        self._print_conflict_stats(df, title=title)
 
     def _create_compare_plots(self, df1, df2, label1, label2, output_dir):
         """Create comparison plots for two datasets"""
@@ -288,24 +258,23 @@ class ConflictAnalyzer:
         )
 
         # Pie charts comparison
-        same_class_data1 = self._get_boolean_pie_data(df1, COL_SAME_CLASS, true_label='Same class', false_label='Different class')
-        same_class_data2 = self._get_boolean_pie_data(df2, COL_SAME_CLASS, true_label='Same class', false_label='Different class')
-        
-        self.visualizer.plot_pie_chart_compare(
-            data1=same_class_data1,
-            data2=same_class_data2,
-            title1=f'{label1} - Same Class',
-            title2=f'{label2} - Same Class',
-            filename=os.path.join(output_dir, 'compare_' + PLOT_SAME_CLASS_PIE)
-        )
+        self._create_compare_pie_charts(df1, df2, label1, label2, output_dir)
 
-        same_method_data1 = self._get_boolean_pie_data(df1, COL_SAME_METHOD, true_label='Same method', false_label='Different method')
-        same_method_data2 = self._get_boolean_pie_data(df2, COL_SAME_METHOD, true_label='Same method', false_label='Different method')
+    def _create_compare_pie_charts(self, df1, df2, label1, label2, output_dir):
+        """Create side-by-side pie chart comparisons"""
+        pie_configs = [
+            (COL_SAME_CLASS, 'Same class', 'Different class', PLOT_SAME_CLASS_PIE, 'Same Class'),
+            (COL_SAME_METHOD, 'Same method', 'Different method', PLOT_SAME_METHOD_PIE, 'Same Method')
+        ]
         
-        self.visualizer.plot_pie_chart_compare(
-            data1=same_method_data1,
-            data2=same_method_data2,
-            title1=f'{label1} - Same Method',
-            title2=f'{label2} - Same Method',
-            filename=os.path.join(output_dir, 'compare_' + PLOT_SAME_METHOD_PIE)
-        )
+        for col, true_label, false_label, filename, title_suffix in pie_configs:
+            data1 = self._get_boolean_pie_data(df1, col, true_label=true_label, false_label=false_label)
+            data2 = self._get_boolean_pie_data(df2, col, true_label=true_label, false_label=false_label)
+            
+            self.visualizer.plot_pie_chart_compare(
+                data1=data1,
+                data2=data2,
+                title1=f'{label1} - {title_suffix}',
+                title2=f'{label2} - {title_suffix}',
+                filename=os.path.join(output_dir, 'compare_' + filename)
+            )
