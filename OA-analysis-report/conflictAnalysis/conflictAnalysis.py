@@ -321,21 +321,23 @@ class ConflictAnalyzer:
                 filename=os.path.join(output_dir, PLOT_SAME_METHOD_PIE)
             )
 
-    def analyze_compare(self, plot=True, output_dir='.', output_dir2='.'):
+    def analyze_compare(self, plot=True, output_dir='.', output_dir2='.', label1=None, label2=None):
         """Analyze and compare two JSON file results"""
         df1 = pd.read_csv(os.path.join(output_dir, CONFLICT_STATS_CSV))
         df2 = pd.read_csv(os.path.join(output_dir2, CONFLICT_STATS_CSV))
         
-        # Extract JSON file names from paths for titles
-        json_name1 = os.path.basename(output_dir)
-        json_name2 = os.path.basename(output_dir2)
+        # Use provided labels, otherwise extract JSON file names from paths
+        if label1 is None:
+            label1 = os.path.basename(output_dir)
+        if label2 is None:
+            label2 = os.path.basename(output_dir2)
         
-        self._print_conflict_stats(df1, title=json_name1)
+        self._print_conflict_stats(df1, title=label1)
         print("\n" + "="*60)
-        self._print_conflict_stats(df2, title=json_name2)
+        self._print_conflict_stats(df2, title=label2)
         
         if plot:
-            self._create_compare_plots(df1, df2, json_name1, json_name2, output_dir)
+            self._create_compare_plots(df1, df2, label1, label2, output_dir)
 
     def _print_statistics_with_title(self, df, title):
         self._print_conflict_stats(df, title=title)

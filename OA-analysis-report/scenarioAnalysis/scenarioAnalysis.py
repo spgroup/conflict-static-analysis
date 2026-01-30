@@ -234,7 +234,7 @@ class ScenarioAnalyzer:
                         filename=os.path.join(self.output_dir, filename)
                     )
 
-    def analyze_compare(self, plot=True, output_dir='.', output_dir2='.'):
+    def analyze_compare(self, plot=True, output_dir='.', output_dir2='.', label1=None, label2=None):
         """Analyze and compare two JSON file results"""
         conflict_df1 = pd.read_csv(os.path.join(output_dir, CONFLICT_STATS_CSV))
         scenarioJAR_df1 = pd.read_csv(os.path.join(output_dir, SCENARIO_STATS_CSV))
@@ -242,16 +242,18 @@ class ScenarioAnalyzer:
         conflict_df2 = pd.read_csv(os.path.join(output_dir2, CONFLICT_STATS_CSV))
         scenarioJAR_df2 = pd.read_csv(os.path.join(output_dir2, SCENARIO_STATS_CSV))
         
-        # Extract JSON file names from paths for titles
-        json_name1 = os.path.basename(output_dir)
-        json_name2 = os.path.basename(output_dir2)
+        # Use provided labels, otherwise extract JSON file names from paths
+        if label1 is None:
+            label1 = os.path.basename(output_dir)
+        if label2 is None:
+            label2 = os.path.basename(output_dir2)
         
-        self._print_scenario_stats(conflict_df1, scenarioJAR_df1, title=json_name1)
+        self._print_scenario_stats(conflict_df1, scenarioJAR_df1, title=label1)
         print("\n" + "="*60)
-        self._print_scenario_stats(conflict_df2, scenarioJAR_df2, title=json_name2)
+        self._print_scenario_stats(conflict_df2, scenarioJAR_df2, title=label2)
         
         if plot:
-            self._create_compare_plots(conflict_df1, conflict_df2, json_name1, json_name2, output_dir)
+            self._create_compare_plots(conflict_df1, conflict_df2, label1, label2, output_dir)
 
     def _create_compare_plots(self, conflict_df1, conflict_df2, label1, label2, output_dir):
         """Create comparison plots for two datasets"""

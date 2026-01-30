@@ -117,6 +117,7 @@ def parse_args():
     plot_enabled = False
     input_json = JSON_INPUT_FILE
     input_json2 = None
+    labels = None
     
     for arg in sys.argv[1:]:
         if arg.lower().startswith('plot='):
@@ -126,11 +127,20 @@ def parse_args():
             input_json = arg.split('=', 1)[1]
         elif arg.lower().startswith('out.json2='):
             input_json2 = arg.split('=', 1)[1]
+        elif arg.lower().startswith('labels='):
+            labels = arg.split('=', 1)[1]
             
-    return plot_enabled, input_json, input_json2
+    return plot_enabled, input_json, input_json2, labels
 
 def main():
-    plot_enabled, input_json, input_json2 = parse_args()
+    plot_enabled, input_json, input_json2, labels = parse_args()
+    
+    # Parse labels if provided
+    label1, label2 = None, None
+    if labels and ',' in labels:
+        parts = labels.split(',')
+        label1 = parts[0].strip()
+        label2 = parts[1].strip() if len(parts) > 1 else None
     
     output_dir = os.path.dirname(os.path.abspath(input_json))
     if not output_dir:
@@ -189,8 +199,8 @@ def main():
     
     if processor2:
         # Comparison mode
-        conflict_analyzer.analyze_compare(plot=plot_enabled, output_dir=output_dir, output_dir2=output_dir2)
-        scenario_analyzer.analyze_compare(plot=plot_enabled, output_dir=output_dir, output_dir2=output_dir2)
+        conflict_analyzer.analyze_compare(plot=plot_enabled, output_dir=output_dir, output_dir2=output_dir2, label1=label1, label2=label2)
+        scenario_analyzer.analyze_compare(plot=plot_enabled, output_dir=output_dir, output_dir2=output_dir2, label1=label1, label2=label2)
     else:
         # Single file mode
         conflict_analyzer.analyze(plot=plot_enabled, output_dir=output_dir)
