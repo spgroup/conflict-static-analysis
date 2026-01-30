@@ -195,6 +195,28 @@ class ConflictAnalyzer:
             output_dir=output_dir, label1=label1, label2=label2
         )
         
+        # Conflicts per scenario with bucketing
+        conflicts_per_scenario = df.groupby(COL_SCENARIO_INDEX).size()
+        
+        if compare_df is not None:
+            conflicts_per_scenario2 = compare_df.groupby(COL_SCENARIO_INDEX).size()
+            self.visualizer.plot_conflicts_per_scenario_compare(
+                data1=conflicts_per_scenario,
+                data2=conflicts_per_scenario2,
+                title='Number of Conflicts per Scenario',
+                label1=label1,
+                label2=label2,
+                filename=os.path.join(output_dir, 'compare_' + PLOT_CONFLICTS_PER_SCENARIO)
+            )
+        else:
+            self.visualizer.plot_histogram(
+                data=conflicts_per_scenario,
+                bins=100,
+                title='Number of Conflicts per Scenario',
+                xlabel='Number of Conflicts',
+                filename=os.path.join(output_dir, PLOT_CONFLICTS_PER_SCENARIO)
+            )
+        
         # Filtered histograms (only in single mode)
         if compare_df is None:
             same_class_df = df[df[COL_SAME_CLASS] == False]
@@ -213,16 +235,6 @@ class ConflictAnalyzer:
                 title='Different Method Conflicts Histogram of Depths',
                 xlabel='Depths',
                 filename=os.path.join(output_dir, PLOT_DIFFERENT_METHOD_DEPTH_HIST)
-            )
-
-            # Conflicts per scenario (discrete values - use side-by-side bars if comparing)
-            conflicts_per_scenario = df.groupby(COL_SCENARIO_INDEX).size()
-            self.visualizer.plot_histogram(
-                data=conflicts_per_scenario,
-                bins=100,
-                title='Number of Conflicts per Scenario',
-                xlabel='Number of Conflicts',
-                filename=os.path.join(output_dir, PLOT_CONFLICTS_PER_SCENARIO)
             )
 
             conflicts_per_jar = df.groupby(COL_SCENARIO_JAR).size()

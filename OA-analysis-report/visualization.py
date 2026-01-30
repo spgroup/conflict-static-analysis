@@ -270,6 +270,53 @@ class Visualizer:
             counts.append(count)
         return counts
 
+    def plot_conflicts_per_scenario_compare(self, data1, data2, title, label1, label2, filename):
+        """Plot bucketed conflicts per scenario comparison with buckets: 1-2, 2-5, 5-10, >10"""
+        fig, ax = plt.subplots(figsize=(12, 6))
+        
+        # Create buckets: 1-2, 2-5, 5-10, >10
+        buckets = [0, 2, 5, 10, float('inf')]
+        bucket_labels = ['1-2', '2-5', '5-10', '>10']
+        
+        # Count values in each bucket
+        counts1 = self._count_in_conflict_buckets(data1, buckets)
+        counts2 = self._count_in_conflict_buckets(data2, buckets)
+        
+        # Convert to percentages
+        total1 = len(data1)
+        total2 = len(data2)
+        percentages1 = [(count / total1 * 100) if total1 > 0 else 0 for count in counts1]
+        percentages2 = [(count / total2 * 100) if total2 > 0 else 0 for count in counts2]
+        
+        x = np.arange(len(bucket_labels))
+        width = 0.35
+        
+        ax.bar(x - width/2, percentages1, width, label=label1, color='steelblue')
+        ax.bar(x + width/2, percentages2, width, label=label2, color='coral')
+        
+        ax.set_title(title)
+        ax.set_xlabel('Number of Conflicts per Scenario')
+        ax.set_ylabel('Percentage (%)')
+        ax.set_xticks(x)
+        ax.set_xticklabels(bucket_labels)
+        ax.legend()
+        ax.grid(True, axis='y', linestyle='--', alpha=0.7)
+        
+        plt.tight_layout()
+        plt.savefig(filename)
+        plt.close()
+
+    def _count_in_conflict_buckets(self, values, buckets):
+        """Count conflict values that fall into each bucket"""
+        counts = []
+        for i in range(len(buckets) - 1):
+            if buckets[i + 1] == float('inf'):
+                count = sum(values > buckets[i])
+            else:
+                count = sum((values > buckets[i]) & (values <= buckets[i + 1]))
+            counts.append(count)
+        return counts
+
     def plot_pie_chart_compare(self, data1, data2, title1, title2, filename):
         """Plot two pie charts side by side"""
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
