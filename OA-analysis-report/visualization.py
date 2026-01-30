@@ -321,8 +321,18 @@ class Visualizer:
         """Plot two pie charts side by side"""
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
         
-        self._plot_pie_on_axis(ax1, data1, title1)
-        self._plot_pie_on_axis(ax2, data2, title2)
+        # Use steelblue for first dataset, coral for second
+        data1_colored = data1.copy()
+        data2_colored = data2.copy()
+        
+        # If colors not in data, use default palette for each dataset
+        if 'colors' not in data1_colored or data1_colored['colors'] is None:
+            data1_colored['colors'] = ['steelblue'] * len(data1_colored['labels'])
+        if 'colors' not in data2_colored or data2_colored['colors'] is None:
+            data2_colored['colors'] = ['coral'] * len(data2_colored['labels'])
+        
+        self._plot_pie_on_axis(ax1, data1_colored, title1)
+        self._plot_pie_on_axis(ax2, data2_colored, title2)
         
         plt.tight_layout()
         plt.savefig(filename)

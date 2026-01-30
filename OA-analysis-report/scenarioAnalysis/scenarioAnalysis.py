@@ -253,10 +253,13 @@ class ScenarioAnalyzer:
         self._print_scenario_stats(conflict_df2, scenarioJAR_df2, title=label2)
         
         if plot:
+            # Set output_dir to data1 directory for saving comparison plots
+            self.output_dir = output_dir
             self._create_compare_plots(conflict_df1, conflict_df2, label1, label2, output_dir)
 
     def _create_compare_plots(self, conflict_df1, conflict_df2, label1, label2, output_dir):
         """Create comparison plots for two datasets"""
+        self.output_dir = output_dir
         self._create_all_plots(
             conflict_df1, None,
             compare_conflict_df=conflict_df2,

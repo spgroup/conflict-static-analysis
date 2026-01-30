@@ -123,7 +123,8 @@ class ConflictAnalyzer:
         return {
             'values': values,
             'labels': labels,
-            'percentages': percentages
+            'percentages': percentages,
+            'colors': ['steelblue', 'coral']
         }
 
     def _create_plots(self, df):
