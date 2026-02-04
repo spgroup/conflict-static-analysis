@@ -240,9 +240,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
     }
 
     public void configureEntryPoints() {
-        scala.collection.immutable.List<SootMethod> scalaList = SootWrapper.getCallGraphAlgorithm().equals(CallGraphAlgorithm.VTA) ?
-                this.statementsUtils.getEntryPoints()
-                : this.statementsUtils.getCallgraphEntryPoints();
+        scala.collection.immutable.List<SootMethod> scalaList = this.statementsUtils.getCallgraphEntryPoints();
         List<SootMethod> entryPoints = new ArrayList<>(JavaConverters.seqAsJavaList(scalaList));
         //List<SootMethod> methods = new ArrayList<>(Collections.singleton(entryPoints.get(1).getDeclaringClass().getMethodByName("main")));
 
