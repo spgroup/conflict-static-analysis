@@ -467,7 +467,7 @@ def main():
         scenario_analyzer.analyze(plot=plot_enabled, output_dir=output_dir)
     
     if perfomance_report_dir:
-        perfomance_analyzer.analyze(output_dir=perfomance_report_dir)
+        perfomance_analyzer.analyze(plot=plot_enabled, output_dir=perfomance_report_dir)
 
 
 if __name__ == "__main__":

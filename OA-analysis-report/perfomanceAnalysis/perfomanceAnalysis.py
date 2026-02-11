@@ -1,17 +1,19 @@
 import os
 import json
 import pandas as pd
+from visualization import Visualizer
 from constants import *
 
 
 class PerformanceAnalyzer:
     def __init__(self):
+        self.visualizer = Visualizer()
         self.output_dir = "."
         self.perf_summary = {}
         self.perf_soot = None
         self.perf_resource = None
 
-    def analyze(self, output_dir="."):
+    def analyze(self, plot=True, output_dir="."):
         """Analyze performance data from aggregated files"""
         self.output_dir = output_dir
 
@@ -21,6 +23,10 @@ class PerformanceAnalyzer:
 
             # Print performance statistics
             self._print_performance_stats()
+
+            # Create plots if requested
+            if plot:
+                self._create_plots()
 
         except Exception as e:
             print(f"Error analyzing performance data: {e}")
@@ -72,27 +78,39 @@ class PerformanceAnalyzer:
                 f"  Peak CPU (%): {self.perf_summary.get('peak_cpu_percent', 'N/A'):.2f}"
             )
 
-        # Print soot results statistics
+        # Print soot results statistics (excluding timeouts)
         if self.perf_soot is not None:
-            print("\nSoot Results (Aggregated):")
-            print(f"  Total test methods: {len(self.perf_soot)}")
-            print(f"  Average time (ms): {self.perf_soot['Time'].mean():.2f}")
-            print(f"  Max time (ms): {self.perf_soot['Time'].max():.2f}")
-            print(f"  Min time (ms): {self.perf_soot['Time'].min():.2f}")
+            # Identify timeouts (OA Inter = true)
+            timeout_count = (self.perf_soot["OA Inter"] == "timeout").sum()
+            non_timeout_df = self.perf_soot[self.perf_soot["OA Inter"] != "timeout"]
+            
+            print("\nSoot Results (Aggregated - Excluding Timeouts):")
+            print(f"  Total scenarios: {len(self.perf_soot)}")
+            print(f"  Timeouts: {timeout_count}")
+            print(f"  Non-timeout scenarios: {len(non_timeout_df)}")
+            print(f"  Timeouts (%) : {(timeout_count / len(self.perf_soot) * 100):.2f}%")
 
-            # OA Inter statistics
-            oa_inter_true = (self.perf_soot["OA Inter"] == "true").sum()
-            oa_inter_false = len(self.perf_soot) - oa_inter_true
-            oa_inter_pct = (
-                (oa_inter_true / len(self.perf_soot) * 100)
-                if len(self.perf_soot) > 0
-                else 0
-            )
-            print(f"  OA Inter True: {oa_inter_true} ({oa_inter_pct:.1f}%)")
-            print(f"  OA Inter False: {oa_inter_false} ({100-oa_inter_pct:.1f}%)")
+            if len(non_timeout_df) > 0:
+                print("\n  Time Statistics (seconds):")
+                print(f"  Average time (seconds): {non_timeout_df['Time'].mean():.2f}")
+                print(f"  Median time (seconds): {non_timeout_df['Time'].median():.2f}")
+                print(f"  Max time (seconds): {non_timeout_df['Time'].max():.2f}")
+                print(f"  Min time (seconds): {non_timeout_df['Time'].min():.2f}")
+                false_count = (self.perf_soot['OA Inter'] == 'false').sum()
+                false_percentage = (false_count / len(self.perf_soot) * 100) if len(self.perf_soot) > 0 else 0
+
+                print(f"  False results (%) : {false_percentage:.2f}%")
+                print(f"  True results (%) : {100 - false_percentage:.2f}%")
+                
+                # Print percentiles
+                print("\n  Time Percentiles:")
+                percentiles = [50, 75, 90, 95, 99]
+                for p in percentiles:
+                    value = non_timeout_df['Time'].quantile(p / 100)
+                    print(f"    {p}th percentile: {value:.2f} seconds")
 
         # Print resource usage statistics
-        if self.perf_resource is not None:
+        if self.perf_resource is not None and len(self.perf_resource) > 0:
             print("\nResource Usage (Aggregated):")
             print(f"  Total records: {len(self.perf_resource)}")
             print(f"  Average CPU (%): {self.perf_resource['CPU_Percent'].mean():.2f}")
@@ -105,3 +123,97 @@ class PerformanceAnalyzer:
             print(f"  Min Memory (GB): {self.perf_resource['Memory_GB'].min():.4f}")
 
         print("\n" + "=" * 60 + "\n")
+
+    def _create_plots(self):
+        """Create performance visualization plots"""
+        if self.perf_soot is not None:
+            self._plot_time_histogram()
+        
+        if self.perf_resource is not None and len(self.perf_resource) > 0:
+            self._plot_resource_timeseries()
+
+    def _plot_time_histogram(self):
+        """Plot histogram of time field excluding timeouts"""
+        if self.perf_soot is None:
+            raise Exception("Soot performance data not loaded")
+        
+        non_timeout_df = self.perf_soot[self.perf_soot["OA Inter"] != "timeout"]
+        
+        if len(non_timeout_df) > 0:
+            self.visualizer.plot_histogram(
+                data=non_timeout_df["Time"],
+                bins=30,
+                title="Test Execution Time Distribution (Excluding Timeouts)",
+                xlabel="Time (seconds)",
+                filename=os.path.join(self.output_dir, "performance_time_histogram.png")
+            )
+
+    def _plot_resource_timeseries(self):
+        """Plot separate timeseries of CPU and Memory usage over time"""
+        # Plot CPU usage over time
+        self.visualizer.plot_timeseries(
+            df=self.perf_resource,
+            x_col="Time_Sec",
+            y_cols=["CPU_Percent"],
+            title="CPU Usage Over Time",
+            xlabel="Time (seconds)",
+            ylabel="CPU Usage (%)",
+            filename=os.path.join(self.output_dir, "performance_cpu_timeseries.png")
+        )
+        
+        # Plot Memory usage over time
+        self.visualizer.plot_timeseries(
+            df=self.perf_resource,
+            x_col="Time_Sec",
+            y_cols=["Memory_GB"],
+            title="Memory Usage Over Time",
+            xlabel="Time (seconds)",
+            ylabel="Memory Usage (GB)",
+            filename=os.path.join(self.output_dir, "performance_memory_timeseries.png")
+        )
+        
+        # Plot smoothed CPU usage
+        self.visualizer.plot_normalized_smoothed_timeseries(
+            df=self.perf_resource,
+            x_col="Time_Sec",
+            y_col="CPU_Percent",
+            title="CPU Usage Over Time (with Smoothed Curve)",
+            xlabel="Time (seconds)",
+            ylabel="CPU Usage (%)",
+            filename=os.path.join(self.output_dir, "performance_cpu_normalized_smoothed.png")
+        )
+        
+        # Plot smoothed Memory usage
+        self.visualizer.plot_normalized_smoothed_timeseries(
+            df=self.perf_resource,
+            x_col="Time_Sec",
+            y_col="Memory_GB",
+            title="Memory Usage Over Time (with Smoothed Curve)",
+            xlabel="Time (seconds)",
+            ylabel="Memory Usage (GB)",
+            filename=os.path.join(self.output_dir, "performance_memory_normalized_smoothed.png")
+        )
+        
+        # Plot smoothed CPU only (without original data)
+        self.visualizer.plot_smoothed_only_timeseries(
+            df=self.perf_resource,
+            x_col="Time_Sec",
+            y_col="CPU_Percent",
+            title="CPU Usage Over Time (Smoothed Only)",
+            xlabel="Time (seconds)",
+            ylabel="CPU Usage (%)",
+            filename=os.path.join(self.output_dir, "performance_cpu_smoothed_only.png")
+        )
+        
+        # Plot smoothed Memory only (without original data)
+        self.visualizer.plot_smoothed_only_timeseries(
+            df=self.perf_resource,
+            x_col="Time_Sec",
+            y_col="Memory_GB",
+            title="Memory Usage Over Time (Smoothed Only)",
+            xlabel="Time (seconds)",
+            ylabel="Memory Usage (GB)",
+            filename=os.path.join(self.output_dir, "performance_memory_smoothed_only.png")
+        )
+
+

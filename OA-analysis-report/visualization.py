@@ -281,3 +281,106 @@ class Visualizer:
             ax.axis('equal')
         
         self._save_plot(filename)
+
+    def plot_timeseries(self, df, x_col, y_cols, title, xlabel, ylabel, filename):
+        """Plot timeseries data with multiple y columns"""
+        plt.figure(figsize=(14, 6))
+        
+        for y_col in y_cols:
+            plt.plot(df[x_col], df[y_col], label=y_col, linewidth=2, marker='o', markersize=4)
+        
+        plt.title(title)
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.legend(loc='best')
+        plt.grid(True, linestyle='--', alpha=0.7)
+        self._save_plot(filename)
+
+    def plot_normalized_smoothed_timeseries(self, df, x_col, y_col, title, xlabel, ylabel, filename):
+        """Plot original data with smoothed parabola fit (no normalization)"""
+        import numpy as np
+        
+        plt.figure(figsize=(14, 6))
+        
+        # Get data
+        x_data = df[x_col].values
+        y_data = df[y_col].values
+        
+        # Plot original data (no normalization)
+        plt.plot(x_data, y_data, 'o-', label='Original Data', 
+                linewidth=2, markersize=4, alpha=0.6)
+        
+        # Apply smoothing using polynomial fitting
+        if len(x_data) > 3:
+            try:
+                # Try to use scipy spline for smooth interpolation
+                from scipy.interpolate import UnivariateSpline
+                spline = UnivariateSpline(x_data, y_data, k=min(3, len(x_data)-1), s=None)
+                x_smooth = np.linspace(x_data.min(), x_data.max(), 300)
+                y_smooth = spline(x_smooth)
+                
+                plt.plot(x_smooth, y_smooth, '-', label='Smoothed (Spline Fit)', 
+                        linewidth=2.5, color='red')
+            except Exception as e:
+                # Fallback to polynomial fitting using numpy
+                try:
+                    degree = min(3, len(x_data)-1)
+                    coeffs = np.polyfit(x_data, y_data, degree)
+                    poly = np.poly1d(coeffs)
+                    x_smooth = np.linspace(x_data.min(), x_data.max(), 300)
+                    y_smooth = poly(x_smooth)
+                    
+                    plt.plot(x_smooth, y_smooth, '-', label='Smoothed (Polynomial Fit)', 
+                            linewidth=2.5, color='red')
+                except Exception as e2:
+                    print(f"Warning: Could not apply smoothing: {e2}")
+        
+        plt.title(title)
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.legend(loc='best')
+        plt.grid(True, linestyle='--', alpha=0.7)
+        self._save_plot(filename)
+
+    def plot_smoothed_only_timeseries(self, df, x_col, y_col, title, xlabel, ylabel, filename):
+        """Plot only the smoothed curve without original data"""
+        import numpy as np
+        
+        plt.figure(figsize=(14, 6))
+        
+        # Get data
+        x_data = df[x_col].values
+        y_data = df[y_col].values
+        
+        # Apply smoothing using polynomial fitting
+        if len(x_data) > 3:
+            try:
+                # Try to use scipy spline for smooth interpolation
+                from scipy.interpolate import UnivariateSpline
+                spline = UnivariateSpline(x_data, y_data, k=min(3, len(x_data)-1), s=None)
+                x_smooth = np.linspace(x_data.min(), x_data.max(), 300)
+                y_smooth = spline(x_smooth)
+                
+                plt.plot(x_smooth, y_smooth, '-', label='Smoothed Curve (Spline Fit)', 
+                        linewidth=3, color='red')
+            except Exception as e:
+                # Fallback to polynomial fitting using numpy
+                try:
+                    degree = min(3, len(x_data)-1)
+                    coeffs = np.polyfit(x_data, y_data, degree)
+                    poly = np.poly1d(coeffs)
+                    x_smooth = np.linspace(x_data.min(), x_data.max(), 300)
+                    y_smooth = poly(x_smooth)
+                    
+                    plt.plot(x_smooth, y_smooth, '-', label='Smoothed Curve (Polynomial Fit)', 
+                            linewidth=3, color='red')
+                except Exception as e2:
+                    print(f"Warning: Could not apply smoothing: {e2}")
+        
+        plt.title(title)
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.legend(loc='best')
+        plt.grid(True, linestyle='--', alpha=0.7)
+        self._save_plot(filename)
+
