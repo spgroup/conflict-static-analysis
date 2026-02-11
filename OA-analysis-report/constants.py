@@ -2,6 +2,10 @@
 JSON_INPUT_FILE = 'out.json'
 CONFLICT_STATS_CSV = 'conflict_stacktrace_stats.csv'
 SCENARIO_STATS_CSV = 'scenariojar_stats.csv'
+PERFORMANCE_SOOT_STATS_CSV = 'performance_soot_results_stats.csv'
+PERFORMANCE_SUMMARY_STATS_JSON = 'performance_summary_stats.json'
+PERFORMANCE_RESOURCE_STATS_CSV = 'performance_resource_stats.csv'
+PERFORMANCE_REPORT_DIR = 'perfomanceReport'
 
 # CSV column names
 COL_CONFLICT_INDEX = 'conflict_index'

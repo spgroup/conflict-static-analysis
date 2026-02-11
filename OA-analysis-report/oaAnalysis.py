@@ -2,7 +2,8 @@ import json
 import csv
 import sys
 import os
-from collections import defaultdict
+import pandas as pd
+from collections import defaultdict, Counter
 from constants import *
 from conflictAnalysis.conflictAnalysis import ConflictAnalyzer
 from scenarioAnalysis.scenarioAnalysis import ScenarioAnalyzer
@@ -113,11 +114,173 @@ class ConflictProcessor:
             for jar in jar_conflict_counts:
                 writer.writerow([jar, jar_conflict_counts[jar], jar_scenario_counts[jar]])
 
+
+class PerformanceAggregator:
+    def __init__(self, performance_data_path):
+        self.performance_data_path = performance_data_path
+        self.report_dir = os.path.join(performance_data_path, PERFORMANCE_REPORT_DIR)
+        os.makedirs(self.report_dir, exist_ok=True)
+    
+    def aggregate(self):
+        """Aggregate all results from individual runs"""
+        self._aggregate_soot_results()
+        self._aggregate_performance_summary()
+        self._aggregate_resource_usage()
+    
+    def _aggregate_soot_results(self):
+        """Aggregate soot-results.csv files with mean for Time and majority vote for OA Inter"""
+        all_data = []
+        
+        # Read all soot-results.csv files from results1 to results10
+        for i in range(1, 11):
+            results_dir = os.path.join(self.performance_data_path, f'results{i}')
+            soot_file = os.path.join(results_dir, 'soot-results.csv')
+            
+            if os.path.exists(soot_file):
+                df = pd.read_csv(soot_file, sep=';')
+                df['result_num'] = i
+                all_data.append(df)
+        
+        if not all_data:
+            print(f"Warning: No soot-results.csv files found in {self.performance_data_path}")
+            return
+        
+        combined_df = pd.concat(all_data, ignore_index=True)
+        
+        # Group by project, class, method, and merge commit
+        groupby_cols = ['project', 'class', 'method', 'merge commit']
+        
+        # Aggregate Time by mean
+        agg_dict = {'Time': 'mean'}
+        aggregated = combined_df.groupby(groupby_cols).agg(agg_dict).reset_index()
+        
+        # For OA Inter, take majority vote
+        oa_inter_groups = combined_df.groupby(groupby_cols)['OA Inter'].apply(
+            lambda x: Counter(x).most_common(1)[0][0]
+        ).reset_index(name='OA Inter')
+        
+        # Merge the results
+        result_df = aggregated.merge(oa_inter_groups, on=groupby_cols)
+        
+        # Reorder columns to match original format
+        result_df = result_df[groupby_cols + ['OA Inter', 'Time']]
+        
+        # Save to CSV with semicolon separator
+        output_path = os.path.join(self.report_dir, PERFORMANCE_SOOT_STATS_CSV)
+        result_df.to_csv(output_path, sep=';', index=False)
+        print(f"Saved aggregated soot results to {output_path}")
+    
+    def _aggregate_performance_summary(self):
+        """Aggregate performance_summary.json files by mean of numeric fields"""
+        all_summaries = []
+        
+        # Read all performance_summary.json files from results1 to results10
+        for i in range(1, 11):
+            results_dir = os.path.join(self.performance_data_path, f'results{i}')
+            summary_file = os.path.join(results_dir, 'performance_summary.json')
+            
+            if os.path.exists(summary_file):
+                with open(summary_file, 'r') as f:
+                    data = json.load(f)
+                    all_summaries.append(data)
+        
+        if not all_summaries:
+            print(f"Warning: No performance_summary.json files found in {self.performance_data_path}")
+            return
+        
+        # Convert to DataFrame for easier aggregation
+        df = pd.json_normalize(all_summaries)
+        
+        # Aggregate numeric fields by mean
+        numeric_cols = ['duration_seconds', 'peak_memory_gb', 'peak_cpu_percent']
+        aggregated = {}
+        
+        for col in numeric_cols:
+            if col in df.columns:
+                aggregated[col] = df[col].mean()
+        
+        # Keep non-numeric fields from the first record
+        for key in ['mode', 'callgraph', 'status']:
+            if key in all_summaries[0]:
+                aggregated[key] = all_summaries[0][key]
+        
+        # Save to JSON
+        output_path = os.path.join(self.report_dir, PERFORMANCE_SUMMARY_STATS_JSON)
+        with open(output_path, 'w') as f:
+            json.dump(aggregated, f, indent=2)
+        print(f"Saved aggregated performance summary to {output_path}")
+    
+    def _aggregate_resource_usage(self):
+        """Aggregate resource_usage_series.csv files by mean per time second"""
+        all_data = []
+        
+        # Read all resource_usage_series.csv files from results1 to results10
+        for i in range(1, 11):
+            results_dir = os.path.join(self.performance_data_path, f'results{i}')
+            resource_file = os.path.join(results_dir, 'resource_usage_series.csv')
+            
+            if os.path.exists(resource_file):
+                df = pd.read_csv(resource_file)
+                
+                # Skip empty DataFrames (only headers, no data)
+                if df.empty:
+                    continue
+                
+                # Convert Time_Sec to numeric and then round to integer for alignment across results
+                if 'Time_Sec' in df.columns:
+                    df['Time_Sec'] = pd.to_numeric(df['Time_Sec'], errors='coerce').round(0).astype(int)
+                
+                df['result_num'] = i
+                all_data.append(df)
+        
+        if not all_data:
+            print(f"Warning: No resource_usage_series.csv files with data found in {self.performance_data_path}")
+            return
+        
+        # Find the maximum time_sec (length of longest series)
+        max_time_sec = max(df['Time_Sec'].max() for df in all_data)
+        
+        # Aggregate by time_sec: for each second, compute mean of CPU and Memory across all results
+        aggregated_data = []
+        for time_sec in range(int(max_time_sec) + 1):
+            row_data = {'Time_Sec': time_sec}
+            
+            # Collect values for this time_sec from all results
+            cpu_values = []
+            memory_values = []
+            
+            for df in all_data:
+                time_rows = df[df['Time_Sec'] == time_sec]
+                if not time_rows.empty:
+                    if 'CPU_Percent' in df.columns:
+                        cpu_values.append(time_rows['CPU_Percent'].iloc[0])
+                    if 'Memory_GB' in df.columns:
+                        memory_values.append(time_rows['Memory_GB'].iloc[0])
+            
+            # Compute mean for this time_sec
+            if cpu_values:
+                row_data['CPU_Percent'] = sum(cpu_values) / len(cpu_values)
+            if memory_values:
+                row_data['Memory_GB'] = sum(memory_values) / len(memory_values)
+            
+            aggregated_data.append(row_data)
+        
+        # Convert to DataFrame and save
+        result_df = pd.DataFrame(aggregated_data)
+        
+        # Save to CSV
+        output_path = os.path.join(self.report_dir, PERFORMANCE_RESOURCE_STATS_CSV)
+        result_df.to_csv(output_path, index=False)
+        print(f"Saved aggregated resource usage to {output_path}")
+
+
+
 def parse_args():
     plot_enabled = False
     input_json = JSON_INPUT_FILE
     input_json2 = None
     labels = None
+    performance_data_path = None
     
     for arg in sys.argv[1:]:
         if arg.lower().startswith('plot='):
@@ -129,11 +292,13 @@ def parse_args():
             input_json2 = arg.split('=', 1)[1]
         elif arg.lower().startswith('labels='):
             labels = arg.split('=', 1)[1]
+        elif arg.lower().startswith('performancedata='):
+            performance_data_path = arg.split('=', 1)[1]
             
-    return plot_enabled, input_json, input_json2, labels
+    return plot_enabled, input_json, input_json2, labels, performance_data_path
 
 def main():
-    plot_enabled, input_json, input_json2, labels = parse_args()
+    plot_enabled, input_json, input_json2, labels, performance_data_path = parse_args()
     
     # Parse labels if provided
     label1, label2 = None, None
@@ -193,6 +358,11 @@ def main():
                               processor2.conflict_data['jar_map'][idx], idx)
 
         processor2.save_results()
+    
+    # Aggregate performance data if path is provided
+    if performance_data_path:
+        perf_aggregator = PerformanceAggregator(performance_data_path)
+        perf_aggregator.aggregate()
     
     conflict_analyzer = ConflictAnalyzer()
     scenario_analyzer = ScenarioAnalyzer()
