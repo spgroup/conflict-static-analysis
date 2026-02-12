@@ -128,6 +128,7 @@ class PerformanceAnalyzer:
         """Create performance visualization plots"""
         if self.perf_soot is not None:
             self._plot_time_histogram()
+            self._plot_time_distribution_bar()
         
         if self.perf_resource is not None and len(self.perf_resource) > 0:
             self._plot_resource_timeseries()
@@ -147,6 +148,47 @@ class PerformanceAnalyzer:
                 xlabel="Time (seconds)",
                 filename=os.path.join(self.output_dir, "performance_time_histogram.png")
             )
+
+    def _plot_time_distribution_bar(self):
+        """Plot bar chart showing distribution of scenarios across time groups"""
+        if self.perf_soot is None:
+            raise Exception("Soot performance data not loaded")
+        
+        non_timeout_df = self.perf_soot[self.perf_soot["OA Inter"] != "timeout"]
+        
+        if len(non_timeout_df) > 0:
+            # Define time groups (in seconds)
+            time_groups = {
+                '1-5': (1, 5),
+                '5-10': (5, 10),
+                '10-30': (10, 30),
+                '30-60': (30, 60),
+                '60-120': (60, 120),
+                '120+': (120, float('inf'))
+            }
+            
+            # Count scenarios in each group
+            group_counts = {}
+            for group_name, (min_time, max_time) in time_groups.items():
+                count = len(non_timeout_df[(non_timeout_df['Time'] >= min_time) & (non_timeout_df['Time'] < max_time)])
+                if count > 0:  # Only include groups with at least one scenario
+                    group_counts[group_name] = count
+            
+            # Create bar chart data with percentages
+            if group_counts:
+                total = sum(group_counts.values())
+                x_labels = list(group_counts.keys())
+                y_percentages = [count / total * 100 for count in group_counts.values()]
+                
+                self.visualizer.plot_bar_chart(
+                    x=x_labels,
+                    y=y_percentages,
+                    title="Scenario Distribution by Execution Time (Excluding Timeouts)",
+                    xlabel="Execution Time Range (seconds)",
+                    ylabel="Percentage (%)",
+                    filename=os.path.join(self.output_dir, "performance_time_distribution_bar.png")
+                )
+
 
     def _plot_resource_timeseries(self):
         """Plot separate timeseries of CPU and Memory usage over time"""

@@ -344,7 +344,7 @@ class PerformanceAggregator:
 
 def parse_args():
     plot_enabled = False
-    input_json = JSON_INPUT_FILE
+    input_json = None
     input_json2 = None
     labels = None
     performance_data_path = None
@@ -368,6 +368,11 @@ def parse_args():
 def main():
     plot_enabled, input_json, input_json2, labels, performance_data_path = parse_args()
 
+    # Validate that at least one input is provided
+    if not input_json and not performance_data_path:
+        print("Error: Either out.json or performancedata parameter must be provided")
+        sys.exit(1)
+
     # Parse labels if provided
     label1, label2 = None, None
     if labels and "," in labels:
@@ -375,65 +380,69 @@ def main():
         label1 = parts[0].strip()
         label2 = parts[1].strip() if len(parts) > 1 else None
 
-    output_dir = os.path.dirname(os.path.abspath(input_json))
-    if not output_dir:
-        output_dir = "."
-
-    output_dir2: str = ""
-
-    # Process first JSON file
-    processor1 = ConflictProcessor(output_dir)
-
-    with open(input_json) as f:
-        data = json.load(f)
-
-    if data and isinstance(data, list):
-        for idx, entry in enumerate(data):
-            if isinstance(entry, dict) and "conflicts" in entry:
-                conflicts = entry.get("conflicts", [])
-                processor1.process_conflicts(conflicts, start_idx=idx)
-            else:
-                raise Exception("Invalid conflict data format")
-
-    for idx in processor1.conflict_data["jar_map"]:
-        if len(processor1.conflict_data["jar_map"][idx]) > 1:
-            raise Exception(
-                "Multiple scenario jars found",
-                processor1.conflict_data["jar_map"][idx],
-                idx,
-            )
-
-    processor1.save_results()
-
-    # Process second JSON file if provided
+    output_dir = None
+    output_dir2 = ""
+    processor1 = None
     processor2 = None
-    if input_json2:
-        output_dir2 = os.path.dirname(os.path.abspath(input_json2))
-        if not output_dir2:
-            output_dir2 = "."
 
-        processor2 = ConflictProcessor(output_dir2)
+    # Process conflict data if JSON input is provided
+    if input_json:
+        output_dir = os.path.dirname(os.path.abspath(input_json))
+        if not output_dir:
+            output_dir = "."
 
-        with open(input_json2) as f:
+        # Process first JSON file
+        processor1 = ConflictProcessor(output_dir)
+
+        with open(input_json) as f:
             data = json.load(f)
 
         if data and isinstance(data, list):
             for idx, entry in enumerate(data):
                 if isinstance(entry, dict) and "conflicts" in entry:
                     conflicts = entry.get("conflicts", [])
-                    processor2.process_conflicts(conflicts, start_idx=idx)
+                    processor1.process_conflicts(conflicts, start_idx=idx)
                 else:
                     raise Exception("Invalid conflict data format")
 
-        for idx in processor2.conflict_data["jar_map"]:
-            if len(processor2.conflict_data["jar_map"][idx]) > 1:
+        for idx in processor1.conflict_data["jar_map"]:
+            if len(processor1.conflict_data["jar_map"][idx]) > 1:
                 raise Exception(
                     "Multiple scenario jars found",
-                    processor2.conflict_data["jar_map"][idx],
+                    processor1.conflict_data["jar_map"][idx],
                     idx,
                 )
 
-        processor2.save_results()
+        processor1.save_results()
+
+        # Process second JSON file if provided
+        if input_json2:
+            output_dir2 = os.path.dirname(os.path.abspath(input_json2))
+            if not output_dir2:
+                output_dir2 = "."
+
+            processor2 = ConflictProcessor(output_dir2)
+
+            with open(input_json2) as f:
+                data = json.load(f)
+
+            if data and isinstance(data, list):
+                for idx, entry in enumerate(data):
+                    if isinstance(entry, dict) and "conflicts" in entry:
+                        conflicts = entry.get("conflicts", [])
+                        processor2.process_conflicts(conflicts, start_idx=idx)
+                    else:
+                        raise Exception("Invalid conflict data format")
+
+            for idx in processor2.conflict_data["jar_map"]:
+                if len(processor2.conflict_data["jar_map"][idx]) > 1:
+                    raise Exception(
+                        "Multiple scenario jars found",
+                        processor2.conflict_data["jar_map"][idx],
+                        idx,
+                    )
+
+            processor2.save_results()
 
     # Aggregate performance data if path is provided
     perfomance_report_dir = None
@@ -441,32 +450,34 @@ def main():
         perf_aggregator = PerformanceAggregator(performance_data_path)
         perfomance_report_dir = perf_aggregator.aggregate()
 
-    conflict_analyzer = ConflictAnalyzer()
-    scenario_analyzer = ScenarioAnalyzer()
-    perfomance_analyzer = PerformanceAnalyzer()
+    # Run analyzers if data is available
+    if processor1:
+        conflict_analyzer = ConflictAnalyzer()
+        scenario_analyzer = ScenarioAnalyzer()
 
-    if processor2:
-        # Comparison mode
-        conflict_analyzer.analyze_compare(
-            plot=plot_enabled,
-            output_dir=output_dir,
-            output_dir2=output_dir2,
-            label1=label1,
-            label2=label2,
-        )
-        scenario_analyzer.analyze_compare(
-            plot=plot_enabled,
-            output_dir=output_dir,
-            output_dir2=output_dir2,
-            label1=label1,
-            label2=label2,
-        )
-    else:
-        # Single file mode
-        conflict_analyzer.analyze(plot=plot_enabled, output_dir=output_dir)
-        scenario_analyzer.analyze(plot=plot_enabled, output_dir=output_dir)
-    
+        if processor2:
+            # Comparison mode
+            conflict_analyzer.analyze_compare(
+                plot=plot_enabled,
+                output_dir=output_dir,
+                output_dir2=output_dir2,
+                label1=label1,
+                label2=label2,
+            )
+            scenario_analyzer.analyze_compare(
+                plot=plot_enabled,
+                output_dir=output_dir,
+                output_dir2=output_dir2,
+                label1=label1,
+                label2=label2,
+            )
+        else:
+            # Single file mode
+            conflict_analyzer.analyze(plot=plot_enabled, output_dir=output_dir)
+            scenario_analyzer.analyze(plot=plot_enabled, output_dir=output_dir)
+
     if perfomance_report_dir:
+        perfomance_analyzer = PerformanceAnalyzer()
         perfomance_analyzer.analyze(plot=plot_enabled, output_dir=perfomance_report_dir)
 
 
