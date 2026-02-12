@@ -1,0 +1,10 @@
+{
+    "mode": "ioa",
+    "callgraph": "SPARK",
+    "run_number": 1,
+    "status": "SUCCESS",
+    "duration_seconds": 7581.85,
+    "peak_memory_gb": 10.1597,
+    "peak_cpu_percent": 8515.1,
+    "timestamp": "2026-01-14T07:36:38.299020"
+}
