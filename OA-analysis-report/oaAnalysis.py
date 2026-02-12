@@ -336,6 +336,14 @@ class PerformanceAggregator:
         # Convert to DataFrame and save
         result_df = pd.DataFrame(aggregated_data)
 
+        # Remove rows where CPU_Percent or Memory_GB are NaN
+        result_df = result_df.dropna(subset=["CPU_Percent", "Memory_GB"])
+
+        # Remove rows where all three metrics are 0
+        result_df = result_df[
+            ~((result_df["CPU_Percent"] == 0) & (result_df["Memory_GB"] == 0))
+        ]
+
         # Save to CSV
         output_path = os.path.join(self.report_dir, PERFORMANCE_RESOURCE_STATS_CSV)
         result_df.to_csv(output_path, index=False)

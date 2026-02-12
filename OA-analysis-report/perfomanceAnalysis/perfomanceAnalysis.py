@@ -48,13 +48,6 @@ class PerformanceAnalyzer:
         resource_path = os.path.join(self.output_dir, PERFORMANCE_RESOURCE_STATS_CSV)
         if os.path.exists(resource_path):
             self.perf_resource = pd.read_csv(resource_path)
-            self.perf_resource = self.perf_resource[
-                ~(
-                    (self.perf_resource["Time_Sec"] == 0)
-                    & (self.perf_resource["CPU_Percent"] == 0)
-                    & (self.perf_resource["Memory_GB"] == 0)
-                )
-            ]
 
     def _print_performance_stats(self):
         """Print performance statistics"""
