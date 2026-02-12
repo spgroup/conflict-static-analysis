@@ -121,7 +121,9 @@ class PerformanceAnalyzer:
         """Create performance visualization plots"""
         if self.perf_soot is not None:
             self._plot_time_histogram()
+            self._plot_time_histogram_including_timeouts()
             self._plot_time_distribution_bar()
+            self._plot_time_distribution_bar_including_timeouts()
         
         if self.perf_resource is not None and len(self.perf_resource) > 0:
             self._plot_resource_timeseries()
@@ -140,6 +142,34 @@ class PerformanceAnalyzer:
                 title="Test Execution Time Distribution (Excluding Timeouts)",
                 xlabel="Time (seconds)",
                 filename=os.path.join(self.output_dir, "performance_time_histogram.png")
+            )
+
+    def _plot_time_histogram_including_timeouts(self):
+        """Plot histogram of time field including timeouts (shown as max value)"""
+        if self.perf_soot is None:
+            raise Exception("Soot performance data not loaded")
+        
+        # For timeouts, use a large value (e.g., 400 seconds as representative)
+        time_data = []
+        non_timeout_df = self.perf_soot[self.perf_soot["OA Inter"] != "timeout"]
+        timeout_count = (self.perf_soot["OA Inter"] == "timeout").sum()
+        
+        if len(non_timeout_df) > 0:
+            time_data = non_timeout_df["Time"].tolist()
+        
+        # Add timeout values (represented as 400 seconds for visualization)
+        if timeout_count > 0:
+            max_time = max(time_data) if time_data else 0
+            timeout_value = max(max_time + 50, 400)  # Add 50 seconds above max or use 400
+            time_data.extend([timeout_value] * timeout_count)
+        
+        if len(time_data) > 0:
+            self.visualizer.plot_histogram(
+                data=time_data,
+                bins=35,
+                title="Test Execution Time Distribution (Including Timeouts)",
+                xlabel="Time (seconds)",
+                filename=os.path.join(self.output_dir, "performance_time_histogram_with_timeouts.png")
             )
 
     def _plot_time_distribution_bar(self):
@@ -181,6 +211,49 @@ class PerformanceAnalyzer:
                     ylabel="Percentage (%)",
                     filename=os.path.join(self.output_dir, "performance_time_distribution_bar.png")
                 )
+
+    def _plot_time_distribution_bar_including_timeouts(self):
+        """Plot bar chart showing distribution of scenarios across time groups including timeouts"""
+        if self.perf_soot is None:
+            raise Exception("Soot performance data not loaded")
+        
+        # Define time groups (in seconds) with updated 120-300 and timeout(>300)
+        time_groups = {
+            '1-5': (1, 5),
+            '5-10': (5, 10),
+            '10-30': (10, 30),
+            '30-60': (30, 60),
+            '60-120': (60, 120),
+            '120-300': (120, 300),
+            'timeout(>300)': (300, float('inf'))
+        }
+        
+        # Count scenarios in each group
+        group_counts = {}
+        for group_name, (min_time, max_time) in time_groups.items():
+            if group_name == 'timeout(>300)':
+                # For timeouts, count the timeout entries marked as "timeout"
+                count = (self.perf_soot["OA Inter"] == "timeout").sum()
+            else:
+                count = len(self.perf_soot[(self.perf_soot['Time'] >= min_time) & (self.perf_soot['Time'] < max_time)])
+            
+            if count > 0:  # Only include groups with at least one scenario
+                group_counts[group_name] = count
+        
+        # Create bar chart data with percentages
+        if group_counts:
+            total = sum(group_counts.values())
+            x_labels = list(group_counts.keys())
+            y_percentages = [count / total * 100 for count in group_counts.values()]
+            
+            self.visualizer.plot_bar_chart(
+                x=x_labels,
+                y=y_percentages,
+                title="Scenario Distribution by Execution Time (Including Timeouts)",
+                xlabel="Execution Time Range (seconds)",
+                ylabel="Percentage (%)",
+                filename=os.path.join(self.output_dir, "performance_time_distribution_bar_with_timeouts.png")
+            )
 
 
     def _plot_resource_timeseries(self):
