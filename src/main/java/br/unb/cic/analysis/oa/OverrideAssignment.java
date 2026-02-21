@@ -1,7 +1,7 @@
 package br.unb.cic.analysis.oa;
 
-import br.unb.cic.analysis.Main;
 import br.unb.cic.analysis.*;
+import br.unb.cic.analysis.Main;
 import br.unb.cic.analysis.model.*;
 import scala.collection.JavaConverters;
 import soot.*;
@@ -18,6 +18,10 @@ import java.util.stream.Collectors;
 
 public abstract class OverrideAssignment extends SceneTransformer implements AbstractAnalysis {
     private final Boolean interprocedural;
+    private static int fallbackCounter;
+    private static int pointToCounter;
+    private static final List<ComparisonAssignment> fallbackComparisons = new ArrayList<>();
+    private static final List<ComparisonAssignment> pointToComparisons = new ArrayList<>();
     protected List<Statement> pointerAnalysisMissingRefs;
     private int depthLimit;
     private OAConflictReport oaConflictReport;
@@ -68,6 +72,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         boolean isSameFieldReference = abstractFieldRef.getFieldRef().equals(flowFieldRef.getFieldRef());
         boolean bothAreSameConstructor = isBothAreSameConstructor(stmtInAbs, stmtInFlow);
 
+        registerFallbackComparison(valueInAbs, valueInFlow);
         return isSameOrSubtype && isSameFieldReference && !bothAreSameConstructor;
     }
 
@@ -192,6 +197,10 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         this.oaConflictReport = new OAConflictReport();
         this.traversedMethodsWrapper = new TraversedMethodsWrapper<>();
         this.stacktraceList = new ArrayList<>();
+        fallbackCounter = 0;
+        pointToCounter = 0;
+        fallbackComparisons.clear();
+        pointToComparisons.clear();
     }
 
     @Override
@@ -217,12 +226,48 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         // List<SootMethod> methods = Scene.v().getEntryPoints();
         scala.collection.immutable.List<SootMethod> scalaList = this.statementsUtils.getEntryPoints();
         List<SootMethod> methods = new ArrayList<>(JavaConverters.seqAsJavaList(scalaList));
-
+        //System.out.println("Methods to analyze: " + methods);
         methods.forEach(sootMethod -> traverse(new OverrideAssignmentAbstraction(), sootMethod, Statement.Type.IN_BETWEEN));
 
         oaConflictReport.report();
+        printComparisonSummary();
 
         createAnalysisReportLog(countEdges, methods);
+    }
+
+    private static void registerFallbackComparison(Value valueInAbs, Value valueInFlow) {
+        fallbackCounter += 1;
+        fallbackComparisons.add(new ComparisonAssignment(valueInAbs, valueInFlow));
+    }
+
+    private static void registerPointsToComparison(Value valueInAbs, Value valueInFlow) {
+        pointToCounter += 1;
+        pointToComparisons.add(new ComparisonAssignment(valueInAbs, valueInFlow));
+    }
+
+    private static void printComparisonSummary() {
+        printComparisonDetails("fallbacks due to missing points-to information. ", fallbackCounter, fallbackComparisons);
+        printComparisonDetails("comparisons made using points-to information: ", pointToCounter, pointToComparisons);
+    }
+
+    private static void printComparisonDetails(String label, int counter, List<ComparisonAssignment> comparisons) {
+        System.out.println(label + counter);
+        if (comparisons.isEmpty()) {
+            System.out.println("assignments: []");
+            return;
+        }
+
+        System.out.println("assignments:");
+        int limit = Math.min(3, comparisons.size());
+
+        for (int i = 0; i < limit; i++) {
+            // System.out.println("  [" + (i + 1) + "] " + comparisons.get(i));
+        }
+
+        // Se houver mais itens além dos exibidos
+        if (comparisons.size() > limit) {
+            // System.out.println("  ...");
+        }
     }
 
     private void createAnalysisReportLog(int countEdges, List<SootMethod> methods) {
@@ -243,7 +288,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         scala.collection.immutable.List<SootMethod> scalaList = this.statementsUtils.getCallgraphEntryPoints();
         List<SootMethod> entryPoints = new ArrayList<>(JavaConverters.seqAsJavaList(scalaList));
         //List<SootMethod> methods = new ArrayList<>(Collections.singleton(entryPoints.get(1).getDeclaringClass().getMethodByName("main")));
-
+        // System.out.println("CG Entry points: " + entryPoints);
         Scene.v().setEntryPoints(entryPoints);
     }
 
@@ -428,8 +473,9 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         String normalizedValueInFlow = normalizeValue(valueInFlow);
 
         boolean isSameValue = normalizedValueInAbs.equals(normalizedValueInFlow);
+        boolean hasCommonTargets = stmtInAbs.getPointsTo().hasNonEmptyIntersection(stmtInFlow.getPointsTo());
 
-        return isSameValue;
+        return isSameValue || hasCommonTargets;
     }
 
     /**
@@ -525,6 +571,7 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
         boolean isSameFieldReference = abstractFieldRef.getField().equals(flowFieldRef.getField());
         boolean hasCommonTargets = stmtInAbs.getPointsTo().hasNonEmptyIntersection(stmtInFlow.getPointsTo());
 
+        registerPointsToComparison(valueInAbs, valueInFlow);
         return hasCommonTargets && isSameFieldReference && !bothAreSameConstructor;
     }
 
