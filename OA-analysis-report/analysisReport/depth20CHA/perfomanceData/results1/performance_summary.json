@@ -1,0 +1,10 @@
+{
+    "mode": "ioa",
+    "callgraph": "CHA",
+    "run_number": 1,
+    "status": "SUCCESS",
+    "duration_seconds": 52411.23,
+    "peak_memory_gb": 10.3211,
+    "peak_cpu_percent": 7349.2,
+    "timestamp": "2026-02-05T04:01:43.955375"
+}

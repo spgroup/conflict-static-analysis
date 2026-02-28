@@ -1,0 +1,8 @@
+{
+  "duration_seconds": 52135.796,
+  "peak_memory_gb": 10.252439999999998,
+  "peak_cpu_percent": 6156.45,
+  "mode": "ioa",
+  "callgraph": "CHA",
+  "status": "SUCCESS"
+}
