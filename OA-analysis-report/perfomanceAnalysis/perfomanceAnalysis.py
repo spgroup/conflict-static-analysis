@@ -163,6 +163,7 @@ class PerformanceAnalyzer:
             timeout_value = max(max_time + 50, 400)  # Add 50 seconds above max or use 400
             time_data.extend([timeout_value] * timeout_count)
         
+        
         if len(time_data) > 0:
             self.visualizer.plot_histogram(
                 data=time_data,
@@ -219,7 +220,7 @@ class PerformanceAnalyzer:
         
         # Define time groups (in seconds) with updated 120-300 and timeout(>300)
         time_groups = {
-            '1-5': (1, 5),
+            '0-5': (0, 5),
             '5-10': (5, 10),
             '10-30': (10, 30),
             '30-60': (30, 60),
@@ -245,6 +246,7 @@ class PerformanceAnalyzer:
         # Create bar chart data with percentages
         if group_counts:
             total = sum(group_counts.values())
+            print("Total groups counted (including timeouts):", total)
             x_labels = list(group_counts.keys())
             y_percentages = [count / total * 100 for count in group_counts.values()]
             
