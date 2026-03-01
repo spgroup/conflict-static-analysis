@@ -77,7 +77,7 @@ class PerformanceAnalyzer:
             timeout_count = (self.perf_soot["OA Inter"] == "timeout").sum()
             non_timeout_df = self.perf_soot[self.perf_soot["OA Inter"] != "timeout"]
             
-            print("\nSoot Results (Aggregated - Excluding Timeouts):")
+            print("\nSoot Results:")
             print(f"  Total scenarios: {len(self.perf_soot)}")
             print(f"  Timeouts: {timeout_count}")
             print(f"  Non-timeout scenarios: {len(non_timeout_df)}")
@@ -225,17 +225,19 @@ class PerformanceAnalyzer:
             '30-60': (30, 60),
             '60-120': (60, 120),
             '120-300': (120, 300),
-            'timeout(>300)': (300, float('inf'))
+            'timeouts': (300, float('inf'))
         }
         
         # Count scenarios in each group
         group_counts = {}
+        non_timeout_df = self.perf_soot[self.perf_soot["OA Inter"] != "timeout"]
+        timeout_df = self.perf_soot[self.perf_soot["OA Inter"] == "timeout"]
         for group_name, (min_time, max_time) in time_groups.items():
-            if group_name == 'timeout(>300)':
+            if group_name == 'timeouts':
                 # For timeouts, count the timeout entries marked as "timeout"
-                count = (self.perf_soot["OA Inter"] == "timeout").sum()
+                count = len(timeout_df)
             else:
-                count = len(self.perf_soot[(self.perf_soot['Time'] >= min_time) & (self.perf_soot['Time'] < max_time)])
+                count = len(non_timeout_df[(non_timeout_df['Time'] >= min_time) & (non_timeout_df['Time'] < max_time)])
             
             if count > 0:  # Only include groups with at least one scenario
                 group_counts[group_name] = count
