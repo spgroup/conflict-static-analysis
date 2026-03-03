@@ -356,6 +356,7 @@ def parse_args():
     input_json2 = None
     labels = None
     performance_data_path = None
+    subset_non_timeouts = None
 
     for arg in sys.argv[1:]:
         if arg.lower().startswith("plot="):
@@ -369,16 +370,36 @@ def parse_args():
             labels = arg.split("=", 1)[1]
         elif arg.lower().startswith("performancedata="):
             performance_data_path = arg.split("=", 1)[1]
+        elif arg.lower().startswith("subsetofnontimeouts="):
+            raw = arg.split("=", 1)[1]
+            # Support comma-separated list of paths
+            subset_non_timeouts = [p.strip() for p in raw.split(",") if p.strip()]
 
-    return plot_enabled, input_json, input_json2, labels, performance_data_path
+    return (
+        plot_enabled,
+        input_json,
+        input_json2,
+        labels,
+        performance_data_path,
+        subset_non_timeouts,
+    )
 
 
 def main():
-    plot_enabled, input_json, input_json2, labels, performance_data_path = parse_args()
+    (
+        plot_enabled,
+        input_json,
+        input_json2,
+        labels,
+        performance_data_path,
+        subset_non_timeouts,
+    ) = parse_args()
 
     # Validate that at least one input is provided
-    if not input_json and not performance_data_path:
-        print("Error: Either out.json or performancedata parameter must be provided")
+    if not input_json and not performance_data_path and not subset_non_timeouts:
+        print(
+            "Error: Either out.json, performancedata, or subsetOfNonTimeouts parameter must be provided"
+        )
         sys.exit(1)
 
     # Parse labels if provided
@@ -487,6 +508,11 @@ def main():
     if perfomance_report_dir:
         perfomance_analyzer = PerformanceAnalyzer()
         perfomance_analyzer.analyze(plot=plot_enabled, output_dir=perfomance_report_dir)
+
+    # Handle subsetOfNonTimeouts: find common non-timeout scenarios across all paths and plot
+    if subset_non_timeouts:
+        perf_analyzer = PerformanceAnalyzer()
+        perf_analyzer.analyze_subset_non_timeouts(subset_non_timeouts)
 
 
 if __name__ == "__main__":
