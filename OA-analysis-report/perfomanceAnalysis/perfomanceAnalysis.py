@@ -285,24 +285,43 @@ class PerformanceAnalyzer:
                 ),
             )
 
+    @staticmethod
+    def _label_from_path(path):
+        """Extract a human-readable label from a path.
+
+        E.g. 'analysisReport/depth5CHA/perfomanceData/perfomanceReport'
+             -> 'depth5 CHA'
+        Looks for a path component matching depthN<ALGO> (case-insensitive).
+        Falls back to the last meaningful path component.
+        """
+        import re
+
+        parts = path.replace("\\", "/").split("/")
+        for part in parts:
+            m = re.match(r"(depth\d+)([a-zA-Z]+)", part, re.IGNORECASE)
+            if m:
+                return f"{m.group(1)} {m.group(2).upper()}"
+        return next((p for p in reversed(parts) if p), path)
+
     def analyze_subset_non_timeouts(self, paths):
         """
         Given a list of performance report directory paths, find the subset of
         scenarios (identified by project, class, method, merge commit) that had
-        NO timeout in ANY of the provided paths, then plot _plot_time_distribution_bar
-        for each path using only those scenarios.
-
-        Each path should point to a directory that contains
-        performance_soot_results_stats.csv.
+        NO timeout in ANY of the provided paths, then produce grouped plots
+        saved in the first valid path:
+          - time distribution bar (subset, no timeouts)
+          - time distribution bar with timeouts (all scenarios, no subset filter)
+          - CPU / Memory timeseries and smoothed variants
         """
         SOOT_CSV = PERFORMANCE_SOOT_STATS_CSV
+        RESOURCE_CSV = PERFORMANCE_RESOURCE_STATS_CSV
         ID_COLS = ["project", "class", "method", "merge commit"]
 
         print("\n" + "=" * 60)
         print("Subset Non-Timeouts Analysis")
         print("=" * 60)
 
-        # --- 1. Load all CSVs and resolve common non-timeout scenario keys ---
+        # --- 1. Load all soot CSVs ---
         path_dfs = {}
         for path in paths:
             csv_path = os.path.join(path, SOOT_CSV)
@@ -310,7 +329,6 @@ class PerformanceAnalyzer:
                 print(f"  Warning: File not found, skipping path: {csv_path}")
                 continue
             df = pd.read_csv(csv_path, sep=";")
-            # Verify required columns exist
             missing = [c for c in ID_COLS + ["OA Inter", "Time"] if c not in df.columns]
             if missing:
                 print(f"  Warning: Missing columns {missing} in {csv_path}, skipping.")
@@ -320,109 +338,39 @@ class PerformanceAnalyzer:
             timeouts = (df["OA Inter"] == "timeout").sum()
             print(f"  Loaded {csv_path}: {total} scenarios, {timeouts} timeouts")
 
-        if len(path_dfs) < 1:
+        if not path_dfs:
             print("  No valid paths found. Aborting subset analysis.")
             return
 
-        # Build sets of non-timeout scenario keys for each path
+        # --- 2. Load resource CSVs (best-effort, keyed by label) ---
+        resource_series = {}  # label -> DataFrame
+        for path in path_dfs:
+            label = self._label_from_path(path)
+            res_path = os.path.join(path, RESOURCE_CSV)
+            if os.path.exists(res_path):
+                res_df = pd.read_csv(res_path)
+                if not res_df.empty and "Time_Sec" in res_df.columns:
+                    resource_series[label] = res_df
+
+        # --- 3. Find common non-timeout scenario keys ---
         non_timeout_key_sets = []
-        for path, df in path_dfs.items():
-            non_timeout_df = df[df["OA Inter"] != "timeout"]
-            keys = set(zip(*[non_timeout_df[c].astype(str) for c in ID_COLS]))
-            non_timeout_key_sets.append(keys)
+        for df in path_dfs.values():
+            nt = df[df["OA Inter"] != "timeout"]
+            non_timeout_key_sets.append(set(zip(*[nt[c].astype(str) for c in ID_COLS])))
 
-        # Intersection: scenarios with no timeout in ALL paths
-        common_non_timeout_keys = non_timeout_key_sets[0]
+        common_keys = non_timeout_key_sets[0]
         for s in non_timeout_key_sets[1:]:
-            common_non_timeout_keys = common_non_timeout_keys & s
+            common_keys &= s
 
-        print(
-            f"\n  Common non-timeout scenarios across all paths: {len(common_non_timeout_keys)}"
-        )
+        print(f"\n  Common non-timeout scenarios across all paths: {len(common_keys)}")
 
-        if len(common_non_timeout_keys) == 0:
+        if not common_keys:
             print("  No common non-timeout scenarios found. Nothing to plot.")
             return
 
-        # --- 2. For each path, filter to subset and plot time distribution bar ---
-        previous_avg_time = None
-        previous_worst_10_avg_time = None
-        for path, df in path_dfs.items():
-            # Build a boolean mask for rows that belong to the common subset
-            key_col = list(zip(*[df[c].astype(str) for c in ID_COLS]))
-            mask = pd.Series(
-                [k in common_non_timeout_keys for k in key_col], index=df.index
-            )
-            subset_df = df[mask].copy()
+        output_path = next(iter(path_dfs))
 
-            # Calculate average time for the subset
-            subset_df_non_timeout = subset_df[subset_df["OA Inter"] != "timeout"]
-            avg_time = subset_df_non_timeout["Time"].mean() if len(subset_df_non_timeout) > 0 else 0
-            
-            # Calculate worst 10% average time
-            worst_10_threshold = subset_df_non_timeout["Time"].quantile(0.9) if len(subset_df_non_timeout) > 0 else 0
-            worst_10_df = subset_df_non_timeout[subset_df_non_timeout["Time"] >= worst_10_threshold]
-            worst_10_avg_time = worst_10_df["Time"].mean() if len(worst_10_df) > 0 else 0
-
-            print(f"\n  Plotting for path: {path}")
-            print(f"    Subset size: {len(subset_df)} scenarios")
-            print(f"    Average time: {avg_time:.2f} seconds", end="")
-            
-            # Calculate and print percentage difference from previous dataset
-            if previous_avg_time is not None:
-                pct_diff = ((avg_time - previous_avg_time) / previous_avg_time) * 100
-                sign = "+" if pct_diff >= 0 else ""
-                print(f" ({sign}{pct_diff:.1f}%)")
-            else:
-                print()
-            
-            print(f"    Worst 10% average time: {worst_10_avg_time:.2f} seconds", end="")
-            
-            # Calculate and print percentage difference from previous dataset's worst 10%
-            if previous_worst_10_avg_time is not None:
-                pct_diff_worst = ((worst_10_avg_time - previous_worst_10_avg_time) / previous_worst_10_avg_time) * 100
-                sign = "+" if pct_diff_worst >= 0 else ""
-                print(f" ({sign}{pct_diff_worst:.1f}%)")
-            else:
-                print()
-
-            # Use a sanitized folder name derived from the path for output filenames
-            safe_name = path.replace("/", "_").replace("\\", "_").strip("_")
-
-            # Temporarily override output_dir and perf_soot, then call the plot method
-            original_output_dir = self.output_dir
-            original_perf_soot = self.perf_soot
-
-            self.output_dir = path
-            self.perf_soot = subset_df
-
-            self._plot_time_distribution_bar_subset(safe_name)
-
-            # Restore
-            self.output_dir = original_output_dir
-            self.perf_soot = original_perf_soot
-            
-            # Update previous average times for next iteration
-            previous_avg_time = avg_time
-            previous_worst_10_avg_time = worst_10_avg_time
-
-        print("\n" + "=" * 60 + "\n")
-
-    def _plot_time_distribution_bar_subset(self, label):
-        """
-        Plot bar chart of time distribution for the current perf_soot (already
-        filtered to non-timeout subset). Output filename includes the given label.
-        """
-        if self.perf_soot is None or len(self.perf_soot) == 0:
-            return
-
-        # All rows are already non-timeout (subset was pre-filtered)
-        non_timeout_df = self.perf_soot[self.perf_soot["OA Inter"] != "timeout"]
-
-        if len(non_timeout_df) == 0:
-            return
-
-        time_groups = {
+        TIME_GROUPS = {
             "0-5": (0, 5),
             "5-10": (5, 10),
             "10-30": (10, 30),
@@ -430,37 +378,240 @@ class PerformanceAnalyzer:
             "60-120": (60, 120),
             "120+": (120, float("inf")),
         }
+        TIME_GROUPS_WITH_TIMEOUTS = {
+            "0-5": (0, 5),
+            "5-10": (5, 10),
+            "10-30": (10, 30),
+            "30-60": (30, 60),
+            "60-120": (60, 120),
+            "120-300": (120, 300),
+            "timeouts": None,  # sentinel – counted separately
+        }
 
-        group_counts = {}
-        for group_name, (min_time, max_time) in time_groups.items():
-            count = len(
-                non_timeout_df[
-                    (non_timeout_df["Time"] >= min_time)
-                    & (non_timeout_df["Time"] < max_time)
-                ]
+        # --- 4. Build per-path subsets, print stats, collect data ---
+        labels = []
+        subset_dfs = {}
+        all_dfs = {}  # full (unfiltered) soot DFs per label
+        previous_avg = None
+        previous_worst10 = None
+
+        for path, df in path_dfs.items():
+            key_col = list(zip(*[df[c].astype(str) for c in ID_COLS]))
+            mask = pd.Series([k in common_keys for k in key_col], index=df.index)
+            subset_df = df[mask].copy()
+            label = self._label_from_path(path)
+            labels.append(label)
+            subset_dfs[label] = subset_df
+            all_dfs[label] = df
+
+            nt = subset_df[subset_df["OA Inter"] != "timeout"]
+            avg = nt["Time"].mean() if len(nt) > 0 else 0
+            w10_threshold = nt["Time"].quantile(0.9) if len(nt) > 0 else 0
+            w10_avg = (
+                nt[nt["Time"] >= w10_threshold]["Time"].mean() if len(nt) > 0 else 0
             )
-            group_counts[group_name] = count
 
-        total = sum(group_counts.values())
-        if total == 0:
-            return
-        x_labels = list(group_counts.keys())
-        y_percentages = [count / total * 100 for count in group_counts.values()]
+            print(f"\n  Dataset: {label}  (path: {path})")
+            print(f"    Subset size: {len(subset_df)} scenarios")
+            print(f"    Average time: {avg:.2f}s", end="")
+            if previous_avg is not None:
+                pct = (avg - previous_avg) / previous_avg * 100
+                print(f"  ({'+' if pct >= 0 else ''}{pct:.1f}%)")
+            else:
+                print()
+            print(f"    Worst 10% avg time: {w10_avg:.2f}s", end="")
+            if previous_worst10 is not None:
+                pct = (w10_avg - previous_worst10) / previous_worst10 * 100
+                print(f"  ({'+' if pct >= 0 else ''}{pct:.1f}%)")
+            else:
+                print()
 
-        filename = os.path.join(
-            self.output_dir,
-            f"subset_non_timeouts_time_distribution_{label}.png",
+            previous_avg = avg
+            previous_worst10 = w10_avg
+
+        # --- 5. Grouped plots ---
+        self._plot_grouped_time_distribution(
+            subset_dfs, labels, TIME_GROUPS, output_path
         )
 
-        self.visualizer.plot_bar_chart(
+        self._plot_grouped_time_distribution_with_timeouts(
+            all_dfs, labels, TIME_GROUPS_WITH_TIMEOUTS, output_path
+        )
+
+        if resource_series:
+            self._plot_grouped_resource_timeseries(resource_series, labels, output_path)
+
+        print("\n" + "=" * 60 + "\n")
+
+    def _plot_grouped_time_distribution(
+        self, subset_dfs, labels, time_groups, output_path
+    ):
+        """Single grouped bar chart comparing time distributions across all datasets."""
+        x_labels = list(time_groups.keys())
+        datasets = []
+
+        for label in labels:
+            nt = subset_dfs[label][subset_dfs[label]["OA Inter"] != "timeout"]
+            counts = [
+                len(nt[(nt["Time"] >= min_t) & (nt["Time"] < max_t)])
+                for min_t, max_t in time_groups.values()
+            ]
+            total = sum(counts)
+            datasets.append([c / total * 100 if total > 0 else 0 for c in counts])
+
+        filename = os.path.join(
+            output_path,
+            "subset_non_timeouts_time_distribution_grouped.png",
+        )
+
+        self.visualizer.plot_grouped_bar_chart(
             x=x_labels,
-            y=y_percentages,
+            datasets=datasets,
+            labels=labels,
             title="Scenario Time Distribution – Common Non-Timeout Subset",
             xlabel="Execution Time Range (seconds)",
             ylabel="Percentage (%)",
             filename=filename,
         )
-        print(f"    Saved plot: {filename}")
+        print(f"\n  Saved grouped plot: {filename}")
+
+    def _plot_grouped_time_distribution_with_timeouts(
+        self, all_dfs, labels, time_groups, output_path
+    ):
+        """Grouped bar chart of time distribution including timeouts, all scenarios."""
+        x_labels = list(time_groups.keys())
+        datasets = []
+
+        for label in labels:
+            df = all_dfs[label]
+            nt = df[df["OA Inter"] != "timeout"]
+            timeout_count = (df["OA Inter"] == "timeout").sum()
+            counts = []
+            for group_name, bounds in time_groups.items():
+                if bounds is None:  # sentinel for "timeouts" bucket
+                    counts.append(int(timeout_count))
+                else:
+                    min_t, max_t = bounds
+                    counts.append(len(nt[(nt["Time"] >= min_t) & (nt["Time"] < max_t)]))
+            total = sum(counts)
+            datasets.append([c / total * 100 if total > 0 else 0 for c in counts])
+
+        filename = os.path.join(
+            output_path,
+            "all_scenarios_time_distribution_with_timeouts_grouped.png",
+        )
+
+        self.visualizer.plot_grouped_bar_chart(
+            x=x_labels,
+            datasets=datasets,
+            labels=labels,
+            title="Scenario Distribution by Execution Time (Including Timeouts) – All Scenarios",
+            xlabel="Execution Time Range (seconds)",
+            ylabel="Percentage (%)",
+            filename=filename,
+        )
+        print(f"  Saved grouped plot: {filename}")
+
+    def _plot_grouped_resource_timeseries(self, resource_series, labels, output_path):
+        """Four grouped resource plots: raw CPU, raw Memory, smoothed+raw, smoothed-only."""
+        import numpy as np
+
+        def _series(res_dfs, col):
+            """Return list of (x_arr, y_arr) for the given column, in label order."""
+            result = []
+            for lbl in labels:
+                if lbl in res_dfs and col in res_dfs[lbl].columns:
+                    df = res_dfs[lbl]
+                    result.append((df["Time_Sec"].values, df[col].values))
+                else:
+                    result.append((np.array([]), np.array([])))
+            return result
+
+        valid_labels = [l for l in labels if l in resource_series]
+
+        # Raw CPU
+        self.visualizer.plot_grouped_timeseries(
+            series_list=_series(resource_series, "CPU_Percent"),
+            labels=labels,
+            title="CPU Usage Over Time",
+            xlabel="Time (seconds)",
+            ylabel="CPU Usage (%)",
+            filename=os.path.join(output_path, "grouped_cpu_timeseries.png"),
+        )
+        print(
+            f"  Saved grouped plot: {os.path.join(output_path, 'grouped_cpu_timeseries.png')}"
+        )
+
+        # Raw Memory
+        self.visualizer.plot_grouped_timeseries(
+            series_list=_series(resource_series, "Memory_GB"),
+            labels=labels,
+            title="Memory Usage Over Time",
+            xlabel="Time (seconds)",
+            ylabel="Memory Usage (GB)",
+            filename=os.path.join(output_path, "grouped_memory_timeseries.png"),
+        )
+        print(
+            f"  Saved grouped plot: {os.path.join(output_path, 'grouped_memory_timeseries.png')}"
+        )
+
+        # Smoothed + raw CPU
+        self.visualizer.plot_grouped_smoothed_timeseries(
+            series_list=_series(resource_series, "CPU_Percent"),
+            labels=labels,
+            title="CPU Usage Over Time (with Smoothed Curve)",
+            xlabel="Time (seconds)",
+            ylabel="CPU Usage (%)",
+            filename=os.path.join(output_path, "grouped_cpu_normalized_smoothed.png"),
+            include_raw=True,
+        )
+        print(
+            f"  Saved grouped plot: {os.path.join(output_path, 'grouped_cpu_normalized_smoothed.png')}"
+        )
+
+        # Smoothed + raw Memory
+        self.visualizer.plot_grouped_smoothed_timeseries(
+            series_list=_series(resource_series, "Memory_GB"),
+            labels=labels,
+            title="Memory Usage Over Time (with Smoothed Curve)",
+            xlabel="Time (seconds)",
+            ylabel="Memory Usage (GB)",
+            filename=os.path.join(
+                output_path, "grouped_memory_normalized_smoothed.png"
+            ),
+            include_raw=True,
+        )
+        print(
+            f"  Saved grouped plot: {os.path.join(output_path, 'grouped_memory_normalized_smoothed.png')}"
+        )
+
+        # Smoothed-only CPU
+        self.visualizer.plot_grouped_smoothed_timeseries(
+            series_list=_series(resource_series, "CPU_Percent"),
+            labels=labels,
+            title="CPU Usage Over Time (Smoothed Only)",
+            xlabel="Time (seconds)",
+            ylabel="CPU Usage (%)",
+            filename=os.path.join(output_path, "grouped_cpu_smoothed_only.png"),
+            include_raw=False,
+        )
+        print(
+            f"  Saved grouped plot: {os.path.join(output_path, 'grouped_cpu_smoothed_only.png')}"
+        )
+
+        # Smoothed-only Memory
+        self.visualizer.plot_grouped_smoothed_timeseries(
+            series_list=_series(resource_series, "Memory_GB"),
+            labels=labels,
+            title="Memory Usage Over Time (Smoothed Only)",
+            xlabel="Time (seconds)",
+            ylabel="Memory Usage (GB)",
+            filename=os.path.join(output_path, "grouped_memory_smoothed_only.png"),
+            include_raw=False,
+        )
+        print(
+            f"  Saved grouped plot: {os.path.join(output_path, 'grouped_memory_smoothed_only.png')}"
+        )
 
     def _plot_resource_timeseries(self):
         """Plot separate timeseries of CPU and Memory usage over time"""
