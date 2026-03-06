@@ -345,6 +345,8 @@ class PerformanceAnalyzer:
             return
 
         # --- 2. For each path, filter to subset and plot time distribution bar ---
+        previous_avg_time = None
+        previous_worst_10_avg_time = None
         for path, df in path_dfs.items():
             # Build a boolean mask for rows that belong to the common subset
             key_col = list(zip(*[df[c].astype(str) for c in ID_COLS]))
@@ -353,8 +355,36 @@ class PerformanceAnalyzer:
             )
             subset_df = df[mask].copy()
 
+            # Calculate average time for the subset
+            subset_df_non_timeout = subset_df[subset_df["OA Inter"] != "timeout"]
+            avg_time = subset_df_non_timeout["Time"].mean() if len(subset_df_non_timeout) > 0 else 0
+            
+            # Calculate worst 10% average time
+            worst_10_threshold = subset_df_non_timeout["Time"].quantile(0.9) if len(subset_df_non_timeout) > 0 else 0
+            worst_10_df = subset_df_non_timeout[subset_df_non_timeout["Time"] >= worst_10_threshold]
+            worst_10_avg_time = worst_10_df["Time"].mean() if len(worst_10_df) > 0 else 0
+
             print(f"\n  Plotting for path: {path}")
             print(f"    Subset size: {len(subset_df)} scenarios")
+            print(f"    Average time: {avg_time:.2f} seconds", end="")
+            
+            # Calculate and print percentage difference from previous dataset
+            if previous_avg_time is not None:
+                pct_diff = ((avg_time - previous_avg_time) / previous_avg_time) * 100
+                sign = "+" if pct_diff >= 0 else ""
+                print(f" ({sign}{pct_diff:.1f}%)")
+            else:
+                print()
+            
+            print(f"    Worst 10% average time: {worst_10_avg_time:.2f} seconds", end="")
+            
+            # Calculate and print percentage difference from previous dataset's worst 10%
+            if previous_worst_10_avg_time is not None:
+                pct_diff_worst = ((worst_10_avg_time - previous_worst_10_avg_time) / previous_worst_10_avg_time) * 100
+                sign = "+" if pct_diff_worst >= 0 else ""
+                print(f" ({sign}{pct_diff_worst:.1f}%)")
+            else:
+                print()
 
             # Use a sanitized folder name derived from the path for output filenames
             safe_name = path.replace("/", "_").replace("\\", "_").strip("_")
@@ -371,6 +401,10 @@ class PerformanceAnalyzer:
             # Restore
             self.output_dir = original_output_dir
             self.perf_soot = original_perf_soot
+            
+            # Update previous average times for next iteration
+            previous_avg_time = avg_time
+            previous_worst_10_avg_time = worst_10_avg_time
 
         print("\n" + "=" * 60 + "\n")
 
