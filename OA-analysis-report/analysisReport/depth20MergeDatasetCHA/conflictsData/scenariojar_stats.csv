@@ -1,0 +1,9 @@
+scenario_jar,num_conflicts,num_scenarios
+/home/mds/miningframework/output/files/retrofit/2b6c719c6645f8e48dca6d0047c752069d321bc4/original-without-dependencies/merge/retrofit-1.2.3-SNAPSHOT.jar,2,2
+/home/mds/miningframework/output/files/SimianArmy/345ad9513aafff397050d613fa87ad06ddffe99d/original-without-dependencies/merge/simianarmy-2.5.0-SNAPSHOT.jar,1,1
+/home/mds/miningframework/output/files/voldemort/4cc1c145819030c8e2baffe4c92383de14b8d880/original-without-dependencies/merge/voldemort-1.9.21.jar,1,1
+/home/mds/miningframework/output/files/hector/0588608e7a2bdf974c985ff546207104f672bf6c/original-without-dependencies/merge/hector-core-1.1-3-SNAPSHOT.jar,1,1
+/home/mds/miningframework/output/files/titan/387c16ea05ef9fa312f37139228d2bbf61455ff4/original-without-dependencies/merge/titan-core-0.4.1-SNAPSHOT.jar,4,1
+/home/mds/miningframework/output/files/elasticsearch/d896886973660785aac45275ddb110c1a6babc57/original-without-dependencies/merge/elasticsearch-5.0.0-SNAPSHOT.jar,1,1
+/home/mds/miningframework/output/files/fitnesse/4d9ba9d221d879507440feb084fa7521b95111ec/original-without-dependencies/merge/fitnesse.jar,1,1
+/home/mds/miningframework/output/files/spring-boot/074771ec125dd407af0282b92960e9e9e3377e84/original-without-dependencies/merge/spring-boot-1.3.0.RELEASE.jar,1,1
