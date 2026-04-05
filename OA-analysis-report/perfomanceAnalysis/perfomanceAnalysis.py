@@ -396,7 +396,7 @@ class PerformanceAnalyzer:
         """Extract a human-readable label from a path.
 
         E.g. 'analysisReport/depth5CHA/perfomanceData/perfomanceReport'
-             -> 'depth5 CHA'
+             -> 'depth5'
         Looks for a path component matching depthN<ALGO> (case-insensitive).
         Falls back to the last meaningful path component.
         """
@@ -406,7 +406,7 @@ class PerformanceAnalyzer:
         for part in parts:
             m = re.match(r"(depth\d+)([a-zA-Z]+)", part, re.IGNORECASE)
             if m:
-                return f"{m.group(1)} {m.group(2).upper()}"
+                return m.group(1)
         return next((p for p in reversed(parts) if p), path)
 
     def analyze_subset_non_timeouts(self, paths):
@@ -531,6 +531,17 @@ class PerformanceAnalyzer:
                 print(f"  ({'+' if pct >= 0 else ''}{pct:.1f}%)")
             else:
                 print()
+            
+            # Add total execution time, mean CPU, and mean Memory from resource data
+            if label in resource_series:
+                res_df = resource_series[label]
+                if not res_df.empty:
+                    total_time = res_df["Time_Sec"].max() if "Time_Sec" in res_df.columns else 0
+                    mean_cpu = res_df["CPU_Percent_Total"].mean() if "CPU_Percent_Total" in res_df.columns else 0
+                    mean_memory = res_df["Memory_GB"].mean() if "Memory_GB" in res_df.columns else 0
+                    print(f"    Total execution time: {total_time:.2f}s")
+                    print(f"    Mean CPU: {mean_cpu:.2f}%")
+                    print(f"    Mean Memory: {mean_memory:.4f}GB")
 
             previous_avg = avg
             previous_worst10 = w10_avg
@@ -695,7 +706,7 @@ class PerformanceAnalyzer:
         self.visualizer.plot_grouped_smoothed_timeseries(
             series_list=_series(resource_series, "CPU_Percent_Total"),
             labels=labels,
-            title="CPU Usage Over Time (Smoothed Only)",
+            title="CPU Usage Over Time (Smoothed)",
             xlabel="Time (seconds)",
             ylabel="CPU Usage (%)",
             filename=os.path.join(output_path, "grouped_cpu_smoothed_only.png"),
@@ -709,7 +720,7 @@ class PerformanceAnalyzer:
         self.visualizer.plot_grouped_smoothed_timeseries(
             series_list=_series(resource_series, "Memory_GB"),
             labels=labels,
-            title="Memory Usage Over Time (Smoothed Only)",
+            title="Memory Usage Over Time (Smoothed)",
             xlabel="Time (seconds)",
             ylabel="Memory Usage (GB)",
             filename=os.path.join(output_path, "grouped_memory_smoothed_only.png"),
@@ -774,7 +785,7 @@ class PerformanceAnalyzer:
             df=self.perf_resource,
             x_col="Time_Sec",
             y_col="CPU_Percent_Total",
-            title="CPU Usage Over Time (Smoothed Only)",
+            title="CPU Usage Over Time (Smoothed)",
             xlabel="Time (seconds)",
             ylabel="CPU Usage (%)",
             filename=os.path.join(self.output_dir, "performance_cpu_smoothed_only.png"),
@@ -785,7 +796,7 @@ class PerformanceAnalyzer:
             df=self.perf_resource,
             x_col="Time_Sec",
             y_col="Memory_GB",
-            title="Memory Usage Over Time (Smoothed Only)",
+            title="Memory Usage Over Time (Smoothed)",
             xlabel="Time (seconds)",
             ylabel="Memory Usage (GB)",
             filename=os.path.join(
