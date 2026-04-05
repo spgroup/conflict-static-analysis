@@ -121,7 +121,113 @@ class PerformanceAnalyzer:
             print(f"  Max Memory (GB): {self.perf_resource['Memory_GB'].max():.4f}")
             print(f"  Min Memory (GB): {self.perf_resource['Memory_GB'].min():.4f}")
 
+        # Print statistics from 10 individual runs
+        self._print_individual_run_stats()
+
         print("\n" + "=" * 60 + "\n")
+
+    def _print_individual_run_stats(self):
+        """Calculate and print statistics for each column from 10 individual runs"""
+        print("\nStatistics from 10 Individual Runs:")
+        print("-" * 60)
+
+        # Find the results directories (results1 through results10)
+        results_folders = []
+        parent_dir = os.path.dirname(self.output_dir)
+
+        for i in range(1, 11):
+            results_path = os.path.join(parent_dir, f"results{i}")
+            if os.path.isdir(results_path):
+                results_folders.append((i, results_path))
+
+        if not results_folders:
+            print("  No individual result folders found (results1-results10)")
+            return
+
+        print(f"  Found {len(results_folders)} result folders\n")
+
+        # Load and analyze Soot results statistics
+        self._analyze_results_file(
+            results_folders, "soot-results.csv", sep=";", file_type="Soot Results"
+        )
+
+        # Load and analyze Resource usage statistics
+        self._analyze_results_file(
+            results_folders,
+            "resource_usage_series.csv",
+            sep=",",
+            file_type="Resource Usage",
+        )
+
+    def _analyze_results_file(self, results_folders, filename, sep=",", file_type=""):
+        """Analyze a specific results file across all result folders"""
+        print(f"\n  {file_type} Analysis ({filename}):")
+        print("  " + "-" * 56)
+
+        # Load data from all results folders
+        dfs = []
+        valid_folders = []
+
+        for run_num, results_path in results_folders:
+            file_path = os.path.join(results_path, filename)
+            if os.path.exists(file_path):
+                try:
+                    df = pd.read_csv(file_path, sep=sep)
+                    # Only add non-empty DataFrames
+                    if len(df) > 0:
+                        dfs.append(df)
+                        valid_folders.append(run_num)
+                except Exception as e:
+                    print(f"    Warning: Could not read {file_path}: {e}")
+            else:
+                print(f"    Warning: File not found: {file_path}")
+
+        if not dfs:
+            print(f"  No valid {filename} files found with data")
+            return
+
+        # Get numeric columns - try to convert all columns to numeric
+        # Use the first dataframe with data to determine numeric columns
+        first_df = dfs[0]
+        numeric_cols = []
+        
+        for col in first_df.columns:
+            # Try to convert column to numeric
+            converted = pd.to_numeric(first_df[col], errors="coerce")
+            if converted.notna().any():  # If at least some values were converted
+                numeric_cols.append(col)
+
+        if not numeric_cols:
+            print(f"  No numeric columns found in {filename}")
+            return
+
+        # Calculate statistics for each numeric column
+        for col in numeric_cols:
+            values = []
+            for df in dfs:
+                if col in df.columns:
+                    # For soot results, exclude timeouts
+                    df_filtered = df
+                    if "soot-results.csv" in filename and "OA Inter" in df.columns:
+                        df_filtered = df[df["OA Inter"] != "timeout"]
+                    
+                    # Extract numeric values, ignoring non-numeric entries
+                    col_values = pd.to_numeric(df_filtered[col], errors="coerce").dropna()
+                    values.extend(col_values.tolist())
+
+            if values:
+                values_series = pd.Series(values)
+                mean = values_series.mean()
+                std_dev = values_series.std()
+                # Coefficient of variation (variability as percentage)
+                cv = (std_dev / mean * 100) if mean != 0 else 0
+
+                print(f"    {col}:")
+                print(f"      Mean: {mean:.6f}")
+                print(f"      Std Dev: {std_dev:.6f}")
+                print(f"      Variability (CV %): {cv:.2f}%")
+            else:
+                print(f"    {col}: No numeric data available")
 
     def _create_plots(self):
         """Create performance visualization plots"""
