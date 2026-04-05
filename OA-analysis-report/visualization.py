@@ -730,3 +730,29 @@ class Visualizer:
         plt.legend(loc="best")
         plt.grid(True, linestyle="--", alpha=0.7)
         self._save_plot(filename)
+
+    def plot_horizontal_bar_chart(self, labels, values, title, xlabel, ylabel, filename, plot_text_on_bars=False):
+        """Plot horizontal bar chart.
+        
+        Args:
+            labels: list of labels for y-axis (e.g., ['depth5', 'depth10', 'depth20'])
+            values: list of values for x-axis (e.g., [4.79, 6.92, 12.99])
+            title, xlabel, ylabel, filename: standard plot params
+        """
+        plt.figure(figsize=(14, 6))
+        
+        palette = sns.color_palette("tab10", len(values))
+        bars = plt.barh(labels, values, color=palette[:len(values)], alpha=0.85)
+        
+        if plot_text_on_bars:
+            # Add value labels on bars
+            for i, (bar, val) in enumerate(zip(bars, values)):
+                plt.text(val, bar.get_y() + bar.get_height()/2, 
+                        f'{val:.1f}', ha='left', va='center', fontsize=10, fontweight='bold')
+            
+        plt.title(title, fontsize=12, fontweight='bold')
+        plt.xlabel(xlabel, fontsize=11)
+        plt.ylabel(ylabel, fontsize=11)
+        plt.grid(True, axis='x', linestyle='--', alpha=0.7)
+        self._save_plot(filename)
+

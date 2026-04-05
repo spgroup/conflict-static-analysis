@@ -500,6 +500,11 @@ class PerformanceAnalyzer:
         all_dfs = {}  # full (unfiltered) soot DFs per label
         previous_avg = None
         previous_worst10 = None
+        previous_total_time = None
+        previous_mean_cpu = None
+        previous_mean_memory = None
+        total_times = {}  # label -> total execution time
+        mean_times = {}   # label -> mean execution time
 
         for path, df in path_dfs.items():
             key_col = list(zip(*[df[c].astype(str) for c in ID_COLS]))
@@ -539,9 +544,36 @@ class PerformanceAnalyzer:
                     total_time = res_df["Time_Sec"].max() if "Time_Sec" in res_df.columns else 0
                     mean_cpu = res_df["CPU_Percent_Total"].mean() if "CPU_Percent_Total" in res_df.columns else 0
                     mean_memory = res_df["Memory_GB"].mean() if "Memory_GB" in res_df.columns else 0
-                    print(f"    Total execution time: {total_time:.2f}s")
-                    print(f"    Mean CPU: {mean_cpu:.2f}%")
-                    print(f"    Mean Memory: {mean_memory:.4f}GB")
+                    mean_time = avg  # mean execution time from soot results
+                    
+                    print(f"    Total execution time: {total_time:.2f}s", end="")
+                    if previous_total_time is not None:
+                        pct = (total_time - previous_total_time) / previous_total_time * 100
+                        print(f"  ({'+' if pct >= 0 else ''}{pct:.1f}%)")
+                    else:
+                        print()
+                    print(f"    Mean execution time: {mean_time:.2f}s")
+                    print(f"    Mean CPU: {mean_cpu:.2f}%", end="")
+                    if previous_mean_cpu is not None:
+                        pct = (mean_cpu - previous_mean_cpu) / previous_mean_cpu * 100
+                        print(f"  ({'+' if pct >= 0 else ''}{pct:.1f}%)")
+                    else:
+                        print()
+                    print(f"    Mean Memory: {mean_memory:.4f}GB", end="")
+                    if previous_mean_memory is not None:
+                        pct = (mean_memory - previous_mean_memory) / previous_mean_memory * 100
+                        print(f"  ({'+' if pct >= 0 else ''}{pct:.1f}%)")
+                    else:
+                        print()
+                    
+                    # Store for plotting
+                    total_times[label] = total_time
+                    mean_times[label] = mean_time
+                    
+                    # Update previous values for next iteration
+                    previous_total_time = total_time
+                    previous_mean_cpu = mean_cpu
+                    previous_mean_memory = mean_memory
 
             previous_avg = avg
             previous_worst10 = w10_avg
@@ -557,6 +589,13 @@ class PerformanceAnalyzer:
 
         if resource_series:
             self._plot_grouped_resource_timeseries(resource_series, labels, output_path)
+        
+        # Plot total duration time and mean execution time as horizontal bars
+        if total_times and labels:
+            self._plot_total_duration_horizontal(total_times, labels, output_path)
+        
+        if mean_times and labels:
+            self._plot_mean_execution_time_horizontal(mean_times, labels, output_path)
 
         print("\n" + "=" * 60 + "\n")
 
@@ -803,3 +842,50 @@ class PerformanceAnalyzer:
                 self.output_dir, "performance_memory_smoothed_only.png"
             ),
         )
+
+    def _plot_total_duration_horizontal(self, total_times, labels, output_path):
+        """Plot total duration time as horizontal bar chart.
+        
+        Args:
+            total_times: dict mapping label -> total duration time
+            labels: list of dataset labels in order
+            output_path: directory to save the plot
+        """
+        # Sort by label order (maintains the order from the analysis)
+        sorted_labels = [label for label in labels if label in total_times]
+        sorted_values = [total_times[label] for label in sorted_labels]
+        
+        filename = os.path.join(output_path, "total_duration_horizontal.png")
+        self.visualizer.plot_horizontal_bar_chart(
+            labels=sorted_labels,
+            values=sorted_values,
+            title="Dataset Execution Time by Depth",
+            xlabel="Time (seconds)",
+            ylabel="Depth",
+            filename=filename,
+        )
+        print(f"  Saved horizontal bar plot: {filename}")
+
+    def _plot_mean_execution_time_horizontal(self, mean_times, labels, output_path):
+        """Plot mean execution time as horizontal bar chart.
+        
+        Args:
+            mean_times: dict mapping label -> mean execution time
+            labels: list of dataset labels in order
+            output_path: directory to save the plot
+        """
+        # Sort by label order (maintains the order from the analysis)
+        sorted_labels = [label for label in labels if label in mean_times]
+        sorted_values = [mean_times[label] for label in sorted_labels]
+        
+        filename = os.path.join(output_path, "mean_execution_time_horizontal.png")
+        self.visualizer.plot_horizontal_bar_chart(
+            labels=sorted_labels,
+            values=sorted_values,
+            title="Mean Scenario Execution Time by Depth",
+            xlabel="Time (seconds)",
+            ylabel="Depth",
+            filename=filename,
+        )
+        print(f"  Saved horizontal bar plot: {filename}")
+
