@@ -320,14 +320,14 @@ class PerformanceAggregator:
             for df in all_data:
                 time_rows = df[df["Time_Sec"] == time_sec]
                 if not time_rows.empty:
-                    if "CPU_Percent" in df.columns:
-                        cpu_values.append(time_rows["CPU_Percent"].iloc[0])
+                    if "CPU_Percent_Total" in df.columns:
+                        cpu_values.append(time_rows["CPU_Percent_Total"].iloc[0])
                     if "Memory_GB" in df.columns:
                         memory_values.append(time_rows["Memory_GB"].iloc[0])
 
             # Compute mean for this time_sec
             if cpu_values:
-                row_data["CPU_Percent"] = sum(cpu_values) / len(cpu_values)
+                row_data["CPU_Percent_Total"] = sum(cpu_values) / len(cpu_values)
             if memory_values:
                 row_data["Memory_GB"] = sum(memory_values) / len(memory_values)
 
@@ -336,12 +336,12 @@ class PerformanceAggregator:
         # Convert to DataFrame and save
         result_df = pd.DataFrame(aggregated_data)
 
-        # Remove rows where CPU_Percent or Memory_GB are NaN
-        result_df = result_df.dropna(subset=["CPU_Percent", "Memory_GB"])
+        # Remove rows where CPU_Percent_Total or Memory_GB are NaN
+        result_df = result_df.dropna(subset=["CPU_Percent_Total", "Memory_GB"])
 
         # Remove rows where all three metrics are 0
         result_df = result_df[
-            ~((result_df["CPU_Percent"] == 0) & (result_df["Memory_GB"] == 0))
+            ~((result_df["CPU_Percent_Total"] == 0) & (result_df["Memory_GB"] == 0))
         ]
 
         # Save to CSV

@@ -112,9 +112,9 @@ class PerformanceAnalyzer:
         if self.perf_resource is not None and len(self.perf_resource) > 0:
             print("\nResource Usage (Aggregated):")
             print(f"  Total records: {len(self.perf_resource)}")
-            print(f"  Average CPU (%): {self.perf_resource['CPU_Percent'].mean():.2f}")
-            print(f"  Max CPU (%): {self.perf_resource['CPU_Percent'].max():.2f}")
-            print(f"  Min CPU (%): {self.perf_resource['CPU_Percent'].min():.2f}")
+            print(f"  Average CPU (%): {self.perf_resource['CPU_Percent_Total'].mean():.2f}")
+            print(f"  Max CPU (%): {self.perf_resource['CPU_Percent_Total'].max():.2f}")
+            print(f"  Min CPU (%): {self.perf_resource['CPU_Percent_Total'].min():.2f}")
             print(
                 f"  Average Memory (GB): {self.perf_resource['Memory_GB'].mean():.4f}"
             )
@@ -637,7 +637,7 @@ class PerformanceAnalyzer:
 
         # Raw CPU
         self.visualizer.plot_grouped_timeseries(
-            series_list=_series(resource_series, "CPU_Percent"),
+            series_list=_series(resource_series, "CPU_Percent_Total"),
             labels=labels,
             title="CPU Usage Over Time",
             xlabel="Time (seconds)",
@@ -663,7 +663,7 @@ class PerformanceAnalyzer:
 
         # Smoothed + raw CPU
         self.visualizer.plot_grouped_smoothed_timeseries(
-            series_list=_series(resource_series, "CPU_Percent"),
+            series_list=_series(resource_series, "CPU_Percent_Total"),
             labels=labels,
             title="CPU Usage Over Time (with Smoothed Curve)",
             xlabel="Time (seconds)",
@@ -693,7 +693,7 @@ class PerformanceAnalyzer:
 
         # Smoothed-only CPU
         self.visualizer.plot_grouped_smoothed_timeseries(
-            series_list=_series(resource_series, "CPU_Percent"),
+            series_list=_series(resource_series, "CPU_Percent_Total"),
             labels=labels,
             title="CPU Usage Over Time (Smoothed Only)",
             xlabel="Time (seconds)",
@@ -725,7 +725,7 @@ class PerformanceAnalyzer:
         self.visualizer.plot_timeseries(
             df=self.perf_resource,
             x_col="Time_Sec",
-            y_cols=["CPU_Percent"],
+            y_cols=["CPU_Percent_Total"],
             title="CPU Usage Over Time",
             xlabel="Time (seconds)",
             ylabel="CPU Usage (%)",
@@ -747,7 +747,7 @@ class PerformanceAnalyzer:
         self.visualizer.plot_normalized_smoothed_timeseries(
             df=self.perf_resource,
             x_col="Time_Sec",
-            y_col="CPU_Percent",
+            y_col="CPU_Percent_Total",
             title="CPU Usage Over Time (with Smoothed Curve)",
             xlabel="Time (seconds)",
             ylabel="CPU Usage (%)",
@@ -773,7 +773,7 @@ class PerformanceAnalyzer:
         self.visualizer.plot_smoothed_only_timeseries(
             df=self.perf_resource,
             x_col="Time_Sec",
-            y_col="CPU_Percent",
+            y_col="CPU_Percent_Total",
             title="CPU Usage Over Time (Smoothed Only)",
             xlabel="Time (seconds)",
             ylabel="CPU Usage (%)",
