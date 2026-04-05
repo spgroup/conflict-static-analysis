@@ -280,15 +280,43 @@ class Visualizer:
     def plot_bar_chart_compare(
         self, x, y1, y2, label1, label2, title, xlabel, ylabel, filename
     ):
-        """Plot two bar charts side by side for comparison"""
+        """Plot two bar charts side by side with double bars per index for comparison"""
+        import numpy as np
+        
         fig, ax = plt.subplots(figsize=(14, 6))
-        plot_df = self._prep_comparison_df(x, y1, y2, label1, label2, xlabel, ylabel)
-        sns.barplot(
-            data=plot_df, x=xlabel, y=ylabel, hue="Group", ax=ax, palette="tab10"
-        )
-
-        ax.set_title(title)
-        ax.grid(True, axis="y", linestyle="--", alpha=0.7)
+        
+        # Create positions for grouped bars
+        n_groups = len(x)
+        bar_width = 0.35
+        x_indices = np.arange(n_groups)
+        
+        # Get colors from palette
+        palette = sns.color_palette("tab10", 2)
+        
+        # Create bars
+        bars1 = ax.bar(x_indices - bar_width/2, y1, bar_width, 
+                       label=label1, color=palette[0], alpha=0.85)
+        bars2 = ax.bar(x_indices + bar_width/2, y2, bar_width, 
+                       label=label2, color=palette[1], alpha=0.85)
+        
+        # Add value labels on bars
+        for bars in [bars1, bars2]:
+            for bar in bars:
+                height = bar.get_height()
+                if height > 0:
+                    ax.text(bar.get_x() + bar.get_width()/2., height,
+                           f'{height:.1f}%',
+                           ha='center', va='bottom', fontsize=8)
+        
+        # Customize axes
+        ax.set_xlabel(xlabel, fontsize=11)
+        ax.set_ylabel(ylabel, fontsize=11)
+        ax.set_title(title, fontsize=12, fontweight='bold')
+        ax.set_xticks(x_indices)
+        ax.set_xticklabels(x)
+        ax.legend(loc='best', fontsize=10)
+        ax.grid(True, axis='y', linestyle='--', alpha=0.7)
+        
         self._save_plot(filename)
 
     def plot_distribution_buckets_compare(

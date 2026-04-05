@@ -7,6 +7,25 @@ class ScenarioAnalyzer:
     def __init__(self):
         self.visualizer = Visualizer()
         self.output_dir = '.'
+    
+    @staticmethod
+    def _extract_dataset_label_from_path(path):
+        """Extract dataset name from path like analysisReport/depth20RefDatasetSPARK/conflictsData/"""
+        # Check for RefDataset or MergeDataset keywords in the path
+        if 'RefDataset' in path:
+            return 'Ref Dataset'
+        elif 'MergeDataset' in path:
+            return 'Merge Dataset'
+        
+        # Otherwise get the parent directory name (depth20RefDatasetSPARK, etc.)
+        parent_dir = os.path.basename(os.path.dirname(path))
+        # Try to extract dataset name from parent directory
+        if 'RefDataset' in parent_dir:
+            return 'Ref Dataset'
+        elif 'MergeDataset' in parent_dir:
+            return 'Merge Dataset'
+        else:
+            return parent_dir
 
     def analyze(self, plot=True, output_dir='.'):
         self.output_dir = output_dir
@@ -242,11 +261,11 @@ class ScenarioAnalyzer:
         conflict_df2 = pd.read_csv(os.path.join(output_dir2, CONFLICT_STATS_CSV))
         scenarioJAR_df2 = pd.read_csv(os.path.join(output_dir2, SCENARIO_STATS_CSV))
         
-        # Use provided labels, otherwise extract JSON file names from paths
+        # Use provided labels, otherwise extract dataset names from paths
         if label1 is None:
-            label1 = os.path.basename(output_dir)
+            label1 = self._extract_dataset_label_from_path(output_dir)
         if label2 is None:
-            label2 = os.path.basename(output_dir2)
+            label2 = self._extract_dataset_label_from_path(output_dir2)
         
         self._print_scenario_stats(conflict_df1, scenarioJAR_df1, title=label1)
         print("\n" + "="*60)
