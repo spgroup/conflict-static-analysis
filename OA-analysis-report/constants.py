@@ -45,9 +45,13 @@ PLOT_MIN_DIFF = 'min_diff_per_scenario.png'
 PLOT_DEPTH_LOSS = 'conflicts_depth_loss.png'
 PLOT_SCENARIO_DEPTH_AFFECT = 'scenarios_depth_affect.png'
 PLOT_SCENARIO_DEPTH_LOSS = 'scenarios_depth_loss.png'
+PLOT_MEDIAN_DEPTH_GROUPED = 'median_depth_grouped_per_scenario.png'
+PLOT_MAX_DEPTH_GROUPED = 'max_depth_grouped_per_scenario.png'
+PLOT_MIN_DEPTH_GROUPED = 'min_depth_grouped_per_scenario.png'
 
 # Analysis thresholds and bins
 PERCENTAGE_BUCKETS = [20, 40, 60, 80, 100]
+DEPTH_GROUPS = [(0, 2), (2, 5), (5, 10), (10, 20)]  # Depth range groups
 CONFLICT_TYPES_BINS = 4
 DEFAULT_HIST_BINS = 30
 DEFAULT_DEPTH = 5

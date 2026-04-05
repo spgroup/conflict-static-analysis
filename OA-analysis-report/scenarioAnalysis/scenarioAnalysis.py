@@ -161,6 +161,9 @@ class ScenarioAnalyzer:
         
         # Metric histograms - median/max/min per scenario
         self._plot_scenario_metric_histograms(conflict_df, compare_conflict_df, label1, label2)
+        
+        # Grouped depth metrics - median/max/min per scenario grouped by depth ranges
+        self._plot_scenario_depth_grouped_metrics(conflict_df, compare_conflict_df, label1, label2)
 
     def _plot_scenario_depth_metrics(self, conflict_df, compare_conflict_df=None, label1='Data 1', label2='Data 2'):
         """Plot scenario depth affected and lost per depth"""
@@ -250,6 +253,62 @@ class ScenarioAnalyzer:
                         metric_col=metric_col,
                         agg_func=agg_func,
                         title=f'{prefix} {title} per Scenario',
+                        filename=os.path.join(self.output_dir, filename)
+                    )
+
+    def _plot_scenario_depth_grouped_metrics(self, df, compare_df=None, label1='Data 1', label2='Data 2'):
+        """Plot grouped bar charts for median/max/min depth per scenario by depth ranges (0-2, 2-5, 5-10, 10-20)"""
+        # Define depth range groups
+        depth_groups = [(0, 2), (2, 5), (5, 10), (10, 20)]
+        group_labels = ['0-2', '2-5', '5-10', '10-20']
+        
+        # Calculate metrics for each depth group
+        metrics = {
+            COL_DEPTH: ('Conflict Depth', [PLOT_MEDIAN_DEPTH_GROUPED, PLOT_MAX_DEPTH_GROUPED, PLOT_MIN_DEPTH_GROUPED]),
+        }
+        
+        for metric_col, (title, filenames) in metrics.items():
+            for agg_func, filename in zip(['median', 'max', 'min'], filenames):
+                prefix = agg_func.capitalize()
+                
+                # Calculate metrics for each depth range group
+                scenario_metrics = df.groupby(COL_SCENARIO_INDEX)[metric_col].agg(agg_func)
+                total_scenarios = len(scenario_metrics)
+                
+                # Calculate percentages for each depth group
+                percentages1 = []
+                for min_depth, max_depth in depth_groups:
+                    count = len(scenario_metrics[(scenario_metrics >= min_depth) & (scenario_metrics < max_depth)])
+                    percentage = (count / total_scenarios * 100) if total_scenarios > 0 else 0
+                    percentages1.append(percentage)
+                
+                if compare_df is not None:
+                    scenario_metrics2 = compare_df.groupby(COL_SCENARIO_INDEX)[metric_col].agg(agg_func)
+                    total_scenarios2 = len(scenario_metrics2)
+                    percentages2 = []
+                    for min_depth, max_depth in depth_groups:
+                        count = len(scenario_metrics2[(scenario_metrics2 >= min_depth) & (scenario_metrics2 < max_depth)])
+                        percentage = (count / total_scenarios2 * 100) if total_scenarios2 > 0 else 0
+                        percentages2.append(percentage)
+                    
+                    self.visualizer.plot_grouped_bar_chart_compare(
+                        x=group_labels,
+                        y1=percentages1,
+                        y2=percentages2,
+                        label1=label1,
+                        label2=label2,
+                        title=f'{prefix} {title} per Scenario',
+                        xlabel='Depth Range',
+                        ylabel='Percentage of Scenarios (%)',
+                        filename=os.path.join(self.output_dir, 'compare_' + filename)
+                    )
+                else:
+                    self.visualizer.plot_bar_chart(
+                        x=group_labels,
+                        y=percentages1,
+                        title=f'{prefix} {title} per Scenario',
+                        xlabel='Depth Range',
+                        ylabel='Percentage of Scenarios (%)',
                         filename=os.path.join(self.output_dir, filename)
                     )
 
