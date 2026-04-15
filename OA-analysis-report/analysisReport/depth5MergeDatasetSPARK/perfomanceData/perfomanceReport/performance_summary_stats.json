@@ -1,8 +1,0 @@
-{
-  "duration_seconds": 699.1600000000001,
-  "peak_memory_gb": 8.18467,
-  "peak_cpu_percent": 374.69199999999995,
-  "mode": "ioa",
-  "callgraph": "SPARK",
-  "status": "SUCCESS"
-}
