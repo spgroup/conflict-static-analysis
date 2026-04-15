@@ -7,6 +7,10 @@ public class OAConflict extends Conflict {
     private final String classpath;
     protected Boolean interprocedural;
 
+    public OAConflict(Statement source, Statement sink, Boolean interprocedural) {
+        this(source, sink, interprocedural, null);
+    } 
+
     public OAConflict(Statement source, Statement sink, Boolean interprocedural, String classpath) {
         super(source, sink);
         this.classpath = classpath;
