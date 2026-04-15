@@ -54,13 +54,13 @@
     <servers>
         <server>
             <id>spg</id>
-            <username></username>
-            <password></password>
+            <username>GIT_HUB_USER</username>
+            <password>GIT_HUB_TOKEN</password>
         </server>
         <server>
             <id>svfa</id>
-            <username></username>
-            <password></password>
+            <username>GIT_HUB_USER</username>
+            <password>GIT_HUB_TOKEN</password>
         </server>
     </servers>
 </settings>

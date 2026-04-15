@@ -4,7 +4,6 @@ git-repo/
 out.txt
 sootOutput/
 target/
-.vscode/
 output
 time.txt
 .settings
