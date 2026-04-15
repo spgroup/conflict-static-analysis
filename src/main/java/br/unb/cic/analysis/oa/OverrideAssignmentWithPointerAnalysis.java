@@ -39,6 +39,11 @@ public class OverrideAssignmentWithPointerAnalysis extends OverrideAssignment im
             getPointToFromBase(((ArrayRef) value).getBase(), stmt);
         } else if (value instanceof StaticFieldRef) {
             getPointToFromStaticField(((StaticFieldRef) value).getField(), stmt);
+        } else if (value instanceof Local) {
+            //Value rhs = stmt.getUnit().getUseBoxes().get(0).getValue();
+            //PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
+            //PointsToSet pts = pointsToAnalysis.reachingObjects((Local) rhs);
+            getPointToFromBase(value, stmt);
         }
         in.add(stmt);
     }

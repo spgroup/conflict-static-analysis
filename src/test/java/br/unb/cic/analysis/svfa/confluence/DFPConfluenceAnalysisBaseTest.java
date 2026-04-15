@@ -38,10 +38,10 @@ public class DFPConfluenceAnalysisBaseTest {
 
     @Test
     public void testDFPConfluentAnalysisExpectingTwoConflicts() {
-        analysis.execute(false);
+        analysis.execute(false, "SPARK");
         Set<ConfluenceConflict> conflicts = analysis.getConfluentConflicts();
         analysis.reportConflictsConfluence();
         System.out.println(conflicts.size());
-        Assert.assertEquals(2, conflicts.size());
+        Assert.assertEquals(3, conflicts.size());
     }
 }

@@ -5,7 +5,6 @@
 1. Make sure docker is installed and updated on the target machine. Run `docker -v`.
 2. Copy `Dockerfile` and `settings.xml` to target machine.
 3. Update **username** and **password** in servers context in `settings.xml` file.
-4. Between lines 57 and 61 of the `Dockerfile` you can choose the target version you want to run the experiment on. Check the comments
 
 ## Build the app’s container image
 
@@ -38,41 +37,45 @@ For remote access, run:
 
 `docker exec -it <container-id> /bin/bash`
 
-## Running the experiment n times
+## Running the Experiment Multiple Times
 
-Access the miningframework project folder
+To run the experiment ten times (as defined by the default configuration), access the container and execute the script:
 
-`cd /home/miningframework`
-
-To run the experiment, use the following commands:
-
-`chmod +x scripts/run_static_analyses_experiment.sh && ./scripts/run_static_analyses_experiment.sh <n>`
-
-You can pass the number (n) of times as an argument, the default is ten.
-
-### To copy the files results:
-
-`docker cp <container-id>:/home/miningframework/output/results <your-path>`
-
-## Analyze scenarios
-
-At the miningframework root, if you want to run the analyzes outside the experiment infrastructure, you can run for example:
-
-`./gradlew run -DmainClass="services.outputProcessors.soot.Main" --args="-icf -ioa -idfp -pdg -report"`
-
-### To copy the files results:
-
-```
-docker cp <container-id>:/home/miningframework/out.txt <your-path>  
-docker cp <container-id>:/home/miningframework/outConsole.txt <your-path>  
-docker cp <container-id>:/home/miningframework/time.txt <your-path>  
-docker cp <container-id>:/home/miningframework/output/data/soot-results.csv <your-path>  
-docker cp <container-id>:/home/miningframework/output/data/results.pdf <your-path>  
+```bash 
+cd /home && ./entrypoint.sh
 ```
 
-## Closing Docker Containers
+### Copying Results from the Container
 
-To stop and remove a docker container, run the following command:
+Use the docker cp command to copy result files from the container to your local machine:
 
-`docker stop <container-id>`
+```bash
+docker cp <container-id>:/home/mds/miningframework/results <your-local-path>
+docker cp <container-id>:/home/rds/miningframework/results <your-local-path>
+```
 
+## Running Analysis Manually
+
+At the root of the mining framework, if you want to run the analyses outside of the experiment infrastructure, you can
+run, for example:
+
+```bash
+./gradlew run -DmainClass="services.outputProcessors.soot.Main" --args="--ioa --ioa-without-pa"`
+```
+
+You can pass the `-l` flag to set the prodnfdity limit and the `-t` flag to set the timeout.
+
+### To retrieve the output files:
+
+```bash
+docker cp <container-id>:/miningframework/out.txt <seu-caminho>
+docker cp <container-id>:/miningframework/outConsole.txt <seu-caminho>
+docker cp <container-id>:/miningframework/time.txt <seu-caminho>
+docker cp <id-do-container>:/miningframework/output/data/soot-results.csv <seu-caminho>
+```
+
+## Stopping and Removing a Docker Container
+
+To stop and remove a Docker container, run the following command:
+
+`docker stop <id-do-container>`
