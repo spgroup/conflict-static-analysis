@@ -505,6 +505,7 @@ class PerformanceAnalyzer:
         previous_mean_memory = None
         total_times = {}  # label -> total execution time
         mean_times = {}   # label -> mean execution time
+        worst_10_times = {}  # label -> worst 10% average execution time
 
         for path, df in path_dfs.items():
             key_col = list(zip(*[df[c].astype(str) for c in ID_COLS]))
@@ -536,6 +537,9 @@ class PerformanceAnalyzer:
                 print(f"  ({'+' if pct >= 0 else ''}{pct:.1f}%)")
             else:
                 print()
+            
+            # Store worst 10% time for plotting
+            worst_10_times[label] = w10_avg
             
             # Add total execution time, mean CPU, and mean Memory from resource data
             if label in resource_series:
@@ -590,12 +594,15 @@ class PerformanceAnalyzer:
         if resource_series:
             self._plot_grouped_resource_timeseries(resource_series, labels, output_path)
         
-        # Plot total duration time and mean execution time as horizontal bars
+        # Plot total duration time, mean execution time, and worst 10% as horizontal bars
         if total_times and labels:
             self._plot_total_duration_horizontal(total_times, labels, output_path)
         
         if mean_times and labels:
             self._plot_mean_execution_time_horizontal(mean_times, labels, output_path)
+        
+        if worst_10_times and labels:
+            self._plot_worst_10_percent_time_horizontal(worst_10_times, labels, output_path)
 
         print("\n" + "=" * 60 + "\n")
 
@@ -883,6 +890,29 @@ class PerformanceAnalyzer:
             labels=sorted_labels,
             values=sorted_values,
             title="Mean Scenario Execution Time by Depth",
+            xlabel="Time (seconds)",
+            ylabel="Depth",
+            filename=filename,
+        )
+        print(f"  Saved horizontal bar plot: {filename}")
+
+    def _plot_worst_10_percent_time_horizontal(self, worst_10_times, labels, output_path):
+        """Plot worst 10% execution time as horizontal bar chart.
+        
+        Args:
+            worst_10_times: dict mapping label -> worst 10% average execution time
+            labels: list of dataset labels in order
+            output_path: directory to save the plot
+        """
+        # Sort by label order (maintains the order from the analysis)
+        sorted_labels = [label for label in labels if label in worst_10_times]
+        sorted_values = [worst_10_times[label] for label in sorted_labels]
+        
+        filename = os.path.join(output_path, "worst_10_percent_time_horizontal.png")
+        self.visualizer.plot_horizontal_bar_chart(
+            labels=sorted_labels,
+            values=sorted_values,
+            title="Worst 10% Scenario Execution Time by Depth",
             xlabel="Time (seconds)",
             ylabel="Depth",
             filename=filename,

@@ -183,6 +183,38 @@ class PerformanceAggregator:
 
         return self.report_dir
 
+    def _validate_oa_inter_consistency(self, df, groupby_cols):
+        """Validate that OA Inter values are consistent for each groupby_cols combination.
+        
+        Rules:
+        - A group cannot have conflicting boolean values (True and False together)
+        - Only transitions to 'timeout' are allowed (not boolean conflicts)
+        
+        Raises:
+            Exception: If conflicting OA Inter values are found for the same groupby_cols
+        """
+        grouped = df.groupby(groupby_cols)["OA Inter"].unique()
+        
+        conflicts = []
+        for group_key, unique_values in grouped.items():
+            unique_vals_set = set(unique_values)
+            
+            # Check if both True and False are present (boolean conflict)
+            if True in unique_vals_set and False in unique_vals_set:
+                conflicts.append({
+                    "group": dict(zip(groupby_cols, group_key)) if isinstance(group_key, tuple) else {groupby_cols[0]: group_key},
+                    "conflicting_values": list(unique_vals_set),
+                    "message": "Boolean conflict: OA Inter has both True and False values"
+                })
+        
+        if conflicts:
+            error_msg = "OA Inter consistency validation failed. Found conflicting values:\n"
+            for i, conflict in enumerate(conflicts, 1):
+                error_msg += f"\n{i}. {conflict['group']}\n"
+                error_msg += f"   Conflicting values: {conflict['conflicting_values']}\n"
+                error_msg += f"   {conflict['message']}\n"
+            raise Exception(error_msg)
+
     def _aggregate_soot_results(self):
         """Aggregate soot-results.csv files with mean for Time and majority vote for OA Inter"""
         all_data = []
@@ -207,6 +239,9 @@ class PerformanceAggregator:
 
         # Group by project, class, method, and merge commit
         groupby_cols = ["project", "class", "method", "merge commit"]
+
+        # Validate OA Inter consistency across result files
+        self._validate_oa_inter_consistency(combined_df, groupby_cols)
 
         # Aggregate Time by mean
         agg_dict = {"Time": "mean"}
