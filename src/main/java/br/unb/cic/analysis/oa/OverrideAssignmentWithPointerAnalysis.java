@@ -14,6 +14,10 @@ import java.util.List;
 
 public class OverrideAssignmentWithPointerAnalysis extends OverrideAssignment implements AbstractAnalysis {
 
+    public OverrideAssignmentWithPointerAnalysis(AbstractMergeConflictDefinition definition, int depthLimit, Boolean interprocedural, List<String> entrypoints, String classpath) {
+        super(definition, depthLimit, interprocedural, entrypoints, classpath);
+    }
+
     public OverrideAssignmentWithPointerAnalysis(AbstractMergeConflictDefinition definition, int depthLimit, Boolean interprocedural, List<String> entrypoints) {
         super(definition, depthLimit, interprocedural, entrypoints);
     }
