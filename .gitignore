@@ -14,4 +14,4 @@ soot-analysis.iml
 visited_methods.txt
 conflicts_log.txt
 *.pyc
-/oa-analysis/venv/
+/oa-analysis/venv
