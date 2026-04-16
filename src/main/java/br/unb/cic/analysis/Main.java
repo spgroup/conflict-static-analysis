@@ -134,44 +134,33 @@ public class Main {
         // write results to out.json
         final String outJSON = "out.json";
 
-        // get the previous content
-        String prevContent;
+        org.json.JSONArray allScenarios;
         try {
-            prevContent = new String(Files.readAllBytes(Paths.get(outJSON)));
+            String prevContent = new String(Files.readAllBytes(Paths.get(outJSON)));
+            allScenarios = new org.json.JSONArray(prevContent);
         } catch (Exception e) {
-            prevContent = "[\n";
+            allScenarios = new org.json.JSONArray();
             System.out.println("Error getting the previous content of the JSON file " + e.getMessage());
         }
-        StringBuilder results = new StringBuilder(prevContent);
 
         if (!JSONconflicts.isEmpty()) {
-            // remove the last character if it is a closing bracket
-            if (results.toString().trim().endsWith("]")) {
-                int idx = results.lastIndexOf("]");
-                results.replace(idx, idx + 1, ",\n");
-            }
-
-            // add the new content
-            JSONconflicts.forEach(c -> {
+            org.json.JSONArray scenarioConflicts = new org.json.JSONArray();
+            for (String c : JSONconflicts) {
                 try {
-                    results.append(c);
-                    results.append(JSONconflicts.indexOf(c) == JSONconflicts.size() - 1 ? "\n" : ",\n");
+                    scenarioConflicts.put(new org.json.JSONObject(c));
                 } catch (Exception e) {
                     System.out.println("error exporting the results " + e.getMessage());
                 }
-            });
-            results.append("\n]");
+            }
+            org.json.JSONObject scenario = new org.json.JSONObject();
+            scenario.put("conflicts", scenarioConflicts);
+            allScenarios.put(scenario);
         }
 
-        // write the new content
-        final FileWriter fwJSON = new FileWriter(outJSON);
-        String[] lines = results.toString().split("\n");
-        for (String line : lines) {
-            fwJSON.write(line + "\n");
+        try (FileWriter fwJSON = new FileWriter(outJSON)) {
+            fwJSON.write(allScenarios.toString(2)); 
         }
-        fwJSON.close();
         System.out.println(" JSON Results exported to " + outJSON);
-
         System.out.println("----------------------------");
     }
 
@@ -411,11 +400,11 @@ public class Main {
         OverrideAssignment overrideAssignment;
         switch (type) {
             case WITH_POINTER_ANALYSIS:
-                overrideAssignment = new OverrideAssignmentWithPointerAnalysis(definition, depthLimit, interprocedural, entrypoints);
+                overrideAssignment = new OverrideAssignmentWithPointerAnalysis(definition, depthLimit, interprocedural, entrypoints, classpath);
                 SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath, cg);
                 return overrideAssignment;
             case WITHOUT_POINTER_ANALYSIS:
-                overrideAssignment = new OverrideAssignmentWithoutPointerAnalysis(definition, depthLimit, interprocedural, entrypoints);
+                overrideAssignment = new OverrideAssignmentWithoutPointerAnalysis(definition, depthLimit, interprocedural, entrypoints, classpath);
                 SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath, cg);
                 return overrideAssignment;
             default:
