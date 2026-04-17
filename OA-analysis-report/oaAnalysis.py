@@ -8,6 +8,7 @@ from constants import *
 from conflictAnalysis.conflictAnalysis import ConflictAnalyzer
 from scenarioAnalysis.scenarioAnalysis import ScenarioAnalyzer
 from perfomanceAnalysis.perfomanceAnalysis import PerformanceAnalyzer
+from groundTruthAnalysis.groundTruthComparison import GroundTruthComparator
 
 
 class ConflictProcessor:
@@ -392,6 +393,7 @@ def parse_args():
     labels = None
     performance_data_path = None
     subset_non_timeouts = None
+    mds_ground_truth = None
 
     for arg in sys.argv[1:]:
         if arg.lower().startswith("plot="):
@@ -409,6 +411,8 @@ def parse_args():
             raw = arg.split("=", 1)[1]
             # Support comma-separated list of paths
             subset_non_timeouts = [p.strip() for p in raw.split(",") if p.strip()]
+        elif arg.lower().startswith("mdsgroundtruth="):
+            mds_ground_truth = arg.split("=", 1)[1]
 
     return (
         plot_enabled,
@@ -417,6 +421,7 @@ def parse_args():
         labels,
         performance_data_path,
         subset_non_timeouts,
+        mds_ground_truth,
     )
 
 
@@ -428,6 +433,7 @@ def main():
         labels,
         performance_data_path,
         subset_non_timeouts,
+        mds_ground_truth,
     ) = parse_args()
 
     # Validate that at least one input is provided
@@ -543,6 +549,24 @@ def main():
     if perfomance_report_dir:
         perfomance_analyzer = PerformanceAnalyzer()
         perfomance_analyzer.analyze(plot=plot_enabled, output_dir=perfomance_report_dir)
+
+    # Compare with ground truth if provided
+    if mds_ground_truth and perfomance_report_dir:
+        perf_soot_path = os.path.join(
+            perfomance_report_dir, PERFORMANCE_SOOT_STATS_CSV
+        )
+        
+        if os.path.exists(perf_soot_path):
+            gt_comparator = GroundTruthComparator()
+            gt_comparator.compare(
+                perf_soot_path=perf_soot_path,
+                ground_truth_path=mds_ground_truth,
+                output_dir=perfomance_report_dir,
+            )
+        else:
+            print(f"Error: Performance soot results file not found at {perf_soot_path}")
+    elif mds_ground_truth:
+        print("Note: Ground truth comparison requires both performancedata and mdsgroundtruth parameters")
 
     # Handle subsetOfNonTimeouts: find common non-timeout scenarios across all paths and plot
     if subset_non_timeouts:
