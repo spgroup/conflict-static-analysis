@@ -104,29 +104,52 @@ class GroundTruthComparator:
 
     def _generate_comparisons(self, matched_df):
         """
-        Generate two comparison subsets with different parity rules
+        Generate four comparison subsets with different parity rules
         
         Subset 1: Strict matching
+        - Only consider scenarios where OA Inter is "true" or "false" (exclude timeout/not-found)
         - loi false (No) = perf false
         - loi true (Yes) = perf true
         
-        Subset 2: Lenient matching
-        - loi false (No) = perf false or timeout or not-found
+        Subset 2: Timeout as False matching
+        - Only consider scenarios where OA Inter is "true", "false", or "timeout" (exclude not-found)
+        - Map timeout to false
+        - loi false (No) = perf false or timeout
         - loi true (Yes) = perf true
+        
+        Subset 3: Timeout as True matching
+        - Only consider scenarios where OA Inter is "true", "false", or "timeout" (exclude not-found)
+        - Map timeout to true
+        - loi false (No) = perf false
+        - loi true (Yes) = perf true or timeout
         """
         self.comparison_results = {}
         
-        # Subset 1: Strict matching
-        subset1_df = matched_df.copy()
+        # Subset 1: Strict matching - exclude timeout and not-found scenarios
+        subset1_df = matched_df[
+            (matched_df["OA Inter"] != "timeout") & 
+            (matched_df["OA Inter"] != "not-found")
+        ].copy()
         subset1_df["prediction_strict"] = subset1_df["oa_inter_prediction"]
-        self._analyze_subset(subset1_df, "strict", "Strict Matching")
+        self._analyze_subset(subset1_df, "strict", "Strict Matching (excluding timeout/not-found)")
         
-        # Subset 2: Lenient matching - map non-true values to false
-        subset2_df = matched_df.copy()
-        subset2_df["prediction_lenient"] = subset2_df["OA Inter"].apply(
+        # Subset 2: Timeout as False matching - exclude not-found, treat timeout as false
+        subset2_df = matched_df[
+            matched_df["OA Inter"] != "not-found"
+        ].copy()
+        subset2_df["prediction_timeout_false"] = subset2_df["OA Inter"].apply(
             lambda x: (x == "true" or x == True)
         )
-        self._analyze_subset(subset2_df, "lenient", "Lenient Matching")
+        self._analyze_subset(subset2_df, "timeout_false", "Timeout as False (excluding not-found)")
+        
+        # Subset 3: Timeout as True matching - exclude not-found, treat timeout as true
+        subset3_df = matched_df[
+            matched_df["OA Inter"] != "not-found"
+        ].copy()
+        subset3_df["prediction_timeout_true"] = subset3_df["OA Inter"].apply(
+            lambda x: (x == "true" or x == True or x == "timeout")
+        )
+        self._analyze_subset(subset3_df, "timeout_true", "Timeout as True (excluding not-found)")
 
     def _analyze_subset(self, df, subset_name, subset_description):
         """Analyze a comparison subset and calculate metrics"""
@@ -174,9 +197,9 @@ class GroundTruthComparator:
         }
 
     def _save_results(self):
-        """Save comparison results to CSV files"""
+        """Save comparison results to txt files"""
         # Create a summary report
-        summary_file = os.path.join(self.output_dir, "ground_truth_comparison_summary.csv")
+        summary_file = os.path.join(self.output_dir, "ground_truth_comparison_summary.txt")
         
         with open(summary_file, "w") as f:
             f.write("Ground Truth Comparison Analysis\n")
