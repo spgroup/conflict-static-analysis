@@ -26,30 +26,6 @@ Class Distribution:
   Negative (Predicted): 66
 
 
-Lenient Matching (timeout/not-found as False)
-================================================================================
-Number of Scenarios: 99
-
-Confusion Matrix:
-  TP (True Positive): 4
-  FP (False Positive): 4
-  TN (True Negative): 66
-  FN (False Negative): 25
-
-Metrics:
-  Accuracy: 0.7071
-  Precision: 0.5000
-  Recall: 0.1379
-  F1-Score: 0.2162
-  Specificity: 0.9429
-
-Class Distribution:
-  Positive (Ground Truth): 29
-  Negative (Ground Truth): 70
-  Positive (Predicted): 8
-  Negative (Predicted): 91
-
-
 Timeout as False (excluding not-found)
 ================================================================================
 Number of Scenarios: 99
