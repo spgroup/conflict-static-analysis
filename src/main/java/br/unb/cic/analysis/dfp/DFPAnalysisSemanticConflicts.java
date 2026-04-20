@@ -2,6 +2,7 @@ package br.unb.cic.analysis.dfp;
 
 import br.ufpe.cin.soot.analysis.jimple.JDFP;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+import br.unb.cic.analysis.SootWrapper;
 import br.unb.cic.analysis.StatementsUtil;
 import br.unb.cic.soot.graph.*;
 import br.unb.cic.soot.svfa.*;
@@ -253,6 +254,11 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
     @Override
     public CG callGraph() {
         return this.callGraph;
+    }
+
+    @Override
+    public void configureCallGraphPhase() {
+        SootWrapper.enableCallGraph(super.callGraph().toString());
     }
 
     public void setCallGraph(String callGraph) {
