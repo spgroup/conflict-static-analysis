@@ -60,6 +60,10 @@ public class Main {
     private List<String> JSONconflicts = new ArrayList<>();
     private ReachDefinitionAnalysis analysis;
 
+    // Guards against double-export when shutdown hook fires after normal completion
+    private static volatile boolean resultsExported = false;
+    private static final Object exportLock = new Object();
+
     public static void main(String args[]) {
         Main m = new Main();
         try {
@@ -72,6 +76,23 @@ public class Main {
             if (cmd.hasOption("mode")) {
                 mode = cmd.getOptionValue("mode");
             }
+
+            // Register a shutdown hook so that partial results are written to out.json even when
+            // the process is terminated early (e.g., by the mining framework timeout via SIGTERM on Unix).
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                synchronized (exportLock) {
+                    if (!resultsExported) {
+                        System.err.println("Shutdown detected. Exporting partial results to out.json...");
+                        try {
+                            m.exportResults();
+                        } catch (Exception e) {
+                            System.err.println("Error exporting partial results: " + e.getMessage());
+                        }
+                        resultsExported = true;
+                    }
+                }
+            }));
+
             if (cmd.hasOption("repo") && cmd.hasOption("commit")) {
                 DiffClass module = new DiffClass();
                 module.getGitRepository(cmd.getOptionValue("repo"));
@@ -82,7 +103,12 @@ public class Main {
             }
             m.runAnalysis(mode, m.parseClassPath(cmd.getOptionValue("cp")));
 
-            m.exportResults();
+            synchronized (exportLock) {
+                if (!resultsExported) {
+                    m.exportResults();
+                    resultsExported = true;
+                }
+            }
 
         } catch (ParseException e) {
             System.out.println("Error: " + e.getMessage());
@@ -279,6 +305,11 @@ public class Main {
         }
     }
 
+    private void addConflictText(String conflict) {
+        conflicts.add(conflict);
+        System.out.println("[CONFLICT_FOUND]");
+    }
+
     private void runPessimisticDataFlowAnalysis(String classpath) {
         PackManager.v().getPack("jtp").add(
                 new Transform("jtp.analysis", new BodyTransformer() {
@@ -286,19 +317,13 @@ public class Main {
                     protected void internalTransform(Body body, String s, Map<String, String> map) {
                         PessimisticTaintedAnalysis analysis = new PessimisticTaintedAnalysis(body, definition);
 
-                        conflicts.addAll(
-                                analysis
-                                        .getConflicts()
-                                        .stream()
-                                        .map(Conflict::toString)
-                                        .collect(Collectors.toList()));
+                        analysis.getConflicts().stream()
+                                .map(Conflict::toString)
+                                .forEach(Main.this::addConflictText);
 
-                        JSONconflicts.addAll(
-                                analysis
-                                        .getConflicts()
-                                        .stream()
-                                        .map(Conflict::toJSON)
-                                        .collect(Collectors.toList()));
+                        analysis.getConflicts().stream()
+                                .map(Conflict::toJSON)
+                                .forEach(JSONconflicts::add);
                     }
                 })
         );
@@ -340,8 +365,8 @@ public class Main {
                 .build()
                 .execute();
         if (analysis != null) {
-            conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
-            JSONconflicts.addAll(analysis.getConflicts().stream().map(c -> c.toJSON()).collect(Collectors.toList()));
+            analysis.getConflicts().stream().map(c -> c.toString()).forEach(this::addConflictText);
+            analysis.getConflicts().stream().map(c -> c.toJSON()).forEach(JSONconflicts::add);
         }
     }
 
@@ -363,13 +388,13 @@ public class Main {
 
         SootWrapper.applyPackages();
 
-        conflicts.addAll(overrideAssignment.getConflicts().stream()
+        overrideAssignment.getConflicts().stream()
                 .map(Object::toString)
-                .collect(Collectors.toList()));
+                .forEach(this::addConflictText);
 
-        JSONconflicts.addAll(overrideAssignment.getFilteredConflicts().stream()
+        overrideAssignment.getFilteredConflicts().stream()
                 .map(c -> c.toJSON())
-                .collect(Collectors.toList()));
+                .forEach(JSONconflicts::add);
 
         saveExecutionTime("Time to perform OA " + modeLabel);
 
@@ -431,8 +456,8 @@ public class Main {
                 .build()
                 .execute();
 
-        conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
-        JSONconflicts.addAll(analysis.getConflicts().stream().map(c -> c.toJSON()).collect(Collectors.toList()));
+        analysis.getConflicts().stream().map(c -> c.toString()).forEach(this::addConflictText);
+        analysis.getConflicts().stream().map(c -> c.toJSON()).forEach(JSONconflicts::add);
     }
 
     private void runPDGAnalysis(String classpath, Boolean omitExceptingUnitEdges) {
@@ -452,10 +477,10 @@ public class Main {
 
         analysis.buildPDG(cd, dfp);
 
-        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsPDG())
+        JavaConverters.asJavaCollection(analysis.reportConflictsPDG())
                 .stream()
                 .map(p -> formatConflict(p.toString()))
-                .collect(Collectors.toList()));
+                .forEach(this::addConflictText);
 
         saveExecutionTime("Time to perform PDG" + type_analysis);
 
@@ -489,10 +514,11 @@ public class Main {
         analysis.buildDFP();
 
         JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
-                .forEach(p -> conflicts.add(formatConflict(p.toString())));
+                .stream()
+                .map(p -> formatConflict(p.toString()))
+                .forEach(this::addConflictText);
 
-
-        //JSONconflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVGJSON()));
+        JavaConverters.asJavaCollection(analysis.reportConflictsSVGJSON()).forEach(JSONconflicts::add);
 
         saveExecutionTime("Time to perform DFP " + type_analysis);
         System.out.println("Depth limit: " + analysis.getDepthLimit());
@@ -522,10 +548,10 @@ public class Main {
 
         analysis.buildCD();
 
-        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsCD())
+        JavaConverters.asJavaCollection(analysis.reportConflictsCD())
                 .stream()
                 .map(p -> formatConflict(p.toString()))
-                .collect(Collectors.toList()));
+                .forEach(this::addConflictText);
 
         saveExecutionTime("Time to perform CD" + type_analysis);
 
@@ -555,12 +581,12 @@ public class Main {
 
         analysis.buildSparseValueFlowGraph();
 
-        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
+        JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
                 .stream()
                 .map(p -> formatConflict(p.toString()))
-                .collect(Collectors.toList()));
+                .forEach(this::addConflictText);
 
-        JSONconflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVGJSON()));
+        JavaConverters.asJavaCollection(analysis.reportConflictsSVGJSON()).forEach(JSONconflicts::add);
 
         saveExecutionTime("Time to perform DF " + type_analysis);
 
@@ -582,10 +608,13 @@ public class Main {
 
         System.out.println("Depth limit: " + analysis.getDepthLimit());
         analysis.getConfluentConflicts(false)
-                .forEach(p -> conflicts.add(formatConflict(p.toString())));
-
+                .stream()
+                .map(p -> formatConflict(p.toString()))
+                .forEach(this::addConflictText);
         analysis.getConfluentConflicts(true)
-                .forEach(p -> JSONconflicts.add(p.toJSON()));
+                .stream()
+                .map(ConfluenceConflict::toJSON)
+                .forEach(JSONconflicts::add);
 
         //System.out.println("CONFLICTS: " + conflicts.toString());
         List<String> conflicts_report = analysis.reportConflictsConfluence();
