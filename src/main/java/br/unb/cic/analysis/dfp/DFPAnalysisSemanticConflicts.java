@@ -17,7 +17,6 @@ import soot.Unit;
 import java.io.File;
 import java.util.*;
 
-
 /**
  * An analysis wrapper around the Sparse value
  * flow analysis implementation.
@@ -37,7 +36,8 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
      * @param depthLimit  the depth limit for the analysis
      * @param entrypoints the list of entry points for the analysis
      */
-    public DFPAnalysisSemanticConflicts(String classPath, AbstractMergeConflictDefinition definition, int depthLimit, List<String> entrypoints) {
+    public DFPAnalysisSemanticConflicts(String classPath, AbstractMergeConflictDefinition definition, int depthLimit,
+                                        List<String> entrypoints) {
         this.cp = classPath;
         this.depthLimit = depthLimit;
         this.statementsUtils = new StatementsUtil(definition, entrypoints);
@@ -51,13 +51,14 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
         this(classPath, definition, depthLimit, new ArrayList<>());
     }
 
-    public DFPAnalysisSemanticConflicts(String classPath, AbstractMergeConflictDefinition definition, List<String> entrypoints) {
+    public DFPAnalysisSemanticConflicts(String classPath, AbstractMergeConflictDefinition definition,
+                                        List<String> entrypoints) {
         this(classPath, definition, 5, entrypoints);
     }
 
     @Override
     public String sootClassPath() {
-        //TODO: what is the role of soot classPath here??
+        // TODO: what is the role of soot classPath here??
         return cp;
     }
 
@@ -91,6 +92,7 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
 
     /**
      * Computes the source-sink paths
+     * 
      * @return a set with a list of nodes that together builds a source-sink path.
      */
     public Set<List<StatementNode>> findSourceSinkPaths() {
@@ -100,7 +102,7 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
                 .asJavaCollection(svg().findConflictingPaths())
                 .forEach(p -> paths.add(new ArrayList(JavaConverters.asJavaCollection(p))));
 
-       return paths;
+        return paths;
     }
 
     @Override
@@ -114,11 +116,10 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
         return JavaConverters.asScalaBuffer(Arrays.asList(array)).toList();
     }
 
-
     @Override
     public final scala.collection.immutable.List<SootMethod> getEntryPoints() {
 
-        //return this.statementsUtils.getEntryPoints(); // DEVELOP
+        // return this.statementsUtils.getEntryPoints(); // DEVELOP
 
         this.statementsUtils.getDefinition().loadSourceStatements();
         this.statementsUtils.getDefinition().loadSinkStatements();
@@ -127,7 +128,6 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
         return entrypoints;
 
     }
-
 
     public final scala.collection.immutable.List<SootMethod> getAnalysisEntryPoints() {
         this.statementsUtils.getDefinition().loadSourceStatements();
@@ -139,10 +139,9 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
 
     @Override
     public final NodeType analyze(Unit unit) {
-        if(isSource(unit)) {
+        if (isSource(unit)) {
             return SourceNode.instance();
-        }
-        else if(isSink(unit)) {
+        } else if (isSink(unit)) {
             return SinkNode.instance();
         }
         return SimpleNode.instance();
@@ -164,7 +163,7 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
 
     @Override
     public boolean propagateObjectTaint() {
-        return true;
+        return (this.callGraph instanceof CHA$) || (this.callGraph instanceof RTA$);
     }
 
     @Override
@@ -211,10 +210,8 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
         VisitedMethods srcStep = src.getPathVisitedMethods().head();
         VisitedMethods sinkStep = sink.getPathVisitedMethods().head();
 
-
         int lineSrc = srcStep.line();
         int lineSink = sinkStep.line();
-
 
         return Optional.of(
                 Collections.singletonList(
@@ -223,10 +220,7 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
                                 "Data flows from execution of line " + lineSrc + " to " + lineSink +
                                         ", defined in " + src.unit() + " and propagated in " + sink.unit(),
                                 "Caused by line " + lineSrc + " flow: " + src.pathVisitedMethodsToString(),
-                                "Caused by line " + lineSink + " flow: " + sink.pathVisitedMethodsToString()
-                        )
-                )
-        );
+                                "Caused by line " + lineSink + " flow: " + sink.pathVisitedMethodsToString())));
 
     }
 
@@ -258,7 +252,7 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
 
     @Override
     public void configureCallGraphPhase() {
-        SootWrapper.enableCallGraph(super.callGraph().toString());
+        SootWrapper.enableCallGraph(this.callGraph().toString());
     }
 
     public void setCallGraph(String callGraph) {
