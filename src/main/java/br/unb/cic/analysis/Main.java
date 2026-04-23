@@ -26,6 +26,7 @@ import br.unb.cic.analysis.reachability.ReachabilityAnalysis;
 import br.unb.cic.analysis.svfa.SVFAAnalysis;
 import br.unb.cic.analysis.svfa.SVFAInterProcedural;
 import br.unb.cic.analysis.svfa.SVFAIntraProcedural;
+import br.unb.cic.analysis.svfa.confluence.ConfluenceConflict;
 import br.unb.cic.analysis.svfa.confluence.DFPConfluenceAnalysis;
 import br.unb.cic.diffclass.DiffClass;
 import com.google.common.base.Stopwatch;
