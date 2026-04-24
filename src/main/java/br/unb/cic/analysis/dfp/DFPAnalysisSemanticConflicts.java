@@ -67,6 +67,8 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
         return new Tuple2<>("wjtp", new Transform("wjtp.svfa", new soot.SceneTransformer() {
             @Override
             protected void internalTransform(String phaseName, Map<String, String> options) {
+                DFPAnalysisSemanticConflicts.this.pointsToAnalysis_$eq(Scene.v().getPointsToAnalysis());
+                DFPAnalysisSemanticConflicts.this.initAllocationSites();
                 List<SootMethod> methods = JavaConverters.seqAsJavaList(getAnalysisEntryPoints());
                 methods.forEach(sootMethod -> traverse(sootMethod, new ListBuffer<>(), false));
             }
@@ -78,6 +80,8 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
         return new Tuple2<>("wjtp", new Transform("wjtp.dfp", new soot.SceneTransformer() {
             @Override
             protected void internalTransform(String phaseName, Map<String, String> options) {
+                DFPAnalysisSemanticConflicts.this.pointsToAnalysis_$eq(Scene.v().getPointsToAnalysis());
+                DFPAnalysisSemanticConflicts.this.initAllocationSites();
                 System.out.println("countEdges: " + Scene.v().getCallGraph().size());
                 List<SootMethod> methods = JavaConverters.seqAsJavaList(getAnalysisEntryPoints());
                 methods.forEach(sootMethod -> traverseDFP(sootMethod, new ListBuffer<>(), false));
