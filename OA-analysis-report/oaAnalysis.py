@@ -394,6 +394,7 @@ def parse_args():
     performance_data_path = None
     subset_non_timeouts = None
     mds_ground_truth = None
+    soot_results_path = None
 
     for arg in sys.argv[1:]:
         if arg.lower().startswith("plot="):
@@ -413,6 +414,8 @@ def parse_args():
             subset_non_timeouts = [p.strip() for p in raw.split(",") if p.strip()]
         elif arg.lower().startswith("mdsgroundtruth="):
             mds_ground_truth = arg.split("=", 1)[1]
+        elif arg.lower().startswith("sootresults="):
+            soot_results_path = arg.split("=", 1)[1]
 
     return (
         plot_enabled,
@@ -422,6 +425,7 @@ def parse_args():
         performance_data_path,
         subset_non_timeouts,
         mds_ground_truth,
+        soot_results_path,
     )
 
 
@@ -434,12 +438,13 @@ def main():
         performance_data_path,
         subset_non_timeouts,
         mds_ground_truth,
+        soot_results_path,
     ) = parse_args()
 
     # Validate that at least one input is provided
-    if not input_json and not performance_data_path and not subset_non_timeouts:
+    if not input_json and not performance_data_path and not subset_non_timeouts and not soot_results_path:
         print(
-            "Error: Either out.json, performancedata, or subsetOfNonTimeouts parameter must be provided"
+            "Error: Either out.json, performancedata, sootresults, or subsetOfNonTimeouts parameter must be provided"
         )
         sys.exit(1)
 
@@ -551,22 +556,29 @@ def main():
         perfomance_analyzer.analyze(plot=plot_enabled, output_dir=perfomance_report_dir)
 
     # Compare with ground truth if provided
-    if mds_ground_truth and perfomance_report_dir:
-        perf_soot_path = os.path.join(
-            perfomance_report_dir, PERFORMANCE_SOOT_STATS_CSV
-        )
-        
-        if os.path.exists(perf_soot_path):
+    if mds_ground_truth:
+        # Resolve which soot results CSV to use
+        if soot_results_path:
+            perf_soot_path = soot_results_path
+            gt_output_dir = os.path.dirname(os.path.abspath(soot_results_path))
+        elif perfomance_report_dir:
+            perf_soot_path = os.path.join(perfomance_report_dir, PERFORMANCE_SOOT_STATS_CSV)
+            gt_output_dir = perfomance_report_dir
+        else:
+            perf_soot_path = None
+            gt_output_dir = None
+
+        if perf_soot_path and os.path.exists(perf_soot_path):
             gt_comparator = GroundTruthComparator()
             gt_comparator.compare(
                 perf_soot_path=perf_soot_path,
                 ground_truth_path=mds_ground_truth,
-                output_dir=perfomance_report_dir,
+                output_dir=gt_output_dir,
             )
+        elif perf_soot_path:
+            print(f"Error: Soot results file not found at {perf_soot_path}")
         else:
-            print(f"Error: Performance soot results file not found at {perf_soot_path}")
-    elif mds_ground_truth:
-        print("Note: Ground truth comparison requires both performancedata and mdsgroundtruth parameters")
+            print("Note: Ground truth comparison requires either sootresults or performancedata parameter")
 
     # Handle subsetOfNonTimeouts: find common non-timeout scenarios across all paths and plot
     if subset_non_timeouts:
