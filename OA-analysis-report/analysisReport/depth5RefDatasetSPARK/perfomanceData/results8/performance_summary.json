@@ -3,8 +3,8 @@
     "callgraph": "SPARK",
     "run_number": 1,
     "status": "SUCCESS",
-    "duration_seconds": 8185.11,
-    "peak_memory_gb": 12.6756,
-    "peak_cpu_percent": 399.56,
-    "timestamp": "2026-03-26T16:11:20.099188"
+    "duration_seconds": 7990.18,
+    "peak_memory_gb": 13.6548,
+    "peak_cpu_percent": 98.92,
+    "timestamp": "2026-04-26T00:29:43.417606"
 }
