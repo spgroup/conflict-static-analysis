@@ -86,40 +86,44 @@ class PerformanceAnalyzer:
             )
 
             if len(non_timeout_df) > 0:
+                t = non_timeout_df["Time"]
                 print("\n  Time Statistics (seconds):")
-                print(f"  Average time (seconds): {non_timeout_df['Time'].mean():.2f}")
-                print(f"  Median time (seconds): {non_timeout_df['Time'].median():.2f}")
-                print(f"  Max time (seconds): {non_timeout_df['Time'].max():.2f}")
-                print(f"  Min time (seconds): {non_timeout_df['Time'].min():.2f}")
+                print(f"  Average:         {t.mean():.2f}")
+                print(f"  Median (50th):   {t.median():.2f}")
+                for p in [75, 90, 95, 99]:
+                    print(f"  {p}th percentile: {t.quantile(p / 100):.2f}")
+                print(f"  Max:             {t.max():.2f}")
+                print(f"  Min:             {t.min():.2f}")
+
                 false_count = (self.perf_soot["OA Inter"] == "false").sum()
                 false_percentage = (
                     (false_count / len(self.perf_soot) * 100)
                     if len(self.perf_soot) > 0
                     else 0
                 )
-
-                print(f"  False results (%) : {false_percentage:.2f}%")
-                print(f"  True results (%) : {100 - false_percentage:.2f}%")
-
-                # Print percentiles
-                print("\n  Time Percentiles:")
-                percentiles = [50, 75, 90, 95, 99]
-                for p in percentiles:
-                    value = non_timeout_df["Time"].quantile(p / 100)
-                    print(f"    {p}th percentile: {value:.2f} seconds")
+                print(f"\n  False results (%) : {false_percentage:.2f}%")
+                print(f"  True results (%)  : {100 - false_percentage:.2f}%")
 
         # Print resource usage statistics
         if self.perf_resource is not None and len(self.perf_resource) > 0:
             print("\nResource Usage (Aggregated):")
             print(f"  Total records: {len(self.perf_resource)}")
-            print(f"  Average CPU (%): {self.perf_resource['CPU_Percent_Total'].mean():.2f}")
-            print(f"  Max CPU (%): {self.perf_resource['CPU_Percent_Total'].max():.2f}")
-            print(f"  Min CPU (%): {self.perf_resource['CPU_Percent_Total'].min():.2f}")
-            print(
-                f"  Average Memory (GB): {self.perf_resource['Memory_GB'].mean():.4f}"
-            )
-            print(f"  Max Memory (GB): {self.perf_resource['Memory_GB'].max():.4f}")
-            print(f"  Min Memory (GB): {self.perf_resource['Memory_GB'].min():.4f}")
+            cpu = self.perf_resource["CPU_Percent_Total"]
+            mem = self.perf_resource["Memory_GB"]
+            print(f"  Average CPU (%): {cpu.mean():.2f}")
+            print(f"  Median CPU (%): {cpu.median():.2f}")
+            for p in [75, 90, 95, 99]:
+                print(f"  {p}th percentile CPU (%): {cpu.quantile(p / 100):.2f}")
+            print(f"  Max CPU (%): {cpu.max():.2f}")
+            print(f"  Min CPU (%): {cpu.min():.2f}")
+            print(f"  Average Memory (GB): {mem.mean():.4f}")
+            print(f"  Median Memory (GB): {mem.median():.4f}")
+            for p in [75, 90, 95, 99]:
+                print(f"  {p}th percentile Memory (GB): {mem.quantile(p / 100):.4f}")
+            print(f"  Max Memory (GB): {mem.max():.4f}")
+            print(f"  Min Memory (GB): {mem.min():.4f}")
+            dist = self._compute_resource_time_distribution(self.perf_resource)
+            self._print_resource_time_distribution(dist, indent="  ")
 
         # Print statistics from 10 individual runs
         self._print_individual_run_stats()
@@ -239,6 +243,8 @@ class PerformanceAnalyzer:
 
         if self.perf_resource is not None and len(self.perf_resource) > 0:
             self._plot_resource_timeseries()
+            dist = self._compute_resource_time_distribution(self.perf_resource)
+            self._plot_resource_usage_distribution(dist, self.output_dir)
 
     def _plot_time_histogram(self):
         """Plot histogram of time field excluding timeouts"""
@@ -391,6 +397,123 @@ class PerformanceAnalyzer:
                 ),
             )
 
+    def _plot_resource_usage_distribution(self, dist, output_dir):
+        """Save CPU and memory usage distribution bar charts for a single dataset."""
+        cpu_dist = dist.get("cpu", {})
+        if cpu_dist:
+            filename = os.path.join(output_dir, "performance_cpu_usage_distribution.png")
+            self.visualizer.plot_bar_chart(
+                x=list(cpu_dist.keys()),
+                y=list(cpu_dist.values()),
+                title="CPU Usage Distribution (% of Total Execution Time)",
+                xlabel="CPU Usage Range",
+                ylabel="Percentage of Time (%)",
+                filename=filename,
+            )
+            print(f"  Saved plot: {filename}")
+
+        mem_dist = dist.get("memory", {})
+        if mem_dist:
+            filename = os.path.join(output_dir, "performance_memory_usage_distribution.png")
+            self.visualizer.plot_bar_chart(
+                x=list(mem_dist.keys()),
+                y=list(mem_dist.values()),
+                title="Memory Usage Distribution (% of Total Execution Time)",
+                xlabel="Memory Usage Range",
+                ylabel="Percentage of Time (%)",
+                filename=filename,
+            )
+            print(f"  Saved plot: {filename}")
+
+    def _plot_grouped_resource_usage_distribution(self, distributions, labels, output_path):
+        """Save grouped CPU and memory usage distribution charts comparing all labels."""
+        valid_labels = [l for l in labels if l in distributions]
+        if not valid_labels:
+            return
+
+        first = next(iter(distributions.values()))
+        cpu_buckets = list(first["cpu"].keys())
+        mem_buckets = list(first["memory"].keys())
+
+        cpu_datasets = [
+            [distributions[l]["cpu"].get(b, 0) for b in cpu_buckets]
+            for l in valid_labels
+        ]
+        mem_datasets = [
+            [distributions[l]["memory"].get(b, 0) for b in mem_buckets]
+            for l in valid_labels
+        ]
+
+        cpu_file = os.path.join(output_path, "grouped_cpu_usage_distribution.png")
+        self.visualizer.plot_grouped_bar_chart(
+            x=cpu_buckets,
+            datasets=cpu_datasets,
+            labels=valid_labels,
+            title="CPU Usage Distribution (% of Total Execution Time)",
+            xlabel="CPU Usage Range",
+            ylabel="Percentage of Time (%)",
+            filename=cpu_file,
+        )
+        print(f"  Saved grouped plot: {cpu_file}")
+
+        mem_file = os.path.join(output_path, "grouped_memory_usage_distribution.png")
+        self.visualizer.plot_grouped_bar_chart(
+            x=mem_buckets,
+            datasets=mem_datasets,
+            labels=valid_labels,
+            title="Memory Usage Distribution (% of Total Execution Time)",
+            xlabel="Memory Usage Range",
+            ylabel="Percentage of Time (%)",
+            filename=mem_file,
+        )
+        print(f"  Saved grouped plot: {mem_file}")
+
+    @staticmethod
+    def _compute_resource_time_distribution(res_df):
+        """Return CPU and memory time-bucket percentages from a resource usage DataFrame.
+
+        Each row represents one second of execution, so bucket count / total rows
+        gives the fraction of total execution time spent in that range.
+        """
+        CPU_BUCKETS = [
+            ("0-30%",   (0,   30)),
+            ("30-50%",  (30,  50)),
+            ("50-70%",  (50,  70)),
+            ("70-100%", (70,  float("inf"))),
+        ]
+        MEM_BUCKETS = [
+            ("0-4GB",   (0,   4)),
+            ("4-8GB",   (4,   8)),
+            ("8-12GB",  (8,   12)),
+            ("12+GB",   (12,  float("inf"))),
+        ]
+
+        total = len(res_df)
+        if total == 0:
+            return {"cpu": {}, "memory": {}}
+
+        cpu_dist = {}
+        for name, (lo, hi) in CPU_BUCKETS:
+            mask = (res_df["CPU_Percent_Total"] >= lo) & (res_df["CPU_Percent_Total"] < hi)
+            cpu_dist[name] = mask.sum() / total * 100
+
+        mem_dist = {}
+        for name, (lo, hi) in MEM_BUCKETS:
+            mask = (res_df["Memory_GB"] >= lo) & (res_df["Memory_GB"] < hi)
+            mem_dist[name] = mask.sum() / total * 100
+
+        return {"cpu": cpu_dist, "memory": mem_dist}
+
+    @staticmethod
+    def _print_resource_time_distribution(dist, indent="  "):
+        """Print CPU and memory time-distribution buckets."""
+        print(f"\n{indent}CPU usage distribution (% of total execution time):")
+        for bucket, pct in dist.get("cpu", {}).items():
+            print(f"{indent}  {bucket}: {pct:.1f}%")
+        print(f"\n{indent}Memory usage distribution (% of total execution time):")
+        for bucket, pct in dist.get("memory", {}).items():
+            print(f"{indent}  {bucket}: {pct:.1f}%")
+
     @staticmethod
     def _label_from_path(path):
         """Extract a human-readable label from a path.
@@ -506,6 +629,7 @@ class PerformanceAnalyzer:
         total_times = {}  # label -> total execution time
         mean_times = {}   # label -> mean execution time
         worst_10_times = {}  # label -> worst 10% average execution time
+        resource_distributions = {}  # label -> dist dict
 
         for path, df in path_dfs.items():
             key_col = list(zip(*[df[c].astype(str) for c in ID_COLS]))
@@ -531,6 +655,11 @@ class PerformanceAnalyzer:
                 print(f"  ({'+' if pct >= 0 else ''}{pct:.1f}%)")
             else:
                 print()
+            if len(nt) > 0:
+                t = nt["Time"]
+                print(f"    Median time (50th): {t.median():.2f}s")
+                for p in [75, 90, 95, 99]:
+                    print(f"    {p}th percentile:    {t.quantile(p / 100):.2f}s")
             print(f"    Worst 10% avg time: {w10_avg:.2f}s", end="")
             if previous_worst10 is not None:
                 pct = (w10_avg - previous_worst10) / previous_worst10 * 100
@@ -546,10 +675,12 @@ class PerformanceAnalyzer:
                 res_df = resource_series[label]
                 if not res_df.empty:
                     total_time = res_df["Time_Sec"].max() if "Time_Sec" in res_df.columns else 0
-                    mean_cpu = res_df["CPU_Percent_Total"].mean() if "CPU_Percent_Total" in res_df.columns else 0
-                    mean_memory = res_df["Memory_GB"].mean() if "Memory_GB" in res_df.columns else 0
+                    cpu_series = res_df["CPU_Percent_Total"] if "CPU_Percent_Total" in res_df.columns else pd.Series(dtype=float)
+                    mem_series = res_df["Memory_GB"] if "Memory_GB" in res_df.columns else pd.Series(dtype=float)
+                    mean_cpu = cpu_series.mean() if not cpu_series.empty else 0
+                    mean_memory = mem_series.mean() if not mem_series.empty else 0
                     mean_time = avg  # mean execution time from soot results
-                    
+
                     print(f"    Total execution time: {total_time:.2f}s", end="")
                     if previous_total_time is not None:
                         pct = (total_time - previous_total_time) / previous_total_time * 100
@@ -557,19 +688,32 @@ class PerformanceAnalyzer:
                     else:
                         print()
                     print(f"    Mean execution time: {mean_time:.2f}s")
+
                     print(f"    Mean CPU: {mean_cpu:.2f}%", end="")
                     if previous_mean_cpu is not None:
                         pct = (mean_cpu - previous_mean_cpu) / previous_mean_cpu * 100
                         print(f"  ({'+' if pct >= 0 else ''}{pct:.1f}%)")
                     else:
                         print()
+                    if not cpu_series.empty:
+                        print(f"    Median CPU: {cpu_series.median():.2f}%")
+                        for p in [75, 90, 95, 99]:
+                            print(f"    {p}th percentile CPU: {cpu_series.quantile(p / 100):.2f}%")
+
                     print(f"    Mean Memory: {mean_memory:.4f}GB", end="")
                     if previous_mean_memory is not None:
                         pct = (mean_memory - previous_mean_memory) / previous_mean_memory * 100
                         print(f"  ({'+' if pct >= 0 else ''}{pct:.1f}%)")
                     else:
                         print()
-                    
+                    if not mem_series.empty:
+                        print(f"    Median Memory: {mem_series.median():.4f}GB")
+                        for p in [75, 90, 95, 99]:
+                            print(f"    {p}th percentile Memory: {mem_series.quantile(p / 100):.4f}GB")
+                    dist = self._compute_resource_time_distribution(res_df)
+                    self._print_resource_time_distribution(dist, indent="    ")
+                    resource_distributions[label] = dist
+
                     # Store for plotting
                     total_times[label] = total_time
                     mean_times[label] = mean_time
@@ -603,6 +747,9 @@ class PerformanceAnalyzer:
         
         if worst_10_times and labels:
             self._plot_worst_10_percent_time_horizontal(worst_10_times, labels, output_path)
+
+        if resource_distributions:
+            self._plot_grouped_resource_usage_distribution(resource_distributions, labels, output_path)
 
         print("\n" + "=" * 60 + "\n")
 
