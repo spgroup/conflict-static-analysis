@@ -64,6 +64,7 @@ class ScenarioAnalyzer:
         """Common statistics printing logic for both single and comparison modes"""
         scenario_stats = self._calculate_scenario_stats(conflict_df)
         self._print_threshold_stats(scenario_stats)
+        self._print_diff_concentration_stats(conflict_df)
 
         # Print percentiles for average conflict depth per scenario
         scenario_avg_depth = conflict_df.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].mean()
@@ -111,6 +112,28 @@ class ScenarioAnalyzer:
             method_pct = (scenario_stats[COL_SAME_METHOD] > threshold).mean() * 100
             print(f">{threshold}% same class: {class_pct:.1f}%")
             print(f">{threshold}% same method: {method_pct:.1f}%")
+
+        print("\nScenarios with conflicts concentrated in the same class/method:")
+        print(f"{'Threshold':<12} {'Class':>10} {'Method':>10}")
+        print("-" * 34)
+        for threshold in CONCENTRATION_THRESHOLDS:
+            class_pct = (scenario_stats[COL_SAME_CLASS] >= threshold).mean() * 100
+            method_pct = (scenario_stats[COL_SAME_METHOD] >= threshold).mean() * 100
+            print(f">={threshold}%       {class_pct:>9.1f}% {method_pct:>9.1f}%")
+
+    def _print_diff_concentration_stats(self, conflict_df):
+        """Print % of scenarios where >= threshold% of conflicts had diff=0 (no stacktrace diff)"""
+        no_diff_pct = conflict_df.groupby(COL_SCENARIO_INDEX)[COL_DIFF].apply(
+            lambda x: (x == 0).mean() * 100
+        )
+        total = len(no_diff_pct)
+        print("\nScenarios with conflicts concentrated in no stacktrace diff (diff=0):")
+        print(f"{'Threshold':<12} {'Scenarios':>10}")
+        print("-" * 24)
+        for threshold in CONCENTRATION_THRESHOLDS:
+            count = (no_diff_pct >= threshold).sum()
+            pct = count / total * 100
+            print(f">={threshold}%       {pct:>8.1f}%  ({count}/{total})")
 
     def _create_plots(self, conflict_df, scenarioJAR_df):
         self._create_all_plots(conflict_df, scenarioJAR_df)

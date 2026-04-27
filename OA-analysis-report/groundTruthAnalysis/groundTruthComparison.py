@@ -52,14 +52,16 @@ class GroundTruthComparator:
         if not os.path.exists(perf_soot_path):
             raise FileNotFoundError(f"Performance file not found: {perf_soot_path}")
         
-        self.perf_soot_df = pd.read_csv(perf_soot_path, sep=";")
+        self.perf_soot_df = pd.read_csv(perf_soot_path, sep=";", encoding="utf-8-sig")
+        self.perf_soot_df.columns = self.perf_soot_df.columns.str.strip()
         print(f"Loaded performance data: {len(self.perf_soot_df)} records")
-        
+
         # Load ground truth
         if not os.path.exists(ground_truth_path):
             raise FileNotFoundError(f"Ground truth file not found: {ground_truth_path}")
-        
-        self.ground_truth_df = pd.read_csv(ground_truth_path)
+
+        self.ground_truth_df = pd.read_csv(ground_truth_path, encoding="utf-8-sig")
+        self.ground_truth_df.columns = self.ground_truth_df.columns.str.strip()
         print(f"Loaded ground truth data: {len(self.ground_truth_df)} records")
 
     def _match_scenarios(self):
