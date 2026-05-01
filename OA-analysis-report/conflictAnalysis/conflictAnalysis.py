@@ -378,6 +378,18 @@ class ConflictAnalyzer:
         """Create comparison plots for two datasets"""
         self._create_all_plots(df1, compare_df=df2, label1=label1, label2=label2, output_dir=output_dir)
 
+    def analyze_compare_multiple(self, plot=True, output_dirs=None, labels=None):
+        """Print conflict stats for N datasets. Plots are not generated for N > 2."""
+        output_dirs = output_dirs or []
+        labels = labels or []
+
+        for i, output_dir in enumerate(output_dirs):
+            df = pd.read_csv(os.path.join(output_dir, CONFLICT_STATS_CSV))
+            label = labels[i] if i < len(labels) else f"Dataset {i + 1}"
+            if i > 0:
+                print("\n" + "=" * 60)
+            self._print_conflict_stats(df, title=label)
+
     def _create_compare_pie_charts(self, df1, df2, label1, label2, output_dir):
         """Create side-by-side pie chart comparisons"""
         pie_configs = [

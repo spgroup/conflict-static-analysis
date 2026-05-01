@@ -1,0 +1,594 @@
+======================================
+=== depth5RefDatasetSPARK ===
+======================================
+Saved aggregated soot results to analysisReport/depth5RefDatasetSPARK/perfomanceData\perfomanceReport\performance_soot_results_stats.csv
+Saved aggregated performance summary to analysisReport/depth5RefDatasetSPARK/perfomanceData\perfomanceReport\performance_summary_stats.json
+Saved aggregated resource usage to analysisReport/depth5RefDatasetSPARK/perfomanceData\perfomanceReport\performance_resource_stats.csv
+
+============================================================
+Performance Analysis Results
+============================================================
+
+Performance Summary (Aggregated):
+  Mode: ioa
+  Callgraph: SPARK
+  Status: SUCCESS
+  Duration (seconds): 7623.73
+  Peak Memory (GB): 13.6181
+  Peak CPU (%): 98.88
+
+Soot Results:
+  Total scenarios: 1004
+  Timeouts: 0
+  Non-timeout scenarios: 1004
+  Timeouts (%) : 0.00%
+
+  Time Statistics (seconds):
+  Average:         6.51
+  Median (50th):   2.52
+  75th percentile: 4.14
+  90th percentile: 7.12
+  95th percentile: 12.88
+  99th percentile: 116.41
+  Max:             551.04
+  Min:             0.00
+
+  False results (%) : 58.67%
+  True results (%)  : 41.33%
+
+Resource Usage (Aggregated):
+  Total records: 8005
+  Average CPU (%): 55.54
+  Median CPU (%): 55.62
+  75th percentile CPU (%): 72.00
+  90th percentile CPU (%): 77.80
+  95th percentile CPU (%): 79.81
+  99th percentile CPU (%): 82.61
+  Max CPU (%): 88.37
+  Min CPU (%): 17.75
+  Average Memory (GB): 7.3756
+  Median Memory (GB): 7.1190
+  75th percentile Memory (GB): 9.3328
+  90th percentile Memory (GB): 10.7491
+  95th percentile Memory (GB): 11.3345
+  99th percentile Memory (GB): 11.9532
+  Max Memory (GB): 12.5742
+  Min Memory (GB): 1.3933
+
+  CPU usage distribution (% of total execution time):
+    0-30%: 5.0%
+    30-50%: 37.5%
+    50-70%: 27.9%
+    70-100%: 29.6%
+
+  Memory usage distribution (% of total execution time):
+    0-4GB: 5.8%
+    4-8GB: 53.1%
+    8-12GB: 40.3%
+    12+GB: 0.8%
+
+Statistics from 10 Individual Runs:
+------------------------------------------------------------
+  Found 10 result folders
+
+
+  Soot Results Analysis (soot-results.csv):
+  --------------------------------------------------------
+    Time:
+      Mean: 7.001698
+      Std Dev: 29.901583
+      Variability (CV %): 427.06%
+
+  Resource Usage Analysis (resource_usage_series.csv):
+  --------------------------------------------------------
+    Time_Sec:
+      Mean: 3839.620123
+      Std Dev: 2243.266130
+      Variability (CV %): 58.42%
+    CPU_Percent_Total:
+      Mean: 55.004119
+      Std Dev: 24.741234
+      Variability (CV %): 44.98%
+    Memory_GB:
+      Mean: 7.439526
+      Std Dev: 3.095671
+      Variability (CV %): 41.61%
+
+============================================================
+
+
+======================================
+=== depth5MergeDatasetSPARK ===
+======================================
+Saved aggregated soot results to analysisReport/depth5MergeDatasetSPARK/perfomanceData\perfomanceReport\performance_soot_results_stats.csv
+Saved aggregated performance summary to analysisReport/depth5MergeDatasetSPARK/perfomanceData\perfomanceReport\performance_summary_stats.json
+Saved aggregated resource usage to analysisReport/depth5MergeDatasetSPARK/perfomanceData\perfomanceReport\performance_resource_stats.csv
+
+============================================================
+Performance Analysis Results
+============================================================
+
+Performance Summary (Aggregated):
+  Mode: ioa
+  Callgraph: SPARK
+  Status: SUCCESS
+  Duration (seconds): 705.07
+  Peak Memory (GB): 8.1567
+  Peak CPU (%): 93.64
+
+Soot Results:
+  Total scenarios: 114
+  Timeouts: 0
+  Non-timeout scenarios: 114
+  Timeouts (%) : 0.00%
+
+  Time Statistics (seconds):
+  Average:         6.07
+  Median (50th):   2.97
+  75th percentile: 6.23
+  90th percentile: 13.84
+  95th percentile: 15.81
+  99th percentile: 53.19
+  Max:             55.11
+  Min:             0.00
+
+  False results (%) : 79.82%
+  True results (%)  : 20.18%
+
+Resource Usage (Aggregated):
+  Total records: 733
+  Average CPU (%): 70.12
+  Median CPU (%): 74.14
+  75th percentile CPU (%): 77.91
+  90th percentile CPU (%): 80.58
+  95th percentile CPU (%): 81.61
+  99th percentile CPU (%): 84.02
+  Max CPU (%): 86.94
+  Min CPU (%): 13.39
+  Average Memory (GB): 3.6735
+  Median Memory (GB): 3.4030
+  75th percentile Memory (GB): 4.4113
+  90th percentile Memory (GB): 6.0945
+  95th percentile Memory (GB): 6.7312
+  99th percentile Memory (GB): 7.1588
+  Max Memory (GB): 7.3684
+  Min Memory (GB): 0.2062
+
+  CPU usage distribution (% of total execution time):
+    0-30%: 0.1%
+    30-50%: 9.3%
+    50-70%: 24.4%
+    70-100%: 66.2%
+
+  Memory usage distribution (% of total execution time):
+    0-4GB: 66.8%
+    4-8GB: 33.2%
+    8-12GB: 0.0%
+    12+GB: 0.0%
+
+Statistics from 10 Individual Runs:
+------------------------------------------------------------
+  Found 10 result folders
+
+
+  Soot Results Analysis (soot-results.csv):
+  --------------------------------------------------------
+    Time:
+      Mean: 6.074159
+      Std Dev: 8.983087
+      Variability (CV %): 147.89%
+
+  Resource Usage Analysis (resource_usage_series.csv):
+  --------------------------------------------------------
+    Time_Sec:
+      Mean: 354.643500
+      Std Dev: 205.918761
+      Variability (CV %): 58.06%
+    CPU_Percent_Total:
+      Mean: 70.010891
+      Std Dev: 17.489315
+      Variability (CV %): 24.98%
+    Memory_GB:
+      Mean: 3.714324
+      Std Dev: 1.773264
+      Variability (CV %): 47.74%
+
+============================================================
+
+
+======================================
+=== depth10RefDatasetSPARK ===
+======================================
+Saved aggregated soot results to analysisReport/depth10RefDatasetSPARK/perfomanceData\perfomanceReport\performance_soot_results_stats.csv
+Saved aggregated performance summary to analysisReport/depth10RefDatasetSPARK/perfomanceData\perfomanceReport\performance_summary_stats.json
+Saved aggregated resource usage to analysisReport/depth10RefDatasetSPARK/perfomanceData\perfomanceReport\performance_resource_stats.csv
+
+============================================================
+Performance Analysis Results
+============================================================
+
+Performance Summary (Aggregated):
+  Mode: ioa
+  Callgraph: SPARK
+  Status: SUCCESS
+  Duration (seconds): 23783.80
+  Peak Memory (GB): 20.0000
+  Peak CPU (%): 98.75
+
+Soot Results:
+  Total scenarios: 1004
+  Timeouts: 0
+  Non-timeout scenarios: 1004
+  Timeouts (%) : 0.00%
+
+  Time Statistics (seconds):
+  Average:         22.59
+  Median (50th):   2.63
+  75th percentile: 4.59
+  90th percentile: 10.37
+  95th percentile: 45.47
+  99th percentile: 537.74
+  Max:             1200.22
+  Min:             0.00
+
+  False results (%) : 57.97%
+  True results (%)  : 42.03%
+
+Resource Usage (Aggregated):
+  Total records: 24301
+  Average CPU (%): 35.56
+  Median CPU (%): 29.94
+  75th percentile CPU (%): 39.42
+  90th percentile CPU (%): 60.95
+  95th percentile CPU (%): 67.01
+  99th percentile CPU (%): 75.44
+  Max CPU (%): 87.64
+  Min CPU (%): 19.90
+  Average Memory (GB): 12.2882
+  Median Memory (GB): 12.6501
+  75th percentile Memory (GB): 14.2799
+  90th percentile Memory (GB): 15.3288
+  95th percentile Memory (GB): 16.0229
+  99th percentile Memory (GB): 16.8865
+  Max Memory (GB): 17.7627
+  Min Memory (GB): 0.5641
+
+  CPU usage distribution (% of total execution time):
+    0-30%: 50.2%
+    30-50%: 33.3%
+    50-70%: 13.9%
+    70-100%: 2.6%
+
+  Memory usage distribution (% of total execution time):
+    0-4GB: 1.7%
+    4-8GB: 6.3%
+    8-12GB: 31.0%
+    12+GB: 61.0%
+
+Statistics from 10 Individual Runs:
+------------------------------------------------------------
+  Found 10 result folders
+
+
+  Soot Results Analysis (soot-results.csv):
+  --------------------------------------------------------
+    Time:
+      Mean: 21.868749
+      Std Dev: 117.509152
+      Variability (CV %): 537.34%
+
+  Resource Usage Analysis (resource_usage_series.csv):
+  --------------------------------------------------------
+    Time_Sec:
+      Mean: 11909.137263
+      Std Dev: 6894.430491
+      Variability (CV %): 57.89%
+    CPU_Percent_Total:
+      Mean: 35.568202
+      Std Dev: 19.980310
+      Variability (CV %): 56.17%
+    Memory_GB:
+      Mean: 12.280883
+      Std Dev: 3.252887
+      Variability (CV %): 26.49%
+
+============================================================
+
+
+======================================
+=== depth10MergeDatasetSPARK ===
+======================================
+Saved aggregated soot results to analysisReport/depth10MergeDatasetSPARK/perfomanceData\perfomanceReport\performance_soot_results_stats.csv
+Saved aggregated performance summary to analysisReport/depth10MergeDatasetSPARK/perfomanceData\perfomanceReport\performance_summary_stats.json
+Saved aggregated resource usage to analysisReport/depth10MergeDatasetSPARK/perfomanceData\perfomanceReport\performance_resource_stats.csv
+
+============================================================
+Performance Analysis Results
+============================================================
+
+Performance Summary (Aggregated):
+  Mode: ioa
+  Callgraph: SPARK
+  Status: SUCCESS
+  Duration (seconds): 3829.44
+  Peak Memory (GB): 9.4089
+  Peak CPU (%): 93.49
+
+Soot Results:
+  Total scenarios: 114
+  Timeouts: 2
+  Non-timeout scenarios: 112
+  Timeouts (%) : 1.75%
+
+  Time Statistics (seconds):
+  Average:         12.66
+  Median (50th):   2.98
+  75th percentile: 6.33
+  90th percentile: 15.00
+  95th percentile: 22.65
+  99th percentile: 298.14
+  Max:             435.03
+  Min:             0.00
+
+  False results (%) : 78.95%
+  True results (%)  : 21.05%
+
+Resource Usage (Aggregated):
+  Total records: 3885
+  Average CPU (%): 34.48
+  Median CPU (%): 25.25
+  75th percentile CPU (%): 35.72
+  90th percentile CPU (%): 67.14
+  95th percentile CPU (%): 75.75
+  99th percentile CPU (%): 81.05
+  Max CPU (%): 89.60
+  Min CPU (%): 25.14
+  Average Memory (GB): 7.0758
+  Median Memory (GB): 7.7493
+  75th percentile Memory (GB): 8.8521
+  90th percentile Memory (GB): 8.8961
+  95th percentile Memory (GB): 8.9245
+  99th percentile Memory (GB): 8.9249
+  Max Memory (GB): 9.0849
+  Min Memory (GB): 0.2583
+
+  CPU usage distribution (% of total execution time):
+    0-30%: 69.3%
+    30-50%: 13.4%
+    50-70%: 8.6%
+    70-100%: 8.6%
+
+  Memory usage distribution (% of total execution time):
+    0-4GB: 10.2%
+    4-8GB: 54.7%
+    8-12GB: 35.1%
+    12+GB: 0.0%
+
+Statistics from 10 Individual Runs:
+------------------------------------------------------------
+  Found 10 result folders
+
+
+  Soot Results Analysis (soot-results.csv):
+  --------------------------------------------------------
+    Time:
+      Mean: 12.661602
+      Std Dev: 51.063198
+      Variability (CV %): 403.29%
+
+  Resource Usage Analysis (resource_usage_series.csv):
+  --------------------------------------------------------
+    Time_Sec:
+      Mean: 1916.144384
+      Std Dev: 1106.767335
+      Variability (CV %): 57.76%
+    CPU_Percent_Total:
+      Mean: 33.958112
+      Std Dev: 19.152046
+      Variability (CV %): 56.40%
+    Memory_GB:
+      Mean: 7.130236
+      Std Dev: 2.052269
+      Variability (CV %): 28.78%
+
+============================================================
+
+
+======================================
+=== depth20RefDatasetSPARK ===
+======================================
+Saved aggregated soot results to analysisReport/depth20RefDatasetSPARK/perfomanceData\perfomanceReport\performance_soot_results_stats.csv
+Saved aggregated performance summary to analysisReport/depth20RefDatasetSPARK/perfomanceData\perfomanceReport\performance_summary_stats.json
+Saved aggregated resource usage to analysisReport/depth20RefDatasetSPARK/perfomanceData\perfomanceReport\performance_resource_stats.csv
+
+============================================================
+Performance Analysis Results
+============================================================
+
+Performance Summary (Aggregated):
+  Mode: ioa
+  Callgraph: SPARK
+  Status: SUCCESS
+  Duration (seconds): 55885.24
+  Peak Memory (GB): 20.0000
+  Peak CPU (%): 98.40
+
+Soot Results:
+  Total scenarios: 1004
+  Timeouts: 0
+  Non-timeout scenarios: 1004
+  Timeouts (%) : 0.00%
+
+  Time Statistics (seconds):
+  Average:         54.24
+  Median (50th):   2.62
+  75th percentile: 4.62
+  90th percentile: 14.04
+  95th percentile: 143.27
+  99th percentile: 1200.04
+  Max:             1200.11
+  Min:             0.00
+
+  False results (%) : 59.56%
+  True results (%)  : 40.44%
+
+Resource Usage (Aggregated):
+  Total records: 56335
+  Average CPU (%): 29.86
+  Median CPU (%): 25.30
+  75th percentile CPU (%): 30.40
+  90th percentile CPU (%): 40.43
+  95th percentile CPU (%): 52.38
+  99th percentile CPU (%): 70.37
+  Max CPU (%): 94.29
+  Min CPU (%): 15.06
+  Average Memory (GB): 11.6911
+  Median Memory (GB): 11.5794
+  75th percentile Memory (GB): 13.8067
+  90th percentile Memory (GB): 15.3875
+  95th percentile Memory (GB): 16.0489
+  99th percentile Memory (GB): 17.4402
+  Max Memory (GB): 19.0376
+  Min Memory (GB): 0.1827
+
+  CPU usage distribution (% of total execution time):
+    0-30%: 74.0%
+    30-50%: 20.3%
+    50-70%: 4.6%
+    70-100%: 1.1%
+
+  Memory usage distribution (% of total execution time):
+    0-4GB: 0.1%
+    4-8GB: 9.3%
+    8-12GB: 51.2%
+    12+GB: 39.4%
+
+Statistics from 10 Individual Runs:
+------------------------------------------------------------
+  Found 10 result folders
+
+
+  Soot Results Analysis (soot-results.csv):
+  --------------------------------------------------------
+    Time:
+      Mean: 51.392536
+      Std Dev: 221.202970
+      Variability (CV %): 430.42%
+
+  Resource Usage Analysis (resource_usage_series.csv):
+  --------------------------------------------------------
+    Time_Sec:
+      Mean: 27947.473228
+      Std Dev: 16140.055334
+      Variability (CV %): 57.75%
+    CPU_Percent_Total:
+      Mean: 29.779387
+      Std Dev: 14.038059
+      Variability (CV %): 47.14%
+    Memory_GB:
+      Mean: 11.670341
+      Std Dev: 3.041044
+      Variability (CV %): 26.06%
+
+============================================================
+
+
+======================================
+=== depth20MergeDatasetSPARK ===
+======================================
+Saved aggregated soot results to analysisReport/depth20MergeDatasetSPARK/perfomanceData\perfomanceReport\performance_soot_results_stats.csv
+Saved aggregated performance summary to analysisReport/depth20MergeDatasetSPARK/perfomanceData\perfomanceReport\performance_summary_stats.json
+Saved aggregated resource usage to analysisReport/depth20MergeDatasetSPARK/perfomanceData\perfomanceReport\performance_resource_stats.csv
+
+============================================================
+Performance Analysis Results
+============================================================
+
+Performance Summary (Aggregated):
+  Mode: ioa
+  Callgraph: SPARK
+  Status: SUCCESS
+  Duration (seconds): 6017.68
+  Peak Memory (GB): 9.2378
+  Peak CPU (%): 94.14
+
+Soot Results:
+  Total scenarios: 114
+  Timeouts: 4
+  Non-timeout scenarios: 110
+  Timeouts (%) : 3.51%
+
+  Time Statistics (seconds):
+  Average:         10.96
+  Median (50th):   3.12
+  75th percentile: 6.40
+  90th percentile: 15.45
+  95th percentile: 47.64
+  99th percentile: 183.92
+  Max:             231.37
+  Min:             0.00
+
+  False results (%) : 78.95%
+  True results (%)  : 21.05%
+
+Resource Usage (Aggregated):
+  Total records: 6064
+  Average CPU (%): 31.35
+  Median CPU (%): 25.23
+  75th percentile CPU (%): 26.22
+  90th percentile CPU (%): 55.68
+  95th percentile CPU (%): 71.71
+  99th percentile CPU (%): 79.75
+  Max CPU (%): 87.07
+  Min CPU (%): 25.13
+  Average Memory (GB): 7.4175
+  Median Memory (GB): 7.3308
+  75th percentile Memory (GB): 8.3803
+  90th percentile Memory (GB): 9.1929
+  95th percentile Memory (GB): 9.2242
+  99th percentile Memory (GB): 9.2288
+  Max Memory (GB): 9.2294
+  Min Memory (GB): 0.3564
+
+  CPU usage distribution (% of total execution time):
+    0-30%: 79.9%
+    30-50%: 8.5%
+    50-70%: 6.0%
+    70-100%: 5.6%
+
+  Memory usage distribution (% of total execution time):
+    0-4GB: 6.1%
+    4-8GB: 53.9%
+    8-12GB: 40.0%
+    12+GB: 0.0%
+
+Statistics from 10 Individual Runs:
+------------------------------------------------------------
+  Found 10 result folders
+
+
+  Soot Results Analysis (soot-results.csv):
+  --------------------------------------------------------
+    Time:
+      Mean: 10.962158
+      Std Dev: 30.326810
+      Variability (CV %): 276.65%
+
+  Resource Usage Analysis (resource_usage_series.csv):
+  --------------------------------------------------------
+    Time_Sec:
+      Mean: 3009.782847
+      Std Dev: 1737.762913
+      Variability (CV %): 57.74%
+    CPU_Percent_Total:
+      Mean: 31.062348
+      Std Dev: 15.961763
+      Variability (CV %): 51.39%
+    Memory_GB:
+      Mean: 7.446935
+      Std Dev: 1.695869
+      Variability (CV %): 22.77%
+
+============================================================
+
+

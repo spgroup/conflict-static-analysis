@@ -129,6 +129,132 @@
             "stackTrace": [
               {
                 "method": "<init>",
+                "line": 69,
+                "class": "io.dropwizard.setup.Bootstrap"
+              },
+              {
+                "method": "register",
+                "line": 89,
+                "class": "com.codahale.metrics.MetricRegistry"
+              },
+              {
+                "method": "onMetricAdded",
+                "line": 338,
+                "class": "com.codahale.metrics.MetricRegistry"
+              },
+              {
+                "method": "notifyListenerOfAddedMetric",
+                "line": 352,
+                "class": "com.codahale.metrics.MetricRegistry"
+              },
+              {
+                "method": "onTimerAdded",
+                "line": 612,
+                "class": "com.codahale.metrics.JmxReporter$JmxListener"
+              },
+              {
+                "method": "<clinit>",
+                "line": 136,
+                "class": "com.codahale.metrics.JmxReporter"
+              },
+              {
+                "method": "getLogger",
+                "line": 288,
+                "class": "org.slf4j.LoggerFactory"
+              },
+              {
+                "method": "getLogger",
+                "line": 277,
+                "class": "org.slf4j.LoggerFactory"
+              },
+              {
+                "method": "getLogger",
+                "line": 143,
+                "class": "ch.qos.logback.classic.LoggerContext"
+              },
+              {
+                "method": "createChildByName",
+                "line": 365,
+                "class": "ch.qos.logback.classic.Logger"
+              }
+            ],
+            "type": "declaration",
+            "branch": "L"
+          },
+          {
+            "location": {
+              "file": "",
+              "method": "<init>",
+              "line": -1,
+              "class": "java.util.ArrayList"
+            },
+            "text": "ArrayList.<java.util.ArrayList: java.lang.Object[] elementData> = null",
+            "stackTrace": [
+              {
+                "method": "<init>",
+                "line": 71,
+                "class": "io.dropwizard.setup.Bootstrap"
+              },
+              {
+                "method": "<clinit>",
+                "line": 136,
+                "class": "com.codahale.metrics.JmxReporter"
+              },
+              {
+                "method": "getLogger",
+                "line": 288,
+                "class": "org.slf4j.LoggerFactory"
+              },
+              {
+                "method": "getLogger",
+                "line": 276,
+                "class": "org.slf4j.LoggerFactory"
+              },
+              {
+                "method": "getILoggerFactory",
+                "line": 306,
+                "class": "org.slf4j.LoggerFactory"
+              },
+              {
+                "method": "getLoggerFactory",
+                "line": 111,
+                "class": "org.slf4j.impl.StaticLoggerBinder"
+              },
+              {
+                "method": "getLoggerContext",
+                "line": 101,
+                "class": "ch.qos.logback.classic.selector.ContextJNDISelector"
+              },
+              {
+                "method": "<init>",
+                "line": 51,
+                "class": "ch.qos.logback.classic.LoggerContext"
+              }
+            ],
+            "type": "override",
+            "branch": "R"
+          }
+        ]
+      }
+    },
+    {
+      "ScenarioJAR": "/home/oav2/miningframework/output/files/dropwizard/ddd15a681bf42360337844412cae4aba1556eb88/original-without-dependencies/merge/dropwizard-example-0.7.1-SNAPSHOT.jar",
+      "label": "OA conflict",
+      "type": "OAINTER",
+      "body": {
+        "description": "ArrayList.<java.util.ArrayList: java.lang.Object[] elementData> - ArrayList.<java.util.ArrayList: java.lang.Object[] elementData>",
+        "interference": [
+          {
+            "location": {
+              "file": "",
+              "method": "<init>",
+              "line": -1,
+              "class": "java.util.ArrayList"
+            },
+            "text": "ArrayList.<java.util.ArrayList: java.lang.Object[] elementData> = null",
+            "stackTrace": [
+              {
+                "method": "<init>",
                 "line": 67,
                 "class": "io.dropwizard.setup.Bootstrap"
               },
@@ -144,12 +270,12 @@
               },
               {
                 "method": "notifyListenerOfAddedMetric",
-                "line": 348,
+                "line": 344,
                 "class": "com.codahale.metrics.MetricRegistry"
               },
               {
-                "method": "onHistogramAdded",
-                "line": 554,
+                "method": "onGaugeAdded",
+                "line": 500,
                 "class": "com.codahale.metrics.JmxReporter$JmxListener"
               },
               {
@@ -391,149 +517,18 @@
             "stackTrace": [
               {
                 "method": "<init>",
-                "line": 69,
-                "class": "io.dropwizard.setup.Bootstrap"
-              },
-              {
-                "method": "register",
-                "line": 89,
-                "class": "com.codahale.metrics.MetricRegistry"
-              },
-              {
-                "method": "onMetricAdded",
-                "line": 338,
-                "class": "com.codahale.metrics.MetricRegistry"
-              },
-              {
-                "method": "notifyListenerOfAddedMetric",
-                "line": 352,
-                "class": "com.codahale.metrics.MetricRegistry"
-              },
-              {
-                "method": "onTimerAdded",
-                "line": 612,
-                "class": "com.codahale.metrics.JmxReporter$JmxListener"
-              },
-              {
-                "method": "<clinit>",
-                "line": 136,
-                "class": "com.codahale.metrics.JmxReporter"
-              },
-              {
-                "method": "getLogger",
-                "line": 288,
-                "class": "org.slf4j.LoggerFactory"
-              },
-              {
-                "method": "getLogger",
-                "line": 277,
-                "class": "org.slf4j.LoggerFactory"
-              },
-              {
-                "method": "getLogger",
-                "line": 143,
-                "class": "ch.qos.logback.classic.LoggerContext"
-              },
-              {
-                "method": "createChildByName",
-                "line": 365,
-                "class": "ch.qos.logback.classic.Logger"
-              }
-            ],
-            "type": "declaration",
-            "branch": "L"
-          },
-          {
-            "location": {
-              "file": "",
-              "method": "<init>",
-              "line": -1,
-              "class": "java.util.ArrayList"
-            },
-            "text": "ArrayList.<java.util.ArrayList: java.lang.Object[] elementData> = null",
-            "stackTrace": [
-              {
-                "method": "<init>",
-                "line": 71,
-                "class": "io.dropwizard.setup.Bootstrap"
-              },
-              {
-                "method": "<clinit>",
-                "line": 136,
-                "class": "com.codahale.metrics.JmxReporter"
-              },
-              {
-                "method": "getLogger",
-                "line": 288,
-                "class": "org.slf4j.LoggerFactory"
-              },
-              {
-                "method": "getLogger",
-                "line": 276,
-                "class": "org.slf4j.LoggerFactory"
-              },
-              {
-                "method": "getILoggerFactory",
-                "line": 302,
-                "class": "org.slf4j.LoggerFactory"
-              },
-              {
-                "method": "performInitialization",
-                "line": 108,
-                "class": "org.slf4j.LoggerFactory"
-              },
-              {
-                "method": "bind",
-                "line": 132,
-                "class": "org.slf4j.LoggerFactory"
-              },
-              {
-                "method": "fixSubstitutedLoggers",
-                "line": 166,
-                "class": "org.slf4j.LoggerFactory"
-              },
-              {
-                "method": "getLoggers",
-                "line": 61,
-                "class": "org.slf4j.helpers.SubstituteLoggerFactory"
-              }
-            ],
-            "type": "override",
-            "branch": "R"
-          }
-        ]
-      }
-    },
-    {
-      "ScenarioJAR": "/home/oav2/miningframework/output/files/dropwizard/ddd15a681bf42360337844412cae4aba1556eb88/original-without-dependencies/merge/dropwizard-example-0.7.1-SNAPSHOT.jar",
-      "label": "OA conflict",
-      "type": "OAINTER",
-      "body": {
-        "description": "ArrayList.<java.util.ArrayList: java.lang.Object[] elementData> - ArrayList.<java.util.ArrayList: java.lang.Object[] elementData>",
-        "interference": [
-          {
-            "location": {
-              "file": "",
-              "method": "<init>",
-              "line": -1,
-              "class": "java.util.ArrayList"
-            },
-            "text": "ArrayList.<java.util.ArrayList: java.lang.Object[] elementData> = null",
-            "stackTrace": [
-              {
-                "method": "<init>",
-                "line": 68,
+                "line": 67,
                 "class": "io.dropwizard.setup.Bootstrap"
               },
               {
                 "method": "<init>",
-                "line": 28,
-                "class": "com.codahale.metrics.jvm.MemoryUsageGaugeSet"
+                "line": 26,
+                "class": "com.codahale.metrics.jvm.GarbageCollectorMetricSet"
               },
               {
                 "method": "<init>",
                 "line": 35,
-                "class": "com.codahale.metrics.jvm.MemoryUsageGaugeSet"
+                "class": "com.codahale.metrics.jvm.GarbageCollectorMetricSet"
               }
             ],
             "type": "declaration",
@@ -613,18 +608,18 @@
             "stackTrace": [
               {
                 "method": "<init>",
-                "line": 67,
+                "line": 68,
                 "class": "io.dropwizard.setup.Bootstrap"
               },
               {
                 "method": "<init>",
-                "line": 26,
-                "class": "com.codahale.metrics.jvm.GarbageCollectorMetricSet"
+                "line": 28,
+                "class": "com.codahale.metrics.jvm.MemoryUsageGaugeSet"
               },
               {
                 "method": "<init>",
                 "line": 35,
-                "class": "com.codahale.metrics.jvm.GarbageCollectorMetricSet"
+                "class": "com.codahale.metrics.jvm.MemoryUsageGaugeSet"
               }
             ],
             "type": "declaration",
@@ -790,102 +785,6 @@
             "stackTrace": [
               {
                 "method": "<init>",
-                "line": 68,
-                "class": "io.dropwizard.setup.Bootstrap"
-              },
-              {
-                "method": "register",
-                "line": 89,
-                "class": "com.codahale.metrics.MetricRegistry"
-              },
-              {
-                "method": "onMetricAdded",
-                "line": 338,
-                "class": "com.codahale.metrics.MetricRegistry"
-              },
-              {
-                "method": "notifyListenerOfAddedMetric",
-                "line": 344,
-                "class": "com.codahale.metrics.MetricRegistry"
-              },
-              {
-                "method": "onGaugeAdded",
-                "line": 493,
-                "class": "com.codahale.metrics.JmxReporter$JmxListener"
-              },
-              {
-                "method": "createName",
-                "line": 634,
-                "class": "com.codahale.metrics.JmxReporter$JmxListener"
-              }
-            ],
-            "type": "declaration",
-            "branch": "L"
-          },
-          {
-            "location": {
-              "file": "",
-              "method": "<init>",
-              "line": -1,
-              "class": "javax.management.ObjectName"
-            },
-            "text": "<javax.management.ObjectName: boolean compat> = null",
-            "stackTrace": [
-              {
-                "method": "<init>",
-                "line": 71,
-                "class": "io.dropwizard.setup.Bootstrap"
-              },
-              {
-                "method": "start",
-                "line": 697,
-                "class": "com.codahale.metrics.JmxReporter"
-              },
-              {
-                "method": "addListener",
-                "line": 187,
-                "class": "com.codahale.metrics.MetricRegistry"
-              },
-              {
-                "method": "notifyListenerOfAddedMetric",
-                "line": 344,
-                "class": "com.codahale.metrics.MetricRegistry"
-              },
-              {
-                "method": "onGaugeAdded",
-                "line": 493,
-                "class": "com.codahale.metrics.JmxReporter$JmxListener"
-              },
-              {
-                "method": "createName",
-                "line": 631,
-                "class": "com.codahale.metrics.JmxReporter$JmxListener"
-              }
-            ],
-            "type": "override",
-            "branch": "R"
-          }
-        ]
-      }
-    },
-    {
-      "ScenarioJAR": "/home/oav2/miningframework/output/files/dropwizard/ddd15a681bf42360337844412cae4aba1556eb88/original-without-dependencies/merge/dropwizard-example-0.7.1-SNAPSHOT.jar",
-      "label": "OA conflict",
-      "type": "OAINTER",
-      "body": {
-        "description": "<javax.management.ObjectName: boolean compat> - <javax.management.ObjectName: boolean compat>",
-        "interference": [
-          {
-            "location": {
-              "file": "",
-              "method": "<init>",
-              "line": -1,
-              "class": "javax.management.ObjectName"
-            },
-            "text": "<javax.management.ObjectName: boolean compat> = null",
-            "stackTrace": [
-              {
-                "method": "<init>",
                 "line": 67,
                 "class": "io.dropwizard.setup.Bootstrap"
               },
@@ -901,12 +800,12 @@
               },
               {
                 "method": "notifyListenerOfAddedMetric",
-                "line": 346,
+                "line": 348,
                 "class": "com.codahale.metrics.MetricRegistry"
               },
               {
-                "method": "onCounterAdded",
-                "line": 521,
+                "method": "onHistogramAdded",
+                "line": 549,
                 "class": "com.codahale.metrics.JmxReporter$JmxListener"
               },
               {
@@ -1059,6 +958,102 @@
           }
         ]
       }
+    },
+    {
+      "ScenarioJAR": "/home/oav2/miningframework/output/files/dropwizard/ddd15a681bf42360337844412cae4aba1556eb88/original-without-dependencies/merge/dropwizard-example-0.7.1-SNAPSHOT.jar",
+      "label": "OA conflict",
+      "type": "OAINTER",
+      "body": {
+        "description": "<javax.management.ObjectName: boolean compat> - <javax.management.ObjectName: boolean compat>",
+        "interference": [
+          {
+            "location": {
+              "file": "",
+              "method": "<init>",
+              "line": -1,
+              "class": "javax.management.ObjectName"
+            },
+            "text": "<javax.management.ObjectName: boolean compat> = null",
+            "stackTrace": [
+              {
+                "method": "<init>",
+                "line": 68,
+                "class": "io.dropwizard.setup.Bootstrap"
+              },
+              {
+                "method": "register",
+                "line": 89,
+                "class": "com.codahale.metrics.MetricRegistry"
+              },
+              {
+                "method": "onMetricAdded",
+                "line": 338,
+                "class": "com.codahale.metrics.MetricRegistry"
+              },
+              {
+                "method": "notifyListenerOfAddedMetric",
+                "line": 350,
+                "class": "com.codahale.metrics.MetricRegistry"
+              },
+              {
+                "method": "onMeterAdded",
+                "line": 577,
+                "class": "com.codahale.metrics.JmxReporter$JmxListener"
+              },
+              {
+                "method": "createName",
+                "line": 634,
+                "class": "com.codahale.metrics.JmxReporter$JmxListener"
+              }
+            ],
+            "type": "declaration",
+            "branch": "L"
+          },
+          {
+            "location": {
+              "file": "",
+              "method": "<init>",
+              "line": -1,
+              "class": "javax.management.ObjectName"
+            },
+            "text": "<javax.management.ObjectName: boolean compat> = null",
+            "stackTrace": [
+              {
+                "method": "<init>",
+                "line": 71,
+                "class": "io.dropwizard.setup.Bootstrap"
+              },
+              {
+                "method": "start",
+                "line": 697,
+                "class": "com.codahale.metrics.JmxReporter"
+              },
+              {
+                "method": "addListener",
+                "line": 187,
+                "class": "com.codahale.metrics.MetricRegistry"
+              },
+              {
+                "method": "notifyListenerOfAddedMetric",
+                "line": 344,
+                "class": "com.codahale.metrics.MetricRegistry"
+              },
+              {
+                "method": "onGaugeAdded",
+                "line": 493,
+                "class": "com.codahale.metrics.JmxReporter$JmxListener"
+              },
+              {
+                "method": "createName",
+                "line": 631,
+                "class": "com.codahale.metrics.JmxReporter$JmxListener"
+              }
+            ],
+            "type": "override",
+            "branch": "R"
+          }
+        ]
+      }
     }
   ]},
   {"conflicts": [
@@ -1119,8 +1114,8 @@
                 "class": "voldemort.utils.JmxUtils"
               },
               {
-                "method": "extractOperationInfo",
-                "line": 114,
+                "method": "extractAttributeInfo",
+                "line": 176,
                 "class": "voldemort.utils.JmxUtils"
               }
             ],

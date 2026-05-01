@@ -369,6 +369,67 @@ class ScenarioAnalyzer:
             label2=label2
         )
 
+    def analyze_compare_multiple(self, plot=True, output_dirs=None, labels=None):
+        """Analyze and compare N datasets, plotting scenario depth loss with grouped bars."""
+        output_dirs = output_dirs or []
+        labels = labels or []
+
+        datasets = []
+        for i, output_dir in enumerate(output_dirs):
+            conflict_df = pd.read_csv(os.path.join(output_dir, CONFLICT_STATS_CSV))
+            scenarioJAR_df = pd.read_csv(os.path.join(output_dir, SCENARIO_STATS_CSV))
+            label = labels[i] if i < len(labels) else f"Dataset {i + 1}"
+            if i > 0:
+                print("\n" + "=" * 60)
+            self._print_scenario_stats(conflict_df, scenarioJAR_df, title=label)
+            datasets.append((conflict_df, label))
+
+        if plot and datasets:
+            self.output_dir = output_dirs[0]
+            self._plot_scenario_depth_loss_multiple(datasets)
+
+    def _plot_scenario_depth_loss_multiple(self, datasets):
+        """Plot scenario depth loss and affected with N grouped bars (one per dataset)."""
+        depths = list(range(DEFAULT_DEPTH, MAX_DEPTH + 1))
+        depth_labels = [str(d) for d in depths]
+
+        all_loss_pcts = []
+        all_affect_pcts = []
+        labels = []
+
+        for conflict_df, label in datasets:
+            total = conflict_df[COL_SCENARIO_INDEX].nunique()
+            scenario_max_depth = conflict_df.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].max()
+            scenario_min_depth = conflict_df.groupby(COL_SCENARIO_INDEX)[COL_DEPTH].min()
+
+            all_affect_pcts.append(
+                [(sum(scenario_max_depth > d) / total * 100) for d in depths]
+            )
+            all_loss_pcts.append(
+                [(sum(d < scenario_min_depth) / total * 100) for d in depths]
+            )
+            labels.append(label)
+
+        self.visualizer.plot_grouped_bar_chart(
+            x=depth_labels,
+            datasets=all_loss_pcts,
+            labels=labels,
+            title="Percentage of Scenarios Lost per Depth",
+            xlabel="Depth",
+            ylabel="Scenarios Lost (%)",
+            filename=os.path.join(self.output_dir, "compare_" + PLOT_SCENARIO_DEPTH_LOSS),
+        )
+
+        self.visualizer.plot_grouped_bar_chart(
+            x=depth_labels,
+            datasets=all_affect_pcts,
+            labels=labels,
+            title="Percentage of Scenarios Affected per Depth",
+            xlabel="Depth",
+            ylabel="Scenarios Affected (%)",
+            filename=os.path.join(self.output_dir, "compare_" + PLOT_SCENARIO_DEPTH_AFFECT),
+        )
+
 if __name__ == "__main__":
     analyzer = ScenarioAnalyzer()
     analyzer.analyze(plot=True)

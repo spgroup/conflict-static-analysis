@@ -388,8 +388,7 @@ class PerformanceAggregator:
 
 def parse_args():
     plot_enabled = False
-    input_json = None
-    input_json2 = None
+    input_jsons = []
     labels = None
     performance_data_path = None
     subset_non_timeouts = None
@@ -401,9 +400,10 @@ def parse_args():
             plot_value = arg.split("=")[1].lower()
             plot_enabled = plot_value == "true"
         elif arg.lower().startswith("out.json="):
-            input_json = arg.split("=", 1)[1]
+            raw = arg.split("=", 1)[1]
+            input_jsons.extend([p.strip() for p in raw.split(",") if p.strip()])
         elif arg.lower().startswith("out.json2="):
-            input_json2 = arg.split("=", 1)[1]
+            input_jsons.append(arg.split("=", 1)[1].strip())
         elif arg.lower().startswith("labels="):
             labels = arg.split("=", 1)[1]
         elif arg.lower().startswith("performancedata="):
@@ -419,8 +419,7 @@ def parse_args():
 
     return (
         plot_enabled,
-        input_json,
-        input_json2,
+        input_jsons,
         labels,
         performance_data_path,
         subset_non_timeouts,
@@ -429,11 +428,37 @@ def parse_args():
     )
 
 
+def _process_json(json_path):
+    """Load and process a single out.json file, returning (processor, output_dir)."""
+    output_dir = os.path.dirname(os.path.abspath(json_path)) or "."
+    processor = ConflictProcessor(output_dir)
+
+    with open(json_path) as f:
+        data = json.load(f)
+
+    if data and isinstance(data, list):
+        for idx, entry in enumerate(data):
+            if isinstance(entry, dict) and "conflicts" in entry:
+                processor.process_conflicts(entry.get("conflicts", []), start_idx=idx)
+            else:
+                raise Exception("Invalid conflict data format")
+
+    for idx in processor.conflict_data["jar_map"]:
+        if len(processor.conflict_data["jar_map"][idx]) > 1:
+            raise Exception(
+                "Multiple scenario jars found",
+                processor.conflict_data["jar_map"][idx],
+                idx,
+            )
+
+    processor.save_results()
+    return processor, output_dir
+
+
 def main():
     (
         plot_enabled,
-        input_json,
-        input_json2,
+        input_jsons,
         labels,
         performance_data_path,
         subset_non_timeouts,
@@ -442,82 +467,23 @@ def main():
     ) = parse_args()
 
     # Validate that at least one input is provided
-    if not input_json and not performance_data_path and not subset_non_timeouts and not soot_results_path:
+    if not input_jsons and not performance_data_path and not subset_non_timeouts and not soot_results_path:
         print(
             "Error: Either out.json, performancedata, sootresults, or subsetOfNonTimeouts parameter must be provided"
         )
         sys.exit(1)
 
-    # Parse labels if provided
-    label1, label2 = None, None
-    if labels and "," in labels:
-        parts = labels.split(",")
-        label1 = parts[0].strip()
-        label2 = parts[1].strip() if len(parts) > 1 else None
+    # Parse labels into a list
+    label_list = [l.strip() for l in labels.split(",")] if labels else []
 
-    output_dir = None
-    output_dir2 = ""
-    processor1 = None
-    processor2 = None
+    processors = []
+    output_dirs = []
 
-    # Process conflict data if JSON input is provided
-    if input_json:
-        output_dir = os.path.dirname(os.path.abspath(input_json))
-        if not output_dir:
-            output_dir = "."
-
-        # Process first JSON file
-        processor1 = ConflictProcessor(output_dir)
-
-        with open(input_json) as f:
-            data = json.load(f)
-
-        if data and isinstance(data, list):
-            for idx, entry in enumerate(data):
-                if isinstance(entry, dict) and "conflicts" in entry:
-                    conflicts = entry.get("conflicts", [])
-                    processor1.process_conflicts(conflicts, start_idx=idx)
-                else:
-                    raise Exception("Invalid conflict data format")
-
-        for idx in processor1.conflict_data["jar_map"]:
-            if len(processor1.conflict_data["jar_map"][idx]) > 1:
-                raise Exception(
-                    "Multiple scenario jars found",
-                    processor1.conflict_data["jar_map"][idx],
-                    idx,
-                )
-
-        processor1.save_results()
-
-        # Process second JSON file if provided
-        if input_json2:
-            output_dir2 = os.path.dirname(os.path.abspath(input_json2))
-            if not output_dir2:
-                output_dir2 = "."
-
-            processor2 = ConflictProcessor(output_dir2)
-
-            with open(input_json2) as f:
-                data = json.load(f)
-
-            if data and isinstance(data, list):
-                for idx, entry in enumerate(data):
-                    if isinstance(entry, dict) and "conflicts" in entry:
-                        conflicts = entry.get("conflicts", [])
-                        processor2.process_conflicts(conflicts, start_idx=idx)
-                    else:
-                        raise Exception("Invalid conflict data format")
-
-            for idx in processor2.conflict_data["jar_map"]:
-                if len(processor2.conflict_data["jar_map"][idx]) > 1:
-                    raise Exception(
-                        "Multiple scenario jars found",
-                        processor2.conflict_data["jar_map"][idx],
-                        idx,
-                    )
-
-            processor2.save_results()
+    # Process all JSON files
+    for json_path in input_jsons:
+        processor, output_dir = _process_json(json_path)
+        processors.append(processor)
+        output_dirs.append(output_dir)
 
     # Aggregate performance data if path is provided
     perfomance_report_dir = None
@@ -526,30 +492,45 @@ def main():
         perfomance_report_dir = perf_aggregator.aggregate()
 
     # Run analyzers if data is available
-    if processor1:
+    if processors:
         conflict_analyzer = ConflictAnalyzer()
         scenario_analyzer = ScenarioAnalyzer()
 
-        if processor2:
-            # Comparison mode
+        # Pad labels with auto-extracted names if not enough provided
+        while len(label_list) < len(output_dirs):
+            label_list.append(
+                ScenarioAnalyzer._extract_dataset_label_from_path(output_dirs[len(label_list)])
+            )
+
+        if len(processors) == 1:
+            conflict_analyzer.analyze(plot=plot_enabled, output_dir=output_dirs[0])
+            scenario_analyzer.analyze(plot=plot_enabled, output_dir=output_dirs[0])
+        elif len(processors) == 2:
             conflict_analyzer.analyze_compare(
                 plot=plot_enabled,
-                output_dir=output_dir,
-                output_dir2=output_dir2,
-                label1=label1,
-                label2=label2,
+                output_dir=output_dirs[0],
+                output_dir2=output_dirs[1],
+                label1=label_list[0],
+                label2=label_list[1],
             )
             scenario_analyzer.analyze_compare(
                 plot=plot_enabled,
-                output_dir=output_dir,
-                output_dir2=output_dir2,
-                label1=label1,
-                label2=label2,
+                output_dir=output_dirs[0],
+                output_dir2=output_dirs[1],
+                label1=label_list[0],
+                label2=label_list[1],
             )
         else:
-            # Single file mode
-            conflict_analyzer.analyze(plot=plot_enabled, output_dir=output_dir)
-            scenario_analyzer.analyze(plot=plot_enabled, output_dir=output_dir)
+            conflict_analyzer.analyze_compare_multiple(
+                plot=plot_enabled,
+                output_dirs=output_dirs,
+                labels=label_list,
+            )
+            scenario_analyzer.analyze_compare_multiple(
+                plot=plot_enabled,
+                output_dirs=output_dirs,
+                labels=label_list,
+            )
 
     if perfomance_report_dir:
         perfomance_analyzer = PerformanceAnalyzer()

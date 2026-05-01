@@ -1,6 +1,6 @@
 conflict_index,left_stacktrace_length,right_stacktrace_length,conflict_depth,stacktrace_diff,same_class,same_method,same_start_class,same_start_method,scenario_jar,scenario_index
 0,10,5,10,5,True,True,True,True,/home/oav2/miningframework/output/files/dropwizard/ddd15a681bf42360337844412cae4aba1556eb88/original-without-dependencies/merge/dropwizard-example-0.7.1-SNAPSHOT.jar,0
-1,10,9,10,1,True,True,True,True,/home/oav2/miningframework/output/files/dropwizard/ddd15a681bf42360337844412cae4aba1556eb88/original-without-dependencies/merge/dropwizard-example-0.7.1-SNAPSHOT.jar,0
+1,10,8,10,2,True,True,True,True,/home/oav2/miningframework/output/files/dropwizard/ddd15a681bf42360337844412cae4aba1556eb88/original-without-dependencies/merge/dropwizard-example-0.7.1-SNAPSHOT.jar,0
 2,10,9,10,1,True,True,True,True,/home/oav2/miningframework/output/files/dropwizard/ddd15a681bf42360337844412cae4aba1556eb88/original-without-dependencies/merge/dropwizard-example-0.7.1-SNAPSHOT.jar,0
 3,10,9,10,1,True,True,True,True,/home/oav2/miningframework/output/files/dropwizard/ddd15a681bf42360337844412cae4aba1556eb88/original-without-dependencies/merge/dropwizard-example-0.7.1-SNAPSHOT.jar,0
 4,3,8,8,5,True,True,True,True,/home/oav2/miningframework/output/files/dropwizard/ddd15a681bf42360337844412cae4aba1556eb88/original-without-dependencies/merge/dropwizard-example-0.7.1-SNAPSHOT.jar,0
