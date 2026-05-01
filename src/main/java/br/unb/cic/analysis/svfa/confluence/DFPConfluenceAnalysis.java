@@ -320,6 +320,7 @@ public class DFPConfluenceAnalysis {
 
             StatementNode stmt = containsKey(pathEndHash, lastNode);
             if (stmt != null) {
+                System.out.println("[CONFLICT_FOUND]");
                 result.add(new ConfluenceConflict(pathEndHash.get(stmt), path));
             }
         }
