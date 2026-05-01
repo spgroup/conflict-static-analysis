@@ -217,14 +217,14 @@ public class DFPConfluenceAnalysis {
         Optional<VisitedMethods> cfVM = safeHead(confluence);
 
         // Método (igual ao srcStep.getMethod().method())
-        String methodName = df1VM.isPresent()
+        String methodName = (df1VM.isPresent() && df1VM.get().getMethod() != null)
                 ? String.valueOf(df1VM.get().getMethod().method())
                 : "<unknown method>";
 
         // Units (equivalente a src.unit() / sink.unit())
         String leftUnit = df1.value().sootUnit().toString();
         String rightUnit = df2.value().sootUnit().toString();
-        String confluenceUnit = cfVM.isPresent()
+        String confluenceUnit = (cfVM.isPresent() && cfVM.get().getUnit() != null)
                 ? cfVM.get().getUnit().toString()
                 : confluence.value().toString();
 
