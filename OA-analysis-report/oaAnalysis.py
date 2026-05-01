@@ -394,6 +394,7 @@ def parse_args():
     subset_non_timeouts = None
     mds_ground_truth = None
     soot_results_path = None
+    perf_soot_path_arg = None
 
     for arg in sys.argv[1:]:
         if arg.lower().startswith("plot="):
@@ -416,6 +417,8 @@ def parse_args():
             mds_ground_truth = arg.split("=", 1)[1]
         elif arg.lower().startswith("sootresults="):
             soot_results_path = arg.split("=", 1)[1]
+        elif arg.lower().startswith("perf_soot_path="):
+            perf_soot_path_arg = arg.split("=", 1)[1]
 
     return (
         plot_enabled,
@@ -425,6 +428,7 @@ def parse_args():
         subset_non_timeouts,
         mds_ground_truth,
         soot_results_path,
+        perf_soot_path_arg,
     )
 
 
@@ -464,12 +468,13 @@ def main():
         subset_non_timeouts,
         mds_ground_truth,
         soot_results_path,
+        perf_soot_path_arg,
     ) = parse_args()
 
     # Validate that at least one input is provided
-    if not input_jsons and not performance_data_path and not subset_non_timeouts and not soot_results_path:
+    if not input_jsons and not performance_data_path and not subset_non_timeouts and not soot_results_path and not perf_soot_path_arg:
         print(
-            "Error: Either out.json, performancedata, sootresults, or subsetOfNonTimeouts parameter must be provided"
+            "Error: Either out.json, performancedata, sootresults, perf_soot_path, or subsetOfNonTimeouts parameter must be provided"
         )
         sys.exit(1)
 
@@ -538,8 +543,11 @@ def main():
 
     # Compare with ground truth if provided
     if mds_ground_truth:
-        # Resolve which soot results CSV to use
-        if soot_results_path:
+        # Resolve which soot results CSV to use (priority: perf_soot_path > sootresults > performancedata)
+        if perf_soot_path_arg:
+            perf_soot_path = perf_soot_path_arg
+            gt_output_dir = os.path.dirname(os.path.abspath(perf_soot_path_arg))
+        elif soot_results_path:
             perf_soot_path = soot_results_path
             gt_output_dir = os.path.dirname(os.path.abspath(soot_results_path))
         elif perfomance_report_dir:
@@ -559,7 +567,7 @@ def main():
         elif perf_soot_path:
             print(f"Error: Soot results file not found at {perf_soot_path}")
         else:
-            print("Note: Ground truth comparison requires either sootresults or performancedata parameter")
+            print("Note: Ground truth comparison requires perf_soot_path, sootresults, or performancedata parameter")
 
     # Handle subsetOfNonTimeouts: find common non-timeout scenarios across all paths and plot
     if subset_non_timeouts:
