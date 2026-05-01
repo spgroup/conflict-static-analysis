@@ -1,0 +1,9 @@
+scenario_jar,num_conflicts,num_scenarios
+/home/oav2/miningframework/output/files/voldemort/4cc1c145819030c8e2baffe4c92383de14b8d880/original-without-dependencies/merge/voldemort-1.9.21.jar,1,1
+/home/oav2/miningframework/output/files/RxJava/a40a4130edcdadc2340da5787ca30353018173f2/original-without-dependencies/merge/rxjava-1.0.13-SNAPSHOT-benchmarks.jar,1,1
+/home/oav2/miningframework/output/files/hector/0588608e7a2bdf974c985ff546207104f672bf6c/original-without-dependencies/merge/hector-core-1.1-3-SNAPSHOT.jar,1,1
+/home/oav2/miningframework/output/files/elasticsearch/d896886973660785aac45275ddb110c1a6babc57/original-without-dependencies/merge/elasticsearch-5.0.0-SNAPSHOT.jar,8,4
+/home/oav2/miningframework/output/files/elasticsearch/f3d63095dbcc985e24162fbac4ee0d6914dc757d/original-without-dependencies/merge/elasticsearch-2.0.0-SNAPSHOT-tests.jar,4,3
+/home/oav2/miningframework/output/files/elasticsearch/f3d63095dbcc985e24162fbac4ee0d6914dc757d/original-without-dependencies/merge/elasticsearch-analysis-kuromoji-2.0.0-SNAPSHOT-tests.jar,2,1
+/home/oav2/miningframework/output/files/fitnesse/4d9ba9d221d879507440feb084fa7521b95111ec/original-without-dependencies/merge/fitnesse.jar,1,1
+/home/oav2/miningframework/output/files/spring-boot/074771ec125dd407af0282b92960e9e9e3377e84/original-without-dependencies/merge/spring-boot-1.3.0.RELEASE.jar,1,1

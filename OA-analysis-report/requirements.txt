@@ -1,0 +1,4 @@
+pandas == 2.3.2
+matplotlib == 3.10.6
+seaborn == 0.13.2
+scikit-learn >= 1.0.0
