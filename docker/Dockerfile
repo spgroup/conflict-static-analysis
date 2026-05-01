@@ -4,7 +4,7 @@ FROM ubuntu:22.04
 # 1. Instalar dependências de sistema
 # -------------------------------------
 RUN apt-get update --fix-missing && \
-    apt-get install -y openjdk-8-jdk ant curl python3 python3-pip git vim ca-certificates-java && \
+    apt-get install -y openjdk-8-jdk openjdk-17-jdk ant curl python3 python3-pip git vim ca-certificates-java && \
     apt-get clean && \
     update-ca-certificates -f
 
@@ -34,7 +34,7 @@ ENV MAVEN_CONFIG "$USER_HOME_DIR/.m2"
 # 4. Prepare miningframework
 # -------------------------------------
 
-RUN git clone --recursive --branch article_ioa_2025 --depth 1 https://github.com/spgroup/miningframework.git /home/tmp/miningframework
+RUN git clone --recursive --depth 1 https://github.com/spgroup/miningframework.git /home/tmp/miningframework
 RUN pip install -r /home/tmp/miningframework/requirements.txt
 
 RUN mkdir -p /home/mds /home/rds && \
@@ -49,32 +49,33 @@ ADD results-with-build-information.csv /home/mds/miningframework/output/data/
 # -------------------------------------
 # 5. Prepare conflict-static-analysis
 # -------------------------------------
-ADD ioa-experiment/settings.xml $USER_HOME_DIR/.m2/
-RUN git clone --branch article_ioa_2025 --depth 1 https://github.com/spgroup/conflict-static-analysis.git /home/conflict-static-analysis
+ADD settings.xml $USER_HOME_DIR/.m2/
+#RUN git config --global http.postBuffer 524288000
+#RUN git clone --branch article_ioa_2025 --depth 1 https://github.com/spgroup/conflict-static-analysis.git /home/conflict-static-analysis
 
-RUN cd /home/conflict-static-analysis && mvn clean install -DskipTests && mvn compile assembly:single && \
-    cp /home/conflict-static-analysis/target/*.jar /home/mds/miningframework/dependencies/ && \
-    cp /home/conflict-static-analysis/target/*.jar /home/rds/miningframework/dependencies/
+#RUN cd /home/conflict-static-analysis && mvn clean install -DskipTests && mvn compile assembly:single && \
+#    cp /home/conflict-static-analysis/target/*.jar /home/mds/miningframework/dependencies/ && \
+#    cp /home/conflict-static-analysis/target/*.jar /home/rds/miningframework/dependencies/
 
 
 # -------------------------------------
 # 6. Preparar datasets
 # -------------------------------------
 
-RUN git clone --branch article_ioa_2025 --depth 1 https://github.com/spgroup/mergedataset.git /home/mds/miningframework/output/files
+#RUN git clone --branch article_ioa_2025 --depth 1 https://github.com/spgroup/mergedataset.git /home/mds/miningframework/output/files
 #RUN /home/mds/miningframework/output/files/prepareDataset.sh
 
-RUN git clone --branch article_ioa_2025 --depth 1 https://github.com/barbosamaatheus/ref-dataset.git /home/rds/miningframework/output/files
-RUN /home/rds/miningframework/output/files/prepare-dataset.sh
-RUN mkdir -p /home/rds/miningframework/output/data && \
-    cp /home/rds/miningframework/output/files/results-with-build-information.csv /home/rds/miningframework/output/data/results-with-build-information.csv
+#RUN git clone --branch article_ioa_2025 --depth 1 https://github.com/barbosamaatheus/ref-dataset.git /home/rds/miningframework/output/files
+#RUN /home/rds/miningframework/output/files/prepare-dataset.sh
+#RUN mkdir -p /home/rds/miningframework/output/data && \
+#    cp /home/rds/miningframework/output/files/results-with-build-information.csv /home/rds/miningframework/output/data/results-with-build-information.csv
 
 
 # -------------------------------------
 # 7. Copiar scripts para o container
 # -------------------------------------
-COPY scripts/run_and_organize_ioa_experimental_results.py /home/mds/miningframework/run_and_organize_ioa_experimental_results.py
-COPY scripts/run_and_organize_ioa_experimental_results.py /home/rds/miningframework/run_and_organize_ioa_experimental_results.py
+COPY scripts/run_organize_monit_exp.py /home/mds/miningframework/run_organize_monit_exp.py
+COPY scripts/run_organize_monit_exp.py /home/rds/miningframework/run_organize_monit_exp.py
 
 COPY scripts /home/mds/miningframework/results
 COPY scripts /home/rds/miningframework/results
@@ -85,9 +86,9 @@ RUN chmod +x /home/entrypoint.sh && chmod +x /home/mds/miningframework/gradlew &
 # -------------------------------------
 # 8. Instalar dependências dos scripts experimentais
 # -------------------------------------
-RUN pip install -r /home/mds/miningframework/results/requirements.txt
-RUN pip install -r /home/rds/miningframework/results/requirements.txt
+RUN pip install -r /home/mds/miningframework/requirements.txt
+RUN pip install -r /home/rds/miningframework/requirements.txt
 # -------------------------------------
 # 11. Definir comando de execução do container
 # -------------------------------------
-CMD ["/home/run_experiment.sh"]
+#sCMD ["/home/run_experiment.sh"]
