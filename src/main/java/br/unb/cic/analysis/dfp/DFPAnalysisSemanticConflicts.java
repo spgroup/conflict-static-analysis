@@ -37,7 +37,7 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
      * @param entrypoints the list of entry points for the analysis
      */
     public DFPAnalysisSemanticConflicts(String classPath, AbstractMergeConflictDefinition definition, int depthLimit,
-                                        List<String> entrypoints) {
+            List<String> entrypoints) {
         this.cp = classPath;
         this.depthLimit = depthLimit;
         this.statementsUtils = new StatementsUtil(definition, entrypoints);
@@ -52,7 +52,7 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
     }
 
     public DFPAnalysisSemanticConflicts(String classPath, AbstractMergeConflictDefinition definition,
-                                        List<String> entrypoints) {
+            List<String> entrypoints) {
         this(classPath, definition, 5, entrypoints);
     }
 
@@ -71,6 +71,7 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
                 DFPAnalysisSemanticConflicts.this.initAllocationSites();
                 List<SootMethod> methods = JavaConverters.seqAsJavaList(getAnalysisEntryPoints());
                 methods.forEach(sootMethod -> traverse(sootMethod, new ListBuffer<>(), false));
+                createAnalysisReportLog(Scene.v().getCallGraph().size(), methods);
             }
         }));
     }
@@ -85,8 +86,113 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
                 System.out.println("countEdges: " + Scene.v().getCallGraph().size());
                 List<SootMethod> methods = JavaConverters.seqAsJavaList(getAnalysisEntryPoints());
                 methods.forEach(sootMethod -> traverseDFP(sootMethod, new ListBuffer<>(), false));
+                createAnalysisReportLog(Scene.v().getCallGraph().size(), methods);
             }
         }));
+    }
+
+    private void createAnalysisReportLog(int countEdges, List<SootMethod> methods) {
+        br.unb.cic.analysis.model.AnalysisRecord.clearInstance();
+        new br.unb.cic.analysis.model.AnalysisRecord.Builder()
+                .callGraphAlgorithm(br.unb.cic.analysis.SootWrapper.getCallGraphAlgorithm())
+                .callGraphEdgeCount(countEdges)
+                .depthLimit(this.depthLimit)
+                .visitedMethodsCount(getNumberVisitedMethods())
+                .analysisType(br.unb.cic.analysis.Main.AnalysisType.WITH_POINTER_ANALYSIS)
+                .callGraphBuildTimeMs(br.unb.cic.analysis.SootWrapper.getPackageExecutionTimes())
+                .callGraphEntryPoint(Scene.v().getEntryPoints())
+                .analysisEntryPoint(methods)
+                .build();
+    }
+
+    private List<br.unb.cic.analysis.model.Statement> pointerAnalysisMissingRefs = new ArrayList<>();
+    private Set<SootMethod> checkedMethods = new HashSet<>();
+
+    public List<br.unb.cic.analysis.model.Statement> getPointerAnalysisMissingRefs() {
+        return pointerAnalysisMissingRefs;
+    }
+
+    @Override
+    public void traverse(SootMethod method, scala.collection.mutable.ListBuffer<VisitedMethods> methods, boolean force) {
+        checkMissingReferences(method);
+        super.traverse(method, methods, force);
+    }
+
+    @Override
+    public void traverseDFP(SootMethod method, scala.collection.mutable.ListBuffer<VisitedMethods> methods, boolean force) {
+        checkMissingReferences(method);
+        super.traverseDFP(method, methods, force);
+    }
+
+    protected void checkMissingReferences(SootMethod sootMethod) {
+        if (sootMethod == null || !sootMethod.hasActiveBody() || checkedMethods.contains(sootMethod)) {
+            return;
+        }
+        checkedMethods.add(sootMethod);
+
+        soot.jimple.toolkits.callgraph.CallGraph callGraph = Scene.v().getCallGraph();
+
+        for (Unit unit : sootMethod.getActiveBody().getUnits()) {
+            boolean isMissing = false;
+
+            if (unit instanceof soot.jimple.AssignStmt) {
+                soot.jimple.AssignStmt assignStmt = (soot.jimple.AssignStmt) unit;
+                if (isMissingReference(assignStmt.getLeftOp()) || isMissingReference(assignStmt.getRightOp())) {
+                    isMissing = true;
+                }
+                if (assignStmt.containsInvokeExpr()) {
+                    if (!callGraph.edgesOutOf(unit).hasNext()) {
+                        isMissing = true;
+                    }
+                }
+            } else if (unit instanceof soot.jimple.InvokeStmt) {
+                if (!callGraph.edgesOutOf(unit).hasNext()) {
+                    isMissing = true;
+                }
+            }
+
+            if (isMissing) {
+                addMissingReference(sootMethod, unit);
+            }
+        }
+    }
+
+    private boolean isMissingReference(soot.Value value) {
+        if (value instanceof soot.jimple.InstanceFieldRef) {
+            return !hasPointsTo(((soot.jimple.InstanceFieldRef) value).getBase());
+        } else if (value instanceof soot.jimple.ArrayRef) {
+            return !hasPointsTo(((soot.jimple.ArrayRef) value).getBase());
+        } else if (value instanceof soot.jimple.StaticFieldRef) {
+            return !hasPointsTo(value);
+        }
+        return false;
+    }
+
+    private boolean hasPointsTo(soot.Value value) {
+        if (value instanceof soot.Local) {
+            soot.PointsToSet points = Scene.v().getPointsToAnalysis().reachingObjects((soot.Local) value);
+            return points != null && !points.isEmpty();
+        } else if (value instanceof soot.jimple.StaticFieldRef) {
+            soot.PointsToSet points = Scene.v().getPointsToAnalysis().reachingObjects(((soot.jimple.StaticFieldRef) value).getField());
+            return points != null && !points.isEmpty();
+        }
+        return true; 
+    }
+
+    private void addMissingReference(SootMethod method, Unit unit) {
+        br.unb.cic.analysis.model.Statement stmt = br.unb.cic.analysis.model.Statement.builder()
+                .setClass(method.getDeclaringClass())
+                .setMethod(method)
+                .setUnit(unit)
+                .setType(br.unb.cic.analysis.model.Statement.Type.IN_BETWEEN)
+                .setSourceCodeLineNumber(unit.getJavaSourceStartLineNumber())
+                .build();
+        
+        boolean exists = pointerAnalysisMissingRefs.stream()
+                .anyMatch(s -> s.getUnit().equals(unit) && s.getSootMethod().equals(method));
+        if (!exists) {
+            this.pointerAnalysisMissingRefs.add(stmt);
+        }
     }
 
     @Override

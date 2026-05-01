@@ -29,11 +29,13 @@ public class DFPConfluenceAnalysis {
      *
      * @param classPath       a classpath to the software under analysis
      * @param definition      a definition with the sources and sinks unities
-     * @param interprocedural a flag indicating whether to consider interprocedural analysis.
+     * @param interprocedural a flag indicating whether to consider interprocedural
+     *                        analysis.
      * @param depthLimit      the depth limit for the analysis
      * @param entrypoints     the list of entry points for the analysis
      */
-    public DFPConfluenceAnalysis(String classPath, AbstractMergeConflictDefinition definition, boolean interprocedural, int depthLimit, List<String> entrypoints) {
+    public DFPConfluenceAnalysis(String classPath, AbstractMergeConflictDefinition definition, boolean interprocedural,
+            int depthLimit, List<String> entrypoints) {
         this.cp = classPath;
         this.definition = definition;
         this.interprocedural = interprocedural;
@@ -41,7 +43,8 @@ public class DFPConfluenceAnalysis {
         this.entrypoints = entrypoints;
     }
 
-    public DFPConfluenceAnalysis(String classPath, AbstractMergeConflictDefinition definition, boolean interprocedural) {
+    public DFPConfluenceAnalysis(String classPath, AbstractMergeConflictDefinition definition,
+            boolean interprocedural) {
         this(classPath, definition, interprocedural, 5, new ArrayList<>());
     }
 
@@ -50,7 +53,8 @@ public class DFPConfluenceAnalysis {
     }
 
     /**
-     * After the execute method has been called, it returns the confluent conflicts returned by the algorithm
+     * After the execute method has been called, it returns the confluent conflicts
+     * returned by the algorithm
      *
      * @return a set of confluence conflicts
      */
@@ -78,7 +82,8 @@ public class DFPConfluenceAnalysis {
             StatementNode confluenceA = pathA.get(pathA.size() - 1);
 
             for (int j = 0; j < conflicts.size(); j++) {
-                if (i == j) continue;
+                if (i == j)
+                    continue;
 
                 ConfluenceConflict conflictB = conflicts.get(j);
                 List<StatementNode> pathB = conflictB.getSourceNodePath();
@@ -106,20 +111,21 @@ public class DFPConfluenceAnalysis {
                             break;
                         }
                     }
-                    if (match) return conflictA;
+                    if (match)
+                        return conflictA;
                 }
             }
         }
         return null;
     }
 
-
     public void setCallGraph(DFPAnalysisSemanticConflicts instance, String callGraph) {
         instance.setCallGraph(callGraph);
     }
 
     /**
-     * Executes both source -> base and sink -> base SVFA analysis intersects then populating
+     * Executes both source -> base and sink -> base SVFA analysis intersects then
+     * populating
      * the confluentFlows attribute with the results
      */
     public void execute(boolean depthMethodsVisited, String callGraph) {
@@ -174,13 +180,44 @@ public class DFPConfluenceAnalysis {
 
         this.confluentFlows = intersectPathsByLastNode(sourceBasePaths, sinkBasePaths);
 
+        this.pointerAnalysisMissingRefs.clear();
+        this.pointerAnalysisMissingRefs.addAll(sourceBaseAnalysis.getPointerAnalysisMissingRefs());
+        this.pointerAnalysisMissingRefs.addAll(sinkBaseAnalysis.getPointerAnalysisMissingRefs());
+
         m.saveExecutionTime("Time to perform Confluence 2 " + type_analysis);
 
-        System.out.println("Visited methods: " + (sourceBaseAnalysis.getNumberVisitedMethods() + sinkBaseAnalysis.getNumberVisitedMethods()));
+        System.out.println("Visited methods: "
+                + (sourceBaseAnalysis.getNumberVisitedMethods() + sinkBaseAnalysis.getNumberVisitedMethods()));
         setVisitedMethods(sourceBaseAnalysis.getNumberVisitedMethods() + sinkBaseAnalysis.getNumberVisitedMethods());
         setGraphSize(sourceBaseAnalysis, sinkBaseAnalysis);
+
+        createAnalysisReportLog(sourceBaseAnalysis);
     }
 
+    private void createAnalysisReportLog(DFPAnalysisSemanticConflicts analysis) {
+        br.unb.cic.analysis.model.AnalysisRecord.clearInstance();
+        int countEdges = soot.Scene.v().getCallGraph().size();
+        List<soot.SootMethod> methods = scala.collection.JavaConverters
+                .seqAsJavaList(analysis.getAnalysisEntryPoints());
+
+        new br.unb.cic.analysis.model.AnalysisRecord.Builder()
+                .callGraphAlgorithm(br.unb.cic.analysis.SootWrapper.getCallGraphAlgorithm())
+                .callGraphEdgeCount(countEdges)
+                .depthLimit(this.depthLimit)
+                .visitedMethodsCount(getVisitedMethods())
+                .analysisType(this.interprocedural ? br.unb.cic.analysis.Main.AnalysisType.WITH_POINTER_ANALYSIS
+                        : br.unb.cic.analysis.Main.AnalysisType.WITHOUT_POINTER_ANALYSIS)
+                .callGraphBuildTimeMs(br.unb.cic.analysis.SootWrapper.getPackageExecutionTimes())
+                .callGraphEntryPoint(soot.Scene.v().getEntryPoints())
+                .analysisEntryPoint(methods)
+                .build();
+    }
+
+    private List<br.unb.cic.analysis.model.Statement> pointerAnalysisMissingRefs = new ArrayList<>();
+
+    public List<br.unb.cic.analysis.model.Statement> getPointerAnalysisMissingRefs() {
+        return pointerAnalysisMissingRefs;
+    }
 
     public List<String> reportConflictsConfluence() {
         List<String> report = new ArrayList<>();
@@ -253,10 +290,7 @@ public class DFPConfluenceAnalysis {
                                         " flow: " + leftPath,
 
                                 "Caused by line " + rightLine +
-                                        " flow: " + rightPath
-                        )
-                )
-        );
+                                        " flow: " + rightPath)));
     }
 
     private boolean isValidConfluenceConflict(ConfluenceConflict conflict) {
@@ -301,13 +335,15 @@ public class DFPConfluenceAnalysis {
 
     /**
      * Intersects the list of paths looking for paths that have the same last nodes
-     * also ignores redundant node (that represent different jimple lines but the same Java line)
+     * also ignores redundant node (that represent different jimple lines but the
+     * same Java line)
      *
      * @param paths1 A set of lists of nodes with at least 2 nodes
      * @param paths2 A set of lists of nodes with at least 2 nodes
      * @return A set of confluence conflicts
      */
-    private Set<ConfluenceConflict> intersectPathsByLastNode(Set<List<StatementNode>> paths1, Set<List<StatementNode>> paths2) {
+    private Set<ConfluenceConflict> intersectPathsByLastNode(Set<List<StatementNode>> paths1,
+            Set<List<StatementNode>> paths2) {
         Map<StatementNode, List<StatementNode>> pathEndHash = new HashMap<>();
 
         for (List<StatementNode> path : paths1) {
@@ -339,58 +375,64 @@ public class DFPConfluenceAnalysis {
         return null;
     }
 
-//    private Set<ConfluenceConflict> intersectPathsByLastNode(Set<List<StatementNode>> paths1, Set<List<StatementNode>> paths2) {
-//        List<PathEntry> pathEndList = new ArrayList<>();
-//
-//        System.out.println("===================================Intersecting paths=====================================");
-//        System.out.println("============ paths1:\n");
-//        for (List<StatementNode> path: paths1) {
-//            System.out.println("(paths1) -> ");
-//            StatementNode firstNode = path.get(0);
-//            StatementNode lastNode = path.get(path.size() - 1);
-//            System.out.println(firstNode.value().className() + ":" + firstNode.value().line() + " / " + firstNode.value().sootUnit() + " -> " +
-//                    lastNode.value().className() + ":" + lastNode.value().line() + " / " + lastNode.value().sootUnit());
-//        }
-//        System.out.println("============ paths2:\n");
-//        for (List<StatementNode> path: paths2) {
-//            System.out.println("(paths2) -> ");
-//            StatementNode firstNode = path.get(0);
-//            StatementNode lastNode = path.get(path.size() - 1);
-//            System.out.println(firstNode.value().className() + ":" + firstNode.value().line() + " / " + firstNode.value().sootUnit() + " -> " +
-//                    lastNode.value().className() + ":" + lastNode.value().line() + " / " + lastNode.value().sootUnit());
-//        }
-//        System.out.println("========================================================================================");
-//
-//        for (List<StatementNode> path : paths1) {
-//            StatementNode lastNode = getLastNode(path);
-//            pathEndList.add(new PathEntry(lastNode, path));
-//        }
-//
-//        Set<ConfluenceConflict> result = new HashSet<>();
-//
-//        for (List<StatementNode> path : paths2) {
-//            StatementNode lastNode = getLastNode(path);
-//
-//            for (PathEntry entry : pathEndList) {
-//                if (lastNode.equals(entry.endNode)) {
-//                    result.add(new ConfluenceConflict(entry.path, path));
-//                }
-//            }
-//        }
-//
-//        return result;
-//    }
-//
-//    private static class PathEntry {
-//        public final StatementNode endNode;
-//        public final List<StatementNode> path;
-//
-//        public PathEntry(StatementNode endNode, List<StatementNode> path) {
-//            this.endNode = endNode;
-//            this.path = path;
-//        }
-//    }
-
+    // private Set<ConfluenceConflict>
+    // intersectPathsByLastNode(Set<List<StatementNode>> paths1,
+    // Set<List<StatementNode>> paths2) {
+    // List<PathEntry> pathEndList = new ArrayList<>();
+    //
+    // System.out.println("===================================Intersecting
+    // paths=====================================");
+    // System.out.println("============ paths1:\n");
+    // for (List<StatementNode> path: paths1) {
+    // System.out.println("(paths1) -> ");
+    // StatementNode firstNode = path.get(0);
+    // StatementNode lastNode = path.get(path.size() - 1);
+    // System.out.println(firstNode.value().className() + ":" +
+    // firstNode.value().line() + " / " + firstNode.value().sootUnit() + " -> " +
+    // lastNode.value().className() + ":" + lastNode.value().line() + " / " +
+    // lastNode.value().sootUnit());
+    // }
+    // System.out.println("============ paths2:\n");
+    // for (List<StatementNode> path: paths2) {
+    // System.out.println("(paths2) -> ");
+    // StatementNode firstNode = path.get(0);
+    // StatementNode lastNode = path.get(path.size() - 1);
+    // System.out.println(firstNode.value().className() + ":" +
+    // firstNode.value().line() + " / " + firstNode.value().sootUnit() + " -> " +
+    // lastNode.value().className() + ":" + lastNode.value().line() + " / " +
+    // lastNode.value().sootUnit());
+    // }
+    // System.out.println("========================================================================================");
+    //
+    // for (List<StatementNode> path : paths1) {
+    // StatementNode lastNode = getLastNode(path);
+    // pathEndList.add(new PathEntry(lastNode, path));
+    // }
+    //
+    // Set<ConfluenceConflict> result = new HashSet<>();
+    //
+    // for (List<StatementNode> path : paths2) {
+    // StatementNode lastNode = getLastNode(path);
+    //
+    // for (PathEntry entry : pathEndList) {
+    // if (lastNode.equals(entry.endNode)) {
+    // result.add(new ConfluenceConflict(entry.path, path));
+    // }
+    // }
+    // }
+    //
+    // return result;
+    // }
+    //
+    // private static class PathEntry {
+    // public final StatementNode endNode;
+    // public final List<StatementNode> path;
+    //
+    // public PathEntry(StatementNode endNode, List<StatementNode> path) {
+    // this.endNode = endNode;
+    // this.path = path;
+    // }
+    // }
 
     /**
      * @param path A list of nodes with at least 2 nodes
@@ -403,13 +445,16 @@ public class DFPConfluenceAnalysis {
     }
 
     /**
-     * @return A instance of a child class of the JDFPAnalysis class that redefine source and sink as source and base
+     * @return A instance of a child class of the JDFPAnalysis class that redefine
+     *         source and sink as source and base
      */
     private br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts sourceBaseAnalysis(boolean interprocedural) {
-        return new br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts(this.cp, this.definition, this.depthLimit, this.entrypoints) {
+        return new br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts(this.cp, this.definition, this.depthLimit,
+                this.entrypoints) {
 
             /**
-             * As in this case we want to detect flows between source and base, this methods defines isSink as all units
+             * As in this case we want to detect flows between source and base, this methods
+             * defines isSink as all units
              * that are neither source nor sink and are inside a method body
              */
             @Override
@@ -429,12 +474,14 @@ public class DFPConfluenceAnalysis {
     }
 
     /**
-     * @return A instance of a child class of the SVFAAnalysis class that redefine source and sink as source and base
+     * @return A instance of a child class of the SVFAAnalysis class that redefine
+     *         source and sink as source and base
      */
     private DFPAnalysisSemanticConflicts sinkBaseAnalysis(boolean interprocedural) {
         return new DFPAnalysisSemanticConflicts(this.cp, this.definition, this.depthLimit, this.entrypoints) {
             /**
-             * As in this case we want to detect flows between sink and base, this methods defines isSource as all units
+             * As in this case we want to detect flows between sink and base, this methods
+             * defines isSource as all units
              * that are initially defined as sink
              */
             @Override
@@ -446,7 +493,8 @@ public class DFPConfluenceAnalysis {
             }
 
             /**
-             * As in this case we want to detect flows between sink and base, this methods defines isSink as all units
+             * As in this case we want to detect flows between sink and base, this methods
+             * defines isSink as all units
              * that are neither source nor sink and are inside a method body
              */
             @Override
@@ -466,7 +514,8 @@ public class DFPConfluenceAnalysis {
 
     private boolean isInMethodBody(Unit unit) {
         /**
-         * Some Jimple units actually don't represent real lines and are not in inside the method body.
+         * Some Jimple units actually don't represent real lines and are not in inside
+         * the method body.
          */
         return unit.getJavaSourceStartLineNumber() > 0;
     }
@@ -489,7 +538,8 @@ public class DFPConfluenceAnalysis {
     }
 
     public void setGraphSize(DFPAnalysisSemanticConflicts source, DFPAnalysisSemanticConflicts sink) {
-        this.getGraphSize = (source.svg().graph().size() + "," + source.svg().edges().size() + "," + sink.svg().graph().size() + "," + sink.svg().edges().size());
+        this.getGraphSize = (source.svg().graph().size() + "," + source.svg().edges().size() + ","
+                + sink.svg().graph().size() + "," + sink.svg().edges().size());
     }
 
     public String getGraphSize() {

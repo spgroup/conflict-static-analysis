@@ -1,6 +1,6 @@
 package br.unb.cic.analysis.io;
 
-import br.unb.cic.analysis.model.OAAnalysisRecord;
+import br.unb.cic.analysis.model.AnalysisRecord;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -8,9 +8,9 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-public class OAAnalysisCsvExporter {
+public class AnalysisCsvExporter {
 
-    public void export(List<OAAnalysisRecord> records, String filePath) {
+    public void export(List<AnalysisRecord> records, String filePath) {
         File file = new File(filePath);
         boolean isNewFile = !file.exists() || file.length() == 0;
 
@@ -20,7 +20,7 @@ public class OAAnalysisCsvExporter {
                 writer.append("CallGraphAlgorithm;CallGraphEdgeCount;DepthLimit;VisitedMethodsCount;AnalysisType;CallGraphBuildTimeMs;AnalysisExecutionTimeMs;CallGraphEntryPointsCount;AnalysisEntryPointsCount;CallGraphEntryPoints;AnalysisEntryPoints;\n");
             }
 
-            for (OAAnalysisRecord record : records) {
+            for (AnalysisRecord record : records) {
                 writeRecord(writer, record);
             }
 
@@ -32,11 +32,11 @@ public class OAAnalysisCsvExporter {
         }
     }
 
-    public void export(OAAnalysisRecord record, String filePath) {
+    public void export(AnalysisRecord record, String filePath) {
         export(Collections.singletonList(record), filePath);
     }
 
-    private void writeRecord(FileWriter writer, OAAnalysisRecord record) throws IOException {
+    private void writeRecord(FileWriter writer, AnalysisRecord record) throws IOException {
         writer.append(record.getCallGraphAlgorithm() != null ? record.getCallGraphAlgorithm().name() : "").append(";");
         writer.append(String.valueOf(record.getCallGraphEdgeCount())).append(";");
         writer.append(String.valueOf(record.getDepthLimit())).append(";");

@@ -12,10 +12,10 @@ import br.unb.cic.analysis.dfp.DFPInterProcedural;
 import br.unb.cic.analysis.dfp.DFPIntraProcedural;
 import br.unb.cic.analysis.io.DefaultReader;
 import br.unb.cic.analysis.io.MergeConflictReader;
-import br.unb.cic.analysis.io.OAAnalysisCsvExporter;
+import br.unb.cic.analysis.io.AnalysisCsvExporter;
 import br.unb.cic.analysis.io.PANotResolveCsvExporter;
 import br.unb.cic.analysis.model.Conflict;
-import br.unb.cic.analysis.model.OAAnalysisRecord;
+import br.unb.cic.analysis.model.AnalysisRecord;
 import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.analysis.oa.OverrideAssignment;
 import br.unb.cic.analysis.oa.OverrideAssignmentWithPointerAnalysis;
@@ -408,8 +408,8 @@ public class Main {
         long time = stopwatch.elapsed(TimeUnit.MILLISECONDS);
         new PANotResolveCsvExporter().export(overrideAssignment.getPointerAnalysisMissingRefs(), "PANotResolve.csv");
 
-        OAAnalysisRecord.getInstance().setAnalysisExecutionTimeMs(time);
-        new OAAnalysisCsvExporter().export(OAAnalysisRecord.getInstance(), "AnalysisRecords.csv");
+        AnalysisRecord.getInstance().setAnalysisExecutionTimeMs(time);
+        new AnalysisCsvExporter().export(AnalysisRecord.getInstance(), "AnalysisRecords.csv");
     }
 
     private OverrideAssignment buildOverrideAssignment(

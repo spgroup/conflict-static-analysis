@@ -7,9 +7,9 @@ import soot.SootMethod;
 import java.util.List;
 import java.util.Map;
 
-public class OAAnalysisRecord {
+public class AnalysisRecord {
 
-    private static OAAnalysisRecord instance;
+    private static AnalysisRecord instance;
 
     private List<SootMethod> callGraphEntryPoint;
     private List<SootMethod> analysisEntryPoint;
@@ -21,14 +21,18 @@ public class OAAnalysisRecord {
     private Map<String, Long> callGraphBuildTimeMs;
     private long analysisExecutionTimeMs;
 
-    private OAAnalysisRecord() {
+    private AnalysisRecord() {
     }
 
-    public static OAAnalysisRecord getInstance() {
+    public static AnalysisRecord getInstance() {
         if (instance == null) {
-            throw new IllegalStateException("OAAnalysisRecord ainda não foi inicializado. Use o Builder primeiro.");
+            throw new IllegalStateException("AnalysisRecord ainda não foi inicializado. Use o Builder primeiro.");
         }
         return instance;
+    }
+
+    public static void clearInstance() {
+        instance = null;
     }
 
     public static class Builder {
@@ -87,9 +91,9 @@ public class OAAnalysisRecord {
             return this;
         }
 
-        public OAAnalysisRecord build() {
+        public AnalysisRecord build() {
             if (instance == null) {
-                instance = new OAAnalysisRecord();
+                instance = new AnalysisRecord();
                 instance.callGraphEntryPoint = this.callGraphEntryPoint;
                 instance.analysisEntryPoint = this.analysisEntryPoint;
                 instance.callGraphAlgorithm = this.callGraphAlgorithm;
