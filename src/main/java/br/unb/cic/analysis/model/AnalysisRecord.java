@@ -20,6 +20,7 @@ public class AnalysisRecord {
     private Main.AnalysisType analysisType;
     private Map<String, Long> callGraphBuildTimeMs;
     private long analysisExecutionTimeMs;
+    private long usedMemoryMb;
 
     private AnalysisRecord() {
     }
@@ -103,6 +104,9 @@ public class AnalysisRecord {
                 instance.analysisType = this.analysisType;
                 instance.callGraphBuildTimeMs = this.callGraphBuildTimeMs;
                 instance.analysisExecutionTimeMs = this.analysisExecutionTimeMs;
+
+                Runtime runtime = Runtime.getRuntime();
+                instance.usedMemoryMb = (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024);
             }
             return instance;
         }
@@ -146,5 +150,9 @@ public class AnalysisRecord {
 
     public void setAnalysisExecutionTimeMs(long time) {
         this.analysisExecutionTimeMs = time;
+    }
+
+    public long getUsedMemoryMb() {
+        return usedMemoryMb;
     }
 }
