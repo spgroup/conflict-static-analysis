@@ -10,12 +10,12 @@ import br.unb.cic.analysis.df.pessimistic.PessimisticTaintedAnalysis;
 import br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts;
 import br.unb.cic.analysis.dfp.DFPInterProcedural;
 import br.unb.cic.analysis.dfp.DFPIntraProcedural;
+import br.unb.cic.analysis.io.AnalysisCsvExporter;
 import br.unb.cic.analysis.io.DefaultReader;
 import br.unb.cic.analysis.io.MergeConflictReader;
-import br.unb.cic.analysis.io.AnalysisCsvExporter;
 import br.unb.cic.analysis.io.PANotResolveCsvExporter;
-import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.AnalysisRecord;
+import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.analysis.oa.OverrideAssignment;
 import br.unb.cic.analysis.oa.OverrideAssignmentWithPointerAnalysis;
@@ -533,6 +533,12 @@ public class Main {
         saveVisitedMethods("DFP " + type_analysis, (analysis.getNumberVisitedMethods() + "," + analysis.svg().graph().size() + "," + analysis.svg().edges().size()));
 
         saveConflictsLog("DFP " + type_analysis, conflicts_report);
+
+        long time = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        new PANotResolveCsvExporter().export(analysis.getPointerAnalysisMissingRefs(), "PANotResolve.csv");
+
+        AnalysisRecord.getInstance().setAnalysisExecutionTimeMs(time);
+        new AnalysisCsvExporter().export(AnalysisRecord.getInstance(), "AnalysisRecords.csv");
     }
 
     private void runCDAnalysis(String classpath, Boolean omitExceptingUnitEdges) {
@@ -622,6 +628,12 @@ public class Main {
 
         saveVisitedMethods("Confluence " + type_analysis, (analysis.getVisitedMethods() + "," + analysis.getGraphSize()));
         saveConflictsLog("Confluence " + type_analysis, conflicts_report);
+
+        long time = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        new PANotResolveCsvExporter().export(analysis.getPointerAnalysisMissingRefs(), "PANotResolve.csv");
+
+        AnalysisRecord.getInstance().setAnalysisExecutionTimeMs(time);
+        new AnalysisCsvExporter().export(AnalysisRecord.getInstance(), "AnalysisRecords.csv");
     }
 
     private void loadDefinition(String filePath) throws Exception {
