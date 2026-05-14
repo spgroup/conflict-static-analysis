@@ -633,8 +633,6 @@ public class Main {
         saveConflictsLog("DF " + type_analysis, conflicts);
 
         long time = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-        analysis.createAnalysisReportLog(SootWrapper.countEdges(soot.Scene.v().getCallGraph()),
-                scala.collection.JavaConverters.seqAsJavaList(analysis.getEntryPoints()));
 
         exportAnalysisRecord(time);
     }
