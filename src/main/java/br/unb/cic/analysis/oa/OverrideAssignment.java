@@ -1,7 +1,9 @@
 package br.unb.cic.analysis.oa;
 
-import br.unb.cic.analysis.*;
-import br.unb.cic.analysis.Main;
+import br.unb.cic.analysis.AbstractAnalysis;
+import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+import br.unb.cic.analysis.SootWrapper;
+import br.unb.cic.analysis.StatementsUtil;
 import br.unb.cic.analysis.model.*;
 import scala.collection.JavaConverters;
 import soot.*;
@@ -304,9 +306,6 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
                 .callGraphEdgeCount(countEdges)
                 .depthLimit(this.depthLimit)
                 .visitedMethodsCount(getVisitedMethodsCount())
-                .analysisType(
-                        this instanceof OverrideAssignmentWithPointerAnalysis ? Main.AnalysisType.WITH_POINTER_ANALYSIS
-                                : Main.AnalysisType.WITHOUT_POINTER_ANALYSIS)
                 .callGraphBuildTimeMs(SootWrapper.getPackageExecutionTimes())
                 .callGraphEntryPoint(Scene.v().getEntryPoints()) // se quiser só 1 método
                 .analysisEntryPoint(methods)

@@ -4,6 +4,7 @@ import br.ufpe.cin.soot.analysis.jimple.JDFP;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.SootWrapper;
 import br.unb.cic.analysis.StatementsUtil;
+import br.unb.cic.analysis.model.AnalysisRecord;
 import br.unb.cic.soot.graph.*;
 import br.unb.cic.soot.svfa.*;
 import scala.Tuple2;
@@ -71,7 +72,7 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
                 DFPAnalysisSemanticConflicts.this.initAllocationSites();
                 List<SootMethod> methods = JavaConverters.seqAsJavaList(getAnalysisEntryPoints());
                 methods.forEach(sootMethod -> traverse(sootMethod, new ListBuffer<>(), false));
-                createAnalysisReportLog(Scene.v().getCallGraph().size(), methods);
+                createAnalysisReportLog(SootWrapper.countEdges(Scene.v().getCallGraph()), methods);
             }
         }));
     }
@@ -83,23 +84,21 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
             protected void internalTransform(String phaseName, Map<String, String> options) {
                 DFPAnalysisSemanticConflicts.this.pointsToAnalysis_$eq(Scene.v().getPointsToAnalysis());
                 DFPAnalysisSemanticConflicts.this.initAllocationSites();
-                System.out.println("countEdges: " + Scene.v().getCallGraph().size());
+                System.out.println("countEdges: " + SootWrapper.countEdges(Scene.v().getCallGraph()));
                 List<SootMethod> methods = JavaConverters.seqAsJavaList(getAnalysisEntryPoints());
                 methods.forEach(sootMethod -> traverseDFP(sootMethod, new ListBuffer<>(), false));
-                createAnalysisReportLog(Scene.v().getCallGraph().size(), methods);
+                createAnalysisReportLog(SootWrapper.countEdges(Scene.v().getCallGraph()), methods);
             }
         }));
     }
 
-    private void createAnalysisReportLog(int countEdges, List<SootMethod> methods) {
-        br.unb.cic.analysis.model.AnalysisRecord.clearInstance();
-        new br.unb.cic.analysis.model.AnalysisRecord.Builder()
-                .callGraphAlgorithm(br.unb.cic.analysis.SootWrapper.getCallGraphAlgorithm())
+    public void createAnalysisReportLog(int countEdges, List<SootMethod> methods) {
+        new AnalysisRecord.Builder()
+                .callGraphAlgorithm(SootWrapper.getCallGraphAlgorithm())
                 .callGraphEdgeCount(countEdges)
                 .depthLimit(this.depthLimit)
                 .visitedMethodsCount(getNumberVisitedMethods())
-                .analysisType(br.unb.cic.analysis.Main.AnalysisType.WITH_POINTER_ANALYSIS)
-                .callGraphBuildTimeMs(br.unb.cic.analysis.SootWrapper.getPackageExecutionTimes())
+                .callGraphBuildTimeMs(SootWrapper.getPackageExecutionTimes())
                 .callGraphEntryPoint(Scene.v().getEntryPoints())
                 .analysisEntryPoint(methods)
                 .build();
@@ -113,13 +112,15 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
     }
 
     @Override
-    public void traverse(SootMethod method, scala.collection.mutable.ListBuffer<VisitedMethods> methods, boolean force) {
+    public void traverse(SootMethod method, scala.collection.mutable.ListBuffer<VisitedMethods> methods,
+                         boolean force) {
         checkMissingReferences(method);
         super.traverse(method, methods, force);
     }
 
     @Override
-    public void traverseDFP(SootMethod method, scala.collection.mutable.ListBuffer<VisitedMethods> methods, boolean force) {
+    public void traverseDFP(SootMethod method, scala.collection.mutable.ListBuffer<VisitedMethods> methods,
+                            boolean force) {
         checkMissingReferences(method);
         super.traverseDFP(method, methods, force);
     }
@@ -173,10 +174,11 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
             soot.PointsToSet points = Scene.v().getPointsToAnalysis().reachingObjects((soot.Local) value);
             return points != null && !points.isEmpty();
         } else if (value instanceof soot.jimple.StaticFieldRef) {
-            soot.PointsToSet points = Scene.v().getPointsToAnalysis().reachingObjects(((soot.jimple.StaticFieldRef) value).getField());
+            soot.PointsToSet points = Scene.v().getPointsToAnalysis()
+                    .reachingObjects(((soot.jimple.StaticFieldRef) value).getField());
             return points != null && !points.isEmpty();
         }
-        return true; 
+        return true;
     }
 
     private void addMissingReference(SootMethod method, Unit unit) {
@@ -187,7 +189,7 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
                 .setType(br.unb.cic.analysis.model.Statement.Type.IN_BETWEEN)
                 .setSourceCodeLineNumber(unit.getJavaSourceStartLineNumber())
                 .build();
-        
+
         boolean exists = pointerAnalysisMissingRefs.stream()
                 .anyMatch(s -> s.getUnit().equals(unit) && s.getSootMethod().equals(method));
         if (!exists) {
@@ -273,7 +275,7 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
 
     @Override
     public boolean propagateObjectTaint() {
-        return (this.callGraph instanceof CHA$) || (this.callGraph instanceof RTA$);
+        return true;
     }
 
     @Override

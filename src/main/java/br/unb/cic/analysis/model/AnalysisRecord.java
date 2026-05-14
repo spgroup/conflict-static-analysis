@@ -1,7 +1,6 @@
 package br.unb.cic.analysis.model;
 
 import br.unb.cic.analysis.CallGraphAlgorithm;
-import br.unb.cic.analysis.Main;
 import soot.SootMethod;
 
 import java.util.List;
@@ -17,7 +16,6 @@ public class AnalysisRecord {
     private int callGraphEdgeCount;
     private int depthLimit;
     private int visitedMethodsCount;
-    private Main.AnalysisType analysisType;
     private Map<String, Long> callGraphBuildTimeMs;
     private long analysisExecutionTimeMs;
     private long usedMemoryMb;
@@ -43,7 +41,6 @@ public class AnalysisRecord {
         private int callGraphEdgeCount;
         private int depthLimit;
         private int visitedMethodsCount;
-        private Main.AnalysisType analysisType;
         private Map<String, Long> callGraphBuildTimeMs;
         private long analysisExecutionTimeMs;
 
@@ -77,11 +74,6 @@ public class AnalysisRecord {
             return this;
         }
 
-        public Builder analysisType(Main.AnalysisType value) {
-            this.analysisType = value;
-            return this;
-        }
-
         public Builder callGraphBuildTimeMs(Map<String, Long> value) {
             this.callGraphBuildTimeMs = value;
             return this;
@@ -101,7 +93,6 @@ public class AnalysisRecord {
                 instance.callGraphEdgeCount = this.callGraphEdgeCount;
                 instance.depthLimit = this.depthLimit;
                 instance.visitedMethodsCount = this.visitedMethodsCount;
-                instance.analysisType = this.analysisType;
                 instance.callGraphBuildTimeMs = this.callGraphBuildTimeMs;
                 instance.analysisExecutionTimeMs = this.analysisExecutionTimeMs;
 
@@ -134,10 +125,6 @@ public class AnalysisRecord {
 
     public int getVisitedMethodsCount() {
         return visitedMethodsCount;
-    }
-
-    public Main.AnalysisType getAnalysisType() {
-        return analysisType;
     }
 
     public Map<String, Long> getCallGraphBuildTimeMs() {

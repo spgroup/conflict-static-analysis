@@ -8,6 +8,7 @@ import br.unb.cic.soot.graph.StatementNode;
 import br.unb.cic.soot.graph.VisitedMethods;
 import com.google.common.base.Stopwatch;
 import soot.G;
+import soot.Scene;
 import soot.Unit;
 import soot.options.Options;
 
@@ -195,8 +196,7 @@ public class DFPConfluenceAnalysis {
     }
 
     private void createAnalysisReportLog(DFPAnalysisSemanticConflicts analysis) {
-        br.unb.cic.analysis.model.AnalysisRecord.clearInstance();
-        int countEdges = soot.Scene.v().getCallGraph().size();
+        int countEdges = Scene.v().getCallGraph().size();
         List<soot.SootMethod> methods = scala.collection.JavaConverters
                 .seqAsJavaList(analysis.getAnalysisEntryPoints());
 
@@ -205,8 +205,6 @@ public class DFPConfluenceAnalysis {
                 .callGraphEdgeCount(countEdges)
                 .depthLimit(this.depthLimit)
                 .visitedMethodsCount(getVisitedMethods())
-                .analysisType(this.interprocedural ? br.unb.cic.analysis.Main.AnalysisType.WITH_POINTER_ANALYSIS
-                        : br.unb.cic.analysis.Main.AnalysisType.WITHOUT_POINTER_ANALYSIS)
                 .callGraphBuildTimeMs(br.unb.cic.analysis.SootWrapper.getPackageExecutionTimes())
                 .callGraphEntryPoint(soot.Scene.v().getEntryPoints())
                 .analysisEntryPoint(methods)
