@@ -484,10 +484,7 @@ public class DFPConfluenceAnalysis {
              */
             @Override
             protected boolean isSource(Unit unit) {
-                return definition.getSinkStatements()
-                        .stream()
-                        .map(stmt -> stmt.getUnit())
-                        .anyMatch(u -> u.equals(unit));
+                return definition.isSinkStatement(unit);
             }
 
             /**
@@ -519,12 +516,7 @@ public class DFPConfluenceAnalysis {
     }
 
     private boolean isNotSourceOrSink(Unit unit) {
-        return unitIsNotOnList(this.definition.getSourceStatements(), unit) &&
-                unitIsNotOnList(this.definition.getSinkStatements(), unit);
-    }
-
-    private boolean unitIsNotOnList(List<Statement> statements, Unit unit) {
-        return statements.stream().map(stmt -> stmt.getUnit()).noneMatch(u -> u.equals(unit));
+        return !this.definition.isSourceStatement(unit) && !this.definition.isSinkStatement(unit);
     }
 
     public int getVisitedMethods() {

@@ -260,17 +260,11 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
     }
 
     protected boolean isSource(Unit unit) {
-        return this.statementsUtils.getDefinition().getSourceStatements()
-                .stream()
-                .map(stmt -> stmt.getUnit())
-                .anyMatch(u -> u.equals(unit));
+        return this.statementsUtils.getDefinition().isSourceStatement(unit);
     }
 
     protected boolean isSink(Unit unit) {
-        return this.statementsUtils.getDefinition().getSinkStatements()
-                .stream()
-                .map(stmt -> stmt.getUnit())
-                .anyMatch(u -> u.equals(unit));
+        return this.statementsUtils.getDefinition().isSinkStatement(unit);
     }
 
     @Override

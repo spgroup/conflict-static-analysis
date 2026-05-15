@@ -91,17 +91,11 @@ public abstract class PDGAnalysisSemanticConflicts extends JPDG {
     }
 
     protected boolean isSource(Unit unit) {
-        return getSourceStatements()
-                .stream()
-                .map(stmt -> stmt.getUnit())
-                .anyMatch(u -> u.equals(unit));
+        return this.statementsUtils.getDefinition().isSourceStatement(unit);
     }
 
     protected boolean isSink(Unit unit) {
-        return getSinkStatements()
-                .stream()
-                .map(stmt -> stmt.getUnit())
-                .anyMatch(u -> u.equals(unit));
+        return this.statementsUtils.getDefinition().isSinkStatement(unit);
     }
 
     protected List<Statement> getSourceStatements() {

@@ -21,6 +21,8 @@ import java.util.*;
 public abstract class AbstractMergeConflictDefinition {
     protected List<Statement> sourceStatements;
     protected List<Statement> sinkStatements;
+    private Set<Unit> sourceUnitsCache;
+    private Set<Unit> sinkUnitsCache;
     private Set<SootMethod> entryMethods;
     private boolean recursive;
     private int omitExceptingUnitEdges; //1 - true and 2-false
@@ -47,11 +49,13 @@ public abstract class AbstractMergeConflictDefinition {
     public void loadSourceStatements() {
         Map<String, List<Integer>> sourceDefinitions = sourceDefinitions();
         sourceStatements = loadStatements(sourceDefinitions, Statement.Type.SOURCE);
+        sourceUnitsCache = null;
     }
 
     public void loadSinkStatements() {
         Map<String, List<Integer>> sinkDefinitions = sinkDefinitions();
         sinkStatements = loadStatements(sinkDefinitions, Statement.Type.SINK);
+        sinkUnitsCache = null;
     }
 
     public List<Statement> getSourceStatements() {
@@ -355,11 +359,23 @@ public abstract class AbstractMergeConflictDefinition {
     }
 
     public boolean isSourceStatement(Unit u) {
-        return sourceStatements.stream().anyMatch(s -> s.getUnit().equals(u));
+        if (sourceUnitsCache == null) {
+            sourceUnitsCache = new HashSet<>();
+            for (Statement s : sourceStatements) {
+                sourceUnitsCache.add(s.getUnit());
+            }
+        }
+        return sourceUnitsCache.contains(u);
     }
 
     public boolean isSinkStatement(Unit u) {
-        return sinkStatements.stream().anyMatch(s -> s.getUnit().equals(u));
+        if (sinkUnitsCache == null) {
+            sinkUnitsCache = new HashSet<>();
+            for (Statement s : sinkStatements) {
+                sinkUnitsCache.add(s.getUnit());
+            }
+        }
+        return sinkUnitsCache.contains(u);
     }
 
     public Set<SootMethod> getEntryMethods() {
