@@ -98,7 +98,7 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
                 .callGraphEdgeCount(countEdges)
                 .depthLimit(this.depthLimit)
                 .visitedMethodsCount(getNumberVisitedMethods())
-                .callGraphBuildTimeMs(SootWrapper.getPackageExecutionTimes())
+                .callGraphBuildTimeMs(getPackageExecutionTimes())
                 .callGraphEntryPoint(Scene.v().getEntryPoints())
                 .analysisEntryPoint(methods)
                 .build();

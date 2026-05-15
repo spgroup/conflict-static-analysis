@@ -142,4 +142,20 @@ public class AnalysisRecord {
     public long getUsedMemoryMb() {
         return usedMemoryMb;
     }
+
+    public void setCallGraphBuildTimeMs(Map<String, Long> callGraphBuildTimeMs) {
+        this.callGraphBuildTimeMs = callGraphBuildTimeMs;
+    }
+
+    public void setCallGraphAlgorithm(CallGraphAlgorithm callGraphAlgorithm) {
+        this.callGraphAlgorithm = callGraphAlgorithm;
+    }
+
+    public void setCallGraphEdgeCount(int callGraphEdgeCount) {
+        this.callGraphEdgeCount = callGraphEdgeCount;
+    }
+
+    public void setUsedMemoryMb(long usedMemoryMb) {
+        this.usedMemoryMb = usedMemoryMb;
+    }
 }

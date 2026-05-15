@@ -205,8 +205,8 @@ public class DFPConfluenceAnalysis {
                 .callGraphEdgeCount(countEdges)
                 .depthLimit(this.depthLimit)
                 .visitedMethodsCount(getVisitedMethods())
-                .callGraphBuildTimeMs(br.unb.cic.analysis.SootWrapper.getPackageExecutionTimes())
-                .callGraphEntryPoint(soot.Scene.v().getEntryPoints())
+                .callGraphBuildTimeMs(analysis.getPackageExecutionTimes())
+                .callGraphEntryPoint(Scene.v().getEntryPoints())
                 .analysisEntryPoint(methods)
                 .build();
     }
