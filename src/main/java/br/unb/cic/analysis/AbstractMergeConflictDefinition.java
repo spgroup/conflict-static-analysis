@@ -24,6 +24,7 @@ public abstract class AbstractMergeConflictDefinition {
     private Set<SootMethod> entryMethods;
     private boolean recursive;
     private int omitExceptingUnitEdges; //1 - true and 2-false
+    private int depthLimit = 5;
 
     public AbstractMergeConflictDefinition() {
         this(false);
@@ -176,7 +177,7 @@ public abstract class AbstractMergeConflictDefinition {
 
     public List<Statement> traverse(SootMethod sm, List<SootMethod> traversed, List<TraversedLine> traversedLine, Statement.Type type, int level) {
         Body body = retrieveActiveBodySafely(sm);
-        if(traversed.contains(sm) || level > 5 || (!sm.getDeclaringClass().isApplicationClass()) || (body == null)) {
+        if(traversed.contains(sm) || level > depthLimit || (!sm.getDeclaringClass().isApplicationClass()) || (body == null)) {
             return new ArrayList<>();
         }
         level++;
@@ -343,6 +344,14 @@ public abstract class AbstractMergeConflictDefinition {
 
     public void setOmitExceptingUnitEdges(int value) {
         this.omitExceptingUnitEdges = value;
+    }
+
+    public int getDepthLimit() {
+        return depthLimit;
+    }
+
+    public void setDepthLimit(int depthLimit) {
+        this.depthLimit = depthLimit;
     }
 
     public boolean isSourceStatement(Unit u) {

@@ -342,7 +342,9 @@ public class DFPConfluenceAnalysis {
      */
     private Set<ConfluenceConflict> intersectPathsByLastNode(Set<List<StatementNode>> paths1,
             Set<List<StatementNode>> paths2) {
-        Map<StatementNode, List<StatementNode>> pathEndHash = new HashMap<>();
+        Map<StatementNode, List<StatementNode>> pathEndHash = new TreeMap<>(
+                Comparator.comparing((StatementNode o) -> o.value().className()).thenComparing(o -> o.value().method())
+                        .thenComparingInt(o -> o.value().line()));
 
         for (List<StatementNode> path : paths1) {
             pathEndHash.put(getLastNode(path), path);
@@ -351,11 +353,9 @@ public class DFPConfluenceAnalysis {
         Set<ConfluenceConflict> result = new HashSet<>();
         for (List<StatementNode> path : paths2) {
             StatementNode lastNode = getLastNode(path);
-
-            StatementNode stmt = containsKey(pathEndHash, lastNode);
-            if (stmt != null) {
+            if (pathEndHash.containsKey(lastNode)) {
                 System.out.println("[CONFLICT_FOUND]");
-                result.add(new ConfluenceConflict(pathEndHash.get(stmt), path));
+                result.add(new ConfluenceConflict(pathEndHash.get(lastNode), path));
             }
         }
 

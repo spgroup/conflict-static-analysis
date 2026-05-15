@@ -101,6 +101,10 @@ public class Main {
             } else {
                 m.loadDefinition(cmd.getOptionValue("csv"));
             }
+            
+            int depthLimit = Integer.parseInt(cmd.getOptionValue("depthLimit", "5"));
+            m.definition.setDepthLimit(depthLimit);
+
             m.runAnalysis(mode, m.parseClassPath(cmd.getOptionValue("cp")));
 
             synchronized (exportLock) {
@@ -508,7 +512,7 @@ public class Main {
         int depthLimit = Integer.parseInt(cmd.getOptionValue("depthLimit", "5"));
         List<String> entrypoints = convertStringEntrypointsToList(cmd.getOptionValue("entrypoints"));
 
-        definition.setRecursiveMode(options.hasOption("recursive"));
+        definition.setRecursiveMode(cmd.hasOption("recursive"));
         DFPAnalysisSemanticConflicts analysis = interprocedural
                 ? new DFPInterProcedural(classpath, definition, depthLimit, entrypoints)
                 : new DFPIntraProcedural(classpath, definition, entrypoints);
@@ -642,14 +646,14 @@ public class Main {
         List<String> entrypoints = convertStringEntrypointsToList(cmd.getOptionValue("entrypoints"));
         String type_analysis = interprocedural ? "Inter" : "Intra";
 
-        definition.setRecursiveMode(options.hasOption("recursive"));
+        definition.setRecursiveMode(cmd.hasOption("recursive"));
         DFPConfluenceAnalysis analysis = new DFPConfluenceAnalysis(classpath, this.definition, interprocedural,
                 depthLimit, entrypoints);
         boolean depthMethodsVisited = Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
         String cg = cmd.getOptionValue("cg", "SPARK");
+        System.out.println("Depth limit: " + analysis.getDepthLimit());
         analysis.execute(depthMethodsVisited, cg);
 
-        System.out.println("Depth limit: " + analysis.getDepthLimit());
         try {
             analysis.getConfluentConflicts(false)
                     .stream()
