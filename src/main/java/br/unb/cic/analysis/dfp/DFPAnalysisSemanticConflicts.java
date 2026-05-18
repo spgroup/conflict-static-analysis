@@ -28,6 +28,9 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
     private int depthLimit;
     private StatementsUtil statementsUtils;
     private CG callGraph = SPARK$.MODULE$;
+    private List<br.unb.cic.analysis.model.Statement> pointerAnalysisMissingRefs = new ArrayList<>();
+    private Set<SootMethod> checkedMethods = new HashSet<>();
+
 
     /**
      * DFPAnalysis constructor
@@ -103,9 +106,6 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
                 .analysisEntryPoint(methods)
                 .build();
     }
-
-    private List<br.unb.cic.analysis.model.Statement> pointerAnalysisMissingRefs = new ArrayList<>();
-    private Set<SootMethod> checkedMethods = new HashSet<>();
 
     public List<br.unb.cic.analysis.model.Statement> getPointerAnalysisMissingRefs() {
         return pointerAnalysisMissingRefs;
@@ -212,7 +212,10 @@ public class DFPAnalysisSemanticConflicts extends JDFP {
 
         JavaConverters
                 .asJavaCollection(svg().findConflictingPaths())
-                .forEach(p -> paths.add(new ArrayList(JavaConverters.asJavaCollection(p))));
+                .forEach(p -> {
+                    System.out.println("[CONFLICT_FOUND]");
+                    paths.add(new ArrayList(JavaConverters.asJavaCollection(p)));
+                });
 
         return paths;
     }
