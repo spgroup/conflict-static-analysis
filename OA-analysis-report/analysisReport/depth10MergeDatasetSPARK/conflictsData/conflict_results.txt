@@ -1,0 +1,140 @@
+
+Conflict Analysis Results:
+Total conflicts analyzed: 31
+Conflicts with same depth: 19 (61.29%)
+Conflicts in same class: 31 (100.00%)
+Conflicts in same method: 30 (96.77%)
+
+Depth statistics:
+  Mean depth: 4.84
+  Median depth: 5.00
+
+Stacktrace diff statistics:
+  Mean diff: 0.97
+  Median diff: 0.00
+
+Conflicts per scenario distribution:
+Scenarios with 0 conflicts: 0 (0.00%)
+Scenarios with 1 conflicts: 9 (60.00%)
+Scenarios with 2 conflicts: 3 (20.00%)
+Scenarios with 3 conflicts: 2 (13.33%)
+Scenarios with 4 conflicts: 0 (0.00%)
+Scenarios with 5 conflicts: 0 (0.00%)
+Scenarios with 6 conflicts: 0 (0.00%)
+Scenarios with 7 conflicts: 0 (0.00%)
+Scenarios with 8 conflicts: 0 (0.00%)
+Scenarios with 9 conflicts: 0 (0.00%)
+Scenarios with 10 conflicts: 1 (6.67%)
+Scenarios with 11 conflicts: 0 (0.00%)
+Scenarios with 12 conflicts: 0 (0.00%)
+Scenarios with 13 conflicts: 0 (0.00%)
+Scenarios with 14 conflicts: 0 (0.00%)
+Scenarios with 15 conflicts: 0 (0.00%)
+Scenarios with 16 conflicts: 0 (0.00%)
+Scenarios with 17 conflicts: 0 (0.00%)
+
+Conflict Depth Distribution:
+Conflicts with depth 0: 0 (0.00%)
+Conflicts with depth 1: 8 (25.81%)
+Conflicts with depth 2: 0 (0.00%)
+Conflicts with depth 3: 1 (3.23%)
+Conflicts with depth 4: 6 (19.35%)
+Conflicts with depth 5: 5 (16.13%)
+Conflicts with depth 6: 3 (9.68%)
+Conflicts with depth 7: 1 (3.23%)
+Conflicts with depth 8: 2 (6.45%)
+Conflicts with depth 9: 1 (3.23%)
+Conflicts with depth 10: 4 (12.90%)
+Conflicts with depth 11: 0 (0.00%)
+Conflicts with depth 12: 0 (0.00%)
+Conflicts with depth 13: 0 (0.00%)
+Conflicts with depth 14: 0 (0.00%)
+Conflicts with depth 15: 0 (0.00%)
+Conflicts with depth 16: 0 (0.00%)
+Conflicts with depth 17: 0 (0.00%)
+
+Conflicts diff Distribution:
+Conflicts with diff 0: 19 (61.29%)
+Conflicts with diff 1: 7 (22.58%)
+Conflicts with diff 2: 1 (3.23%)
+Conflicts with diff 3: 0 (0.00%)
+Conflicts with diff 4: 0 (0.00%)
+Conflicts with diff 5: 3 (9.68%)
+Conflicts with diff 6: 1 (3.23%)
+Conflicts with diff 7: 0 (0.00%)
+Conflicts with diff 8: 0 (0.00%)
+Conflicts with diff 9: 0 (0.00%)
+
+Scenario Analysis Results:
+Total scenario JARs: 10
+Total scenarios: 15
+
+Scenario Statistics:
+Average conflicts per JAR: 3.10
+Average scenarios per JAR: 1.50
+
+Same Class/Method Statistics:
+Percentage of scenarios with:
+>20% same class: 100.0%
+>20% same method: 93.3%
+>40% same class: 100.0%
+>40% same method: 93.3%
+>60% same class: 100.0%
+>60% same method: 93.3%
+>80% same class: 100.0%
+>80% same method: 93.3%
+>100% same class: 0.0%
+>100% same method: 0.0%
+
+Scenarios with conflicts concentrated in the same class/method:
+Threshold         Class     Method
+----------------------------------
+>=50%           100.0%      93.3%
+>=75%           100.0%      93.3%
+>=90%           100.0%      93.3%
+>=99%           100.0%      93.3%
+
+Scenarios with conflicts concentrated in no stacktrace diff (diff=0):
+Threshold     Scenarios
+------------------------
+>=50%           60.0%  (9/15)
+>=75%           60.0%  (9/15)
+>=90%           60.0%  (9/15)
+>=99%           60.0%  (9/15)
+
+Scenario average depth percentiles:
+  25th percentile: 2.00
+  50th percentile: 4.00
+  75th percentile: 5.00
+  90th percentile: 7.00
+  99th percentile: 7.77
+
+Scenarios with mean depth > 5: 3 (20.00%)
+Scenarios affected when depth is 5: 3 (20.00%)
+Scenarios affected when depth is 6: 3 (20.00%)
+Scenarios affected when depth is 7: 2 (13.33%)
+Scenarios affected when depth is 8: 2 (13.33%)
+Scenarios affected when depth is 9: 1 (6.67%)
+Scenarios affected when depth is 10: 0 (0.00%)
+Scenarios affected when depth is 11: 0 (0.00%)
+Scenarios affected when depth is 12: 0 (0.00%)
+Scenarios affected when depth is 13: 0 (0.00%)
+Scenarios affected when depth is 14: 0 (0.00%)
+Scenarios affected when depth is 15: 0 (0.00%)
+Scenarios affected when depth is 16: 0 (0.00%)
+Scenarios affected when depth is 17: 0 (0.00%)
+
+
+Scenarios lost when depth is 5: 1 (6.67%)
+Scenarios lost when depth is 6: 1 (6.67%)
+Scenarios lost when depth is 7: 0 (0.00%)
+Scenarios lost when depth is 8: 0 (0.00%)
+Scenarios lost when depth is 9: 0 (0.00%)
+Scenarios lost when depth is 10: 0 (0.00%)
+Scenarios lost when depth is 11: 0 (0.00%)
+Scenarios lost when depth is 12: 0 (0.00%)
+Scenarios lost when depth is 13: 0 (0.00%)
+Scenarios lost when depth is 14: 0 (0.00%)
+Scenarios lost when depth is 15: 0 (0.00%)
+Scenarios lost when depth is 16: 0 (0.00%)
+Scenarios lost when depth is 17: 0 (0.00%)

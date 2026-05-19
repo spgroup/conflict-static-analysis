@@ -1,0 +1,75 @@
+Ground Truth Comparison Analysis
+Generated: 2026-04-18T08:32:44.569687
+
+
+Strict Matching (excluding timeout/not-found)
+================================================================================
+Number of Scenarios: 79
+
+Confusion Matrix:
+  TP (True Positive): 5
+  FP (False Positive): 5
+  TN (True Negative): 51
+  FN (False Negative): 18
+
+Metrics:
+  Accuracy: 0.7089
+  Precision: 0.5000
+  Recall: 0.2174
+  F1-Score: 0.3030
+  Specificity: 0.9107
+
+Class Distribution:
+  Positive (Ground Truth): 23
+  Negative (Ground Truth): 56
+  Positive (Predicted): 10
+  Negative (Predicted): 69
+
+
+Timeout as False (excluding not-found)
+================================================================================
+Number of Scenarios: 99
+
+Confusion Matrix:
+  TP (True Positive): 5
+  FP (False Positive): 5
+  TN (True Negative): 65
+  FN (False Negative): 24
+
+Metrics:
+  Accuracy: 0.7071
+  Precision: 0.5000
+  Recall: 0.1724
+  F1-Score: 0.2564
+  Specificity: 0.9286
+
+Class Distribution:
+  Positive (Ground Truth): 29
+  Negative (Ground Truth): 70
+  Positive (Predicted): 10
+  Negative (Predicted): 89
+
+
+Timeout as True (excluding not-found)
+================================================================================
+Number of Scenarios: 99
+
+Confusion Matrix:
+  TP (True Positive): 11
+  FP (False Positive): 19
+  TN (True Negative): 51
+  FN (False Negative): 18
+
+Metrics:
+  Accuracy: 0.6263
+  Precision: 0.3667
+  Recall: 0.3793
+  F1-Score: 0.3729
+  Specificity: 0.7286
+
+Class Distribution:
+  Positive (Ground Truth): 29
+  Negative (Ground Truth): 70
+  Positive (Predicted): 30
+  Negative (Predicted): 69
+

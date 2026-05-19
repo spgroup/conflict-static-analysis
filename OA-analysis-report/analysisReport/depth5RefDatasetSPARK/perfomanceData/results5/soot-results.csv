@@ -1,0 +1,1088 @@
+project;class;method;merge commit;OA Inter;Time
+helpscout-api-java;net.helpscout.api.ApiClient;getPage(String, Map<String,String>, Class<?>, int);f606dc7048e32d8953594011ce7a80f8f325a5eb;false;3.84100
+hbnpojogen;com.felees.hbnpojogen.Config;fillBasicEntries();16f458ccc0b3675ec72a298481794ed4afd70666;true;23.87800
+hprof-parser;edu.tufts.eaftan.hprofparser.parser.HprofParser;parseRecord(DataInput, int);3668fd734f79c2b949f0703654dfda812c800707;true;4.15200
+helpscout-api-java;net.helpscout.api.ApiClient;setFields(String, List<String>);7dde5bbe5d07ba446e8d8b7b942d378b40f2b5c3;true;2.51700
+helpscout-api-java;net.helpscout.api.ApiClient;getPage(String, Class<?>, int);7dde5bbe5d07ba446e8d8b7b942d378b40f2b5c3;true;2.54600
+helpscout-api-java;net.helpscout.api.Parser;Parser();7dde5bbe5d07ba446e8d8b7b942d378b40f2b5c3;true;2.29300
+helpscout-api-java;net.helpscout.api.adapters.ThreadsAdapater;deserialize(JsonElement, Type, JsonDeserializationContext);b4963a5777344c814c99822967351c819072fbf5;false;2.43000
+ldp-testsuite;org.w3.ldp.testsuite.reporter.LdpHtmlReporter;getAdditionalInfo(ITestResult, ITestNGMethod);a7515238ae8139c8d6b2ee7e042183294ca3869f;true;2.94600
+ldp-testsuite;org.w3.ldp.testsuite.reporter.LdpEarlTestManifest;generateInformation(Method, String, ArrayList<ArrayList<Resource>>);a8f3dba6c261c5d9f6d8eff73f72e2712b9d25a4;false;2.69800
+jetty-bootstrap;org.teknux.jettybootstrap.JettyBootstrap;shutdown(IJettyConfiguration);6a9f52a5377a484397eeca4b0511f356f493696f;true;49.49900
+jetty-bootstrap;org.teknux.jettybootstrap.handler.AbstractAppJettyHandler;createHandler();17deab171882d57f5d02052ea6e631cb11aa0d55;true;53.40300
+jetty-bootstrap;org.teknux.jettybootstrap.handler.AbstractJettyHandler;getHandler();17deab171882d57f5d02052ea6e631cb11aa0d55;true;50.77400
+jetty-bootstrap;org.teknux.jettybootstrap.JettyBootstrap;addWarApp(String, String);17deab171882d57f5d02052ea6e631cb11aa0d55;true;52.92500
+jetty-bootstrap;org.teknux.jettybootstrap.JettyBootstrap;addExplodedWarAppFromClasspath(String, String, String);17deab171882d57f5d02052ea6e631cb11aa0d55;true;49.85600
+jetty-bootstrap;org.teknux.jettybootstrap.JettyBootstrap;addExplodedWarApp(String, String, String);17deab171882d57f5d02052ea6e631cb11aa0d55;true;53.43500
+jetty-bootstrap;org.teknux.jettybootstrap.JettyBootstrap;addHandler(Handler);17deab171882d57f5d02052ea6e631cb11aa0d55;false;48.99000
+jetty-bootstrap;org.teknux.jettybootstrap.JettyBootstrap;addWarAppFromClasspath(String, String);17deab171882d57f5d02052ea6e631cb11aa0d55;true;51.83400
+jetty-bootstrap;org.teknux.jettybootstrap.JettyBootstrap;stopServer();8a2b05ce18ff6c5ee8887b1c320c9735636126da;false;2.18100
+sectioned-view-plugin;hudson.plugins.sectioned_view.SectionedViewSectionDescriptor;newInstance(StaplerRequest, JSONObject);f79afadc89e325e4258847928fd9392dd78e5b64;false;2.05800
+google-oauth-plugin;com.google.jenkins.plugins.credentials.oauth.GoogleRobotPrivateKeyCredentials;readResolve();94f08c7c32d576d99ddd3e215b67653fc99eaeca;true;2.19200
+parallel-test-executor-plugin;org.jenkinsci.plugins.parallel_test_executor.TimeDrivenParallelism;calculate(List<TestClass>);95bd91171d3672799201b503c0cb8a4d6fcbc485;false;2.09300
+mercurial-plugin;hudson.plugins.mercurial.MercurialSCMSource2Test;withCredentialsId();442c688d35c5d22fd37822285b997c0addc5c3eb;false;2.98300
+mercurial-plugin;hudson.plugins.mercurial.MercurialSCMSource2Test;withCredentialsId();7ad0c7ed48378c86e23c90fadc32e647bbcd45c0;false;2.76800
+ec2-plugin;hudson.plugins.ec2.EC2Cloud;resolvePrivateKey();6520e9f879484a1b38e0abebc3b88de7662d2cb5;true;4.65700
+mercurial-plugin;hudson.plugins.mercurial.CustomConfigTest;customConfiguration();8e3d433d21ddd1b66d003a65d71fab8d15781c6a;false;2.42900
+mercurial-plugin;hudson.plugins.mercurial.SCMTestBase;parameterizedBuildsBranch();8e3d433d21ddd1b66d003a65d71fab8d15781c6a;false;2.19700
+ec2-plugin;hudson.plugins.ec2.UnixData;UnixData(String, String, String);54fff41fd8087801067cc7104e0d8ce7765de146;false;4.36900
+ec2-plugin;hudson.plugins.ec2.UnixData;hashCode();54fff41fd8087801067cc7104e0d8ce7765de146;false;4.75600
+junit-plugin;hudson.tasks.junit.SuiteResult;parse(File, boolean);b9fadd8a0573896cae592149587752b4ab45b370;false;3.11400
+git-client-plugin;org.jenkinsci.plugins.gitclient.jgit.PreemptiveAuthHttpClientConnectionTest;goUp_noPath();90b31f6f4d2ae0a70b37843c136461bfe1c21994;not-found;0.01100
+git-client-plugin;org.jenkinsci.plugins.gitclient.JGitAPIImpl;clone_();90b31f6f4d2ae0a70b37843c136461bfe1c21994;false;4.81900
+active-directory-plugin;hudson.plugins.active_directory.ActiveDirectoryDomain;ActiveDirectoryDomain(String, String, String, String, String, TlsConfiguration);2ea4fe7df1bd84db4fc64f04053f6e23a3460df6;true;2.59400
+active-directory-plugin;hudson.plugins.active_directory.ActiveDirectoryUnixAuthenticationProvider;ActiveDirectoryUnixAuthenticationProvider(ActiveDirectorySecurityRealm);8ecc2fcaae74e6950a4012cdf25d90e1fde6f867;false;2.84500
+active-directory-plugin;hudson.plugins.active_directory.ActiveDirectoryUnixAuthenticationProvider;retrieveUser(String, String, ActiveDirectoryDomain, List<SocketInfo>);8ecc2fcaae74e6950a4012cdf25d90e1fde6f867;false;3.12600
+ldap-plugin;hudson.security.LDAPSecurityRealm;searchForGroupName(String);eea7336ee4cf2e275c469bea99f549eba74fdc2b;false;2.22100
+ldap-plugin;hudson.security.LDAPSecurityRealm;loadUserByUsername(String);3eee59e25ac9c794d93058ac3043568c4eefb520;false;1.90000
+coverity-plugin;jenkins.plugins.coverity.CIMInstanceTest;getIssuesForView_logsMissingColumns();d24f4fd6c49ce41b60d6211d24eb165ae6188c81;not-found;0.01900
+coverity-plugin;jenkins.plugins.coverity.CIMInstanceTest;getIssuesForView_handlesPagingAndLogsProgess();d24f4fd6c49ce41b60d6211d24eb165ae6188c81;not-found;0.00200
+log-parser-plugin;hudson.plugins.logparser.LogParserStatusComputer;computeStatusMatches(FilePath, int, String);a4d0e3ca611eef6567b9ac34a8b8453a35fb4fd8;false;2.54700
+mailer-plugin;hudson.tasks.MailSenderTest;testIncludeUpstreamCulprits();021f80f4d6d5f008f0b673df1465e4ad849ac52a;not-found;0.00200
+mailer-plugin;hudson.tasks.MailSenderTest;forbiddenMail();021f80f4d6d5f008f0b673df1465e4ad849ac52a;not-found;0.00000
+log-parser-plugin;hudson.plugins.logparser.LogParserParser;parseLogBody(Run<?,?>, BufferedWriter, FilePath, String, int, Logger);a4d0e3ca611eef6567b9ac34a8b8453a35fb4fd8;false;2.32500
+log-parser-plugin;hudson.plugins.logparser.LogParserParser;parseLog(Run<?,?>);a4d0e3ca611eef6567b9ac34a8b8453a35fb4fd8;true;3.61700
+coverity-plugin;jenkins.plugins.coverity.CheckConfig;check();22b9d50b9e08c024210a30efab4f82b3933f56e6;true;4.91700
+coverity-plugin;jenkins.plugins.coverity.ws.DefectReaderTest;getLatestDefectsForBuild_withNoDefectFilters_addDefectsToBuildAction();62bdb6232eea84510734c8fee133d6568251b0b9;not-found;0.01500
+bitbucket-plugin;com.cloudbees.jenkins.plugins.BitbucketJobProbe;triggerMatchingJobs(String, String, String, String);da518043f34583234ad250c82869d287b33ee483;false;2.05200
+coverity-plugin;jenkins.plugins.coverity.CoverityLauncherDecorator;launch(ProcStarter);f79e5e1e325928b6403095ba63bf2baac77d491d;false;4.61100
+disk-usage-plugin;hudson.plugins.disk_usage.integration.ProjectDiskUsageActionTest;getAllBuildDiskUsageFiltered();f527c92357bed2cfa432c19b1673edd642ea49ad;not-found;0.00100
+jclouds-plugin;jenkins.plugins.jclouds.compute.JCloudsComputer;doDoDelete();b7620d50052a81ed2fc373a1aa77d48f55372b8f;false;3.05300
+disk-usage-plugin;hudson.plugins.disk_usage.integration.DiskUsagePropertyTest;testGetAllDiskUsageOfBuild();f527c92357bed2cfa432c19b1673edd642ea49ad;not-found;0.00000
+jclouds-plugin;jenkins.plugins.jclouds.compute.JCloudsCloudTest;testConfigurationUI();b7620d50052a81ed2fc373a1aa77d48f55372b8f;not-found;0.02200
+jclouds-plugin;jenkins.plugins.jclouds.compute.JCloudsOneOffSlave;tearDown(Run<?,?>, FilePath, Launcher, TaskListener);b7620d50052a81ed2fc373a1aa77d48f55372b8f;false;3.41600
+jclouds-plugin;jenkins.plugins.jclouds.compute.JCloudsCloud;ensureLaunched(JCloudsSlave);b7620d50052a81ed2fc373a1aa77d48f55372b8f;false;3.59400
+coverity-plugin;jenkins.plugins.coverity.CoverityTool.CoverityToolHandler;perform(AbstractBuild<?,?>, Launcher, BuildListener, CoverityPublisher);834a107594f7484029ebc2b3e6bc3e44986a2ef7;false;12.14600
+coverity-plugin;jenkins.plugins.coverity.CoverityTool.CovBuildCommandTest;commandForScriptSourcesTest();7ce14e1f9746cbd72d358c35c42361a2b5aba884;not-found;0.01800
+coverity-plugin;jenkins.plugins.coverity.CoverityTool.CovBuildCommandTest;commandForCompileSourcesTest_WithTaOptions();7ce14e1f9746cbd72d358c35c42361a2b5aba884;not-found;0.00100
+coverity-plugin;jenkins.plugins.coverity.CoverityTool.CovBuildCommandTest;cannotExecuteTest();7ce14e1f9746cbd72d358c35c42361a2b5aba884;not-found;0.00100
+coverity-plugin;jenkins.plugins.coverity.CoverityTool.CovBuildCommandTest;commandForCompileSourcesTest_WithAdditionalBuildArguments();7ce14e1f9746cbd72d358c35c42361a2b5aba884;not-found;0.00100
+coverity-plugin;jenkins.plugins.coverity.CoverityTool.CoverityToolHandler;perform(AbstractBuild<?,?>, Launcher, BuildListener, CoverityPublisher);e6e4f8a32b62f8753af9950b4f434ec4e7ffd07f;true;25.32000
+coverity-plugin;jenkins.plugins.coverity.analysis.JasperToolHandler;perform(AbstractBuild<?,?>, Launcher, BuildListener, CoverityPublisher);cba2ffdc456e11aef169b7e469f3605f8874f05e;false;6.61200
+maven-hpi-plugin;org.jenkinsci.maven.plugins.hpi.TestDependencyMojo;scanWar(File, MavenSession, MavenProject);d65f4ba879cf14e39c5e502787d736afa054ea92;true;2.71600
+maven-hpi-plugin;org.jenkinsci.maven.plugins.hpi.TestInsertionMojo;execute();433cb4d66954d957616211c059228b7d1531b800;false;2.70200
+maven-hpi-plugin;org.jenkinsci.maven.plugins.hpi.AbstractHpiMojo;setAttributes(Section);a4e85119cbfd5e48899b2cad3352e4ec718fdde1;false;2.73500
+maven-hpi-plugin;org.jenkinsci.maven.plugins.hpi.RunMojo;execute();7487ca2d90bff27b5e85f6bb1fd383504e8020c4;false;3.22500
+coverity-plugin;jenkins.plugins.coverity.analysis.FresnoToolHandler;perform(AbstractBuild<?,?>, Launcher, BuildListener, CoverityPublisher);09ae8cd6353743a1ebbd9bbfb903b60d7c7bbf55;true;7.26100
+coverity-plugin;jenkins.plugins.coverity.analysis.JasperToolHandler;perform(AbstractBuild<?,?>, Launcher, BuildListener, CoverityPublisher);09ae8cd6353743a1ebbd9bbfb903b60d7c7bbf55;true;6.91300
+coverity-plugin;jenkins.plugins.coverity.analysis.IndioToolHandler;perform(AbstractBuild<?,?>, Launcher, BuildListener, CoverityPublisher);09ae8cd6353743a1ebbd9bbfb903b60d7c7bbf55;true;6.83000
+coverity-plugin;jenkins.plugins.coverity.analysis.PreFresnoToolHandler;perform(AbstractBuild<?,?>, Launcher, BuildListener, CoverityPublisher);09ae8cd6353743a1ebbd9bbfb903b60d7c7bbf55;true;7.15500
+crowd2-plugin;de.theit.jenkins.crowd.CrowdConfigurationService;isGroupMember(String);d3fe5c539e80d79fd23a79d0d7266b8875acb239;false;2.46700
+email-ext-plugin;hudson.plugins.emailext.ExtendedEmailPublisher;sendMail(ExtendedEmailPublisherContext);a84b1dba982a1b692f8ee709fcb640759170a1e1;false;3.40500
+jira-client;net.rcarz.jiraclient.RestClient;request(HttpRequestBase);c5c2864195012ac574cbb4c687cf3fbeefc9f7fe;false;2.92600
+email-ext-plugin;hudson.plugins.emailext.ExtendedEmailPublisher;sendMail(ExtendedEmailPublisherContext);d8ddc534ebe43b6ca3737002c13a2c87a05abfd9;false;3.77900
+email-ext-plugin;hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;createSession(String);f995fa0ecca2296eff1dbfe2efa60948179daec3;false;3.42000
+jira-client;net.rcarz.jiraclient.Field;toJson(String, Object, JSONObject);b0d7ee7a420adb7016118809e1fc4aeb1d27565e;false;2.88500
+jira-client;net.rcarz.jiraclient.Field;toJson(String, Object, JSONObject);ae6e7fd9c5d3ab805026c00491f9e6265694a36e;false;2.79800
+jira-client;net.rcarz.jiraclient.Field;toJson(String, Object, JSONObject);3bc59bcee2e94a0905d0325aa037ecf68133ca64;true;2.62100
+hdt-java;org.rdfhdt.hdt.triples.TripleString;read(String);5478100321b500aff7bb90a75ce8eb755ca09583;false;2.92300
+hdt-java;org.rdfhdt.hdt.dictionary.impl.section.PFCDictionarySectionBig;locateInBlock(int, CharSequence);9dc6b033f1d70837496faf8fed9ead5c4ccfd0cf;false;1.66900
+hdt-java;org.rdfhdt.hdt.triples.impl.BitmapTriples;load(IteratorTripleID, ProgressListener);9dc6b033f1d70837496faf8fed9ead5c4ccfd0cf;false;2.29800
+hdt-java;org.rdfhdt.hdt.triples.TripleIDComparator;compare(TripleID, TripleID);9dc6b033f1d70837496faf8fed9ead5c4ccfd0cf;false;1.34300
+hdt-java;org.rdfhdt.hdt.dictionary.impl.section.PFCDictionarySectionBig;locateInBlock(int, CharSequence);cd88626a4e665e548f0981fdd26994e4819de68c;false;1.72400
+hdt-java;org.rdfhdt.hdt.triples.impl.BitmapTriples;close();cd88626a4e665e548f0981fdd26994e4819de68c;true;1.94000
+hdt-java;org.rdfhdt.hdt.hdt.impl.HDTImpl;search(CharSequence, CharSequence, CharSequence);cd88626a4e665e548f0981fdd26994e4819de68c;false;2.06700
+hdt-java;org.rdfhdt.hdt.hdt.impl.HDTImpl;loadOrCreateIndex(ProgressListener);cd88626a4e665e548f0981fdd26994e4819de68c;true;2.02900
+hdt-java;org.rdfhdt.hdt.fuseki.FusekiHDTCmd;processModulesAndArgs();75f3d402bc177bac168e7ea810c16f6d98776f89;false;2.80700
+hdt-java;org.rdfhdt.hdt.fuseki.FusekiHDTCmd;exec();75f3d402bc177bac168e7ea810c16f6d98776f89;false;1.81100
+gitools;org.gitools.cli.comparison.ComparisonTool;run(Object);46aa7bc54b455b60ac7ff4537d88a89718559c94;false;1.92600
+hdt-java;org.rdfhdt.hdt.triples.impl.BitmapTriples;search(TripleID);75f3d402bc177bac168e7ea810c16f6d98776f89;false;2.00100
+hdt-java;org.rdfhdt.hdt.triples.impl.BitmapTriples;load(IteratorTripleID, ProgressListener);75f3d402bc177bac168e7ea810c16f6d98776f89;false;1.90400
+hdt-java;org.rdfhdt.hdt.rdf.parsers.RDFParserRIOT;doParse(String, String, RDFNotation, RDFCallback);75f3d402bc177bac168e7ea810c16f6d98776f89;false;1.83600
+hdt-java;org.rdfhdt.hdt.triples.impl.PredicateIndexArray;generate(ProgressListener);75f3d402bc177bac168e7ea810c16f6d98776f89;true;1.99400
+hdt-java;org.rdfhdt.hdtjena.solver.OptimizedCount;getPlan(HDTQueryEngine, Query, DatasetGraph, Binding, Context);75f3d402bc177bac168e7ea810c16f6d98776f89;false;2.04900
+hdt-java;org.rdfhdt.hdt.hdt.impl.HDTImpl;mapFromHDT(File, long, ProgressListener);75f3d402bc177bac168e7ea810c16f6d98776f89;false;2.50800
+hdt-java;org.rdfhdt.hdt.rdf.parsers.RDFParserTar;doParse(String, String, RDFNotation, RDFCallback);75f3d402bc177bac168e7ea810c16f6d98776f89;false;1.86000
+mavanagaiata;com.github.koraktor.mavanagaiata.mojo.ChangelogMojo;run();e153234859a225b45352822576141fe470bada0f;false;2.05900
+oripa;oripa.view.main.UIPanel;addPropertyChangeListenersToSetting(MainScreenSetting);c7a747856cefa97fa45aa389c08f0eabb471efff;false;1.91900
+oripa;oripa.resource.StringResource_en;strings;c7a747856cefa97fa45aa389c08f0eabb471efff;false;1.79200
+oripa;oripa.resource.LabelStringResource_en;strings;c7a747856cefa97fa45aa389c08f0eabb471efff;false;1.55200
+oripa;oripa.viewsetting.main.uipanel.ChangeOnAlterTypeButtonSelected;changeViewSetting();cc79fc708c35d87be0ff45d54a8b2b6d6c804fbb;false;6.34600
+oripa;oripa.view.main.MainFrame;MainFrame();cc79fc708c35d87be0ff45d54a8b2b6d6c804fbb;false;6.88800
+oripa;oripa.viewsetting.main.uipanel.ChangeOnSelectButtonSelected;changeViewSetting();cc79fc708c35d87be0ff45d54a8b2b6d6c804fbb;false;6.48100
+oripa;oripa.view.main.UIPanel;addPropertyChangeListenersToSetting(MainScreenSetting);cc79fc708c35d87be0ff45d54a8b2b6d6c804fbb;false;7.47000
+oripa;oripa.view.main.UIPanel;UIPanel(StateManager, ViewScreenUpdater, MouseActionHolder, PaintContextInterface, CutModelOutlinesHolder, MainFrameSetting, MainScreenSetting);cc79fc708c35d87be0ff45d54a8b2b6d6c804fbb;false;7.12600
+oripa;oripa.resource.LabelStringResource_en;strings;cc79fc708c35d87be0ff45d54a8b2b6d6c804fbb;true;6.58500
+oripa;oripa.viewsetting.main.uipanel.ChangeOnPaintInputButtonSelected;changeViewSetting();cc79fc708c35d87be0ff45d54a8b2b6d6c804fbb;false;6.79500
+openkeepass;de.slackspace.openkeepass.stream.HashedBlockOutputStream;writeHashedBlock();3dc44ae983c2022ca0544609982fcac1ec1bff0c;true;2.18100
+openkeepass;de.slackspace.openkeepass.KeePassDatabase;decryptAndParseDatabase(byte[]);6218ade3f2e50f22e5e263714197f176e856c5a2;false;2.53200
+openkeepass;de.slackspace.openkeepass.KeePassDatabase;write(KeePassFile, String, OutputStream);6218ade3f2e50f22e5e263714197f176e856c5a2;false;2.82700
+gitools;org.gitools.matrix.model.compressmatrix.AbstractCompressor;initialize(IMatrixReader);f3903af522feb02e11fd24b68fe5c1d56608aa60;false;1.88100
+cf-java-client;org.cloudfoundry.client.lib.rest.CloudControllerClientImpl;createApplication(String, Staging, int, List<String>, List<String>);db184246cb5eda46a232e11ab9d4a41b744d2c9a;false;2.60100
+nassau;com.paritytrading.nassau.moldudp64.MoldUDP64Client;handle();77574c064155c1f9245f5dda74c0531bedc81c9e;false;4.37800
+typescript-generator;cz.habarta.typescript.generator.compiler.ModelCompiler;removeInheritedProperties(SymbolTable, TsModel);d35af8140a6870436d9ff2b8f2e47164d405af58;false;2.89000
+typescript-generator;cz.habarta.typescript.generator.gradle.GenerateTask;generate();d35af8140a6870436d9ff2b8f2e47164d405af58;false;1.65300
+typescript-generator;cz.habarta.typescript.generator.maven.GenerateMojo;execute();d35af8140a6870436d9ff2b8f2e47164d405af58;false;1.85000
+typescript-generator;cz.habarta.typescript.generator.gradle.GenerateTask;generate();1c03813f0d5593fbea4d3572a6ef028da3f034bd;false;1.44800
+typescript-generator;cz.habarta.typescript.generator.maven.GenerateMojo;execute();1c03813f0d5593fbea4d3572a6ef028da3f034bd;false;1.86400
+typescript-generator;cz.habarta.typescript.generator.DefaultTypeProcessor;processType(Type, Context);1c03813f0d5593fbea4d3572a6ef028da3f034bd;false;3.44900
+typescript-generator;cz.habarta.typescript.generator.Input;fromClassNamesAndJaxrsApplication(List<String>, List<String>, String, boolean, Predicate<String>, ClassLoader);1c03813f0d5593fbea4d3572a6ef028da3f034bd;true;3.81500
+jqm4gwt;com.sksamuel.jqm4gwt.list.JQMListItem;setCheckBox(IconPos);6513def00e116ce29ef9eaeae02e18b8ec9a41db;true;3.16300
+luwak;uk.co.flax.luwak.util.SpanRewriter;rewrite(Query);666bdd192e7e1e262d1ba9b71deb1519d626046c;false;3.01800
+californium;org.eclipse.californium.core.network.config.NetworkConfigDefaults;setDefaults(NetworkConfig);88ff010738dcb2c9e0726af7b6a7feb4daf1f333;true;6.60100
+californium;org.eclipse.californium.core.network.config.NetworkConfigDefaults;setDefaults(NetworkConfig);4f29e53f0a4805f5a85c73d0bfa314606494611d;true;5.35700
+californium;org.eclipse.californium.core.network.config.NetworkConfigDefaults;setDefaults(NetworkConfig);14cecab828b7b2ee4aa3e1728dff84940404fb02;true;5.61500
+proguard-maven-plugin;com.github.wvengen.maven.proguard.ProGuardMojo;execute();f451e7e614d307e53025ba5738baa26724d3ad54;true;2.17400
+proguard-maven-plugin;com.github.wvengen.maven.proguard.ProGuardMojo;execute();abfad8528e0374a1dd18c74264bad8bf20fcffc0;false;1.75800
+springmvc-router;org.resthub.web.springmvc.router.RouterHandlerMapping;initApplicationContext();71d38b423902b98a187292a1c0e9a6665fe35231;false;1.84300
+californium;org.eclipse.californium.core.network.config.NetworkConfigDefaults;setDefaults(NetworkConfig);b977b51748f8efee1bd10d4ebf8094c48cb51741;false;4.61500
+proguard-maven-plugin;com.github.wvengen.maven.proguard.ProGuardMojo;execute();65fb4b434c390988653d6eec5ae61a4a60ef3f7a;true;1.83900
+springmvc-router;org.resthub.web.springmvc.router.RouterHandlerMapping;initApplicationContext();cf86d464ca1768fae380c8a99223c5d536fa0b3e;false;1.79300
+proguard-maven-plugin;com.github.wvengen.maven.proguard.ProGuardMojo;execute();4d30721e4e09b2c826da62104ba433059216a3fe;false;2.05600
+californium;org.eclipse.californium.core.network.config.NetworkConfigDefaults;setDefaults(NetworkConfig);fae5f58d3db31d40a057873a424835b95a420773;false;5.12500
+proguard-maven-plugin;com.github.wvengen.maven.proguard.ProGuardMojo;execute();a7884a77e6491fc22a60b167f8099794534f9cb1;false;1.90800
+californium;org.eclipse.californium.core.network.stack.CoapTcpStack;CoapTcpStack(NetworkConfig, Outbox);82c3891f53102534d57b4ff829c957b9a44d79bd;false;5.30000
+californium;org.eclipse.californium.core.network.config.NetworkConfigDefaults;setDefaults(NetworkConfig);82c3891f53102534d57b4ff829c957b9a44d79bd;true;6.13700
+californium;org.eclipse.californium.core.network.stack.BlockwiseLayer;handleBlock2Response(Exchange, Response);54e272279f793bc458312aeab5105779434513e3;true;5.89400
+californium;org.eclipse.californium.core.network.stack.BlockwiseLayer;handleBlock2Response(Exchange, Response);677286ef24f95757ec5b9ec89648a99bba9bdd67;true;15.41300
+californium;org.eclipse.californium.core.network.config.NetworkConfigDefaults;setDefaults(NetworkConfig);677286ef24f95757ec5b9ec89648a99bba9bdd67;true;4.51400
+californium;org.eclipse.californium.core.network.stack.BlockwiseLayer;handleBlock2Response(Exchange, Response);0cc8e8652e7ff21b1215e3f486d592d6aad9c3bb;true;13.49000
+jndn;net.named_data.jndn.encoding.der.DerNode;toVal();11c59d2bd071a37e90ae603bfcb242a8bc4a2ce1;false;4.93800
+californium;org.eclipse.californium.core.network.config.NetworkConfigDefaults;setDefaults(NetworkConfig);0cc8e8652e7ff21b1215e3f486d592d6aad9c3bb;false;4.13800
+jndn;net.named_data.jndn.Node;nfdRegisterPrefix(long, Name, OnInterestCallback, OnRegisterFailed, ForwardingFlags, KeyChain, Name, WireFormat, Face);62f89871b57a8bc206428dacff6bde4e6fd305c3;true;4.40500
+tinder;org.xmpp.component.AbstractComponent;processIQRequest(IQ);c99be3f06ec9c816c3416f2c1963d6b19cc412c9;false;3.00700
+spark;spark.embeddedserver.jetty.EmbeddedJettyFactoryTest;create();bc05286f21e4abb498f728bcbbdbb9283458a40c;not-found;0.00100
+spark;spark.embeddedserver.jetty.EmbeddedJettyFactory;create(Routes, StaticFilesConfiguration, boolean);bc05286f21e4abb498f728bcbbdbb9283458a40c;false;2.94000
+spark;spark.Service;exception(Class<?extendsException>, ExceptionHandler);e2854295f7c484671ce69bff7ec37fcb0c413a32;false;3.20100
+spark;spark.staticfiles.MimeType;mappings;d87688b099ec224994fa4694bb6297ac3206c6c7;false;2.63500
+spark;spark.embeddedserver.jetty.EmbeddedJettyServer;ignite(String, int, SslStores, CountDownLatch, int, int, int);86bef5bbb81339f758b65b80a8488c5a10ef4d41;false;3.21500
+spark;spark.Service;init();86bef5bbb81339f758b65b80a8488c5a10ef4d41;true;3.29500
+mongowp;com.eightkdata.mongowp.utils.BsonReaderTool;getHostAndPort(Entry<?>, String);0d07d54c9494205afde3a7a17a9b449bb2308e6d;false;2.66300
+spark;spark.GenericIntegrationTest;setup();e975642b835fda306eaf0fe0339fbc92fe7b8333;not-found;0.00000
+spark;spark.http.matching.GeneralError;modify(HttpServletResponse, Body, RequestWrapper, ResponseWrapper, Exception);9b0279275378d3679902d856bc232f90d6eb3b84;false;3.22100
+spark;spark.GenericIntegrationTest;setup();e5d84a2acb5352c98db084722e2164b6b2073809;not-found;0.00200
+spark;spark.http.matching.MatcherFilter;doFilter(ServletRequest, ServletResponse, FilterChain);e5d84a2acb5352c98db084722e2164b6b2073809;false;3.63700
+spark;spark.staticfiles.StaticFilesConfiguration;configure(String);d8f6320e4c6d98ce16ebc33f07700bee9a95ae24;false;3.12600
+spark;spark.resource.ClassPathResourceHandler;getResource(String);d8f6320e4c6d98ce16ebc33f07700bee9a95ae24;true;3.20000
+spark;spark.http.matching.MatcherFilter;doFilter(ServletRequest, ServletResponse, FilterChain);ce46d86ba6e01c53db6abec306add3cb1ce0fe73;false;3.22200
+spark;spark.http.matching.AfterFilters;execute(RouteContext);b4ee63ef98b7572f5045857b32329ac34634d8a3;false;3.16600
+spark;spark.GenericIntegrationTest;setup();4f64ce71d8eec6fdd251fd4a4ae55c02896156d9;not-found;0.00100
+spark;spark.examples.filter.FilterExampleAttributes;main(String[]);d82881f845c8e678e1159e19b13aa13204bfd294;not-found;0.00100
+spark;spark.webserver.SparkServer;ignite(String, int, String, String, String, String, String, String);3810603d8a0b9aecb363208b7efbc795c3d031c1;false;2.08800
+spark;spark.webserver.MatcherFilter;doFilter(ServletRequest, ServletResponse, FilterChain);ae4a19a6782c0a3837d374a3bbd5a657830603f7;false;2.05500
+spark;spark.webserver.MatcherFilter;doFilter(ServletRequest, ServletResponse, FilterChain);5e183332a2b897bcf233ab1b8fcc9d6c59a8a60b;false;2.31200
+spark;spark.webserver.MatcherFilter;doFilter(ServletRequest, ServletResponse, FilterChain);2f578411a6a85950c5ba40fb204f8e0119b08a17;false;2.43300
+spark;spark.webserver.MatcherFilter;doFilter(ServletRequest, ServletResponse, FilterChain);5ccac4563762866e957198966f153eceaf66a51b;false;2.59800
+spark;spark.route.SimpleRouteMatcher;parseValidateAddRoute(String, Object);0de6842695fde634bdff38d3eab77b7802c8ffb3;false;2.60300
+spark;spark.webserver.MatcherFilter;doFilter(ServletRequest, ServletResponse, FilterChain);0de6842695fde634bdff38d3eab77b7802c8ffb3;false;2.61700
+spark;spark.webserver.JettyHandler;doHandle(String, Request, HttpServletRequest, HttpServletResponse);a1adf96711a0da607d7b0e9535c5fe5645580f0a;false;2.81600
+mongowp;com.eightkdata.mongowp.mongoserver.api.safe.library.v3m0.commands.admin.DropIndexesCommand;marshall();cded7d4d4a7a5ef253a517e8755e565e8f32d6de;false;4.21700
+mongowp;com.eightkdata.mongowp.mongoserver.api.safe.library.v3m0.pojos.IndexOptions;unmarshall(BsonDocument);88f77f1ac377baa67eb1b65a2929fee51f541e0c;false;3.27100
+mongowp;com.eightkdata.mongowp.server.api.RequestProcessorAdaptor;executeCommand(C, QueryMessage, MessageReplier);88f77f1ac377baa67eb1b65a2929fee51f541e0c;false;1.76100
+cjwizard;com.github.cjwizard.WizardContainer;visitPage(WizardPage);341c6c5f8dd3b1d0daafcc4bde69ad53ac42a27b;false;1.90200
+cjwizard;com.github.cjwizard.WizardContainer;visitPage(WizardPage);341c6c5f8dd3b1d0daafcc4bde69ad53ac42a27b;false;1.94500
+pom-manipulation-ext;org.commonjava.maven.ext.cli.CliTest;checkDependencies();d345d2903261da5654653f58df810c3fa413e32c;not-found;0.02000
+aesh;org.jboss.aesh.cl.parser.AeshCommandLineCompletionParser;injectValuesAndComplete(ParsedCompleteObject, CompleteOperation, InvocationProviders);28538044565c324ee53cfe3d3e3834a21d96dafd;false;4.35900
+pom-manipulation-ext;org.commonjava.maven.ext.io.rest.DefaultTranslator;translateVersions(List<ProjectVersionRef>);a282eb864b0390a93e0559ccce1cfa4ab624112b;true;2.90500
+java-iso-tools;com.github.stephenc.javaisotools.maven.PackageMojo;execute();abb37e3cfda2f2774f128d2a4f8299b4d721b452;false;1.89100
+java-iso-tools;com.github.stephenc.javaisotools.maven.PackageMojo;execute();f447e78e0af192bf7880698f7d617db5ff7aeb2e;false;1.67400
+designwizard;org.designwizard.extractor.asm.ASMExtractor;processDir(String);58fcd555cc6909bb7ca3df27d277600d8c871a81;true;1.75300
+drugwars;com.tufsd.drugwars.Player;Player();c4e30329d753ba87176104bd8a1f90275ad14266;false;1.20200
+geohash-java;ch.hsr.geohash.util.BoundingBoxGeoHashIterator;next();1e0aa77a02c168f39dc3c26f64257af4baffac6f;false;2.04500
+geohash-java;ch.hsr.geohash.GeoHash;ord();029fd4411871b99cef71407c432752c570fcfaa2;false;1.64700
+bioformats;loci.plugins.out.Exporter;run();783bb54232fb80894ee75f5bb9f7539e6ae22fc8;false;135.19800
+bioformats;loci.formats.out.DicomWriter;saveBytes(int, byte[], int, int, int, int);ee861f751acd4d4e6cf0847f2b2c74e09799e5b8;false;136.87200
+bioformats;loci.formats.out.DicomWriter;setId(String);ee861f751acd4d4e6cf0847f2b2c74e09799e5b8;false;123.03500
+bioformats;loci.formats.in.OMETiffReader;initFile(String);d4a3008b8ade3fd762074eead2725f68ddf5fe45;false;8.52900
+bioformats;loci.formats.in.CV7000Reader;initFile(String);6b73e46baf0dbd4692d41b00f2ff78078d5ed29e;false;131.95000
+bioformats;loci.formats.in.CellomicsReader;initFile(String);908aa2b8bd41ac31a1a46b669a68d731c0cd0854;false;136.77600
+bioformats;loci.formats.in.FakeReader;initFile(String);a476f00af1b9b0e41cf8d62944c1e1c2a318f613;false;128.61300
+bioformats;loci.formats.tools.ImageConverter;testConvert(IFormatWriter, String[]);47eb93c49e4b283e8907961c9f2a644c689d329a;false;104.21100
+bioformats;loci.formats.in.SVSReader;initMetadataStore();07b804962bea206361e1ab1a8e56874cf8c68496;false;99.51500
+bioformats;loci.formats.in.MetamorphReader;initStandardMetadata();610943fe9c1095e525a242533116e473616e16c6;false;17.63100
+bioformats;loci.formats.in.GelReader;initMetadata();610943fe9c1095e525a242533116e473616e16c6;true;17.14300
+bioformats;loci.formats.in.MinimalTiffReader;initFile(String);610943fe9c1095e525a242533116e473616e16c6;true;4.83300
+bioformats;loci.tests.testng.FormatReaderTest;testIsThisType();9ffe29e39564e95606ae3c4148f1ee599a49ddbb;false;3.18900
+bioformats;loci.formats.in.TrestleReader;initStandardMetadata();0595010eecc58334c37b1dd76a0a173ed00d2ef6;false;16.49900
+jadb;se.vidstige.jadb.managers.PackageManager;install(File, List<String>);6c84fe654222121475fb066fd217db3143fb901a;false;1.90800
+dbdeploy;com.dbdeploy.integration.DirectToDbIntegrationTest;shouldBeAbleToRecoverFromBadScriptsJustByRunningCorrectedScriptsAgain();50e6bb3003bf2e91512f9263a966f9e30fb17113;not-found;0.00300
+sql-parser;com.akiban.sql.parser.NodeFactoryImpl;nodeName(int);b41794d7af49d6c07e339f51eac8209f2a0bb9d1;false;7.28500
+sql-parser;com.akiban.sql.unparser.NodeToString;toString(QueryTreeNode);99bbf93e0dd33479341dbb3b553f1f2514c14a2e;false;7.03700
+sql-parser;com.akiban.sql.parser.NodeFactoryImpl;nodeName(int);99bbf93e0dd33479341dbb3b553f1f2514c14a2e;false;7.14900
+sql-parser;com.akiban.sql.parser.NodeFactoryImpl;nodeName(int);26bac97322396d85352f94fa79fc526e38d5c8fd;false;7.06100
+sql-parser;com.akiban.sql.parser.NodeFactoryImpl;nodeName(int);21d9d04b08761aacd8cf844096fbe64d8c4b3c57;false;7.59100
+spotify-web-api-java;com.wrapper.spotify.TestUtil;readFromFile(File);86bf0c7f5b0988b67d0191025981674cc6afe430;not-found;0.00100
+sql-parser;com.akiban.sql.parser.NodeFactoryImpl;nodeName(int);27786c78259031fefc81a3a83567f80596af939f;false;7.40200
+sql-parser;com.akiban.sql.parser.NodeFactoryImpl;nodeName(int);a53978799e131026528a8159f229c7a55de4bb38;false;7.29900
+sql-parser;com.akiban.sql.parser.NodeFactoryImpl;nodeName(int);996b5128efb1fbdf329bdf417aac4183be68a852;false;7.23200
+sql-parser;com.akiban.sql.unparser.NodeToString;toString(QueryTreeNode);101b5461bd04057ce934915a66975c7f373918af;false;7.44200
+sql-parser;com.akiban.sql.parser.NodeFactoryImpl;nodeName(int);101b5461bd04057ce934915a66975c7f373918af;false;7.21200
+sql-parser;com.akiban.sql.parser.NodeFactoryImpl;nodeName(int);307d28df56eaaf3913404fbde2b3f0053acd1c6f;false;8.06800
+sql-parser;com.akiban.sql.unparser.NodeToString;toString(QueryTreeNode);782c9d1a596ef8897e208741b620d783e5f6d549;false;8.16500
+sql-parser;com.akiban.sql.parser.NodeFactoryImpl;nodeName(int);782c9d1a596ef8897e208741b620d783e5f6d549;false;7.11900
+sql-parser;com.akiban.sql.parser.NodeFactoryImpl;nodeName(int);93762dbf3e46896f89615a1f6d4e3f5597dfc8fc;false;6.89200
+sql-parser;com.akiban.sql.parser.NodeFactoryImpl;nodeName(int);44c21ec228c4aa150fbab011e3a6058eec6ff634;false;6.91300
+spotify-web-api-java;se.michaelthelin.spotify.SpotifyHttpManager;SpotifyHttpManager(Builder);e836da54e76e85cf60a2b34fc264e75a21d6f97a;true;4.38800
+spotify-web-api-java;com.wrapper.spotify.TestUtil;readFromFile(File);86bf0c7f5b0988b67d0191025981674cc6afe430;not-found;0.00200
+logit;com.stuartwarren.logit.jul.Layout;doFormat(LogRecord);eac908db9cf67867431c05991d8f9fe0865ce4d8;false;2.66100
+logit;com.stuartwarren.logit.log4j1.Layout;doFormat(LoggingEvent);eac908db9cf67867431c05991d8f9fe0865ce4d8;false;2.23800
+logit;com.stuartwarren.logit.logstash.v1.LogstashV1Log;toString();eac908db9cf67867431c05991d8f9fe0865ce4d8;false;2.47800
+launch4j-maven-plugin;com.akathist.maven.plugins.launch4j.Launch4jMojo;doExecute();39b20ecf72eaceed9de727ed7697c43377210a43;false;2.63400
+launch4j-maven-plugin;com.akathist.maven.plugins.launch4j.Launch4jMojo;getLaunch4jVersion();7fcbfe2892665c6ac9197546184c8b1f6e437ae4;false;2.24200
+launch4j-maven-plugin;com.akathist.maven.plugins.launch4j.Launch4jMojo;doExecute();a9c285647e87efe1b79f807945bddb313ec48dff;false;2.34200
+wsc;com.sforce.async.BulkConnection;createBatchFromStreamImpl(JobInfo, InputStream, boolean);f617922ebb458d3e0df5769ad3792a1e683b05b1;true;11.43800
+launch4j-maven-plugin;com.akathist.maven.plugins.launch4j.ClassPath;toL4j(Set);fa32ac37750ca59daf0bc99d03ab1bf20c2f03ea;true;1.81600
+launch4j-maven-plugin;com.akathist.maven.plugins.launch4j.Jre;toL4j();fa32ac37750ca59daf0bc99d03ab1bf20c2f03ea;true;1.71900
+jnr-unixsocket;jnr.unixsocket.impl.AbstractNativeSocketChannel;shutdownOutput();3320077dbf666c3967d483e405f4507ba40ee738;false;1.85700
+jnr-unixsocket;jnr.unixsocket.impl.AbstractNativeSocketChannel;shutdownInput();3320077dbf666c3967d483e405f4507ba40ee738;false;2.23600
+auto-matter;io.norberg.automatter.processor.AutoMatterProcessor;collectionImplType(ExecutableElement);5739d194fb360dde65820538263efddba683785f;true;1.85000
+auto-matter;io.norberg.automatter.processor.AutoMatterProcessor;isCollection(ExecutableElement);5739d194fb360dde65820538263efddba683785f;true;1.87500
+auto-matter;io.norberg.automatter.processor.AutoMatterProcessor;collectionType(ExecutableElement);5739d194fb360dde65820538263efddba683785f;true;2.20100
+auto-matter;io.norberg.automatter.processor.AutoMatterProcessor;unmodifiableCollection(ExecutableElement);5739d194fb360dde65820538263efddba683785f;false;1.80400
+auto-matter;io.norberg.automatter.processor.AutoMatterProcessor;emptyCollection(ExecutableElement);5739d194fb360dde65820538263efddba683785f;false;2.16500
+jbake-maven-plugin;br.com.ingenieux.mojo.jbake.GenerateMojo;reRender();34fe642a4dd2f95ef72208fb0b7cea663e40f3ad;true;1.90000
+jandex-maven-plugin;org.jboss.jandex.maven.JandexGoal;execute();fc8c548a01a12414b6cd29b3ab989a9bcd6ff5c9;false;1.36900
+wildfly-arquillian;org.jboss.as.arquillian.container.managed.ManagedDeployableContainer;startInternal();a04f9389abb421d22f1d1951ed200118b5531006;false;2.17200
+wildfly-arquillian;org.jboss.as.arquillian.container.domain.managed.ManagedDomainDeployableContainer;startInternal();a04f9389abb421d22f1d1951ed200118b5531006;false;1.84800
+transducers-java;com.cognitect.transducers.Fns;takeNth(long);a1897ce7865dcc6ffeea78e1c3bfed26f713bcc7;false;1.37300
+license-maven-plugin;com.mycila.maven.plugin.license.dependencies.MavenProjectLicenses;getDependencies();0cbbf006623cd8c927cc333dc187badaad014601;false;2.80600
+jqplot4java;jqplot.BarChartTest;testBarChart();578e717e1a96d93391bca2868be514fbc8a764c3;not-found;0.00100
+license-maven-plugin;com.mycila.maven.plugin.license.git.CopyrightAuthorProviderTest;assertAuthor(CopyrightAuthorProvider, String, String, String);a25a1c61ec15b2610bc5baae86aa3f814c32745b;not-found;0.00100
+license-maven-plugin;com.mycila.maven.plugin.license.git.CopyrightRangeProviderTest;assertRange(CopyrightRangeProvider, String, String, String, String, String, String);a25a1c61ec15b2610bc5baae86aa3f814c32745b;not-found;0.00000
+license-maven-plugin;com.mycila.maven.plugin.license.Default;EXCLUDES;69c1f16b379a5f9a5ac098388ac2ab76e2d86501;false;2.14800
+jsons2xsd;com.ethlo.jsons2xsd.ConversionTest;testCustomNames();f9816050401ceaf9875554e8ade757c8fcf12741;not-found;0.00000
+ircbot;org.jenkinsci.backend.ircbot.IrcListener;handleDirectCommand(Channel, User, String);59396ceb76c9db8977d1ac8cd650fb1f32dc6e43;false;2.45400
+exp4j;de.congrace.exp4j.Tokenizer;getTokens(String);184e5535f93973aa2ed597b5ed92058b988e0784;false;1.67400
+generalized-language-modeling-toolkit;de.typology.nGramBuilder.NGramNormalizer;normalize(String, String);b2b90c58b5c20fc9e7565e4336c575ab6f27684d;false;3.52100
+generalized-language-modeling-toolkit;de.typology.nGramBuilder.EdgeNormalizer;normalize(String, String);b2b90c58b5c20fc9e7565e4336c575ab6f27684d;false;3.51000
+migration-tools;com.nuodb.migrator.backup.format.value.SimpleValueFormatRegistryResolver;SimpleValueFormatRegistryResolver();de0e2f210167f6fea3a5a9937dfe42e1dccb4ddb;true;2.21700
+migration-tools;com.nuodb.migrator.backup.Column;equals(Object);de0e2f210167f6fea3a5a9937dfe42e1dccb4ddb;false;2.38900
+migration-tools;com.nuodb.migrator.jdbc.dialect.NuoDBDialect;initJdbcTypeNames();de0e2f210167f6fea3a5a9937dfe42e1dccb4ddb;true;2.98900
+mongodb-async-driver;com.allanbank.mongodb.client.connection.socket.SocketConnection;send(Message, Message, Callback<Reply>);d2f6677f0192ca72fb886a38029b7690dabcc7a0;true;14.49300
+mongodb-async-driver;com.allanbank.mongodb.client.connection.socket.AbstractSocketConnection;doReceiveOne();d2f6677f0192ca72fb886a38029b7690dabcc7a0;false;7.21400
+migration-tools;com.nuodb.migrator.integration.types.MySQLTypes;getMappedLength(String, String, String);de0e2f210167f6fea3a5a9937dfe42e1dccb4ddb;not-found;0.00200
+migration-tools;com.nuodb.migrator.integration.types.MySQLTypes;getMappedJDBCType(String, String);de0e2f210167f6fea3a5a9937dfe42e1dccb4ddb;not-found;0.00200
+migration-tools;com.nuodb.migrator.jdbc.metadata.generator.HasTablesScriptGenerator;addTablesCreateScripts(Collection<Table>, Collection<String>, ScriptGeneratorManager);de0e2f210167f6fea3a5a9937dfe42e1dccb4ddb;true;2.60600
+migration-tools;com.nuodb.migrator.jdbc.dialect.MSSQLServerDialect;initJdbcTypes();de0e2f210167f6fea3a5a9937dfe42e1dccb4ddb;true;2.23800
+migration-tools;com.nuodb.migrator.jdbc.metadata.generator.SequenceQualifyNamingStrategy;getNonPrefixedName(Sequence, ScriptGeneratorManager);de0e2f210167f6fea3a5a9937dfe42e1dccb4ddb;true;2.45800
+migration-tools;com.nuodb.migrator.jdbc.metadata.generator.TableScriptGenerator;getTypeName(Column, ScriptGeneratorManager);de0e2f210167f6fea3a5a9937dfe42e1dccb4ddb;true;2.49500
+migration-tools;com.nuodb.migrator.jdbc.metadata.generator.TableScriptGenerator;getCreateScripts(Table, ScriptGeneratorManager);de0e2f210167f6fea3a5a9937dfe42e1dccb4ddb;true;2.96200
+lolibox;io.loli.box.service.impl.AliStorageService;upload(InputStream, String, String, long);899ca5187a3701f6594779189467f31eacb3e33c;false;2.09300
+mongodb-async-driver;com.allanbank.mongodb.connection.socket.SocketConnection;SocketConnection(ServerState, MongoDbConfiguration);2df4f3664dbf6f7217cd03ea369c9f7d28427892;true;5.89400
+dnssecjava;org.jitsi.dnssec.unbound.rpl.UnboundTests;runUnboundTest();05cb5d378fe90768618ce158335fbcb564274790;not-found;0.00100
+static-mustache;com.github.sviperll.staticmustache.examples.Main;main(String[]);271693c779061cde2069af7507b5721c208da8e4;false;1.76900
+webarchive-commons;org.archive.resource.html.ExtractingParseObserver;extract(HTMLMetaData, TagNode, ExtractingParseObserver);3d0cdd721a11dea44731904389ac4a54dbd08df5;false;120.94700
+nutzwx;org.nutz.weixin.util.Wxs;xmls();c56d087e4e05657ee461a797a7b59c882082cd69;false;2.15700
+nutzwx;org.nutz.weixin.impl.AbstractWxApi2;call(String, METHOD, String);11d3b3744cfea0ce332aa28aa480735956a0a73b;false;1.88700
+sql-processor;org.sample.SampleSqlProcessingIdPlugin;getProcessingId(String, Object, SqlControl);4e7851a544957454ab1795647f56cee208cdabb5;not-found;0.00200
+sql-processor;org.sample.model.PersonDetail;getProcessingId(Object);4e7851a544957454ab1795647f56cee208cdabb5;not-found;0.00100
+sql-processor;org.sqlproc.sample.simple.Main;main(String[]);698fa6c48c7df343e390675eacd507b886609038;not-found;0.00100
+sql-processor;org.sqlproc.engine.impl.TestStandardParameters;getDataSetFile(String);8968e32ea09be0994799e017dbaf14422ff7afe2;not-found;0.00100
+sql-processor;org.sqlproc.engine.impl.TestStandardParameters;testStandardParameters();8968e32ea09be0994799e017dbaf14422ff7afe2;not-found;0.00000
+sql-processor;org.sqlproc.engine.impl.TestStandardParameters;testFromToParameters();8968e32ea09be0994799e017dbaf14422ff7afe2;not-found;0.00100
+sql-processor;org.sqlproc.engine.impl.TestStandardTypes;testStandardTypes();8968e32ea09be0994799e017dbaf14422ff7afe2;not-found;0.00100
+sql-processor;org.sqlproc.engine.impl.TestStandardTypes;testStandardTypes2();8968e32ea09be0994799e017dbaf14422ff7afe2;not-found;0.00100
+sql-processor;org.sqlproc.engine.impl.TestUndefinedTypes;testUndefinedTypes2();8968e32ea09be0994799e017dbaf14422ff7afe2;not-found;0.00100
+sql-processor;org.sqlproc.engine.impl.TestUndefinedTypes;testUndefinedTypes();8968e32ea09be0994799e017dbaf14422ff7afe2;not-found;0.00100
+sql-processor;org.sqlproc.engine.impl.TestUndefinedParameters;getDataSetFile(String);8968e32ea09be0994799e017dbaf14422ff7afe2;not-found;0.00100
+sql-processor;org.sqlproc.engine.impl.TestUndefinedParameters;testUndefinedParameters();8968e32ea09be0994799e017dbaf14422ff7afe2;not-found;0.00100
+riak-java-client;com.basho.riak.client.convert.reflect.AnnotationInfo;AnnotationInfo(Field, List<UsermetaField>, Field, List<RiakIndexField>, Field, Field);b005f84d4a1c144aca8ccdfa87a794e0bac19627;false;4.58800
+riak-java-client;com.basho.riak.client.operations.FetchObject;pr(int);057c2f20461e3d1f759d3a1d5a5da161a01a6f84;false;3.47000
+riak-java-client;com.basho.riak.client.http.itest.ITestBasic;deleteQuorumIsApplied();6363c8f70dc57737390f542720c6a571e993958f;not-found;0.00300
+stapler;org.kohsuke.stapler.jelly.groovy.GroovyClassLoaderTearOffTest;testGettext();e4c10835694bc8f5db30ffa1c15c50469c60acd8;not-found;0.00200
+vectorz;mikera.matrixx.decompose.impl.lu.AltLU;decompose(Matrix);889e8999395fb5f60266d32bec790fc2ad3daeb8;true;7.09800
+xcelite;com.ebay.xcelite.reader.BeanSheetReader;getDeclaredHeaderNames();40e1d22a1ff208cd99f014eac25fe2a51f1cc6df;true;2.44600
+jcseg;org.lionsoul.jcseg.server.JcsegServer;registerHandler();3220cb12322c30c6b9f3b20eb5ff1a5cb9e61f1e;false;1.60300
+log-synth;com.mapr.synth.Synth;call();83316ef849229d87b24ce5d0d6d54f1f76764759;true;30.91900
+log-synth;com.mapr.synth.Synth;main(String[]);83316ef849229d87b24ce5d0d6d54f1f76764759;true;32.65600
+dune2themaker4j;com.fundynamic.d2tm.game.state.PlayingState;makeBattleField(Player, Mouse);fa32851fce4806699ba6828e72e145fd0107837b;false;1.39800
+dune2themaker4j;com.fundynamic.d2tm.game.state.PlayingState;init(GameContainer, StateBasedGame);fa32851fce4806699ba6828e72e145fd0107837b;false;1.41900
+xcelite;com.ebay.xcelite.reader.BeanSheetReader;read();84006743928a35e4725ea470f36fd1a3efcc1dcd;false;2.00900
+esperandro;de.devland.esperandro.generation.CollectionActionGenerator;generateMethod(TypeSpec.Builder, MethodInformation, Cached);a504784178f32a425ca7bd38f97b9a77a2eb6dfa;true;2.09900
+esperandro;de.devland.esperandro.processor.EsperandroAnnotationProcessor;process(Set<?extendsTypeElement>, RoundEnvironment);a34767fddf8967ad70af5829bef6e564f38c16ec;false;2.28900
+scim-schema;org.osiam.resources.data.DataURI;DataURI(String);3f675dd978c33c6f953bfda952bf10707d8a35b0;true;2.64100
+a;co.nordlander.a.A;connect(String, String, String, Protocol, String, boolean);3497235f96c45ea39d2be68ded078b07a4d1a17c;true;49.56400
+cjwizard;com.github.cjwizard.WizardContainer;visitPage(WizardPage);341c6c5f8dd3b1d0daafcc4bde69ad53ac42a27b;false;2.53400
+cjwizard;com.github.cjwizard.WizardContainer;visitPage(WizardPage);341c6c5f8dd3b1d0daafcc4bde69ad53ac42a27b;false;2.38600
+fluent-jdbc;org.codejargon.fluentjdbc.internal.query.TransactionInternal;inNewTransaction(Supplier<T>, Map<ConnectionProvider,Connection>);e7212c290709614b7a321947058b23dcdabed7ab;false;2.44200
+cglib;net.sf.cglib.proxy.Enhancer;wrapCachedClass(Class);e734a97d4a6ab4c04f82ba79996bf27b12f5156a;true;6.02000
+wonder;er.rest.ERXRestUtils;coerceValueToString(Object, ERXRestContext);87766daee1a98fa029c2811c4df0b0771dc4c2ef;false;2.30100
+vraptor-test;br.com.caelum.vraptor.test.http.Parameters;fill(MockHttpServletRequest);1c3d2c41ff4296c14871ee53be77059a2467b0d8;true;1.97500
+iban4j;org.iban4j.bban.BbanStructure;static block;52ace4f3cfdb442793c5a0b0f4b58c8fa5397c69;true;2.87900
+iban4j;org.iban4j.TestDataHelper;getIbanData();52ace4f3cfdb442793c5a0b0f4b58c8fa5397c69;not-found;0.00100
+iban4j;org.iban4j.bban.BbanStructure;static block;f3bf7d2b03dc703f74882f2f478e90e86db121a1;true;3.19500
+iban4j;org.iban4j.TestDataHelper;getIbanData();f3bf7d2b03dc703f74882f2f478e90e86db121a1;not-found;0.00100
+iban4j;org.iban4j.bban.BbanStructure;static block;cb73f417d976a89c1b5066506a6ec368556845f6;true;2.62100
+testlink-java-api;br.eti.kinoshita.testlinkjavaapi.TestCaseService;createTestCase(String, Integer, Integer, String, String, List<TestCaseStep>, String, TestImportance, ExecutionType, Integer, Integer, Boolean, ActionOnDuplicate);ca1b05e58116d5b8641265c6e5bada826e279d2f;false;2.09800
+canal;com.alibaba.otter.canal.parse.inbound.mysql.dbsync.LogEventConvert;parseQueryEvent(QueryLogEvent, boolean);b1dc5bd59f66fdc6df0dbf449d7b9eec8c58452c;false;4.14200
+canal;com.alibaba.otter.canal.parse.inbound.mysql.dbsync.SimpleDdlParser;parse(String, String);10930b9e3d7a006f4c1c0eba42dfa6bfddc0a468;true;3.17300
+commons-ognl;org.apache.commons.ognl.OgnlRuntime;isJdk15();ac73f7e1ae9b6a7833b25d7be9ddc277b1cc952c;false;4.83600
+roller;org.apache.roller.weblogger.ui.rendering.util.cache.SiteWideCache;generateKey(WeblogPageRequest);1628c3a3c4425cb39d2aa5197cd94f817c9e935e;false;3.10200
+roller;org.apache.roller.weblogger.ui.rendering.util.cache.SiteWideCache;generateKey(WeblogFeedRequest);1628c3a3c4425cb39d2aa5197cd94f817c9e935e;false;2.87400
+roller;org.apache.roller.weblogger.ui.rendering.util.cache.WeblogPageCache;generateKey(WeblogPageRequest);1628c3a3c4425cb39d2aa5197cd94f817c9e935e;false;2.90700
+roller;org.apache.roller.weblogger.ui.rendering.util.cache.WeblogFeedCache;generateKey(WeblogFeedRequest);1628c3a3c4425cb39d2aa5197cd94f817c9e935e;false;2.92800
+roller;org.apache.roller.selenium.InitialLoginTestIT;setUp();0e2fb77da19d6fa0b2d829fc626e8a6482479604;not-found;0.02600
+roller;org.apache.roller.weblogger.ui.core.security.RollerRememberMeServices;RollerRememberMeServices();a963bb123df4591e12bfc0511791d9c79a71c0f7;true;2.90700
+roller;org.apache.roller.weblogger.ui.core.security.RollerRememberMeAuthenticationProvider;RollerRememberMeAuthenticationProvider(String);a963bb123df4591e12bfc0511791d9c79a71c0f7;true;2.83400
+avro;org.apache.avro.io.parsing.Symbol;flatten(Symbol[], int, Symbol[], int, Map<Sequence,Sequence>, Map<Sequence,List<Fixup>>);c299da64ee53de57ea34e589b858d7fe8ada72fd;false;2.10700
+cayenne;org.apache.cayenne.project.ProjectModule;configure(Binder);63f738d220c9c81649002eaeeef1869dc7d82277;false;2.25000
+directory-kerby;org.apache.kerberos.kerb.crypto.String2keyTest;testWith(TestCase);0ce18e3a426e9617742aee6d7fdba76a6faf58a9;not-found;0.00100
+accumulo;org.apache.accumulo.miniclusterImpl.MiniAccumuloClusterImpl;MiniAccumuloClusterImpl(MiniAccumuloConfigImpl);bf0d1602e26d2bc8bfa5c37c7ef11afa87eedc81;false;2.53300
+accumulo;org.apache.accumulo.test.functional.ManagerAssignmentIT;testShutdownOnlyTServerWithoutUserTable();ff98ee4498b39838d781065b4202508ae50d36cc;true;3.48800
+accumulo;org.apache.accumulo.server.rpc.TServerUtils;getSslServerSocket(int, int, InetAddress, SslConnectionParams);19b4c508bf316671af4158d46d49b29eed9caf48;false;3.87600
+accumulo;org.apache.accumulo.test.functional.ZombieTServer;main(String[]);83d2dc24e87641171b2aef3fa3e4e35dc94cf279;false;3.33400
+accumulo;org.apache.accumulo.test.randomwalk.concurrent.CheckBalance;visit(State, Properties);99b6e252d4b68179927ae101f95ab1d72bbb6fe1;false;3.72300
+accumulo;org.apache.accumulo.tserver.Tablet;Tablet(TabletServer, Text, KeyExtent, TabletResourceManager, Configuration, VolumeManager, List<LogEntry>, SortedMap<FileRef,DataFileValue>, String, TServerInstance, Set<FileRef>, long, long);08f0b9ac1691b1d078a691a2b819df56512aa318;false;4.09300
+accumulo;org.apache.accumulo.fate.AdminUtil;prepDelete(ZooStore<T>, IZooReaderWriter, String, String);7688eaf0b684a2bb76a0b49bff9a79763d41a8e5;true;3.10900
+accumulo;org.apache.accumulo.server.tabletserver.Tablet;split(byte[]);3ad3f8b38f2ac5b1cfeb26edcaa7f014bf13c793;false;7.16500
+accumulo;org.apache.accumulo.core.util.TableDiskUsage;printDiskUsage(AccumuloConfiguration, Collection<String>, FileSystem, Connector, Printer);8312b0740ecdfaff7afd963e8bab91a0bfdeafd1;true;6.94400
+accumulo;org.apache.accumulo.core.client.impl.thrift.ClientService;isSet(_Fields);4d93300ee39e79417a0e9f270147262326b5c78b;false;8.85600
+jboss-msc;org.jboss.msc.service.ServiceControllerImpl;dependentStopped();2109ea6f82b5ab20a1a6b918654f7f0e990a5c06;false;2.84700
+jboss-msc;org.jboss.msc.service.ServiceControllerImpl;propagateTransitiveAvailability();2109ea6f82b5ab20a1a6b918654f7f0e990a5c06;true;2.40100
+jboss-msc;org.jboss.msc.service.ServiceControllerImpl;run();2109ea6f82b5ab20a1a6b918654f7f0e990a5c06;false;2.43500
+jboss-msc;org.jboss.msc.service.ServiceContainerImpl;doResolve(BatchServiceBuilderImpl<T>, Map<ServiceName,BatchServiceBuilderImpl<?>>);a4e21a3b10f4b4253329bdf153eccd97cc36531a;false;1.77000
+cron-utils;com.cronutils.descriptor.TimeDescriptionStrategy;registerFunctions();8b7ce4ad9f822f8a149edcd8b4b1a492a6dd4358;false;2.16300
+groovy-shell-server;me.bazhenov.groovysh.GroovyShellService;start();a062e98f0cbb91f5ec0cf9fb2915535c1afdc93c;true;1.66100
+groovy-shell-server;me.bazhenov.groovysh.GroovyShellService;buildSshServer();a062e98f0cbb91f5ec0cf9fb2915535c1afdc93c;false;1.60700
+staxmapper;org.jboss.staxmapper.FormattingXMLStreamWriter;writeEndElement();8df8c6aad07328ccec3c4326485074342d85673b;true;2.15400
+remoting-jmx;org.jboss.remotingjmx.RemotingConnector;internalRemotingConnect(Map<String,?>);de3218ef58ebd3293e2afbe472f5a90f5c33e0e0;true;4.27400
+remoting-jmx;org.jboss.remotingjmx.RemotingConnector;internalConnect(Map<String,?>);de3218ef58ebd3293e2afbe472f5a90f5c33e0e0;true;4.11000
+remoting-jmx;org.jboss.remotingjmx.common.JMXRemotingServer;JMXRemotingServer(JMXRemotingConfig);de3218ef58ebd3293e2afbe472f5a90f5c33e0e0;not-found;0.00000
+remoting-jmx;org.jboss.remotingjmx.common.JMXRemotingServer;start();de3218ef58ebd3293e2afbe472f5a90f5c33e0e0;not-found;0.00000
+remoting-jmx;org.jboss.remotingjmx.protocol.v2.ClientConnection;addNotificationListener(ObjectName, NotificationListener, NotificationFilter, Object);de3218ef58ebd3293e2afbe472f5a90f5c33e0e0;true;3.30300
+libsass-maven-plugin;wrm.CompilationMojo;execute();3f55235a63376fa8cff15dabc9138d7a97d92832;false;1.56000
+lsdpatch;lsdpatch.LSDPatcher;processArguments(String[]);d71c2128e270a45a018b3d03ba39d18b74b658c3;false;3.43100
+lsdpatch;utils.CommandLineFunctions;extractFontToPng(String, int);d71c2128e270a45a018b3d03ba39d18b74b658c3;false;3.65000
+lsdpatch;utils.CommandLineFunctions;fontToPng(String, String);d71c2128e270a45a018b3d03ba39d18b74b658c3;false;3.54200
+lsdpatch;kitEditor.Sample;createFromWav(File);2d1f4f1cd746930a9ce1236e44a0e8fe1b55391a;false;2.57500
+flume-ftp-source;org.keedio.flume.source.ftp.source.Source;readStream(InputStream, long);f4c145bec4acce94ef00f97b814a511049b3b372;false;2.16700
+flume-ftp-source;org.keedio.flume.source.ftp.source.Source;readStream(InputStream, long);f4c145bec4acce94ef00f97b814a511049b3b372;false;2.13000
+flume-ftp-source;org.keedio.flume.source.ftp.source.Source;discoverElements(KeedioSource, String, String, int);f4c145bec4acce94ef00f97b814a511049b3b372;false;2.14200
+flume-ftp-source;org.keedio.flume.source.ftp.source.Source;discoverElements(KeedioSource, String, String, int);f4c145bec4acce94ef00f97b814a511049b3b372;false;2.13200
+ggplot;org.beastmachine.util.NumberFormatter;format(double);e2841b05bab86e238732649229f3d0a2834badf7;false;1.97500
+flume-ftp-source;org.apache.flume.source.FTPSource;discoverElements(FTPClient, String, String, int);2c3d89af9a0a099fae96e591b85fd094c7a5ab1b;false;2.00200
+flume-ftp-source;org.apache.flume.source.FTPSource;discoverElements(FTPClient, String, String, int);2c3d89af9a0a099fae96e591b85fd094c7a5ab1b;false;1.99300
+dependency-check-sonar-plugin;org.sonar.dependencycheck.DependencyCheckPlugin;define(Context);f0032e903f332c22e4beb65b317edcafb7fdf2cf;false;1.97000
+dependency-check-sonar-plugin;org.sonar.dependencycheck.base.DependencyCheckMetrics;REPORT;b3cbcd1d5b0a89d5651398bc0afd9bf04b204183;false;1.94100
+java-iban;nl.garvelink.iban.CountryCodesParameterizedTest;PARAMETERS;981e0311705b2f83cabb82c9c9e098952960b248;not-found;0.00000
+java-iban;nl.garvelink.iban.CountryCodes;COUNTRY_CODES;981e0311705b2f83cabb82c9c9e098952960b248;false;1.42900
+java-iban;nl.garvelink.iban.CountryCodes;COUNTRY_IBAN_LENGTHS;981e0311705b2f83cabb82c9c9e098952960b248;false;1.68900
+java-iban;nl.garvelink.iban.IBANFieldsCompat;BANK_CODE_BRANCH_CODE;981e0311705b2f83cabb82c9c9e098952960b248;false;1.73500
+naether;com.slackworks.naether.maven.Project;getDependencies(List<String>, boolean);cb2ae6004ec0fefd7cc67071c3a54026b53c795a;false;2.10100
+steam-api;nl.pvanassen.steam.http.Http;handleConnection(HttpRequestBase, Handle, int);d66bbf30a8cbde1b42642b487bbd96bce502e3c8;false;2.99300
+discovery;com.nepxion.discovery.plugin.strategy.gateway.route.DefaultGatewayStrategyRoute;update(List<GatewayStrategyRouteEntity>);99c2bc3a686bfaa15e56484c3828e1fb0e17cfd6;true;2.01400
+discovery;com.nepxion.discovery.plugin.strategy.zuul.route.DefaultZuulStrategyRoute;retrieve();99c2bc3a686bfaa15e56484c3828e1fb0e17cfd6;false;1.76600
+steam-api;nl.pvanassen.steam.http.Http;post(String, Map<String,String>, Handle, String);a1bad87e53a54905a1d5614ce4d0fe23c5c4228c;false;2.63800
+discovery;com.nepxion.discovery.plugin.strategy.gateway.route.DefaultGatewayStrategyRoute;update(List<GatewayStrategyRouteEntity>);b71b398b74eea4b8684bfdb091c43e58b627403d;true;1.99100
+discovery;com.nepxion.discovery.plugin.strategy.zuul.route.DefaultZuulStrategyRoute;retrieve();b71b398b74eea4b8684bfdb091c43e58b627403d;false;1.80100
+storm-cassandra-cql;com.hmsonline.trident.cql.CqlClientFactory;CqlClientFactory(String, String, ConsistencyLevel, ConsistencyLevel);756905cd9e592caaaa963739029bca5d46d20b77;false;1.95500
+storm-cassandra-cql;com.hmsonline.trident.cql.CqlClientFactory;getCluster();756905cd9e592caaaa963739029bca5d46d20b77;false;1.92600
+plexus-archiver;org.codehaus.plexus.archiver.tar.TarUnArchiver;execute();ffbe4ff823d97858eead3a1a50c42f8454177392;false;3.12500
+plexus-compiler;org.codehaus.plexus.compiler.eclipse.EclipseJavaCompiler;performCompile(CompilerConfiguration);cd19909909a08932fa7b7fad1442ab146489715d;false;1.91900
+plexus-archiver;org.codehaus.plexus.archiver.tar.TarUnArchiver;execute();732496b53a30504d85ae187c3e73788084c9be55;false;4.01400
+geoip-api-java;com.maxmind.geoip.regionName;regionNameByCode(String, String);49ecb07cc82f13aa1a25857de424be43c88368c1;false;3.77500
+gwtbootstrap3;com.svenjacobs.gwtbootstrap3.demo.client.DemoEntryPoint;onModuleLoad();06aa5c07dae8f30904c70a5987c614e0620e66bd;not-found;0.00200
+jopt-simple;joptsimple.internal.Columns;piecesOfEmbeddedLine(String, int);257ac04e6ceefb074788b8c35a8e0287f0af6bef;false;2.50000
+ez18n;org.ez18n.apt.processor.CSVReportProcessor;process(Set<?extendsTypeElement>, RoundEnvironment);acee2a6039d3810a8424f77fb7b72017b31bd92d;false;2.44900
+jgralab;de.uni_koblenz.jgralab.greql2.optimizer.PathExistenceToDirectedPathExpressionOptimizer;optimize(GreqlEvaluator, Greql2);f475191b1bb19e089d61d4d35056c1306db833a9;not-found;0.00900
+onebusaway-application-modules;org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeTripLibrary;groupTripUpdatesAndVehiclePositions(MonitoredResult, FeedMessage, FeedMessage);ba2d6fe10eae216d17524dc64f80ae34df5adef6;true;578.69200
+onebusaway-application-modules;org.onebusaway.presentation.impl.realtime.SiriSupport;fillMonitoredVehicleJourney(MonitoredVehicleJourneyStructure, TripBean, ArrivalAndDepartureBean, TripStatusBean, StopBean, OnwardCallsMode, PresentationService, TransitDataService, int, List<TimepointPredictionRecord>, boolean, long, boolean, boolean);a21c48b8807544c88faf02f00c51ae2bd26d3d8b;true;582.91300
+crest;org.tomitribe.crest.maven.CrestCommandLoaderDescriptorGeneratorMojo;execute();debd617d636fa3bbd231ee31d499b5cbecd5a34a;false;1.75600
+crest;org.tomitribe.crest.cmds.processors.Commands;load();debd617d636fa3bbd231ee31d499b5cbecd5a34a;false;3.20000
+crest;org.tomitribe.crest.cmds.CmdGroup;complete(String, int);eaa8735a70f7f9a5fd6d805ebacc5bfaacc57ba9;false;3.25000
+crest;org.tomitribe.crest.cmds.processors.OptionParam;getSeparatedValues(String);eaa8735a70f7f9a5fd6d805ebacc5bfaacc57ba9;false;2.90500
+crest;org.tomitribe.crest.cmds.CmdMethod;convert(Arguments, Needed, List<Param>);eaa8735a70f7f9a5fd6d805ebacc5bfaacc57ba9;false;3.43700
+crest;org.tomitribe.crest.cmds.CmdMethod;getCommand(String, String, Map<String,String>, Map<String,String>, List<String>, Set<String>);eaa8735a70f7f9a5fd6d805ebacc5bfaacc57ba9;false;3.90000
+crest;org.tomitribe.crest.cmds.CmdMethod;checkRequired(Map<String,String>);eaa8735a70f7f9a5fd6d805ebacc5bfaacc57ba9;false;3.58700
+crest;org.tomitribe.crest.cmds.utils.CommandLine;translateCommandline(String);eaa8735a70f7f9a5fd6d805ebacc5bfaacc57ba9;false;2.68700
+crest;org.tomitribe.crest.cmds.processors.Help;Item(OptionParam, String);eaa8735a70f7f9a5fd6d805ebacc5bfaacc57ba9;false;2.84900
+crest;org.tomitribe.crest.cmds.processors.Help;optionHelp(Class<?>, String, Collection<OptionParam>, PrintStream);eaa8735a70f7f9a5fd6d805ebacc5bfaacc57ba9;false;2.68900
+crest;org.tomitribe.crest.cli.impl.CommandParser;toArgs(String);eaa8735a70f7f9a5fd6d805ebacc5bfaacc57ba9;false;1.83200
+nfe;com.fincatto.documentofiscal.utils.DFAssinaturaDigital;getPrivateKeyEntry();a4be269d5dc77dafeedaa7986ce331f1dac5bfae;false;12.58400
+nfe;com.fincatto.documentofiscal.utils.DFAssinaturaDigital;assinarDocumento(Reader, Writer, String);a4be269d5dc77dafeedaa7986ce331f1dac5bfae;true;12.43500
+crest;org.tomitribe.crest.Main;processSystemProperties(String[]);eaa8735a70f7f9a5fd6d805ebacc5bfaacc57ba9;false;3.11500
+crest;org.tomitribe.crest.Main;complete(String, int);eaa8735a70f7f9a5fd6d805ebacc5bfaacc57ba9;false;2.81500
+crest;org.tomitribe.crest.cmds.OverloadedCmdMethod;help(PrintStream);eaa8735a70f7f9a5fd6d805ebacc5bfaacc57ba9;false;2.79000
+crest;org.tomitribe.crest.cmds.CmdMethod;convert(Arguments, Needed, List<Param>);73469538cdc04b36ea4d09dccedc1cc50780904a;false;2.66000
+jgralab;de.uni_koblenz.jgralabtest.greql2.ParserTest;testForallExpression();70c7b81959da8e726b6fc1bdaae4fd78c940bc87;not-found;0.00900
+nfe;com.fincatto.documentofiscal.DFUnidadeFederativaTest;deveRepresentarOCodigoCorretamente();eae6aafc07ee7019d90ad6fcee9afd164d2cfe85;not-found;0.00200
+toml4j;com.moandjiezana.toml.NumberConverter;convert(String);a3edb55e9c0c40f0620c3b8c4480864a2f07f46c;false;2.30100
+jgralab;de.uni_koblenz.jgralab.greql2.evaluator.costmodel.DefaultCostModel;calculateCardinalitySetComprehension(SetComprehensionEvaluator, GraphSize);70c7b81959da8e726b6fc1bdaae4fd78c940bc87;not-found;0.00200
+toml4j;com.moandjiezana.toml.Results;addValue(String, Object);c4027ed2d5a685734a83306fdd1a4ed41f473f60;true;1.96400
+onebusaway-application-modules;org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeTripLibrary;getBlockStartTimeForTripStartTime(BlockInstance, AgencyAndId, int);5c66122666e40d6132746e130691f6e9bd615d30;false;1.70400
+onebusaway-application-modules;org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeTripLibrary;getTripDescriptorAsBlockDescriptor(MonitoredResult, TripDescriptor, long);5c66122666e40d6132746e130691f6e9bd615d30;false;2.04100
+nfe;com.fincatto.documentofiscal.nfe400.webservices.consultacadastro.CadConsultaCadastro4Stub;consultaCadastro(CadConsultaCadastro4Stub.NfeDadosMsg);4ac342c432689950341e05b7e8397f2ff793dbe4;true;13.54700
+nfe;com.fincatto.documentofiscal.nfe400.webservices.consultacadastro.CadConsultaCadastro4Stub;startconsultaCadastro(CadConsultaCadastro4Stub.NfeDadosMsg, CadConsultaCadastro4CallbackHandler);4ac342c432689950341e05b7e8397f2ff793dbe4;true;13.37000
+nfe;com.fincatto.documentofiscal.DFUnidadeFederativaTest;deveRepresentarOCodigoCorretamente();e74a5e0a7663af58116cda89208a08f1589e0ff1;not-found;0.00700
+nfe;com.fincatto.documentofiscal.nfe.webservices.distribuicao.WSDistribuicaoNFe;gerarNFDistribuicaoInt(String, DFUnidadeFederativa, String, String);e844ec0fb51e9a8692e52dd917a51c8f6efbad5c;true;13.81100
+jboss-modules;org.jboss.modules.MavenArtifactUtil;downloadFile(String, String, File);b2fe3c9d938f81405cf60e29685a1b634fe8257a;false;3.75200
+jboss-modules;org.jboss.modules.ModuleLoader;defineModule(ModuleSpec);86ed5a70b195eb0e6dc7b43826b5bad32ec93232;false;2.03300
+nfe;com.fincatto.documentofiscal.transformers.DFRegistryMatcher;DFRegistryMatcher();2d5f9f7706d2f94ece669cdae9f8e7e79fd6c48b;false;13.10200
+jboss-modules;org.jboss.modules.ModuleXmlParser;parseResources(File, XMLStreamReader, ModuleSpec);292744aae84372d91c45059c63f807174f4f4e05;false;1.81100
+jboss-modules;org.jboss.modules.ModuleXmlParser;parseRootElement(File, XMLStreamReader, ModuleSpec);292744aae84372d91c45059c63f807174f4f4e05;false;2.20700
+jboss-modules;org.jboss.modules.ModuleXmlParser;parseDocument(File, XMLStreamReader, ModuleSpec);292744aae84372d91c45059c63f807174f4f4e05;false;2.19300
+jboss-modules;org.jboss.modules.ModuleXmlParser;parseModuleContents(File, XMLStreamReader, ModuleSpec);292744aae84372d91c45059c63f807174f4f4e05;false;1.95600
+jboss-modules;org.jboss.modules.ModuleXmlParser;parseDependencies(XMLStreamReader, ModuleSpec);292744aae84372d91c45059c63f807174f4f4e05;false;1.79300
+nfe;com.fincatto.documentofiscal.transformers.DFRegistryMatcher;DFRegistryMatcher();aef846d91a4beba88798661101d13ef8090ce54e;false;10.86700
+jgralab;de.uni_koblenz.jgralab.schema.impl.SchemaImpl;getVertexCreateMethod(QualifiedName, QualifiedName);1502a3525248376410ba747530bf6ef93a0656f2;not-found;0.00900
+jgralab;de.uni_koblenz.jgralab.schema.impl.SchemaImpl;commit();1502a3525248376410ba747530bf6ef93a0656f2;not-found;0.00400
+jgralab;de.uni_koblenz.jgralab.greql2.evaluator.vertexeval.FunctionApplicationEvaluator;getFunctionName();1502a3525248376410ba747530bf6ef93a0656f2;not-found;0.00300
+jgralab;de.uni_koblenz.jgralab.schema.impl.EdgeClassImpl;addSuperClass(EdgeClass);1502a3525248376410ba747530bf6ef93a0656f2;not-found;0.00200
+nfe;com.fincatto.nfe310.FabricaDeObjetosFake;getConfig();f5098f55c819dc8fc490d4feefefbde97c9c1d55;not-found;0.00100
+jgralab;de.uni_koblenz.jgralab.greql2.evaluator.costmodel.DefaultCostModel;calculateCostsGreql2Expression(Greql2ExpressionEvaluator, GraphSize);1502a3525248376410ba747530bf6ef93a0656f2;not-found;0.00200
+jgralab;de.uni_koblenz.jgralab.greql2.evaluator.costmodel.DefaultCostModel;calculateCostsConditionalExpression(ConditionalExpressionEvaluator, GraphSize);1502a3525248376410ba747530bf6ef93a0656f2;not-found;0.00200
+jgralab;de.uni_koblenz.jgralab.greql2.evaluator.costmodel.DefaultCostModel;calculateCostsBackwardVertexSet(BackwardVertexSetEvaluator, GraphSize);1502a3525248376410ba747530bf6ef93a0656f2;not-found;0.00200
+jgralab;de.uni_koblenz.jgralab.GraphIO;writeHierarchy(Package, AttributedElementClass);1502a3525248376410ba747530bf6ef93a0656f2;not-found;0.00200
+jgralab;de.uni_koblenz.jgralab.greql2.evaluator.fa.SimpleTransition;SimpleTransition(State, State, AllowedEdgeDirection, JValueTypeCollection, String);1502a3525248376410ba747530bf6ef93a0656f2;not-found;0.00200
+jgralab;de.uni_koblenz.jgralab.greql2.optimizer.CommonSubgraphOptimizer;mergeSourcePositionsBelow(Greql2Vertex, Greql2Vertex);1502a3525248376410ba747530bf6ef93a0656f2;not-found;0.00100
+jgralab;de.uni_koblenz.jgralab.schema.impl.CollectionDomainImpl;CollectionDomainImpl(Schema, QualifiedName, Domain);1502a3525248376410ba747530bf6ef93a0656f2;not-found;0.00200
+jgralab;de.uni_koblenz.jgralab.impl.GraphBaseImpl;internalDeleteEdge(Edge);7280e66b283a5941b96f6fbf22e8795bf70b0d47;not-found;0.00400
+jgralab;de.uni_koblenz.jgralab.codegenerator.SchemaCodeGenerator;createGraphFactoryMethod();7280e66b283a5941b96f6fbf22e8795bf70b0d47;not-found;0.00200
+jgralab;de.uni_koblenz.jgralab.impl.trans.EdgeImpl;setPrevIncidenceInternal(IncidenceImpl);d530577887bef4780cb227f3724bee93a2684214;not-found;0.00400
+mes;com.qcadoo.plugin.internal.manager.PluginManagerInstallTest;shouldFailureInstallEnabledPluginWithUnsitisfiedDependencies();16cf6469ef16ac6ef627544b000a348ac8181054;not-found;0.01200
+mes;com.qcadoo.plugin.internal.manager.PluginManagerInstallTest;shouldNotInstallEnabledPluginIfCannotInstall();16cf6469ef16ac6ef627544b000a348ac8181054;not-found;0.00500
+mes;com.qcadoo.mes.core.data.internal.DataAccessServiceImpl;save(String, Entity);55a021fd583f7e03838e5f64874d2cf48777c6c7;false;2.48500
+java-libpst;com.pff.PSTObject;createJavaString(byte[], int, String);c4092b6aa4bf8d1d48bf15d72abd7de6fe8a4723;false;2.71900
+dcm4che;org.dcm4che3.opencv.NativeJPEGImageWriter;write(IIOMetadata, IIOImage, ImageWriteParam);751257d4699542e73929367a83fe59d2989fafca;true;2.18100
+dcm4che;org.dcm4che3.opencv.NativeJLSImageWriter;write(IIOMetadata, IIOImage, ImageWriteParam);751257d4699542e73929367a83fe59d2989fafca;false;1.92500
+podam;uk.co.jemos.podam.api.PodamFactoryImpl;manufacturePojoInternal(Class<T>, Map<Class<?>,Integer>, Type);738f766483f1779ebb144f9ae1950e6780c62c53;false;2.45300
+cloudconductor-server;de.cinovo.cloudconductor.server.rest.impl.ConfigValueImpl;get(String, String, String);d27ec8030f47886baaac3272b5a7f4b815d88052;false;1.43600
+cloudconductor-server;de.cinovo.cloudconductor.server.impl.rest.AgentImpl;notifyPackageState(String, String, PackageState);ebfad18ac0eb756cccc7e244f741b92d57f2fef8;false;1.98500
+netphony-network-protocols;es.tid.tests.TestPCEPCommons;createAllFields(Object);07041eaa5a5fe329a0efbcecbe079f3323b65462;not-found;0.00300
+netphony-network-protocols;es.tid.pce.pcep.constructs.PCEPIntiatedLSP;decode(byte[], int);cfab35baf55c9496446ba24b76345d8e52145511;true;6.73200
+datasift-java;org.datasift.Historic;reloadData();be06e5debddb07eb337ae8c84897bc47873f59f7;true;4.50200
+datasift-java;org.datasift.streamconsumer.HttpMultiThread;run();22b7bbde53faf387e103eaa31078f6ba9960bc68;false;4.32500
+camus;com.linkedin.camus.etl.kafka.CamusJob;run(Class<?extendsInputFormat>, Class<?extendsOutputFormat>);5b74b04dd711168ab082d2aec6363675f8eb6a87;true;209.21600
+datasift-java;org.datasift.streamconsumer.HttpMultiThread;run();27ae5e0af9801b9e37cd960e12136404eae3676e;true;4.40000
+datasift-java;org.datasift.streamconsumer.HttpThread;run();27ae5e0af9801b9e37cd960e12136404eae3676e;true;4.09400
+camus;com.linkedin.camus.etl.kafka.coders.JsonStringMessageDecoder;decode(byte[]);b9c601035667c2880778667d7cb559af238ed745;true;209.89600
+datasift-java;org.datasift.tests.TestLiveApi;testCompile_Failure();63473e61923aeb786325b6edf3828aa7538be0e6;false;3.93900
+datasift-java;org.datasift.tests.TestLiveApi;testCompile_SuccessThenFailure();63473e61923aeb786325b6edf3828aa7538be0e6;false;4.29200
+datasift-java;org.datasift.tests.TestLiveApi;testValidate_Success();63473e61923aeb786325b6edf3828aa7538be0e6;false;3.65700
+datasift-java;org.datasift.tests.TestLiveApi;testValidate_SuccessThenFailure();63473e61923aeb786325b6edf3828aa7538be0e6;false;4.59300
+datasift-java;org.datasift.tests.TestLiveApi;testGetCreatedAt();63473e61923aeb786325b6edf3828aa7538be0e6;false;4.42600
+datasift-java;org.datasift.tests.TestLiveApi;testCompile_Success();63473e61923aeb786325b6edf3828aa7538be0e6;false;4.51000
+datasift-java;org.datasift.tests.TestLiveApi;testValidate_Failure();63473e61923aeb786325b6edf3828aa7538be0e6;false;4.52400
+datasift-java;org.datasift.tests.TestDefinition;testSetAndGet();63473e61923aeb786325b6edf3828aa7538be0e6;false;4.15700
+datasift-java;org.datasift.tests.TestDefinition;testCompile_Failure();63473e61923aeb786325b6edf3828aa7538be0e6;false;4.80400
+datasift-java;org.datasift.tests.TestDefinition;testCompile_SuccessThenFailure();63473e61923aeb786325b6edf3828aa7538be0e6;true;5.14400
+datasift-java;org.datasift.tests.TestDefinition;testValidate_Success();63473e61923aeb786325b6edf3828aa7538be0e6;false;4.87400
+datasift-java;org.datasift.tests.TestDefinition;testGetConsumer();63473e61923aeb786325b6edf3828aa7538be0e6;false;4.58300
+datasift-java;org.datasift.tests.TestDefinition;testConstructionWithDefinition();63473e61923aeb786325b6edf3828aa7538be0e6;false;3.89800
+datasift-java;org.datasift.tests.TestDefinition;testValidate_SuccessThenFailure();63473e61923aeb786325b6edf3828aa7538be0e6;true;5.07300
+datasift-java;org.datasift.tests.TestDefinition;testCompile_Success();63473e61923aeb786325b6edf3828aa7538be0e6;false;3.87200
+datasift-java;org.datasift.tests.TestDefinition;testValidate_Failure();63473e61923aeb786325b6edf3828aa7538be0e6;false;4.31700
+datasift-java;org.datasift.tests.TestUser;testCreateDefinition_NonEmpty();63473e61923aeb786325b6edf3828aa7538be0e6;false;4.36500
+datasift-java;org.datasift.tests.TestUser;testRateLimits();63473e61923aeb786325b6edf3828aa7538be0e6;false;3.77200
+orientdb-etl;com.orientechnologies.orient.etl.loader.OOrientDBLoader;configure(OETLProcessor, ODocument, OBasicCommandContext);889e65b57d07559f507bcef0e966f6f0612ae9dd;true;2.71200
+datasift-java;org.datasift.streamconsumer.HttpThread;run();b4660b1bcfce1f3c83b456e1937640a88b9698b9;false;4.15600
+orientdb-etl;com.orientechnologies.orient.etl.transformer.OCSVTransformer;executeTransform(Object);889e65b57d07559f507bcef0e966f6f0612ae9dd;false;2.54800
+orientdb-etl;com.orientechnologies.orient.etl.transformer.OEdgeTransformer;executeTransform(Object);889e65b57d07559f507bcef0e966f6f0612ae9dd;true;3.23700
+camus;com.linkedin.camus.sweeper.mapreduce.AvroKeyCombineFileInputFormat;getSplits(JobContext);94ecd8cac46d23ae6dfd40fb37d149660ed2cf34;true;6.52600
+geoserver-manager;it.geosolutions.geoserver.rest.encoder.utils.PropertyXMLEncoder;add(Element, String, String);352e241e0bf2b9c4a7d640dd5ca7795e1b5d303a;true;2.74500
+geoserver-manager;it.geosolutions.geoserver.rest.GeoServerRESTPublisher;publishShp(String, String, String, File, String);352e241e0bf2b9c4a7d640dd5ca7795e1b5d303a;true;2.75900
+geoserver-manager;it.geosolutions.geoserver.rest.GeoServerRESTPublisher;publishShp(String, String, String, File, String, String);352e241e0bf2b9c4a7d640dd5ca7795e1b5d303a;true;2.42100
+es-amazon-s3-river;com.github.lbroudoux.elasticsearch.river.s3.river.S3River;indexFile(S3ObjectSummary);2aa45336dcc877155d7df5063071f37a86368271;false;2.28500
+es-amazon-s3-river;com.github.lbroudoux.elasticsearch.river.s3.river.S3River;S3River(RiverName, RiverSettings, Client);2aa45336dcc877155d7df5063071f37a86368271;false;2.35000
+jruby-maven-plugins;de.saumya.mojo.rspec.RSpecMojo;runIt(de.saumya.mojo.ruby.script.ScriptFactory, Mode, String);0a0cd61692b909d8d67aded996b9d6201ba7044e;false;1.69300
+jsondiff;foodev.jsondiff.JsonDiff;diff(JsonObject, JsonObject);4ac27123bccc0e733c27d3be222175e4862a5869;true;4.67000
+jsondiff;foodev.jsondiff.JsonDiff;diff(JsonObject, JsonObject);cd3cba0a2fcc4f07a4e04f0e729962c2bbd6b769;true;3.51800
+jsondiff;foodev.jsondiff.JsonDiff;findLeaves(Node, JsonElement, List<Leaf>);cd3cba0a2fcc4f07a4e04f0e729962c2bbd6b769;false;1.79900
+jsondiff;foodev.jsondiff.JsonPatch;apply(JsonObject, JsonObject);cd3cba0a2fcc4f07a4e04f0e729962c2bbd6b769;false;2.36300
+jruby-maven-plugins;de.saumya.mojo.gem.GemifyMojo;build(MavenProject, File);9a1038d1343abc2df3ead351e22d7d481bbdffbe;false;2.48100
+jruby-maven-plugins;de.saumya.mojo.gemify.GemifyMojo;execute();9a1038d1343abc2df3ead351e22d7d481bbdffbe;true;1.68700
+jruby-maven-plugins;de.saumya.mojo.gem.PackageMojo;build(MavenProject, GemArtifact);1b783e16c0c48cfd4ac14e4bb393963879969688;true;2.19700
+flyingsaucer;org.xhtmlrenderer.pdf.ITextUserAgent;getImageResource(String);3f9940081e8b9710f6855a05c8dcfda73103545d;true;2.35800
+k3po;org.kaazing.k3po.driver.internal.control.handler.ControlServerHandler;prepareReceived(ChannelHandlerContext, MessageEvent);5601ab5aab64da1d3b14b6b78eb1a44bd4811778;false;4.45500
+k3po;org.kaazing.k3po.driver.internal.netty.bootstrap.http.HttpClientChannelSource;httpMessageReceived(ChannelHandlerContext, MessageEvent, HttpChunk);1b2a7eaed60d376ab87a8130c29b2ec957bca767;false;3.99400
+asterisk-java;org.asteriskjava.pbx.agi.ActivityAgi;service();a17cb65e3b2f8b80738eb57cf6ee796a05a2e89c;false;4.51000
+junit-rules;co.unruly.junit.IgnoreUntilRule;apply(Statement, Description);9f9e68b409b45bc46b8210c50964508e185dea8f;true;1.44100
+asterisk-java;org.asteriskjava.manager.internal.ManagerConnectionImpl;determineVersion();326e875942fdf0230a7e94c371bd3a4ae7e841c3;false;4.03000
+k3po;org.kaazing.k3po.driver.internal.Robot;createBindCompleteListener(RegionInfo);808d53cfd9e2f32e8383d4fe75f1d318792e8946;false;3.80700
+darcy-ui;com.redhat.darcy.ui.By;ByNested(Element, Locator);8a7587987c54c5f92d2d71f755b2771ba9671442;false;1.91900
+asterisk-java;org.asteriskjava.manager.internal.ActionBuilderImpl;buildAction(ManagerAction, String);289eb2ff84516b2cace9bdda532d4b0fa5a92575;false;3.26500
+asterisk-java;org.asteriskjava.manager.internal.EventBuilderImpl;buildEvent(Object, Map<String,Object>);8667113125e016f8351971f96913726173b7d5a8;false;3.46300
+asterisk-java;org.asteriskjava.manager.internal.EventBuilderImpl;buildEvent(Object, Map<String,Object>);6e450e0332b585ea49cdb092cf5dc2e95e4a2374;false;4.17000
+asterisk-java;org.asteriskjava.tools.HtmlEventTracer;getText(String, ManagerEvent);c2e7dc11a5842730c43dea7f8a0f7b7f9cc1f8ee;false;3.66200
+asterisk-java;org.asteriskjava.live.internal.MeetMeManager;populateRoom(MeetMeRoomImpl);c2e7dc11a5842730c43dea7f8a0f7b7f9cc1f8ee;false;3.37800
+asterisk-java;org.asteriskjava.live.internal.AbstractLiveObject;addPropertyChangeListener(String, PropertyChangeListener);c2e7dc11a5842730c43dea7f8a0f7b7f9cc1f8ee;true;3.86400
+asterisk-java;org.asteriskjava.manager.internal.AbstractBuilder;setAttributes(Object, Map<String,Object>, Set<String>);c2e7dc11a5842730c43dea7f8a0f7b7f9cc1f8ee;false;3.75000
+asterisk-java;org.asteriskjava.fastagi.command.DatabaseDelTreeCommand;buildCommand();c2e7dc11a5842730c43dea7f8a0f7b7f9cc1f8ee;false;3.80600
+maven-gitlog-plugin;com.github.danielflower.mavenplugins.gitlog.renderers.AsciidocRenderer;renderCommit(RevCommit);37784d6f29f5c446fcc52dc2d7416efb51123a03;false;2.26200
+asterisk-java;org.asteriskjava.live.internal.AsteriskServerImpl;initializeIfNeeded();c2e7dc11a5842730c43dea7f8a0f7b7f9cc1f8ee;true;4.48400
+asterisk-java;org.asteriskjava.live.internal.ChannelManager;addNewChannel(String, String, Date, String, String, ChannelState, String);d051cefe929eeba446139b2480f4e6006502d896;false;4.31900
+asterisk-java;org.asteriskjava.manager.internal.EventBuilderImpl;registerBuiltinEventClasses();b07617fe185d57dd38980993e1934d68e7e6c0c6;true;4.81300
+swagger-maven-plugin;com.github.kongchen.swagger.docgen.reader.SpringMvcApiReader;parseMethod(Method, RequestMethod);6a1618ba07a66309f2b5287e4c812dc10d1970b0;false;2.53000
+asterisk-java;org.asteriskjava.manager.internal.AbstractBuilder;setAttributes(Object, Map<String,Object>, Set<String>);a4b27137cc92af086da78fdfb634a441cb07e1d0;true;3.00400
+swagger-maven-plugin;com.github.kongchen.swagger.docgen.reader.AbstractReader;readImplicitParameters(Method, Operation);c6c1fb810d36710abd531cf56a9e0bee5a689df0;false;2.47300
+swagger-maven-plugin;com.github.kongchen.swagger.docgen.reader.JaxrsReader;parseMethod(String, Method);34fb37258e823222f6743558724ef66ce56738c4;false;2.63100
+swagger-maven-plugin;com.github.kongchen.swagger.docgen.reader.JaxrsReader;read(Class<?>, String, String, boolean, String[], String[], Map<String,Tag>, List<Parameter>);34fb37258e823222f6743558724ef66ce56738c4;false;2.71400
+swagger-maven-plugin;com.github.kongchen.swagger.docgen.mavenplugin.ApiDocumentMojo;execute();af4fd83eacd9ccbd81e0750e6e74881b6eedd587;false;3.03000
+transit-java;com.cognitect.transit.TransitTest;testWriteSet();f6b2d6ffa4605772a03c012c540ccb762f115b29;not-found;0.00100
+transit-java;com.cognitect.transit.TransitTest;testWriteMap();f6b2d6ffa4605772a03c012c540ccb762f115b29;not-found;0.00000
+swagger-maven-plugin;com.github.kongchen.swagger.docgen.reader.JaxrsReader;read(Class<?>, String, String, boolean, String[], String[], Map<String,Tag>, List<Parameter>);b95b07fb1704e624b8aa2a1eb89ff5f540e72b2e;false;2.53900
+hawtjni;org.fusesource.hawtjni.generator.StructsGenerator;generateGetFields(JNIClass);9d38df2f4a25ee55fbb0dc921fb2004b33c59541;true;3.80600
+hawtjni;org.fusesource.hawtjni.generator.StructsGenerator;generateSetFields(JNIClass);9d38df2f4a25ee55fbb0dc921fb2004b33c59541;false;4.24500
+transit-java;com.cognitect.transit.impl.WriterImpl;getJsonInstance(OutputStream, Map<Class,Handler>, boolean);92587f00c3468d2f58f93ed64ba9a75afc690d3c;false;1.99400
+hawtjni;org.fusesource.hawtjni.runtime.Library;getSpecificSearchDirs();c0cfb2558b8e11edd224f08fd7da6daa84876b34;true;2.33400
+swagger-maven-plugin;com.github.kongchen.swagger.docgen.reader.JaxrsReader;parseMethod(String, Method);4c7121698f35a35098c4c900c8b16aa3d444118b;false;3.13800
+swagger-maven-plugin;com.github.kongchen.swagger.docgen.reader.SpringMvcApiReader;parseMethod(Method);4c7121698f35a35098c4c900c8b16aa3d444118b;false;3.12300
+hawtjni;org.fusesource.hawtjni.maven.BuildMojo;configureBasedBuild(File);916515413152d2b25268d0f813c1f0f411388b3a;false;1.77900
+swagger-maven-plugin;com.github.kongchen.swagger.docgen.reader.JaxrsReader;read(Class<?>, String, String, boolean, String[], String[], Map<String,Tag>, List<Parameter>);5869fb67d89ddd6768f144d72026b27217911f93;false;3.27600
+swagger-maven-plugin;com.github.kongchen.swagger.docgen.reader.JaxrsReader;read(Class<?>, String, String, boolean, String[], String[], Map<String,Tag>, List<Parameter>);5e2ac85d33d0bf03ac6148743931507b778991a3;true;3.49500
+swagger-maven-plugin;com.github.kongchen.swagger.docgen.reader.SpringMvcApiReader;parseMethod(Method);79e35180ae729f232c33cc856e32ed00986b6846;false;2.71000
+swagger-maven-plugin;com.github.kongchen.swagger.docgen.reader.SpringMvcApiReader;parseMethod(Method);a001cc6bfb666ddb6ae8861f7c1017cfa62f5384;false;3.06600
+swagger-maven-plugin;com.github.kongchen.swagger.docgen.jaxrs.BeanParamInjectParamExtention;extractParameters(Class<?>);a0f0c8d4d9a98c1d7c9e469f47e215328eb7c3e6;false;2.99900
+swagger-maven-plugin;com.github.kongchen.swagger.docgen.reader.AbstractReader;hasValidAnnotations(List<Annotation>);e825a7fdc6ef688f1253b93d2cb236e710acfc56;false;2.79200
+swagger-maven-plugin;com.github.kongchen.swagger.docgen.mavenplugin.ApiDocumentMojo;execute();8815af3713deb6d005ed9770cfacc1de179a1b01;false;3.07900
+swagger-maven-plugin;com.github.kongchen.swagger.docgen.mustache.OutputTemplate;createMustacheDocument(ApiListing);6709abca5c021468e26de8b69255cf583959377b;false;3.22600
+swagger-maven-plugin;com.github.kongchen.swagger.docgen.mavenplugin.ApiDocumentMojo;execute();b660556c9bc78d80956d4ac8822b02e41df004eb;false;2.18500
+k3po;org.kaazing.k3po.driver.internal.test.utils.K3poTestRule;apply(Statement, Description);b147a61164f98a41ebf0ea384a568565d34295cb;not-found;0.00200
+k3po;org.kaazing.k3po.junit.rules.K3poRule;apply(Statement, Description);b147a61164f98a41ebf0ea384a568565d34295cb;false;2.27700
+k3po;org.kaazing.k3po.driver.internal.control.handler.ControlServerHandler;prepareReceived(ChannelHandlerContext, MessageEvent);b147a61164f98a41ebf0ea384a568565d34295cb;false;4.27200
+k3po;org.kaazing.k3po.driver.internal.test.utils.K3poTestStatement;evaluate();b147a61164f98a41ebf0ea384a568565d34295cb;not-found;0.00100
+bigdataviewer-core;bdv.tools.transformation.ManualTransformationEditor;setActive(boolean);572d4602a6282501870c01d3660fea9b22a817f6;false;4.76900
+stormpot;stormpot.PoolTest;mustNotCachePoisonedSlots(PoolFixture);375e8c807ffca5524e6333b5ba602e2ce430300f;not-found;0.00000
+stormpot;stormpot.BAllocThread;BAllocThread(BlockingQueue<BSlot<T>>, DisregardBPile<T>, Config<T>, BSlot<T>);375e8c807ffca5524e6333b5ba602e2ce430300f;false;2.24700
+sitemapgen4j;com.redfin.sitemapgenerator.SitemapGenerator;addUrl(U);a46ea9ffe51e0f77969a39cecfb2fc9fd479b19b;false;2.43800
+jcr-mock;com.tacitknowledge.jcr.testing.impl.MockNodeFactory;createProperty(Node, String, String, int);c73aee7bfb9d5c3488412b84d8f83961f57abcd2;false;2.06800
+rxjava-extras;com.github.davidmoten.rx.internal.operators.ObservableServerSocketTest;checkServerSocketReadsTcpPushWhenBufferSizeIs(String, int);fba9f4ad2a32245c7e0e9425cd17a3d19a07ad4b;not-found;0.00100
+geo;com.github.davidmoten.geo.GeoHash;encodeHash(double, double, int);d280483edeeabc57247e1753ac0c161039f6e604;false;1.81900
+rtree;com.github.davidmoten.rtree.BenchmarksRTree;main(String[]);dd478c4ea8eeeede9848bc596dda5454a648541d;not-found;0.00100
+pac4j;org.pac4j.core.run.RunClient;run();7cb3852867c1e0255021ba62670d736d23d4eec6;false;2.96800
+pac4j;org.pac4j.jwt.credentials.authenticator.JwtAuthenticator;createJwtProfile(TokenCredentials, SignedJWT);7063591a9334041183818a7bf49a0ff4e49cc1cb;false;1.74700
+pac4j;org.pac4j.jwt.credentials.authenticator.JwtAuthenticator;validate(TokenCredentials);7063591a9334041183818a7bf49a0ff4e49cc1cb;false;1.77400
+k3po;org.kaazing.k3po.driver.internal.control.handler.ControlServerHandler;prepareReceived(ChannelHandlerContext, MessageEvent);5601ab5aab64da1d3b14b6b78eb1a44bd4811778;false;4.00100
+k3po;org.kaazing.k3po.driver.internal.control.handler.ControlServerHandler;prepareReceived(ChannelHandlerContext, MessageEvent);5601ab5aab64da1d3b14b6b78eb1a44bd4811778;false;4.61600
+k3po;org.kaazing.k3po.driver.internal.netty.bootstrap.http.HttpClientChannelSource;httpMessageReceived(ChannelHandlerContext, MessageEvent, HttpChunk);1b2a7eaed60d376ab87a8130c29b2ec957bca767;false;4.16000
+rival;net.recommenders.rival.split.splitter.SplitTest;testCrossValidation();aefae91d1ce70013519cfa0bc0132c5279c0fb2c;not-found;0.02400
+rival;net.recommenders.rival.split.splitter.CrossValidationSplitter;split(DataModel<Long,Long>);aefae91d1ce70013519cfa0bc0132c5279c0fb2c;false;1.66500
+k3po;org.kaazing.k3po.driver.internal.Robot;createBindCompleteListener(RegionInfo);808d53cfd9e2f32e8383d4fe75f1d318792e8946;false;4.22000
+rival;net.recommenders.rival.examples.movielens100k.CrossValidatedMahoutKNNRecommenderEvaluator;prepareStrategy(int);986d8751fe81be8664d345a740ebcbaea011fc63;false;1.96000
+smartsheet-java-sdk;com.smartsheet.api.sample.Sample;main(String[]);e3a8071836d7e5cf8949174a783d1f0d9525934e;not-found;0.00400
+camel-ironmq;org.apache.camel.component.ironmq.IronMQConsumer;processBatch(Queue<Object>);7b8e755aa410ddd2841a5471f78bf5256a647b76;true;1.79200
+smartsheet-java-sdk;com.smartsheet.api.internal.AbstractResources;createResource(String, Class<T>, S);1fe3f6971fbd7a61b7785d8d0082d5622241e047;false;22.18900
+k3po;org.kaazing.k3po.driver.internal.test.utils.K3poTestRule;apply(Statement, Description);b147a61164f98a41ebf0ea384a568565d34295cb;not-found;0.00300
+k3po;org.kaazing.k3po.junit.rules.K3poRule;apply(Statement, Description);b147a61164f98a41ebf0ea384a568565d34295cb;false;2.19500
+vertx-mod-cassandra-persistor;com.insanitydesign.vertx.CassandraPersistor;start();5f849c44ac7fa15876145c056ba40871f94afeb1;false;1.88800
+k3po;org.kaazing.k3po.driver.internal.control.handler.ControlServerHandler;prepareReceived(ChannelHandlerContext, MessageEvent);b147a61164f98a41ebf0ea384a568565d34295cb;false;4.06700
+k3po;org.kaazing.k3po.driver.internal.control.handler.ControlServerHandler;prepareReceived(ChannelHandlerContext, MessageEvent);b147a61164f98a41ebf0ea384a568565d34295cb;false;3.87700
+k3po;org.kaazing.k3po.driver.internal.test.utils.K3poTestStatement;evaluate();b147a61164f98a41ebf0ea384a568565d34295cb;not-found;0.00300
+movsim;org.movsim.simulator.vehicles.Vehicle;updateAcceleration(double, RoadSegment, LaneSegment, LaneSegment, double, double);10239d7f513a507e33bba526abfe0b696af80e0d;false;2.64700
+movsim;org.movsim.simulator.roadnetwork.RoadSegment;updateVehicleAccelerations(double, double, long);10239d7f513a507e33bba526abfe0b696af80e0d;false;3.58800
+movsim;org.movsim.simulator.roadnetwork.RoadSegment;RoadSegment(double, int);10239d7f513a507e33bba526abfe0b696af80e0d;false;3.23700
+movsim;org.movsim.simulator.Simulator;initialize();633cf8a7804a537c3b908eff2ec21dc4213d9b77;true;4.86700
+movsim;org.movsim.simulator.Simulator;matchRoadSegmentsAndRoadInput(List<Road>);633cf8a7804a537c3b908eff2ec21dc4213d9b77;false;3.26000
+movsim;org.movsim.simulator.roadnetwork.RoadSegment;checkForInconsistencies(double, long, boolean);633cf8a7804a537c3b908eff2ec21dc4213d9b77;false;3.34900
+movsim;org.movsim.viewer.graphics.TrafficCanvas;drawRoadSectionIds(Graphics2D);633cf8a7804a537c3b908eff2ec21dc4213d9b77;false;2.82000
+movsim;org.movsim.input.XmlReaderSimInput;XmlReaderSimInput(ProjectMetaData, InputData);8d1945632c9b6321e6b10f522e999870352fc5af;false;6.68300
+movsim;org.movsim.simulator.vehicles.consumption.FuelConsumption;FuelConsumption(String, ConsumptionModelInput);57a6e06a93d33cfc24666e14225c57a8a6b2377f;false;5.37800
+movsim;org.movsim.simulator.Simulator;initialize();86a12a45b096cf729d955b0c076ac8a91923d227;false;5.52300
+movsim;org.movsim.viewer.graphics.TrafficCanvasScenarios;initGraphicSettings();8ca385dde480797527bebd140d5a32525b14f2a7;false;5.51200
+checksum-maven-plugin;net.nicoulaj.maven.plugins.checksum.mojo.DependenciesCheckMojo;getArtifactsToProcess();2b189287252966d78359d4fcc9eb67e27fc44596;false;2.07300
+checksum-maven-plugin;net.nicoulaj.maven.plugins.checksum.execution.target.OneHashPerFileTarget;write(String, File, String);64d5937cfbe053b0773e365369d661c06bc34ba4;false;2.27300
+checksum-maven-plugin;net.nicoulaj.maven.plugins.checksum.execution.target.CsvSummaryFileTarget;close();64d5937cfbe053b0773e365369d661c06bc34ba4;true;2.41300
+checksum-maven-plugin;net.nicoulaj.maven.plugins.checksum.mojo.DependenciesMojo;getFilesToProcess();64d5937cfbe053b0773e365369d661c06bc34ba4;false;2.28300
+checksum-maven-plugin;net.nicoulaj.maven.plugins.checksum.mojo.AbstractChecksumMojo;execute();64d5937cfbe053b0773e365369d661c06bc34ba4;false;2.38000
+checksum-maven-plugin;net.nicoulaj.maven.plugins.checksum.execution.target.XmlSummaryFileTarget;close();64d5937cfbe053b0773e365369d661c06bc34ba4;true;2.28900
+checksum-maven-plugin;net.nicoulaj.maven.plugins.checksum.execution.target.CsvSummaryFileTarget;close();837c34617a6123ead3cc374d0a1afef4f0232ffa;false;2.17400
+checksum-maven-plugin;net.nicoulaj.maven.plugins.checksum.mojo.AbstractChecksumMojo;execute();837c34617a6123ead3cc374d0a1afef4f0232ffa;false;2.37700
+mybatis-3;org.apache.ibatis.type.TypeHandlerRegistry;getJdbcHandlerMap(Type);40872421fec3524a83f1ed5fd9df28c25e3db46d;true;5.43300
+movsim;org.movsim.simulator.Simulator;initialize();85b1821b4508a6ee489bd2f899caa01c1f3a94d6;true;8.77100
+movsim;org.movsim.input.model.output.impl.TrajectoriesInputImpl;TrajectoriesInputImpl(Element);dda7cfc15c5dc1102f21327f720973fa36dbc38b;true;2.64700
+movsim;org.movsim.output.impl.Macro3DImpl;Macro3DImpl(String, boolean, MacroInput, RoadSection);74bf00b4da88c667252186decf556361b856e32c;false;2.74800
+kryo-serializers;de.javakaffee.kryoserializers.KryoTest;beforeTest();aebbe4d73401d7ac255fc3a57af495d146f9e238;not-found;0.00100
+metrics-librato;com.librato.metrics.LibratoReporter;run();140caf9da468df3c5bedacf427b06903b0933a9e;false;1.36200
+infovore;com.ontology2.bakemono.pse3.PSE3Tool;run(String[]);f4bfcb0e1a40645db41fca239282fc0a99cddeae;false;43.72500
+jsign;net.jsign.AuthenticodeSigner;createSignedDataGenerator();8ebe5cfc204315fc84713ed0f8fdd12808dfbcc4;false;7.31700
+analytics-java;com.segment.analytics.Analytics;build();31de7e6b022e2544919f5e975803067bdf43753a;false;5.18700
+analytics-java;com.segment.analytics.internal.AnalyticsClient;create(SegmentService, int, long, Log, ThreadFactory, ExecutorService, List<Callback>);31de7e6b022e2544919f5e975803067bdf43753a;false;5.23700
+substeps-core;com.technophobia.substeps.runner.syntax.validation.SyntaxAwareStepValidatorTest;validatorReportsNoErrorsForSubstepsWithValidSteps();f51e19b36c2a13d3d11fe9744381a0c910d61c6f;not-found;0.00000
+substeps-core;com.technophobia.substeps.runner.syntax.validation.SyntaxAwareStepValidatorTest;validatorReportsMissingSubstepsInDefinition();f51e19b36c2a13d3d11fe9744381a0c910d61c6f;not-found;0.00000
+substeps-core;com.technophobia.substeps.runner.syntax.SubStepDefinitionParser;processDirective(Directive, String, File, int);f51e19b36c2a13d3d11fe9744381a0c910d61c6f;true;2.88200
+substeps-core;com.technophobia.substeps.runner.syntax.SubStepDefinitionParser;parseSubStepFile(File);f51e19b36c2a13d3d11fe9744381a0c910d61c6f;true;3.11900
+analytics-java;com.segment.analytics.internal.AnalyticsClient;run();ba863112c230f0def9b42213c59cc8441236c6ba;false;5.36700
+analytics-java;com.segment.analytics.internal.AnalyticsClient;AnalyticsClient(BlockingQueue<Message>, SegmentService, int, long, Log, ThreadFactory, ExecutorService, List<Callback>);ba863112c230f0def9b42213c59cc8441236c6ba;false;4.59700
+analytics-java;com.segment.analytics.internal.AnalyticsClient;create(SegmentService, int, long, Log, ThreadFactory, ExecutorService, List<Callback>);ba863112c230f0def9b42213c59cc8441236c6ba;false;5.13000
+analytics-java;com.segment.analytics.internal.AnalyticsClientTest;newClient();ba863112c230f0def9b42213c59cc8441236c6ba;not-found;0.00300
+substeps-core;com.technophobia.substeps.runner.FeatureFileParser;processScenarioDirective(FeatureFile, Set<String>, String, String, boolean);158700c1f3b0f4508a9b2b75fbd43be18f5fae4f;false;2.87000
+analytics-java;com.segment.analytics.internal.AnalyticsClient;enqueue(Message);b5a96236e473740ea83e5d1ab0548deea21a5656;true;5.45900
+analytics-java;com.segment.analytics.internal.AnalyticsClient;run();b5a96236e473740ea83e5d1ab0548deea21a5656;false;5.53200
+semanticvectors;pitt.search.semanticvectors.LuceneUtils;getExternalDocId(int);b679d17bec13345488974a7500a0252f140ee506;false;4.34200
+azure-tables-hadoop;com.microsoft.hadoop.azure.AzureTableRecordReader;initialize(InputSplit, TaskAttemptContext);f5ae55a8d5024fba05bd9a188ae18116b624a69d;true;1.71700
+otr4j;net.java.otr4j.crypto.OtrCryptoEngineImpl;aesDecrypt(byte[], byte[], byte[]);445fe2a8ad55d7da4043a22a4adc2c09ee4097f4;true;2.06600
+otr4j;net.java.otr4j.crypto.OtrCryptoEngineImpl;aesEncrypt(byte[], byte[], byte[]);445fe2a8ad55d7da4043a22a4adc2c09ee4097f4;true;2.09800
+otr4j;net.java.otr4j.session.SessionImpl;transformSending(String, List<TLV>);554c21799595e39e67f1b9efdb636eb2314df784;false;2.35200
+otr4j;net.java.otr4j.session.SessionImpl;handleQueryMessage(QueryMessage);554c21799595e39e67f1b9efdb636eb2314df784;false;2.31100
+otr4j;net.java.otr4j.session.SessionImpl;handleErrorMessage(ErrorMessage);554c21799595e39e67f1b9efdb636eb2314df784;false;2.21600
+otr4j;net.java.otr4j.session.SessionImpl;handlePlainTextMessage(PlainTextMessage);554c21799595e39e67f1b9efdb636eb2314df784;false;2.43500
+otr4j;net.java.otr4j.session.AuthContextImpl;handleSignatureMessage(SignatureMessage);554c21799595e39e67f1b9efdb636eb2314df784;false;2.16600
+otr4j;net.java.otr4j.session.AuthContextImpl;handleRevealSignatureMessage(RevealSignatureMessage);554c21799595e39e67f1b9efdb636eb2314df784;false;2.20200
+otr4j;net.java.otr4j.session.AuthContextImpl;handleDHCommitMessage(DHCommitMessage);554c21799595e39e67f1b9efdb636eb2314df784;false;2.12600
+otr4j;net.java.otr4j.session.AuthContextImpl;handleDHKeyMessage(DHKeyMessage);554c21799595e39e67f1b9efdb636eb2314df784;false;2.05600
+excel-streaming-reader;com.monitorjbl.xlsx.impl.StreamingSheetReader;handleEvent(XMLEvent);3df886c6be124136bcbcc3f75b78e6e840ed9981;false;2.69900
+lyra;net.jodah.lyra.internal.ChannelHandler;recoverChannel(boolean);f6e0bf88bb1d2666d532f4aa6144132e9b79dd5f;false;2.42200
+otr4j;net.java.otr4j.session.SessionImpl;transformSending(String, List<TLV>);540d5c8013e19985d771216ab92ab1c1dcb37ef9;true;2.45300
+lyra;net.jodah.lyra.internal.ChannelHandler;recoverChannel(boolean);14e69c369afca578a1fd2796c2f6588f2cfe90b8;true;2.61000
+lyra;net.jodah.lyra.internal.ChannelHandler;canRecover(boolean);14e69c369afca578a1fd2796c2f6588f2cfe90b8;true;2.47700
+hdiv;org.hdiv.config.xml.ConfigBeanDefinitionParser;parse(Element, ParserContext);24a14715725c13330cb2da5e7846ba88e50557cf;false;2.26900
+excel-streaming-reader;com.monitorjbl.xlsx.StreamingReader;handleEvent(XMLEvent);0ddd3bd015cc0a792db62c6a5988844478e7d388;false;2.31200
+lyra;net.jodah.lyra.internal.ConnectionHandler;createConnection(RetryPolicy, boolean);14e69c369afca578a1fd2796c2f6588f2cfe90b8;false;2.52800
+hdiv;org.hdiv.dataComposer.AbstractDataComposer;applyConfidentialityToParams(String, Method);18ad146004ddb7a88006a5242fc28868898b7e01;false;3.06400
+lyra;net.jodah.lyra.internal.RetryableResource;callWithRetries(Callable<T>, RetryPolicy, boolean, boolean);14e69c369afca578a1fd2796c2f6588f2cfe90b8;true;2.51800
+mafia-maven-plugin;nl.sijpesteijn.testing.fitnesse.plugins.FitNesseStarterMojo;execute();397e23f5f00948ceb35a9ab4cccdd34ff9543f01;false;2.58000
+mafia-maven-plugin;nl.sijpesteijn.testing.fitnesse.plugins.runner.URLTestCallerTest;setup();6595d9487b0b97c8bf32cce0951e95763d4962a8;not-found;0.00600
+shazamcrest;com.shazam.shazamcrest.matcher.DiagnosingCustomisableMatcher;matches(Object, Description);9be9807f1cf79c5a11d69fde25afc99f3fb2f40c;true;2.21000
+hdiv;org.hdiv.filter.ValidatorHelperRequest;validateRequestCookies(HttpServletRequest, String);2f9993190a5d9e153c693e8060ef8050f2fe2baa;false;2.98300
+hdiv;org.hdiv.dataComposer.DataComposerFactory;initDataComposer(IDataComposer, RequestContext);2f9993190a5d9e153c693e8060ef8050f2fe2baa;true;3.35500
+shazamcrest;com.shazam.shazamcrest.matcher.DiagnosingCustomisableMatcher;matches(Object, Description);5bb33c89041258a0f9fa7bc50a06026e7ecd0845;true;2.19200
+hdiv;org.hdiv.components.support.OutputLinkComponentProcessor;processOutputLink(FacesContext, HtmlOutputLink);2f9993190a5d9e153c693e8060ef8050f2fe2baa;false;2.16000
+hdiv;org.hdiv.components.support.OutcomeTargetComponentProcessor;processOutcomeTargetLinkComponent(FacesContext, UIOutcomeTarget);2f9993190a5d9e153c693e8060ef8050f2fe2baa;false;2.17800
+hdiv;org.hdiv.urlProcessor.AbstractUrlProcessor;getUrlParamsAsMap(HttpServletRequest, String);2f9993190a5d9e153c693e8060ef8050f2fe2baa;false;2.93200
+hdiv;org.hdiv.web.servlet.support.HdivRequestDataValueProcessor;getExtraHiddenFields(HttpServletRequest);2f9993190a5d9e153c693e8060ef8050f2fe2baa;false;1.69800
+hdiv;org.hdiv.web.servlet.support.ThymeleafHdivRequestDataValueProcessor;getExtraHiddenFields(HttpServletRequest);2f9993190a5d9e153c693e8060ef8050f2fe2baa;false;1.49800
+hdiv;org.hdiv.filter.ValidatorHelperRequest;validateEditableParameter(HttpServletRequest, String, String, String[], String, Map<String,String[]>);c99a61a046a1cc2b7897a9866fb405ce151e1099;false;2.93200
+ninja;ninja.params.ControllerMethodInvoker;getArgumentExtractor(Class<?>, Annotation[], Injector);335e2c3e80a2687ceb8ae90a08a6228ef6daef02;true;4.53100
+hdiv;org.hdiv.filter.ValidatorHelperRequest;restoreState(HttpServletRequest, String);f20c50afc9a677031789094bef758c39a5dbbc09;false;2.97200
+ninja;ninja.utils.HttpCacheToolkitImpl;isModified(String, Long, Context);efde8984335dfe3ee6e36d9dec05d5299b36ddc0;false;2.31200
+ninja;ninja.template.TemplateEngineFreemarker;invoke(Context, Object);9ff808e7dfb4262128dda50e5990b1226b0c3f1e;true;2.24300
+jmxterm;org.cyclopsgroup.jmxterm.cmd.BeansCommandTest;testExecuteWithAllBeans();eb38f4012dacafe4b4e876004ccf09080bde4e8a;not-found;0.00400
+jmxterm;org.cyclopsgroup.jmxterm.cmd.BeansCommandTest;testExecuteWithNullDomain();eb38f4012dacafe4b4e876004ccf09080bde4e8a;not-found;0.00100
+sdk-java;com.mercadopago.client.customer.CustomerCardClient;listAll(String, MPRequestOptions);addc0f809ffcb32c146c0f1094b4dbc0350fd257;false;2.53100
+sdk-java;com.mercadopago.client.payment.PaymentClient;create(PaymentCreateRequest, MPRequestOptions);afce3a22ad47ca4eb3292a0285d378c4ae4cc605;true;3.51500
+sdk-java;com.mercadopago.client.MercadoPagoClient;buildRequest(String, HttpMethod, JsonObject, Map<String,Object>, MPRequestOptions);afce3a22ad47ca4eb3292a0285d378c4ae4cc605;true;4.03200
+khs-sherpa;com.khs.sherpa.servlet.SherpaRequest;run();289155a83ee0e7fbac9c0fe2ce72d1af750b5926;false;2.18500
+khs-sherpa;com.khs.sherpa.servlet.SherpaServlet;init();289155a83ee0e7fbac9c0fe2ce72d1af750b5926;false;2.17100
+sdk-java;test.mercadopago.core.MPBaseMultipleParamsTest;noParamsMethdTest();c71a33c366866371a12e0d1c864172f84a555561;not-found;0.00000
+sdk-java;test.mercadopago.core.MPBaseMultipleParamsTest;threeParamsMethdTest();c71a33c366866371a12e0d1c864172f84a555561;not-found;0.00100
+sdk-java;test.mercadopago.core.MPBaseMultipleParamsTest;twoParamsMethdTest();c71a33c366866371a12e0d1c864172f84a555561;not-found;0.00000
+sdk-java;test.mercadopago.core.MPBaseMultipleParamsTest;singleParamsMethdTest();c71a33c366866371a12e0d1c864172f84a555561;not-found;0.00000
+sdk-java;com.mercadopago.core.MPBase;generatePayload(HttpMethod);c71a33c366866371a12e0d1c864172f84a555561;not-found;0.00000
+sdk-java;com.mercadopago.core.MPBase;processMethod(String, HashMap<String,String>);c71a33c366866371a12e0d1c864172f84a555561;not-found;0.00000
+sdk-java;com.mercadopago.core.MPBase;parsePath(String, HashMap<String,String>);c71a33c366866371a12e0d1c864172f84a555561;not-found;0.00000
+sdk-java;com.mercadopago.core.MPBase;processMethod(String, HashMap<String,String>);34ee96bc8793f17a98d6048e2ddb058f4c02de76;not-found;0.00000
+jboss-remoting;org.jboss.remoting3.remote.RemoteReadListener;handleEvent(ConduitStreamSourceChannel);fa12e275a2d217fdbf49a391aac7cf7b33b842ee;true;2.57800
+jboss-remoting;org.jboss.remoting3.remote.ServerConnectionOpenListener;handleEvent(ConduitStreamSourceChannel);85eb87e2f2ab1f476fa8a6afbaed720c885de295;true;2.40500
+jboss-remoting;org.jboss.remoting3.remote.ClientConnectionOpenListener;handleEvent(ConduitStreamSourceChannel);85eb87e2f2ab1f476fa8a6afbaed720c885de295;false;2.23100
+sdk-java;com.mercadopago.core.MPBase;processMethod(String, HashMap<String,String>);b822e23f94b13e932c53074fbfe2800da45d22f3;not-found;0.00000
+sdk-java;com.mercadopago.core.MPBase;parsePath(String, HashMap<String,String>);b822e23f94b13e932c53074fbfe2800da45d22f3;not-found;0.00000
+sdk-java;com.mercadopago.core.MPBase;generatePayload(String);b822e23f94b13e932c53074fbfe2800da45d22f3;not-found;0.00000
+sdk-java;com.mercadopago.core.MPCredentials;getAccessToken();b822e23f94b13e932c53074fbfe2800da45d22f3;not-found;0.00000
+jboss-remoting;org.jboss.remoting3.remote.RemoteConnectionHandler;open(String, Result<Channel>, OptionMap);a0ffc92f24bfa6f261d677f461d699d1511794de;true;2.19200
+sdk-java;com.mercadopago.net.MPRestClient;getRequestMethod(String, String, HttpEntity);0633f406688697a6f4446f6351cf2cf748082823;not-found;0.00000
+sdk-java;com.mercadopago.core.MPBaseResponse;parseResponse(HttpResponse);0633f406688697a6f4446f6351cf2cf748082823;not-found;0.00000
+sdk-java;test.mercadopago.net.MPRestClientTest;postMethodTest();e88ae0e7903dcb0b29aba8bf89af2eb3b07367ea;not-found;0.00000
+sdk-java;test.mercadopago.net.MPRestClientTest;putMethodTest();e88ae0e7903dcb0b29aba8bf89af2eb3b07367ea;not-found;0.00000
+sdk-java;test.mercadopago.net.MPRestClientTest;getMethodTest();e88ae0e7903dcb0b29aba8bf89af2eb3b07367ea;not-found;0.00000
+sdk-java;test.mercadopago.net.MPRestClientTest;deleteMethodTest();e88ae0e7903dcb0b29aba8bf89af2eb3b07367ea;not-found;0.00100
+stateless4j;com.github.oxo42.stateless4j.StateMachine;publicFire(T, Object);c3e521ee3857f94babe0ffe5e8e18960dd2ac186;false;2.09900
+stateless4j;com.github.oxo42.stateless4j.StateRepresentation;addEntryAction(T, Action2<Transition<S,T>,Object[]>);c3e521ee3857f94babe0ffe5e8e18960dd2ac186;true;2.24500
+stateless4j;com.github.oxo42.stateless4j.StateConfiguration;permitDynamicIf(TriggerWithParameters1<TArg0,S,T>, Func2<TArg0,S>, FuncBoolean);7024c77da6e879210442dfc38327f1aac8d00916;false;2.11200
+stateless4j;com.github.oxo42.stateless4j.StateConfiguration;permitDynamicIf(TriggerWithParameters3<TArg0,TArg1,TArg2,S,T>, Func4<TArg0,TArg1,TArg2,S>, FuncBoolean);7024c77da6e879210442dfc38327f1aac8d00916;false;2.14400
+stateless4j;com.github.oxo42.stateless4j.StateConfiguration;permitDynamicIf(TriggerWithParameters2<TArg0,TArg1,S,T>, Func3<TArg0,TArg1,S>, FuncBoolean);7024c77da6e879210442dfc38327f1aac8d00916;false;2.09500
+stateless4j;com.github.oxo42.stateless4j.StateConfiguration;permitDynamicIf(T, Func<S>, FuncBoolean);7024c77da6e879210442dfc38327f1aac8d00916;false;2.18800
+druid-api;io.druid.data.input.impl.InputRowParserSerdeTest;testMapInputRowParserSerde();ac15c8e6c4baa07aecc2208f13952c0adcce489c;not-found;0.00100
+druid-api;io.druid.data.input.impl.InputRowParserSerdeTest;testStringInputRowParserSerde();ac15c8e6c4baa07aecc2208f13952c0adcce489c;not-found;0.00000
+stateless4j;com.github.oxo42.stateless4j.IgnoredTriggerBehaviourTests;returnFalse;4c7880ec0e20cabecb1c31043e95ff6b8a707543;not-found;0.00000
+stateless4j;com.github.oxo42.stateless4j.IgnoredTriggerBehaviourTests;returnTrue;4c7880ec0e20cabecb1c31043e95ff6b8a707543;not-found;0.00100
+name-parser;org.gbif.nameparser.NameParserTest;phraseNames();3c1d815c087b4201c84f5bae97c9760487776e06;true;2.91500
+billy;com.premiumminds.billy.france.persistence.dao.jpa.DAOFRCreditReceiptImpl;findByReferencedDocument(UID, UID);bc9db3332320895636598425f8927fab20c59a09;false;1.77600
+datacube;com.urbanairship.datacube.Address;toKey(IdService);2d5233dbf1f428b640c818f8e61234e24faffbaf;false;1.74700
+billy;com.premiumminds.billy.spain.persistence.dao.jpa.DAOESCreditReceiptImpl;findByReferencedDocument(UID, UID);bc9db3332320895636598425f8927fab20c59a09;false;1.82900
+java-library;com.urbanairship.api.customevents.parse.CustomEventPayloadSerializerTest;testFullPayload();bbe0297a107727f3f58629274f6ca5e42356e146;not-found;0.01200
+java-library;com.urbanairship.api.customevents.model.CustomEventPayloadTest;testBuilder();bbe0297a107727f3f58629274f6ca5e42356e146;not-found;0.00300
+billy;com.premiumminds.billy.portugal.test.services.export.qrcode.TestQRCodeStringGenerator;generateInvoice(boolean);9420e73394b22e375a57d57822bad925e7f9572a;not-found;0.00600
+billy;com.premiumminds.billy.portugal.test.services.documents.TestDocumentIssuingService;testIssuingService();9420e73394b22e375a57d57822bad925e7f9572a;not-found;0.00100
+billy;com.premiumminds.billy.portugal.test.services.export.TestPTCreditNotePDFTransformer;generatePTCreditNote(PaymentMechanism, PTInvoiceEntity);9970ae9f48e0f6bd10efbdd5dcb9de6a0ed8f839;not-found;0.00400
+billy;com.premiumminds.billy.portugal.services.export.saftpt.v1_04_01.PTSAFTFileGenerator;processDocument(Invoice, PTGenericInvoiceEntity, boolean);139b49c057acd9672b0221a314c04dd1d18d2c7b;false;2.49900
+billy;com.premiumminds.billy.portugal.services.export.saftpt.v1_04_01.PTSAFTFileGenerator;processDocument(Invoice, PTGenericInvoiceEntity, boolean);139b49c057acd9672b0221a314c04dd1d18d2c7b;false;2.49800
+billy;com.premiumminds.billy.portugal.services.export.saftpt.v1_02_01.PTSAFTFileGenerator;processDocument(Invoice, PTGenericInvoiceEntity, boolean);139b49c057acd9672b0221a314c04dd1d18d2c7b;false;2.45800
+billy;com.premiumminds.billy.portugal.services.export.saftpt.v1_03_01.PTSAFTFileGenerator;processDocument(Invoice, PTGenericInvoiceEntity, boolean);139b49c057acd9672b0221a314c04dd1d18d2c7b;false;2.43100
+java-library;com.urbanairship.api.push.parse.PushObjectMapper;static block;626508b96fa21c611341275ee8239db70c16b573;false;8.20700
+yardstick;org.yardstickframework.impl.BenchmarkProbeSet;start();26cbe1302e1a08ae9f04033a22c4593ac16faf00;false;3.12400
+jmeter-analysis-maven-plugin;com.lazerycode.jmeter.analyzer.parser.JMeterResultParser;addData(AggregatedResponses, String, long, long, long, long, int, boolean);009c19b2eee186b5bc9b279f7e6a6e9935c6953d;false;2.08600
+jmeter-analysis-maven-plugin;com.lazerycode.jmeter.analyzer.AnalyzeMojo;initializeEnvironment();b5d8d8fc2b75beaa9fa6265208204639dc084991;true;2.62000
+heroku.jar;com.heroku.api.command.BasicAuthLoginCommand;getResponse(byte[], boolean);4f714e5a549e1ae2a80ff75348a24a07f3e9fb7e;false;2.32000
+heroku.jar;com.heroku.api.command.HerokuAppCreateCommand;execute(HerokuConnection);13e378a702b57af42d2e08eb1bd2250ffe217b5b;false;2.10200
+billy;com.premiumminds.billy.portugal.test.PTMockDependencyModule;configure();4646ce44110d9832878f58f54a112a49eda5a4bd;not-found;0.00100
+billy;com.premiumminds.billy.core.test.services.builders.TestProductBuilder;doTest();f443290adb2821b80265a6559b626bb51f44269c;not-found;0.00000
+qlrm;org.qlrm.mapper.JpaResultMapper;list(Query, Class<T>);e03f1617f3978b3a1906f96e92317514eef243ff;true;1.90700
+redpen;cc.redpen.RedPen;validate(List<Document>);cdc1310dbdc5ff2636e233c49ef4ef018d1c5f36;false;4.32700
+redpen;cc.redpen.validator.ValidatorFactory;static block;6070b11414a006e8f3c05e457543200a9f558809;true;4.33800
+redpen;cc.redpen.validator.ValidatorFactory;static block;40227ac51b9b6b17183afc17af9f910131ca6f91;false;3.87100
+webbit;org.webbitserver.netty.NettyWebServerTest;stopsServerCleanlyNotLeavingResourcesHanging();654f23f315084bd97bb8d67c6543259c0d35b882;not-found;0.00400
+webbit;org.webbitserver.netty.WebSocketClient;start();5dd8e73fe435a74b3caa2dd1137d9fbe52262879;false;3.09200
+java-figo;me.figo.internal.FigoTrustManager;checkServerTrusted(X509Certificate[], String);c204036be25429e7fcfe402bfab4284f5212ced9;false;2.52200
+webbit;org.webbitserver.netty.WebSocketClient;start();0d57793d92a4fd8799845c7adb356644c1128a6f;false;3.18200
+photon;de.komoot.photon.nominatim.NominatimConnector;completePlace(PhotonDoc);e6b5af77a12b60ab409fc4bf71dbe505fc773238;false;178.12400
+photon;de.komoot.photon.nominatim.NominatimConnector;completePlace(PhotonDoc);e6b5af77a12b60ab409fc4bf71dbe505fc773238;false;168.23400
+jline2;jline.internal.TerminalLineSettings;getProperty(String);6db1644351479fb82c909d82b0b57b321440a5e6;false;2.88200
+jline2;jline.console.ConsoleReader;readLine(String, Character);120b7ad28294b67e9f7936f0ad1869fc7190c5ad;true;4.79400
+jline2;jline.console.ConsoleReader;readLine(String, Character);5acfe5945383a620910a2d78eb131af86efe7022;true;4.79600
+redpen;cc.redpen.formatter.XMLFormatter;convertError(ValidationError);9af5140829baa1e9dd5094879ad0681606574646;false;2.86000
+overture;org.overture.typechecker.visitor.TypeCheckerDefinitionVisitor;caseAImplicitOperationDefinition(AImplicitOperationDefinition, TypeCheckInfo);183044a608970fa550c097fdd98216a182cc895d;false;80.52600
+redpen;org.unigram.docvalidator.SampleDocumentGeneratorTest;testGenerateSimplePlainDocument();ea815d7ad42ed88e93bc78aac909f030439f77d3;not-found;0.00100
+redpen;org.unigram.docvalidator.SampleDocumentGeneratorTest;testGenerateSimpleWikiDocument();ea815d7ad42ed88e93bc78aac909f030439f77d3;not-found;0.00100
+redpen;org.unigram.docvalidator.SampleDocumentGeneratorTest;testGenerateSimpleMarkdownDocument();ea815d7ad42ed88e93bc78aac909f030439f77d3;not-found;0.00100
+redpen;org.unigram.docvalidator.Main;main(String[]);ea815d7ad42ed88e93bc78aac909f030439f77d3;false;1.51200
+redpen;org.unigram.docvalidator.Main;main(String[]);c096b65ca2103033aecb685065acefe5d3e3b407;false;1.53900
+esigate;org.esigate.http.ProxyingHttpClientBuilder;addFetchEvent(ClientExecChain);22266c0f5c09c1f57d27b162ad0dfdd1f0903fc6;false;3.76900
+redpen;org.unigram.docvalidator.parser.BasicDocumentParser;initialize(DVResource);b0bae90319a3edcfcdce388f61c053e017e72748;false;2.86700
+mongobee;com.github.mongobee.dao.ChangeEntryDao;connectMongoDb(Mongo, String);abf507930c55a2a4d918d70d5c3ff852fb5cbf5e;false;1.92600
+cucumber-reporting;net.masterthought.cucumber.generators.FeatureOverviewPage;generatePage();9fa019efbb3e9219643a69303c549bdb7b6515a2;true;2.58400
+cucumber-reporting;net.masterthought.cucumber.util.Util;collectSteps(Step[], Closure<String,Step>);78e3dc94e23908b6afcefd9725537bc3d674ff77;false;2.16200
+pebble;com.mitchellbosecke.pebble.node.expression.GetAttributeExpression;evaluate(PebbleTemplateImpl, EvaluationContext);aa932204dedbe24bdefeb75593385eb0c091e7f7;true;7.60000
+jongo;org.jongo.marshall.jackson.bson4jackson.BsonDeserializers;BsonDeserializers();697fc67ed565bbaf3b67d4ad5e8a19ca8c09e90c;true;2.10100
+pebble;com.mitchellbosecke.pebble.lexer.LexerImpl;lexExpression();b092f5eee672fdf7f8100336b35e37a9876f6f72;true;7.98900
+pebble;com.mitchellbosecke.pebble.parser.ExpressionParser;subparseExpression();b092f5eee672fdf7f8100336b35e37a9876f6f72;true;8.12200
+jongo;org.jongo.util.MongoResource;getInstance();ef3b9719963e125da4191c6917e6453edd04c410;not-found;0.00000
+jongo;org.jongo.marshall.jackson.JacksonObjectIdUpdater;getId(Object);00106c72391f5af2826c964dbbbe303bffee5a9f;false;2.10600
+jongo;org.jongo.marshall.jackson.JacksonObjectIdUpdater;mustGenerateObjectId(Object);00106c72391f5af2826c964dbbbe303bffee5a9f;false;2.31400
+jongo;org.jongo.marshall.jackson.JacksonObjectIdUpdater;setObjectId(Object, ObjectId);00106c72391f5af2826c964dbbbe303bffee5a9f;false;2.24600
+pebble;com.mitchellbosecke.pebble.PebbleEngine;build();b092f5eee672fdf7f8100336b35e37a9876f6f72;false;7.39900
+jongo;org.jongo.bson.LazyBsonDocument;getSize();aa988ff7746f3ea0740acaa9fda47444e3fd7400;true;2.21700
+jongo;org.jongo.InsertTest;canOnlyInsertOnceAPojoWithACustomId();aa988ff7746f3ea0740acaa9fda47444e3fd7400;not-found;0.00000
+pebble;com.mitchellbosecke.pebble.template.PebbleTemplateImpl;initContext(Locale);e35516f690d07a5fecc6a27c7b14b143fba7b5d1;false;8.51500
+pebble;com.mitchellbosecke.pebble.node.ParallelNode;render(PebbleTemplateImpl, Writer, EvaluationContext);16c84db836af1ff7b2ec8a7849e951a2b3f5be36;false;7.92400
+pebble;com.mitchellbosecke.pebble.node.expression.GetAttributeExpression;evaluate(PebbleTemplateImpl, EvaluationContextImpl);c8c30f79bfa1849d04e41ed14402ddc2f2746fe9;true;7.09900
+pebble;com.mitchellbosecke.pebble.extension.core.JoinFilter;apply(Object, Map<String,Object>);8dbd27621c8d8c5db8d229da6ebf18a851c146c6;false;7.09100
+pebble;com.mitchellbosecke.pebble.node.expression.FunctionOrMacroInvocationExpression;evaluate(PebbleTemplateImpl, EvaluationContextImpl);a0e7bc09e4cfff141e0e05d2e788b07919b78995;true;7.64400
+pebble;com.mitchellbosecke.pebble.template.PebbleTemplateImpl;includeTemplate(Writer, EvaluationContext, String, Map<?,?>);5e0ae828b608474920471010ea6f02a4ba92ef34;false;2.90000
+pebble;com.mitchellbosecke.pebble.node.expression.GetAttributeExpression;evaluate(PebbleTemplateImpl, EvaluationContext);0d20dd1243c2e96516bafbd29301eed7b9f53e5e;false;3.41000
+pebble;com.mitchellbosecke.pebble.lexer.Syntax;Syntax(String, String, String, String, String, String, String);48ab05076e92d1280bc8c3797717a3f020a2eca2;true;2.75300
+pebble;com.mitchellbosecke.pebble.node.expression.GetAttributeExpression;GetAttributeExpression(Expression<?>, String, ArgumentsNode);549bdec272479087af0ff89e129ee8a90ee7bd71;false;2.92000
+pebble;com.mitchellbosecke.pebble.node.expression.GetAttributeExpression;evaluate(PebbleTemplateImpl, EvaluationContext);549bdec272479087af0ff89e129ee8a90ee7bd71;false;3.34500
+qlrm;org.qlrm.mapper.JpaResultMapper;list(Query, Class<T>);e03f1617f3978b3a1906f96e92317514eef243ff;true;1.95500
+java-figo;me.figo.internal.FigoTrustManager;checkServerTrusted(X509Certificate[], String);c204036be25429e7fcfe402bfab4284f5212ced9;false;2.46100
+photon;de.komoot.photon.nominatim.NominatimConnector;completePlace(PhotonDoc);e6b5af77a12b60ab409fc4bf71dbe505fc773238;false;166.90800
+photon;de.komoot.photon.nominatim.NominatimConnector;completePlace(PhotonDoc);e6b5af77a12b60ab409fc4bf71dbe505fc773238;false;176.07700
+esigate;org.esigate.http.ProxyingHttpClientBuilder;addFetchEvent(ClientExecChain);22266c0f5c09c1f57d27b162ad0dfdd1f0903fc6;false;3.04200
+mongobee;com.github.mongobee.dao.ChangeEntryDao;connectMongoDb(Mongo, String);abf507930c55a2a4d918d70d5c3ff852fb5cbf5e;false;1.54500
+cucumber-reporting;net.masterthought.cucumber.generators.FeatureOverviewPage;generatePage();9fa019efbb3e9219643a69303c549bdb7b6515a2;true;2.20100
+pebble;com.mitchellbosecke.pebble.node.expression.GetAttributeExpression;evaluate(PebbleTemplateImpl, EvaluationContext);aa932204dedbe24bdefeb75593385eb0c091e7f7;true;7.00300
+pebble;com.mitchellbosecke.pebble.lexer.LexerImpl;lexExpression();b092f5eee672fdf7f8100336b35e37a9876f6f72;true;7.14400
+pebble;com.mitchellbosecke.pebble.parser.ExpressionParser;subparseExpression();b092f5eee672fdf7f8100336b35e37a9876f6f72;true;7.67900
+pebble;com.mitchellbosecke.pebble.PebbleEngine;build();b092f5eee672fdf7f8100336b35e37a9876f6f72;false;7.01800
+jongo;org.jongo.marshall.jackson.bson4jackson.BsonDeserializers;BsonDeserializers();697fc67ed565bbaf3b67d4ad5e8a19ca8c09e90c;true;2.01800
+cucumber-reporting;net.masterthought.cucumber.util.Util;collectSteps(Step[], Closure<String,Step>);78e3dc94e23908b6afcefd9725537bc3d674ff77;false;1.81000
+jongo;org.jongo.util.MongoResource;getInstance();ef3b9719963e125da4191c6917e6453edd04c410;not-found;0.00000
+jongo;org.jongo.marshall.jackson.JacksonObjectIdUpdater;getId(Object);00106c72391f5af2826c964dbbbe303bffee5a9f;false;2.03000
+jongo;org.jongo.marshall.jackson.JacksonObjectIdUpdater;mustGenerateObjectId(Object);00106c72391f5af2826c964dbbbe303bffee5a9f;false;1.94200
+jongo;org.jongo.marshall.jackson.JacksonObjectIdUpdater;setObjectId(Object, ObjectId);00106c72391f5af2826c964dbbbe303bffee5a9f;false;1.90500
+jongo;org.jongo.bson.LazyBsonDocument;getSize();aa988ff7746f3ea0740acaa9fda47444e3fd7400;true;1.87600
+jongo;org.jongo.InsertTest;canOnlyInsertOnceAPojoWithACustomId();aa988ff7746f3ea0740acaa9fda47444e3fd7400;not-found;0.00000
+pebble;com.mitchellbosecke.pebble.template.PebbleTemplateImpl;initContext(Locale);e35516f690d07a5fecc6a27c7b14b143fba7b5d1;false;7.05400
+pebble;com.mitchellbosecke.pebble.node.ParallelNode;render(PebbleTemplateImpl, Writer, EvaluationContext);16c84db836af1ff7b2ec8a7849e951a2b3f5be36;false;7.46800
+pebble;com.mitchellbosecke.pebble.node.expression.GetAttributeExpression;evaluate(PebbleTemplateImpl, EvaluationContextImpl);c8c30f79bfa1849d04e41ed14402ddc2f2746fe9;true;6.99100
+pebble;com.mitchellbosecke.pebble.extension.core.JoinFilter;apply(Object, Map<String,Object>);8dbd27621c8d8c5db8d229da6ebf18a851c146c6;false;6.91900
+pebble;com.mitchellbosecke.pebble.node.expression.FunctionOrMacroInvocationExpression;evaluate(PebbleTemplateImpl, EvaluationContextImpl);a0e7bc09e4cfff141e0e05d2e788b07919b78995;true;6.96400
+pebble;com.mitchellbosecke.pebble.template.PebbleTemplateImpl;includeTemplate(Writer, EvaluationContext, String, Map<?,?>);5e0ae828b608474920471010ea6f02a4ba92ef34;false;2.82800
+pebble;com.mitchellbosecke.pebble.node.expression.GetAttributeExpression;evaluate(PebbleTemplateImpl, EvaluationContext);0d20dd1243c2e96516bafbd29301eed7b9f53e5e;false;4.12100
+pebble;com.mitchellbosecke.pebble.lexer.Syntax;Syntax(String, String, String, String, String, String, String);48ab05076e92d1280bc8c3797717a3f020a2eca2;true;3.38800
+pebble;com.mitchellbosecke.pebble.node.expression.GetAttributeExpression;GetAttributeExpression(Expression<?>, String, ArgumentsNode);549bdec272479087af0ff89e129ee8a90ee7bd71;false;2.85000
+pebble;com.mitchellbosecke.pebble.node.expression.GetAttributeExpression;evaluate(PebbleTemplateImpl, EvaluationContext);549bdec272479087af0ff89e129ee8a90ee7bd71;false;3.37700
+overture;org.overture.pog.obligation.POOperationDefinitionContext;makeBinds();f423e657f18ee0f6035dcc2f58f542a1dc745ae5;true;4.32200
+qlrm;org.qlrm.mapper.JpaResultMapper;list(Query, Class<T>);e03f1617f3978b3a1906f96e92317514eef243ff;true;1.98300
+java-figo;me.figo.internal.FigoTrustManager;checkServerTrusted(X509Certificate[], String);c204036be25429e7fcfe402bfab4284f5212ced9;false;2.53900
+photon;de.komoot.photon.nominatim.NominatimConnector;completePlace(PhotonDoc);e6b5af77a12b60ab409fc4bf71dbe505fc773238;false;179.48500
+photon;de.komoot.photon.nominatim.NominatimConnector;completePlace(PhotonDoc);e6b5af77a12b60ab409fc4bf71dbe505fc773238;false;173.57700
+overture;org.overture.pog.visitors.PogParamDefinitionVisitor;caseAImplicitOperationDefinition(AImplicitOperationDefinition, IPOContextStack);183044a608970fa550c097fdd98216a182cc895d;true;41.54800
+jline2;jline.internal.TerminalLineSettings;getProperty(String);6db1644351479fb82c909d82b0b57b321440a5e6;false;2.80300
+mongobee;com.github.mongobee.dao.ChangeEntryDao;connectMongoDb(Mongo, String);abf507930c55a2a4d918d70d5c3ff852fb5cbf5e;false;1.59000
+cucumber-reporting;net.masterthought.cucumber.generators.FeatureOverviewPage;generatePage();9fa019efbb3e9219643a69303c549bdb7b6515a2;true;2.16500
+pebble;com.mitchellbosecke.pebble.node.expression.GetAttributeExpression;evaluate(PebbleTemplateImpl, EvaluationContext);aa932204dedbe24bdefeb75593385eb0c091e7f7;true;8.20200
+pebble;com.mitchellbosecke.pebble.lexer.LexerImpl;lexExpression();b092f5eee672fdf7f8100336b35e37a9876f6f72;true;8.30600
+pebble;com.mitchellbosecke.pebble.parser.ExpressionParser;subparseExpression();b092f5eee672fdf7f8100336b35e37a9876f6f72;true;8.60600
+pebble;com.mitchellbosecke.pebble.PebbleEngine;build();b092f5eee672fdf7f8100336b35e37a9876f6f72;false;7.04500
+jongo;org.jongo.marshall.jackson.bson4jackson.BsonDeserializers;BsonDeserializers();697fc67ed565bbaf3b67d4ad5e8a19ca8c09e90c;true;2.11600
+cucumber-reporting;net.masterthought.cucumber.util.Util;collectSteps(Step[], Closure<String,Step>);78e3dc94e23908b6afcefd9725537bc3d674ff77;false;1.71700
+jongo;org.jongo.util.MongoResource;getInstance();ef3b9719963e125da4191c6917e6453edd04c410;not-found;0.00000
+jongo;org.jongo.marshall.jackson.JacksonObjectIdUpdater;getId(Object);00106c72391f5af2826c964dbbbe303bffee5a9f;false;2.22100
+jongo;org.jongo.marshall.jackson.JacksonObjectIdUpdater;mustGenerateObjectId(Object);00106c72391f5af2826c964dbbbe303bffee5a9f;false;1.95700
+jongo;org.jongo.marshall.jackson.JacksonObjectIdUpdater;setObjectId(Object, ObjectId);00106c72391f5af2826c964dbbbe303bffee5a9f;false;2.32700
+jongo;org.jongo.bson.LazyBsonDocument;getSize();aa988ff7746f3ea0740acaa9fda47444e3fd7400;true;1.90800
+jongo;org.jongo.InsertTest;canOnlyInsertOnceAPojoWithACustomId();aa988ff7746f3ea0740acaa9fda47444e3fd7400;not-found;0.00000
+pebble;com.mitchellbosecke.pebble.template.PebbleTemplateImpl;initContext(Locale);e35516f690d07a5fecc6a27c7b14b143fba7b5d1;false;8.21100
+pebble;com.mitchellbosecke.pebble.node.ParallelNode;render(PebbleTemplateImpl, Writer, EvaluationContext);16c84db836af1ff7b2ec8a7849e951a2b3f5be36;false;7.62200
+pebble;com.mitchellbosecke.pebble.node.expression.GetAttributeExpression;evaluate(PebbleTemplateImpl, EvaluationContextImpl);c8c30f79bfa1849d04e41ed14402ddc2f2746fe9;true;8.83400
+pebble;com.mitchellbosecke.pebble.extension.core.JoinFilter;apply(Object, Map<String,Object>);8dbd27621c8d8c5db8d229da6ebf18a851c146c6;false;9.08400
+pebble;com.mitchellbosecke.pebble.node.expression.FunctionOrMacroInvocationExpression;evaluate(PebbleTemplateImpl, EvaluationContextImpl);a0e7bc09e4cfff141e0e05d2e788b07919b78995;true;9.11100
+pebble;com.mitchellbosecke.pebble.template.PebbleTemplateImpl;includeTemplate(Writer, EvaluationContext, String, Map<?,?>);5e0ae828b608474920471010ea6f02a4ba92ef34;false;3.58600
+pebble;com.mitchellbosecke.pebble.node.expression.GetAttributeExpression;evaluate(PebbleTemplateImpl, EvaluationContext);0d20dd1243c2e96516bafbd29301eed7b9f53e5e;false;3.51900
+argparse4j;net.sourceforge.argparse4j.internal.ArgumentParserImpl;printHelp(PrintWriter);c3b38c0b78286623022b1bfb8b4cac5a5d732e8e;false;2.09200
+argparse4j;net.sourceforge.argparse4j.internal.ArgumentParserImpl;printUsage(PrintWriter, int);b8440ba6c3b618ffcfc5e2bafac672e048e15c5c;false;2.20200
+argparse4j;net.sourceforge.argparse4j.internal.ArgumentParserImpl;printHelp(PrintWriter);b8440ba6c3b618ffcfc5e2bafac672e048e15c5c;false;2.38800
+pebble;com.mitchellbosecke.pebble.lexer.Syntax;Syntax(String, String, String, String, String, String, String);48ab05076e92d1280bc8c3797717a3f020a2eca2;true;3.30600
+pebble;com.mitchellbosecke.pebble.node.expression.GetAttributeExpression;GetAttributeExpression(Expression<?>, String, ArgumentsNode);549bdec272479087af0ff89e129ee8a90ee7bd71;false;3.30800
+pebble;com.mitchellbosecke.pebble.node.expression.GetAttributeExpression;evaluate(PebbleTemplateImpl, EvaluationContext);549bdec272479087af0ff89e129ee8a90ee7bd71;false;3.37200
+z;com.adamldavis.z.Z;showNewEditor(ZNode);da778dcb9cf35110cc3b35d9c4c26a66238d3450;false;3.41000
+elasticsearch-analysis-morfologik;org.elasticsearch.indices.analysis.pl.MorfologikIndicesAnalysis;MorfologikIndicesAnalysis(Settings, IndicesAnalysisService);6024cb183c93a9bcde34205c97b4a1dfb3694ac5;true;2.50500
+flume-ng-sql-source;org.keedio.flume.source.SQLSource;process();4f08bc79018fb70a02605640ba1cbef23b3bf9f5;false;21.38400
+flume-ftp-source;org.keedio.flume.source.ftp.source.Source;readStream(InputStream, long);f4c145bec4acce94ef00f97b814a511049b3b372;false;2.02200
+flume-ftp-source;org.keedio.flume.source.ftp.source.Source;readStream(InputStream, long);f4c145bec4acce94ef00f97b814a511049b3b372;false;1.78800
+flume-ftp-source;org.keedio.flume.source.ftp.source.Source;discoverElements(KeedioSource, String, String, int);f4c145bec4acce94ef00f97b814a511049b3b372;false;2.14400
+flume-ftp-source;org.keedio.flume.source.ftp.source.Source;discoverElements(KeedioSource, String, String, int);f4c145bec4acce94ef00f97b814a511049b3b372;false;2.06000
+dyn4j;org.dyn4j.world.AbstractPhysicsWorld;processCollisions(Iterator<V>);b6c114ea1ff974840b5daa3092732877134ecda2;true;2.05100
+flume-ftp-source;org.apache.flume.source.FTPSource;discoverElements(FTPClient, String, String, int);2c3d89af9a0a099fae96e591b85fd094c7a5ab1b;false;1.67500
+flume-ftp-source;org.apache.flume.source.FTPSource;discoverElements(FTPClient, String, String, int);2c3d89af9a0a099fae96e591b85fd094c7a5ab1b;false;1.94600
+dyn4j;org.dyn4j.dynamics.contact.WarmStartingContactManager;updateAndNotify(List<ContactListener>, Settings);bc4a8d51912dc9956fb3d64324b0323e238bf5cb;false;1.42300
+dyn4j;org.dyn4j.dynamics.contact.SimpleContactManager;postSolveNotify(List<ContactListener>);bc4a8d51912dc9956fb3d64324b0323e238bf5cb;false;1.32500
+openpnp;org.openpnp.machine.reference.feeder.BlindsFeeder;findPocketsAndCenterline(Camera);36f65ec0aa210007f525f3fad494d0f2e8d843cb;true;11.97700
+openpnp;org.openpnp.machine.reference.feeder.BlindsFeeder;calibrateFeederLocations();36f65ec0aa210007f525f3fad494d0f2e8d843cb;false;4.51400
+openpnp;org.openpnp.machine.reference.feeder.ReferencePushPullFeeder;performVisionOperations(Camera, CvPipeline, boolean, boolean, boolean, OcrWrongPartAction, boolean, StringBuilder);36f65ec0aa210007f525f3fad494d0f2e8d843cb;false;14.92100
+openpnp;org.openpnp.gui.components.SimpleGraphView;paintComponent(Graphics);3b445f100ed55b7fab6946fa1102993413160e89;false;4.26300
+openpnp;org.openpnp.machine.reference.wizards.ReferenceNozzleTipCalibrationWizard;createBindings();42dea1790c643c15cc312701591d4774d245bbed;true;4.13500
+openpnp;org.openpnp.gui.wizards.CameraConfigurationWizard;CameraConfigurationWizard(AbstractBroadcastingCamera);85c5f5a92da17f7c19492293df0c5369d4c04c3d;true;3.92200
+openpnp;org.openpnp.machine.reference.ReferenceNozzle;ReferenceNozzle();a3cca4dababa7940c7cc5a86cfbd89ccf21e6cbf;true;3.85400
+openpnp;org.openpnp.vision.pipeline.ui.CvPipelineEditor;static block;af31eaadef77310d8942dda126512ebbf3ce859d;false;2.95200
+openpnp;org.openpnp.machine.reference.ReferenceNozzle;isPartOff();f1d9c747ac3d7f0376b56e1c81f4da617f396e98;true;2.87100
+openpnp;org.openpnp.machine.reference.vision.ReferenceBottomVision;findOffsetsPostRotate(Part, BoardLocation, Location, Nozzle, Camera, PartSettings);db3203525ab5fe997c4cf7f90dce74d9d5c74943;true;4.08800
+openpnp;org.openpnp.machine.reference.ReferenceNozzle;unloadNozzleTip();b9a1c67ca2321c1d4a943a562985767d9b34b6a9;false;5.15000
+openpnp;org.openpnp.machine.reference.ReferenceNozzle;loadNozzleTip(NozzleTip);b9a1c67ca2321c1d4a943a562985767d9b34b6a9;false;5.66300
+openpnp;org.openpnp.machine.reference.vision.ReferenceBottomVision;findOffsets(Part, BoardLocation, Location, Nozzle);b62c0ce8269e73c38ef5215d02d264586a1ab399;false;6.65200
+openpnp;org.openpnp.gui.PartsPanel;PartsPanel(Configuration, Frame);0713b6c46487e92a89d68780a39282cce8446abd;true;2.97200
+openpnp;org.openpnp.machine.reference.feeder.ReferenceLoosePartFeeder;getPickLocation(Camera);3bce6e43e27344d6140fe166b5322cfa77844280;true;2.69000
+openpnp;org.openpnp.gui.MainFrame;registerBoardImporters();d1778a6820a095395d408955ba274ebdefe546e2;true;2.47600
+openpnp;org.openpnp.gui.JobPanel;JobPanel(Configuration, MainFrame, MachineControlsPanel);99835c7c58242d6b0cdfba3211ed2f60169fdda7;false;2.36700
+liquibase;liquibase.util.LiquibaseUtil;getBuildInfo(String);47869406413cd360b95a15a0022c9dfc59a1637c;false;6.17300
+liquibase;liquibase.change.ColumnConfig;ColumnConfig(Column);9ae2b572c79ff0273f1dfb2f867148e74dfebb98;false;6.14500
+yawp;io.yawp.servlet.EndpointServlet;execute(RequestContext);918dcec5fbd9a540c7c2cb692da4499f2b4944aa;false;3.82800
+yawp;io.yawp.repository.EndpointScanner;scanActions();439805c48da9c75b88197706a222ae6c15c5f6c0;false;3.38900
+jdeb;org.vafer.jdeb.maven.DebMojo;execute();de300005f033a22b2c6424745628cbbc1f7cb509;false;12.29800
+jdeb;org.vafer.jdeb.DataBuilder;buildData(Collection<DataProducer>, File, StringBuilder, Compression);114dfe4331fb79230632ec54ba8155ec149431c3;false;12.40700
+jdeb;org.vafer.jdeb.ControlBuilder;buildControl(BinaryPackageControlFile, File[], StringBuilder, File);f5a3be7ac1c646b94e9c197d12061cb33d2fa32e;true;11.07800
+jdeb;org.vafer.jdeb.maven.DebMojo;execute();f5a3be7ac1c646b94e9c197d12061cb33d2fa32e;false;8.73000
+jbox2d;org.jbox2d.dynamics.World;drawDebugData();5a40771b28f6c00ce08620d3fe88bb27ceb8687b;false;4.50900
+ohc;org.caffinitas.ohc.chunked.OHCacheChunkedImpl;OHCacheChunkedImpl(OHCacheBuilder<K,V>);cf706bb89ebae023432c2bbd949266bfd68401e8;true;7.78100
+jbox2d;org.jbox2d.common.Sweep;advance(float);6c7d53a0ccf1fe88f0cd1debaf7389b52810e14d;true;4.85800
+versioneye_maven_plugin;com.versioneye.SuperMojo;fetchProjectId();fdaaa77a460d09c61bd2b8448f9debc6200e840e;false;1.95100
+nibiru;io.teknek.nibiru.cli.Cli;main(String[]);bb6150cffd19a67941797bb3a08739c24879fb3c;false;1.91000
+jcabi-jdbc;com.jcabi.jdbc.SingleOutcome;fetch(ResultSet);6105fbc436b41aaaf6e4be6ecbf86c253de7b9f6;false;2.03600
+jcabi-jdbc;com.jcabi.jdbc.PrepareArgs;prepare(PreparedStatement);6105fbc436b41aaaf6e4be6ecbf86c253de7b9f6;true;2.27700
+jcabi-jdbc;com.jcabi.jdbc.ColumnOutcome;fetch(ResultSet);6105fbc436b41aaaf6e4be6ecbf86c253de7b9f6;false;2.06600
+jcabi-jdbc;com.jcabi.jdbc.SingleOutcome;fetch(ResultSet);40e95d792465ff63e698273a475a8b256cf11a5b;false;1.87800
+jcabi-jdbc;com.jcabi.jdbc.PrepareArgs;prepare(PreparedStatement);40e95d792465ff63e698273a475a8b256cf11a5b;true;2.29000
+jcabi-jdbc;com.jcabi.jdbc.ColumnOutcome;fetch(ResultSet);40e95d792465ff63e698273a475a8b256cf11a5b;false;2.14200
+frontend-maven-plugin;com.github.eirslett.maven.plugins.frontend.lib.NodeAndNPMInstaller;installNpm();ac09c66c0c6aad3066a206b91c302c695ac9d80f;false;2.26300
+frontend-maven-plugin;com.github.eirslett.maven.plugins.frontend.mojo.NpmMojo;execute();377ca86b211717379c03f0830ff4ddd1dc8e4c20;false;1.68100
+jcabi-http;com.jcabi.http.mock.GrizzlyQuery;GrizzlyQuery(GrizzlyRequest);b33d320e5a794ad393369a0c141a3afbc1ff53e4;false;2.87900
+jcabi-http;com.jcabi.http.wire.BasicAuthWire;send(Request, String, String, Collection<Map.Entry<String,String>>, byte[]);b33d320e5a794ad393369a0c141a3afbc1ff53e4;false;2.91200
+jcabi-http;com.jcabi.http.request.DefaultResponse;body();b33d320e5a794ad393369a0c141a3afbc1ff53e4;false;2.90900
+uglifyjs-maven-plugin;net.tqh.plugins.UglifyMojo;execute();c77d67ab1de02ab8fca05ea264d59a50ef71cbcf;false;1.63800
+consumer-dispatcher;com.thenetcircle.comsumerdispatcher.job.JobExecutor;run();ad52e52884dde01fb2762e25e77fcd8db77ab84f;false;2.43400
+libpam4j;org.jvnet.libpam.PAM;PAM(String);43d35c217451951500d0cb1246602c42494f7a28;false;1.77700
+jcabi-github;com.jcabi.github.mock.MkGit;commits();70a85681b5440ecdadd24e346039ddebc81e965d;true;10.00300
+jcabi-github;com.jcabi.github.RtContentsITCase;getContent();207129389bde3a9f4edf87392c369e4f144b343b;not-found;0.00100
+mclauncher-api;sk.tomsik68.mclauncher.impl.versions.mcdownload.MCDResourcesInstaller;downloadAssetList(AssetIndex, IProgressMonitor);18b42d87e39be1a3bd4f51f5828aa7db54dd6e11;false;2.28500
+jcliff;com.redhat.jcliff.Main;main(String[]);206c63ba6f86b656ddf71caa32068a1f6c88b182;false;2.67200
+couchdb-lucene;com.github.rnewson.couchdb.lucene.couchdb.ViewSettings;ViewSettings(String, String, String, String, ViewSettings);a26642d5ab84f52d51eca92ce9ee594420eb719e;true;1.90800
+couchdb-lucene;com.github.rnewson.couchdb.lucene.DatabaseIndexer;search(HttpServletRequest, HttpServletResponse);a26642d5ab84f52d51eca92ce9ee594420eb719e;true;2.02100
+couchdb-lucene;org.apache.couchdb.lucene.SearchRequest;execute(IndexSearcher);14123029dc4281316d0200eeb64a55049fd21601;false;2.05200
+couchdb-lucene;org.apache.couchdb.lucene.Index;updateIndex();4e2de1bc8af38c12b594469eafc887060d1ae136;false;1.70800
+javacpp;org.bytedeco.javacpp.tools.Builder;generateAndCompile(Class[], String);5944112bb41dbeba870a2bcfe190a7ca369c2cda;true;6.95300
+javacpp;org.bytedeco.javacpp.tools.Parser;parse(File, String[], Class);4b738fa5c21984e5828f75c270ae17dab9c81b69;false;4.83700
+github-api;org.kohsuke.github.GHPullRequestTest;pullRequestReviewComments();c3cbaa43eab611b29a7f3be97d8a66f59628a67b;not-found;0.00100
+javacpp;org.bytedeco.javacpp.tools.Parser;declarator(Context, String, int, boolean, int, boolean, boolean);6e982f7faf50f8b18b2ccbe2affd84f0dbd77ea3;false;20.90100
+moquette;io.moquette.spi.impl.ProtocolProcessor;processSubscribe(Channel, SubscribeMessage);3085ee54d8ec8ff1fdce167c698af7064fc3052f;true;2.77800
+jcabi-github;com.jcabi.github.mock.MkSearchTest;canSearchForUsers();f0838e37a49a2ab757b59582addef51d0c69e0e0;not-found;0.00100
+jcabi-github;com.jcabi.github.mock.MkSearchTest;canSearchForIssues();f0838e37a49a2ab757b59582addef51d0c69e0e0;not-found;0.00100
+jcabi-github;com.jcabi.github.mock.MkSearchTest;canSearchForRepos();f0838e37a49a2ab757b59582addef51d0c69e0e0;not-found;0.00000
+yoga;org.skyscreamer.yoga.mapper.ResultTraverser;traverseChild(HttpServletResponse, Selector, HierarchicalModel, PropertyDescriptor, Object, String);6ded402d219f4be75d040cb7c5ea0a670af3eb57;false;1.76000
+yoga;org.skyscreamer.yoga.mapper.ResultTraverser;traverse(Object, Selector, HierarchicalModel, String, HttpServletResponse);6ded402d219f4be75d040cb7c5ea0a670af3eb57;false;2.18800
+jcabi-github;com.jcabi.github.RtReleases;RtReleases(Request, Repo);b753098546c4fce159d88e863277216c3ec2e845;true;5.68500
+github-api;org.kohsuke.github.GitHubBuilder;fromCredentials();225383464a5d2823a28d5eca9d364d9fdc803e73;true;4.71400
+yoga;org.skyscreamer.yoga.mapper.ResultTraverser;traverseIterable(Selector, HierarchicalModel, PropertyDescriptor, Iterable<?>);0d9855e43e4a1d3fff08df4c688cc9eab58da338;false;2.08900
+bychan;org.bychan.core.dynamic.minilang.MiniLangTest;test();96d59116bbca17ba5b72e31736f17cb431b19ad1;not-found;0.00000
+blueflood;com.rackspacecloud.blueflood.io.ElasticIOIntegrationTest;setup();03c8a29606ad6cfa421db5ad84dad7c9318fe37a;not-found;0.02300
+hazeltask;com.succinctllc.hazelcast.work.executor.DistributedExecutorService;doExecute(HazelcastWork, boolean);9f9809f46cd73b80f333774d552565e5ca89f302;false;2.51400
+atom-hopper;org.atomhopper.AtomHopperServlet;createProvider();5addacd45fc6c2c434d877a5a15f78af9c7674be;true;2.67700
+galen;net.mindengine.galen.validation.specs.SpecValidationComponent;check(PageValidation, String, SpecComponent);ac103adc6ff68969627d7df20590a8177c24af19;true;2.88800
+galen;net.mindengine.galen.suite.actions.GalenPageActionCheck;execute(TestReport, Browser, GalenPageTest, ValidationListener);ac103adc6ff68969627d7df20590a8177c24af19;true;3.33500
+getdown;com.threerings.getdown.launcher.ProxyUtil;autoDetectProxy(Application);f087863098a6bc43551643f94cbe1893348773e6;false;4.25000
+getdown;com.threerings.getdown.data.Application;init(boolean);18d449166c11133997bbb914db0c4c480edff8c5;false;2.98800
+getdown;com.threerings.getdown.launcher.Getdown;getdown();f4679b4a369f4eb354583be916cd15df69faad9d;true;3.44000
+getdown;com.threerings.getdown.data.Application;init(boolean);f4679b4a369f4eb354583be916cd15df69faad9d;false;4.57700
+getdown;com.threerings.getdown.data.EnvConfig;create(String[], List<Note>);0bd22aaacca0e463c074d40e48dc7df6e3035a7a;false;4.10700
+rabbitmq-flume-plugin;com.aweber.flume.source.rabbitmq.Consumer;run();710a5fb3b85f30fc1992e135ee8b303591aa6bce;false;1.70000
+rabbitmq-flume-plugin;com.aweber.flume.source.rabbitmq.Consumer;buildHeaders(AMQP.BasicProperties);ed70b2c5c33b52017f2528a587894c01be750ed7;true;2.02600
+garbagecat;org.eclipselabs.garbagecat.service.GcManager;preprocess(File, Date);4af1d9c4fc71246add443b99af9cc47e5464aa89;true;3.79300
+casperjs-runner-maven-plugin;com.github.linsolas.casperjsrunner.CasperJSRunnerMojo;executeScript(File);98fccc0f940917225388733e66237404f374cdfc;true;2.07400
+casperjs-runner-maven-plugin;com.github.linsolas.casperjsrunner.CasperJSRunnerMojo;init();98fccc0f940917225388733e66237404f374cdfc;false;1.63800
+elasticsearch-cassandra-river;com.blu.es.cassandra.CassandraRiver;CassandraRiver(RiverName, RiverSettings, Client);9c15eaf6e745dc4d0e65458a4f60e43e0d5726d2;true;2.02100
+hdfs2cass;com.spotify.hdfs2cass.cassandra.cql.CrunchCqlBulkRecordWriter;close();d9ccc2bac7fe1bbb5a690b6a95ab80eac4e0fa36;true;1.75100
+resty-gwt;org.fusesource.restygwt.rebind.DirectRestServiceInterfaceClassCreator;getMethodCallback(JMethod);867b917c43c32acbdcac55767e7f04334006c866;true;3.70000
+gelfj;org.graylog2.GelfMessage;toDatagrams();f57a572d8c372b60afde1f1f300fdb93e3d1a194;true;2.19000
+gelfj;org.graylog2.GelfMessageTest;testSimpleMessage();f57a572d8c372b60afde1f1f300fdb93e3d1a194;not-found;0.00000
+gelfj;org.graylog2.log.GelfAppender;activateOptions();f57a572d8c372b60afde1f1f300fdb93e3d1a194;true;2.16800
+resty-gwt;org.fusesource.restygwt.GwtCompleteTestSuite;suite();6b049ac6ac63e9fd3607dacd2c4aa8302e7a4949;not-found;0.00000
+resty-gwt;org.fusesource.restygwt.GwtCompleteTestSuite;suite();7365f191bd3b2c0484708329b7d6e3bfd2646865;not-found;0.00100
+resty-gwt;org.fusesource.restygwt.GwtCompleteTestSuite;suite();52d1d66d66a96b6099ff24cd403ae357187703aa;not-found;0.00000
+nailgun;com.martiansoftware.nailgun.NGSession;run();7f1e1bc712bec6ad375f7d0e6cdc46323126b448;false;2.76800
+quickfixj;quickfix.mina.initiator.AbstractSocketInitiator;createInitiator(Session, boolean);f4ed6a1a1b6ddc9db7bee5ad5368116210f8f0b8;false;13.78900
+samskivert;com.samskivert.jdbc.BaseLiaison;lastInsertedId(Connection, Statement, String, String);d870dd2fac79ec07a7e9143cda4efe41fd3e66d4;false;2.48200
+nfctools;org.nfctools.ndef.ext.ExternalTypeEncoder;encodeRecord(Record, NdefMessageEncoder);15659385c0127435a9d7ed840ff8f444d3d63053;false;2.65300
+nfctools;org.nfctools.ndef.NdefRecordEncoder;NdefRecordEncoder();15659385c0127435a9d7ed840ff8f444d3d63053;true;2.81000
+nfctools;org.nfctools.ndef.NdefEncodeDecodeRoundtripTest;records;15659385c0127435a9d7ed840ff8f444d3d63053;not-found;0.00000
+titokone;fi.helsinki.cs.titokone.Compiler;parseLine(String);b4ac484b6a1a0484bc131e305cb531835efe9aa0;false;4.49800
+titokone;fi.helsinki.cs.titokone.GUI;centerToLine(int, short);be02026b3d94278be9f282364f41af4058b061f5;false;2.88600
+rultor;com.rultor.agents.github.StartsTalks;execute(Talks);a23a45f3c2cd9acbb9b8d69d4ec0ebaa09b68cc0;false;1.79600
+aeolus;storm.lrb.LRBTopology;LRBTopology(String, List<String>, int, int, int, int, int, IRichSpout, StopWatch, boolean, String, String);85127f4c5b94cc63493a78baf3bcb0f703a4bca5;true;1.62900
+embedded-jmxtrans;org.jmxtrans.embedded.output.CopperEggWriter;write(Iterable<QueryResult>);2266cfcadd9491cea8c5eea1d7c08116ce35471d;false;3.33900
+jmxtrans-agent;org.jmxtrans.agent.JmxTransExporterBuilderTest;testParseConfiguration2();5a5a447b340d6f99ac10fd8e954db69669f60122;not-found;0.00100
+jmxtrans-agent;org.jmxtrans.agent.JmxTransExporterBuilderTest;testParseConfiguration();5a5a447b340d6f99ac10fd8e954db69669f60122;not-found;0.00000
+config-magic;org.skife.config.ConfigurationObjectFactory;buildSimple(ArrayList<Callback>, Method, Config, Map<String,String>);a7953193ae2e296565ecee2809830b5abb3a3bb7;true;1.94600
+config-magic;org.skife.config.ConfigurationObjectFactory;buildParameterized(ArrayList<Callback>, Method, Config);a7953193ae2e296565ecee2809830b5abb3a3bb7;true;2.02100
+jdbi3;org.jdbi.jdbi3.Handle;query(String, Object);9f40c034b7d4b1a262f723ec81a630d1ebeb31bd;true;1.83100
+xml-avro;ly.stealth.xmlavro.SchemaBuilder;createRootRecordSchema(Map<Source,Schema>);0b17578deda5b3cf81a58e86016a82b34df1fbc3;true;16.59400
+xml-avro;ly.stealth.xmlavro.ConverterTest;severalRoots();0b17578deda5b3cf81a58e86016a82b34df1fbc3;not-found;0.00200
+xml-avro;ly.stealth.xmlavro.SchemaBuilder;createTypeSchema(XSTypeDefinition, boolean, boolean);4459180f2931d596524621a3b388e756cc4a22e9;true;16.41300
+xml-avro;ly.stealth.xmlavro.SchemaBuilder;static block;4cadd7d11f80af746499bcba731b0559642e621e;true;16.57800
+jaxb-xew-plugin;com.sun.tools.xjc.addon.xew.XmlElementWrapperPlugin;run(Outline, Options, ErrorHandler);fcf314fc820a9e81121de8fe9b2e56a526e5d58a;false;1.03400
+moquette;io.moquette.spi.impl.ProtocolProcessor;processSubscribe(Channel, SubscribeMessage);3085ee54d8ec8ff1fdce167c698af7064fc3052f;true;2.05400
+jaxb-xew-plugin;com.sun.tools.xjc.addon.xew.XmlElementWrapperPlugin;run(Outline, Options, ErrorHandler);f0aa9e2f6cd85f927c5a009c4ff95617c5d69fec;false;1.04800
+apgdiff;cz.startnet.utils.pgdiff.PgDiffTest;parameters();a42c3242b6e78aa612e362f409e373225a9c4a2e;not-found;0.00000
+apgdiff;cz.startnet.utils.pgdiff.loader.PgDumpLoader;loadDatabaseSchema(InputStream, String, boolean, boolean, boolean);6184333a9bab436893e9d501b6cdba86b0c4b0c8;true;11.16500
+apgdiff;cz.startnet.utils.pgdiff.loader.PgDumpLoader;loadDatabaseSchema(InputStream, String, boolean, boolean);df3a67acdd167f1c2af1b52bb94e8580ce323e43;true;72.47700
+apgdiff;cz.startnet.utils.pgdiff.loader.PgDumpLoader;loadDatabaseSchema(String, String, boolean, boolean);df3a67acdd167f1c2af1b52bb94e8580ce323e43;true;67.13900
+apgdiff;cz.startnet.utils.pgdiff.schema.PgTrigger;getCreationSQL();0c34f6a3ff64209f8c1e41ee6fb4e22ada7adc39;false;2.77600
+apgdiff;cz.startnet.utils.pgdiff.schema.PgTable;PgTable(String);f8a63c5f0ad47c6bbb48220fffad3a1d0889bb3b;false;2.63300
+apgdiff;cz.startnet.utils.pgdiff.PgDiffTest;parameters();f8a63c5f0ad47c6bbb48220fffad3a1d0889bb3b;not-found;0.00100
+apgdiff;cz.startnet.utils.pgdiff.parsers.CreateTableParser;parse(PgDatabase, String);f8a63c5f0ad47c6bbb48220fffad3a1d0889bb3b;true;5.87900
+apgdiff;cz.startnet.utils.pgdiff.PgDiffViews;isViewModified(PgView, PgView);b7a925d5cb97bb0f5bf28e432599e28ff5d18d8a;true;2.84200
+apgdiff;cz.startnet.utils.pgdiff.PgDiff;updateSchemas(PrintWriter, PgDiffArguments, PgDatabase, PgDatabase);f5411ae844bff589367f10ab780062ef97dd8ca5;true;9.96200
+apgdiff;cz.startnet.utils.pgdiff.parsers.CreateIndexParser;parse(PgDatabase, String);bae5ff1ab1298dcf57b4b691e2cfbe6498201d05;true;2.42700
+apgdiff;cz.startnet.utils.pgdiff.PgDiffViews;dropViews(PrintWriter, PgSchema, PgSchema);969537124e1b37732eb6bf02926238ec18dc7c3e;false;2.29600
+apgdiff;cz.startnet.utils.pgdiff.loader.PgDumpLoader;loadDatabaseSchema(InputStream, String, boolean);969537124e1b37732eb6bf02926238ec18dc7c3e;true;6.65500
+apgdiff;cz.startnet.utils.pgdiff.PgDiffFunctions;dropFunctions(PrintWriter, PgDiffArguments, PgSchema, PgSchema);969537124e1b37732eb6bf02926238ec18dc7c3e;false;2.81200
+apgdiff;cz.startnet.utils.pgdiff.PgDiffTables;dropTables(PrintWriter, PgSchema, PgSchema);969537124e1b37732eb6bf02926238ec18dc7c3e;false;2.56500
+apgdiff;cz.startnet.utils.pgdiff.PgDiffSequences;alterSequences(PrintWriter, PgDiffArguments, PgSchema, PgSchema);969537124e1b37732eb6bf02926238ec18dc7c3e;false;2.68300
+vertx-docgen;io.vertx.docgen.BaseProcessor;process(Writer, PackageElement);9134f5b15fc02c05c55070e38e6d186817873f09;false;2.11000
+vertx-docgen;io.vertx.docgen.BaseProcessor;process(Writer, PackageElement);3f7283c63d19b9677b7987b626713c40e5f95b57;false;2.39900
+swagger-parser;io.swagger.v3.parser.processors.ExternalRefProcessor;processRefToExternalSchema(String, RefFormat);7f6eb9c7325565ab99c256cf99382df83fa567c5;false;5.42100
+swagger-parser;io.swagger.v3.parser.util.ResolverFully;resolveSchema(Schema);73715caa96ec4699d6ef99da54e59497c565e6b4;false;4.73700
+swagger-parser;io.swagger.v3.parser.util.ResolverFully;aggregateSchemaCombinators(ComposedSchema, Schema, List<Schema>, Set<Object>);4560c4b4a6f91502a24f4dd1cf226a34b60d70ad;false;4.48600
+swagger-parser;io.swagger.v3.parser.util.ResolverFully;resolveSchema(Schema);4560c4b4a6f91502a24f4dd1cf226a34b60d70ad;false;4.48600
+swagger-parser;io.swagger.v3.parser.util.ResolverFully;aggregateSchemaCombinators(ComposedSchema, Schema, List<Schema>, Set<Object>);d72bb1e68c122e30d52bbbee6c7174def15f8635;false;4.47700
+swagger-parser;io.swagger.v3.parser.util.ResolverFully;aggregateSchemaCombinators(ComposedSchema, Schema, List<Schema>, Set<Object>);8a75d44b26c37cb4a9e218ed24dbd3f4781edb2a;false;4.34100
+swagger-parser;io.swagger.v3.parser.util.OpenAPIDeserializer;getParameter(ObjectNode, String, ParseResult);1f1bd6618f2a71ffdc98d7b84a2ca6ad0e803460;false;5.04500
+swagger-parser;io.swagger.v3.parser.util.OpenAPIDeserializer;getSchema(ObjectNode, String, ParseResult);3313d11137f5707d9273dffa1ab23a77f4ef1a96;true;3.88900
+swagger-parser;io.swagger.v3.parser.processors.ParameterProcessor;processParameters(List<Parameter>);3b00f2990dbc8aa4f4bddeac1926c18f943dcec4;true;4.00900
+swagger-parser;io.swagger.v3.parser.converter.SwaggerConverter;convertOauth2SecurityScheme(SecuritySchemeDefinition);ab229821bf4d0e9ff33692ca8dd67794dbe95d88;false;2.10600
+swagger-parser;io.swagger.v3.parser.util.RefUtils;computeRefFormat(String);23dc3430c2fb8874afd0a88ffbaac16b1283dbeb;true;3.49600
+swagger-parser;io.swagger.v3.parser.converter.SwaggerConverter;convert(SwaggerDeserializationResult);23dc3430c2fb8874afd0a88ffbaac16b1283dbeb;false;2.23600
+swagger-parser;io.swagger.v3.parser.converter.SwaggerConverter;convert(io.swagger.models.Model);4296b62a157c462094cea9ae7e75ac2fea74a47e;false;1.90900
+swagger-parser;io.swagger.parser.processors.ExternalRefProcessor;processRefToExternalDefinition(String, RefFormat);9bd3910e741bbf9612deed248dfe61c51afa41b6;true;2.93600
+swagger-parser;io.swagger.parser.SwaggerCompatConverter;convert(ResourceListing, List<ApiDeclaration>);beeb999eea26cd9334a016bab9ee76915defa940;false;2.27000
+swagger-parser;io.swagger.parser.SwaggerCompatConverter;convertOperation(String, io.swagger.models.apideclaration.Operation);beeb999eea26cd9334a016bab9ee76915defa940;false;2.10800
+swagger-parser;io.swagger.parser.util.RemoteUrl;urlToString(String, List<AuthorizationValue>);c866c38ac62613d533cdb614ed305dcf6d14b2eb;false;2.07600
+twilio-java;com.twilio.sdk.resource.instance.BasicRequestTester;init();6b9f7f74bd272b04a3bd2964fc518c13eeb30fd0;not-found;0.00300
+swagger-codegen;io.swagger.client.api.StoreApi;getOrderById(String);947935f3d9d27f942ce540500ca58c3b13891909;not-found;0.04600
+swagger-codegen;io.swagger.client.api.UserApi;deleteUser(String);622b5c179ad066b7504b07385f9813d00859c848;not-found;0.03400
+netconf-java;net.juniper.netconf.NetconfSessionTest;GIVEN_executeRPC_WHEN_lldpRequest_THEN_correctResponse();5720d527507c33e5fede2e542dc3d892eb780b5d;not-found;0.00000
+jsonld-java;com.github.jsonldjava.core.Context;parse(Object, List<String>, boolean);a88eacf0a94efb50e0e81a1d3faab4a9638d3ff1;false;19.64200
+gs-core;org.graphstream.ui.layout.springbox.implementations.SpringBoxNodeParticle;repulsionN2(Vector3);99ccebee6bc0cef9bd01204a5334ddcccfbb4d16;true;3.93600
+gs-core;org.graphstream.ui.layout.springbox.implementations.SpringBoxNodeParticle;recurseRepulsion(Cell, Vector3);99ccebee6bc0cef9bd01204a5334ddcccfbb4d16;true;4.40500
+gs-core;org.graphstream.ui.layout.springbox.implementations.SpringBoxNodeParticle;repulsionN2(Vector3);f54844786d269c3151cc7baf634bcd304b572081;false;3.95000
+gs-core;org.graphstream.ui.layout.springbox.implementations.SpringBoxNodeParticle;recurseRepulsion(Cell, Vector3);f54844786d269c3151cc7baf634bcd304b572081;false;4.38400
+documents4j;com.documents4j.builder.ConverterServerBuilder;build();8c6d50679c88443efe6c84b7c06821c8895b81d0;false;1.91800
+jsonld-java;com.github.jsonldjava.core.JsonLdProcessor;frame(Object, Object, JsonLdOptions);67ce1f47c7e559fb636cf7c5a1cd2d5950990156;true;5.58100
+omnisecurity;org.omnifaces.security.jaspic.factory.SamAutoRegistrationListener;contextInitialized(ServletContextEvent);709bf9a6157b4b5ff8defca103c94811a87c0c04;true;2.15600
+omnifaces;org.omnifaces.cdi.viewscope.ViewScopeManager;preDestroyView();712021203d8249563f2ce33fa8fd35b07586e877;false;6.33600
+burst;com.squareup.burst.BurstAndroid;explodeSuite(TestSuite, TestSuite);08629234e54b58a5477fe85f3cb7ddc115e343db;false;1.66300
+omnifaces;org.omnifaces.converter.GenericEnumConverter;getAsString(FacesContext, UIComponent, Object);8c849f95032fb15f97262e2ce77e3785c95806ae;false;6.02100
+omnifaces;org.omnifaces.resourcehandler.PWAResourceHandler;decorateResource(Resource, String, String);4a0b5c6115e81e4d5d7ce5eb957a178316aa7ac4;false;7.56800
+asadmin;org.n0pe.mojo.asadmin.DeployMojo;getAsCommandList();6fb154963dfd021025038412792ef1dcc5399017;false;1.84600
+osm-lib;com.conveyal.osmlib.VanillaExtract;service(Request, Response);8796ed51f2727a30b1ccff02c8aeaa6331ec318c;false;2.90900
+firefly;com.firefly.net.tcp.secure.AbstractSecureSession;read(ByteBuffer);7c207900f6cb1bb9eca2ab0d127b42442231b0fd;true;4.35600
+graphhopper;com.graphhopper.routing.PathTest;testCalcInstructionsRoundaboutClockwise();ef7551194a3e2b9239bee1b661a7fbf3835c523a;false;4.27100
+graphhopper;com.graphhopper.GraphHopper;load(String);e75674036ef293242027d66366ff74826bc9805a;true;4.86500
+swagger-codegen;io.swagger.client.api.StoreApi;getOrderById(String);622b5c179ad066b7504b07385f9813d00859c848;not-found;0.04600
+pmd;net.sourceforge.pmd.lang.java.rule.codestyle.UnnecessaryFullyQualifiedNameRule;isAvoidingConflict(TypeNode, String, ASTImportDeclaration);da28648b6463b93275cf434339c96faff017cac6;false;10.45000
+pmd;net.sourceforge.pmd.cpd.GUI;LANGUAGE_SETS;fa45557845866575f2404d601b62ee371807e8fc;false;6.25400
+android-ndk-maven-plugin;com.simpligility.maven.plugins.androidndk.phase05compile.NdkBuildMojo;processCompiledArtifacts(String, File);0432151e0e8138a983c601b2819b1545c8ff0385;false;2.12600
+schema-repo;org.schemarepo.server.RepositoryServer;RepositoryServer(Properties);f85f90da3d8305f4cd40870cf736123b49ae379f;true;9.72900
+schema-repo;org.schemarepo.config.Config;static block;f85f90da3d8305f4cd40870cf736123b49ae379f;true;8.88100
+tcl-regex-java;com.basistech.tclre.ColorMap;subrange(char, char, State, State);a59ac26009d50c6624d69b821bd67b523a7e9d03;false;2.53800
+clue;com.senseidb.clue.commands.TermsCommand;execute(String[], PrintStream);a0e4c4affb26558cd60574073c39681defdcf954;false;23.46000
+clue;com.senseidb.clue.ClueContext;ClueContext(Directory, ClueConfiguration, boolean);a0e4c4affb26558cd60574073c39681defdcf954;false;25.34100
+jeromq;zmq.io.mechanism.curve.CurveClientMechanism;decode(Msg);f589efe70baa47650bc321e5e240d51d4ae79ba2;false;5.88700
+jeromq;zmq.io.mechanism.curve.CurveServerMechanism;decode(Msg);f589efe70baa47650bc321e5e240d51d4ae79ba2;false;4.92700
+eventstore2;no.ks.eventstore2.eventstore.EventStore;onReceive(Object);5b3fce76f05ee1f9763890e187acd48d3ee86b6d;false;2.67900
+jjwt;io.jsonwebtoken.impl.DefaultJwtParser;parse(String);ff932e9838a9961f4084a51323092559e1a1ad25;false;2.57000
+jjwt;io.jsonwebtoken.impl.DefaultJwtParser;parse(String);e55ea34e951f8bbc8be50a49b166949a4d1e4873;false;2.92400
+xdi2;xdi2.messaging.target.contributor.impl.MessageResultContributor;executeGetOnRelationStatement(XDIAddress[], XDIAddress, XDIStatement, GetOperation, MessageResult, ExecutionContext);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;3.36700
+xdi2;xdi2.core.features.nodetypes.XdiAttributeCollection;isValidXDIArc(XDIArc);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;4.75100
+xdi2;xdi2.core.io.writers.XDIJSONWriter;writeInternal(Graph, JsonObject);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;4.62900
+xdi2;xdi2.core.features.nodetypes.XdiAttributeSingleton;isValidXDIArc(XDIArc);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;5.42600
+xdi2;xdi2.core.features.linkcontracts.template.LinkContractTemplate;findLinkContractTemplate(Graph, XDIAddress, boolean);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;5.19100
+xdi2;xdi2.core.features.nodetypes.XdiAbstractMemberUnordered;isValidXDIArc(XDIArc, Class<?extendsXdiCollection<?,?,?,?,?,?>>);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;5.52600
+xdi2;xdi2.core.io.writers.XDIJSONPARSEWriter;write(Graph, Writer);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;5.27800
+xdi2;xdi2.core.io.writers.XDIJSONPARSEWriter;makeGom(XDIArc);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;5.75200
+xdi2;xdi2.core.features.nodetypes.XdiPeerRoot;getLiteralOfPeerRootXDIArc(XDIArc);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;4.93400
+xdi2;xdi2.core.impl.AbstractRelation;follow();eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;4.99800
+xdi2;xdi2.tests.AllTests;suite();eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;2.88900
+xdi2;xdi2.messaging.MessageEnvelope;fromOperationXDIAddressAndTargetXDIAddress(XDIAddress, XDIAddress);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;3.40900
+xdi2;xdi2.core.syntax.CloudName;isValid(XDIAddress);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;true;5.84200
+xdi2;xdi2.webtools.util.MessageUuidShorteningCopyStrategy;replaceContextNode(ContextNode);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;not-found;0.01000
+xdi2;xdi2.core.features.signatures.KeyPairSignature;validate(PublicKey);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;4.76800
+xdi2;xdi2.core.features.signatures.KeyPairSignature;sign(PrivateKey);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;4.73800
+xdi2;xdi2.core.util.XRI2Util;cloudNumberToINumber(CloudNumber);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;true;4.81000
+xdi2;xdi2.core.impl.AbstractStatement;isImplied();eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;4.57100
+xdi2;xdi2.core.impl.AbstractContextNode;setContextNodeSetInnerRoot(XDIArc, ContextNode);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;5.53000
+xdi2;xdi2.core.impl.AbstractContextNode;setContextNodeCheckValid(XDIArc);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;5.81300
+xdi2;xdi2.core.features.nodetypes.XdiEntitySingleton;isValidXDIArc(XDIArc);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;4.57800
+xdi2;xdi2.core.features.signatures.SymmetricKeySignature;validate(SecretKey);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;5.77200
+xdi2;xdi2.core.features.signatures.SymmetricKeySignature;sign(SecretKey);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;5.09200
+xdi2;xdi2.core.io.writers.XDIDisplayWriter;writeStatement(BufferedWriter, XDIStatement);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;true;5.13500
+xdi2;xdi2.core.io.writers.XDIDisplayWriter;write(Graph, BufferedWriter);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;4.87000
+xdi2;xdi2.core.features.nodetypes.XdiAbstractMemberOrdered;isValidXDIArc(XDIArc, Class<?extendsXdiCollection<?,?,?,?,?,?>>);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;5.65600
+xdi2;xdi2.core.features.nodetypes.XdiEntityCollection;isValidXDIArc(XDIArc);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;false;4.73500
+xdi2;xdi2.core.syntax.CloudNumber;isValid(XDIAddress);eb0bebb706227aea2ddd7fbdb01fd0d5d7c77038;true;5.69800
+xdi2;xdi2.webtools.messenger.XDIMessenger;doPost(HttpServletRequest, HttpServletResponse);53f585d42362bc3edc3b9cb1fb94f00ce0863d42;not-found;0.00800
+xdi2;xdi2.webtools.converter.XDIConverter;doPost(HttpServletRequest, HttpServletResponse);53f585d42362bc3edc3b9cb1fb94f00ce0863d42;not-found;0.00400
+xdi2;xdi2.webtools.discoverer.XDIDiscoverer;doPost(HttpServletRequest, HttpServletResponse);53f585d42362bc3edc3b9cb1fb94f00ce0863d42;not-found;0.00200
+xdi2;xdi2.webtools.signer.XDISigner;doPost(HttpServletRequest, HttpServletResponse);53f585d42362bc3edc3b9cb1fb94f00ce0863d42;not-found;0.00300
+xdi2;xdi2.webtools.localmessenger.XDILocalMessenger;doPost(HttpServletRequest, HttpServletResponse);53f585d42362bc3edc3b9cb1fb94f00ce0863d42;not-found;0.00200
+xdi2;xdi2.discovery.XDIDiscoveryResult;initFromAuthorityMessageResult(MessageEnvelope, MessageResult, XDI3Segment[]);7618906e7fe1505c0bfe64cff226298032c7e49f;true;1.69900
+xdi2;xdi2.messaging.target.interceptor.impl.authentication.signature.GraphSignatureAuthenticator;getPublicKey(Message);296b5a5c0c778dc64193994e5f2399facbe262b2;false;2.24700
+xdi2;xdi2.tests.core.graph.AbstractGraphTest;testRoot();316f32a4dd6f00d34f4481d57bfb3ce04e8cc58a;not-found;0.01100
+jgrapht;org.jgrapht.generate.GnpRandomGraphGenerator;generateGraph(Graph<V,E>, VertexFactory<V>, Map<String,V>);62628bcbc4bd44eed87539b6e804a189db3e299c;true;2.38600
+jgrapht;org.jgrapht.generate.GnpRandomGraphGenerator;GnpRandomGraphGenerator(int, double, Random, boolean);62628bcbc4bd44eed87539b6e804a189db3e299c;false;2.03700
+jgrapht;org.jgrapht.generate.GnmRandomGraphGenerator;generateGraph(Graph<V,E>, VertexFactory<V>, Map<String,V>);62628bcbc4bd44eed87539b6e804a189db3e299c;false;1.84000
+jgrapht;org.jgrapht.alg.vertexcover.GreedyVCImpl;getVertexCover(Graph<V,E>, Map<V,Double>);a1da34c8f43a243454808270f60c9a223086a167;true;2.55700
+jgrapht;org.jgrapht.alg.vertexcover.RecursiveExactVCImpl;getVertexCover(Graph<V,E>, Map<V,Double>);a1da34c8f43a243454808270f60c9a223086a167;true;2.69100
+jgrapht;org.jgrapht.generate.HyperCubeGraphGenerator;generateGraph(Graph<V,E>, VertexFactory<V>, Map<String,V>);f1961d7d4809ba4ac3dc8ab59f88d269d1ebdec0;false;1.69400
+jgrapht;org.jgrapht.alg.spanning.GreedyMultiplicativeSpanner;UnweightedSpannerAlgorithm();f1961d7d4809ba4ac3dc8ab59f88d269d1ebdec0;false;2.04600
+jgrapht;org.jgrapht.alg.cycle.DirectedSimpleCyclesTest;testAlgorithm(DirectedSimpleCycles<Integer,DefaultEdge>);611d20098454925fcc0fdfff14425df34abad8d5;not-found;0.00500
+jgrapht;org.jgrapht.io.Graph6Sparse6Exporter;writeSparse6(Graph<V,E>, List<V>);db8652113029b408d6729f4fa54455ffe2b0182d;false;2.23800
+xdi2;xdi2.core.features.linkcontracts.PolicyExpressionComponent;addLiteralExpression(String);ff33f2c6f639ede8c5179456d23bc695b929b12a;false;3.88300
+jgrapht;org.jgrapht.traverse.CrossComponentIterator;hasNext();eeb3686eb78c03308977f010b359938ed00d8e52;true;2.83200
+pending;net.ttsui.junit.rules.pending.PendingRuleSemanticsTest;failingTestAnnotatedWithPendingImplemenationShouldPass();65bd3e29c6d8148eb1704c6713b726f4cf043854;not-found;0.00000
+ob1k;com.outbrain.ob1k.server.netty.NettyServer;initChannel(SocketChannel);8f656032bd986f2ff0e91cbd73a0904062415c31;false;2.91800
+ob1k;com.outbrain.ob1k.server.netty.NettyServer;NettyServer(int, ServiceRegistry, StaticPathResolver, ChannelGroup, String, String, boolean, long, boolean, MetricFactory, int, long);8f656032bd986f2ff0e91cbd73a0904062415c31;false;2.95000
+ob1k;com.outbrain.ob1k.server.builder.AbstractServerBuilder;build();00245f85140ce9d6c3cd084196d717410526a580;false;2.98500
+tabula-java;technology.tabula.CommandLineApp;buildOptions();4aa9568a70b6748d28491648e13598e5cc097c3f;false;2.86400
+tabula-java;technology.tabula.CommandLineApp;buildOptions();a15a61879df1b519548f2368535df57ce3dc1297;false;3.24400
+ob1k;com.outbrain.ob1k.consul.HealthyTargetsList;pollForTargetsUpdates(long);821f116c59b62c50d5f7fc3a99edcb5a83b02f56;true;2.22000
+fastweixin;com.github.sd4324530.fastweixin.servlet.QYWeixinSupport;processRequest(HttpServletRequest);0519f3179f85a6f22a87251442e898f49ad53d7c;true;3.97700
+fastweixin;com.github.sd4324530.fastweixin.servlet.WeixinSupport;processRequest(HttpServletRequest);53b5138ff7f9f52933a2c6b0c0d2cb102f503b68;true;4.66500
+guvna;com.positiverobot.guvna.StateMachineTestCase;testLeaveAction();34cd63519389f9e2fc0f1a8ec79f770a764e5e69;not-found;0.00000
+guvna;com.positiverobot.guvna.StateMachineTestCase;testEntryAction();34cd63519389f9e2fc0f1a8ec79f770a764e5e69;not-found;0.00000
+jmeter-maven-plugin;com.lazerycode.jmeter.testrunner.TestManager;executeSingleTest(File, JMeterArgumentsArray);efc1712ae3cf864ff9e552c855f79ec5617dba34;false;2.25900
+jmeter-maven-plugin;com.lazerycode.jmeter.JMeterMojo;execute();efc1712ae3cf864ff9e552c855f79ec5617dba34;false;2.69100
+splunk-library-javalogging;com.splunk.logging.HttpEventCollectorSender;HttpEventCollectorSender(String, String, String, String, long, long, long, String, Map<String,String>);e1c8b58266f1b020779e5a80c78d5589a2565970;false;2.41500
+splunk-library-javalogging;com.splunk.logging.HttpEventCollectorSender;HttpEventCollectorSender(String, String, String, String, long, long, long, String, Map<String,String>);f80bc59f417077de739ae23c10be9b1658219bed;false;2.60000
+splunk-library-javalogging;com.splunk.logging.serialization.HecJsonSerializer;serialize(HttpEventCollectorEventInfo);f80bc59f417077de739ae23c10be9b1658219bed;false;2.58000
+splunk-library-javalogging;com.splunk.logging.HttpEventCollectorLoggingHandler;HttpEventCollectorLoggingHandler();f80bc59f417077de739ae23c10be9b1658219bed;true;3.31600
+splunk-library-javalogging;com.splunk.logging.HttpEventCollectorLogbackAppender;start();f80bc59f417077de739ae23c10be9b1658219bed;false;2.55000
+gitflow-maven-plugin;com.amashchenko.maven.plugin.gitflow.GitFlowHotfixFinishMojo;execute();b92cad2118538f4ee7e545fb86c0a40e5337f589;false;2.33900
+splunk-library-javalogging;com.splunk.logging.HttpEventCollectorSender;HttpEventCollectorSender(String, String, String, String, long, long, long, String, Map<String,String>);db431b0cb891401264f6659e4eeaeae9eb0a1db0;false;2.58700
+splunk-library-javalogging;com.splunk.logging.HttpEventCollectorLoggingHandler;HttpEventCollectorLoggingHandler();db431b0cb891401264f6659e4eeaeae9eb0a1db0;false;3.33500
+structr;org.structr.web.servlet.UploadServlet;doPost(HttpServletRequest, HttpServletResponse);b8d40c710aa6ef0edf590b1da2f16dd75ec64bc1;false;9.21600
+structr;org.structr.test.core.script.ScriptingTest;testAdvancedFindForRemoteProperties();bde6117226d15672abc40c433fc31dc50e138ca0;not-found;0.11100
+structr;org.structr.core.script.Scripting;evaluateJavascript(ActionContext, GraphObject, Snippet);970ffd3236d38988dc90f3fd659acb693e3d8740;true;5.19700
+pmd;net.sourceforge.pmd.LanguageVersionTest;data();1187a9a97770741a3cd33aaed87bc599adfeff3f;not-found;0.02400
+nar-maven-plugin;com.github.maven_nar.NarCompileMojo;createLibrary(Project, Library);4b92031b61e8d6dae2184dbf0a5954152933086b;false;7.18600
+nar-maven-plugin;com.github.maven_nar.cpptasks.CompilerEnum;compilers;f094671078becaaf84107cb3859f4a41a66be2af;false;6.55600
+nar-maven-plugin;com.github.maven_nar.Msvc;configureCCTask(CCTask);436a5cc07ad6d54972e719e8f23d0265593632e2;true;4.71400
+nar-maven-plugin;com.github.maven_nar.cpptasks.CCTask;execute();2a22efb75d74ff6c6b87a26f4f00d2a790fad7ff;false;5.54600
+jstest-maven-plugin;net.awired.jstest.mojo.TestMojo;run();1842e580665903b7192e06575679fb39870601b5;false;1.97300
+assertj-assertions-generator;org.assertj.assertions.generator.BaseAssertionGenerator;BaseAssertionGenerator(Template, Template, Template, Template, Template, Template, Template, Template, Template, Template, Template, Template);e9c59be58d0f5f8598375f4031f5f06ac0f1cdcc;true;1.76800
+docker-java;com.kpelykh.docker.client.test.DockerClientTest;testDiff();4ac45cd93ef94037331fee091ec6f004cf56ead8;false;1.94300
+docker-java;com.kpelykh.docker.client.DockerClient;DockerClient(String);62843f36d4563fb512f037e0b8b7418aa0a33765;true;1.80400
+assertj-assertions-generator;org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter;getTypeDescription(Class<?>, Method);3bc2b65080edcb2c78376ccc90f9245e913f14aa;false;2.00500
+assertj-assertions-generator;org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter;getNeededImportsFor(Class<?>);3bc2b65080edcb2c78376ccc90f9245e913f14aa;false;1.99900
+assertj-assertions-generator;org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverterTest;should_build_player_class_description();90ea9aa591a04829f67fe32d1f2f97fa3ca20064;not-found;0.00100
+assertj-assertions-generator;org.assertj.assertions.generator.BaseAssertionGenerator;assertionContentFor(GetterDescription);90ea9aa591a04829f67fe32d1f2f97fa3ca20064;true;1.75000
+assertj-assertions-generator;org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter;getterDescriptionsOf(Class<?>);90ea9aa591a04829f67fe32d1f2f97fa3ca20064;true;2.20100
+assertj-assertions-generator;org.assertj.assertions.generator.description.converter.ClassToClassDescriptionConverter;getNeededImportsFor(Class<?>);90ea9aa591a04829f67fe32d1f2f97fa3ca20064;true;1.97200

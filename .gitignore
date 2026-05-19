@@ -14,5 +14,4 @@ visited_methods.txt
 conflicts_log.txt
 .DS_Store
 *.pyc
-/oa-analysis-report/venv/
-oa-analysis-report
+/OA-analysis-report/venv
