@@ -57,3 +57,38 @@ CONFLICT_TYPES_BINS = 4
 DEFAULT_HIST_BINS = 30
 DEFAULT_DEPTH = 5
 MAX_DEPTH = 14
+
+DEPTH_GROUP_LABELS = [f"{lo}-{hi}" for lo, hi in DEPTH_GROUPS]
+
+TIME_GROUPS = {
+    "0-5":   (0,   5),
+    "5-10":  (5,   10),
+    "10-30": (10,  30),
+    "30-60": (30,  60),
+    "60-120": (60, 120),
+    "120+":  (120, float("inf")),
+}
+
+TIME_GROUPS_WITH_TIMEOUTS = {
+    "0-5":     (0,   5),
+    "5-10":    (5,   10),
+    "10-30":   (10,  30),
+    "30-60":   (30,  60),
+    "60-120":  (60,  120),
+    "120-300": (120, 300),
+    "timeouts": None,
+}
+
+CPU_BUCKETS = [
+    ("0-30%",   (0,  30)),
+    ("30-50%",  (30, 50)),
+    ("50-70%",  (50, 70)),
+    ("70-100%", (70, float("inf"))),
+]
+
+MEM_BUCKETS = [
+    ("0-4GB",  (0,  4)),
+    ("4-8GB",  (4,  8)),
+    ("8-12GB", (8,  12)),
+    ("12+GB",  (12, float("inf"))),
+]
