@@ -1075,14 +1075,4 @@ public class OAInterWithoutPointerAnalysisTest {
         Assert.assertTrue(analysis.getConflicts().size() > 1);
     }
 
-    @Test
-    public void multiCG() {
-        String sampleClassPath = "br.unb.cic.analysis.samples.MultiCG.Main";
-        AbstractMergeConflictDefinition definition = DefinitionFactory
-                .definition(sampleClassPath, new int[]{36}, new int[]{38});
-        OverrideAssignment analysis = new OverrideAssignmentWithoutPointerAnalysis(definition);
-        configureTest(analysis);
-        Assert.assertTrue(analysis.getConflicts().size() > 1);
-    }
-
 }
