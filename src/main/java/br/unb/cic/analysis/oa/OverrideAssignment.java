@@ -366,13 +366,16 @@ public abstract class OverrideAssignment extends SceneTransformer implements Abs
     }
 
     private boolean shouldSkip(SootMethod sootMethod) {
-        boolean hasRelativeBeenTraversed = this.traversedMethodsWrapper.hasRelativeBeenTraversed(sootMethod);
         boolean isSizeGreaterThanDepthLimit = this.traversedMethodsWrapper.size() >= this.depthLimit;
+        if (isSizeGreaterThanDepthLimit) return true;
+
         boolean isPhantom = sootMethod.isPhantom();
         boolean isMethodInObjectClass = isMethodDefinedInObject(sootMethod);
-        // boolean isJavaLibraryMethod = sootMethod.isJavaLibraryMethod();
 
-        return hasRelativeBeenTraversed || isSizeGreaterThanDepthLimit || isPhantom || isMethodInObjectClass;
+        if (isPhantom || isMethodInObjectClass) return true;
+
+        boolean hasRelativeBeenTraversed = this.traversedMethodsWrapper.hasRelativeBeenTraversed(sootMethod);
+        return hasRelativeBeenTraversed;
     }
 
     private boolean isMethodDefinedInObject(SootMethod sootMethod) {

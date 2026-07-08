@@ -11,6 +11,7 @@ public class TraversedMethodsWrapper<E> {
 
     private final List<E> traversedMethods;
     private final Map<String, Integer> allVisitedMethodSignatures = new LinkedHashMap<>();
+    private final Map<String, Set<SootClass>> ancestorCache = new HashMap<>();
     private int visitedMethodsCount = 0;
 
     private int missedAncestorEvents = 0;
@@ -103,6 +104,7 @@ public class TraversedMethodsWrapper<E> {
     }
 
     public boolean hasRelativeBeenTraversed(SootMethod method) {
+        if (traversedMethods.contains(method)) return true;
         return hasTraversedMethodWithCommonSuperclassAndSignature(method);
     }
 
@@ -124,12 +126,21 @@ public class TraversedMethodsWrapper<E> {
     }
 
     private Set<SootClass> getAncestors(SootMethod method) {
+        String cacheKey = method.getDeclaringClass().getName() + "#" + method.getSubSignature();
+        Set<SootClass> cached = ancestorCache.get(cacheKey);
+        if (cached != null) {
+            return cached;
+        }
+
         Set<SootClass> ancestors = new HashSet<>();
         SootClass sootClass = method.getDeclaringClass();
         ancestors.add(sootClass);
         getSuperclasses(sootClass, ancestors);
         getInterfaceAncestors(ancestors);
-        return getAncestorsWithMethod(method, ancestors);
+        Set<SootClass> result = getAncestorsWithMethod(method, ancestors);
+
+        ancestorCache.put(cacheKey, result);
+        return result;
     }
 
     private void getSuperclasses(SootClass sootClass, Set<SootClass> ancestors) {
