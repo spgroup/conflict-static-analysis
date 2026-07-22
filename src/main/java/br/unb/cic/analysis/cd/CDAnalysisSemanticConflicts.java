@@ -4,6 +4,9 @@ import br.ufpe.cin.soot.analysis.jimple.JCD;
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.StatementsUtil;
 import br.unb.cic.soot.graph.*;
+import br.unb.cic.soot.svfa.CG;
+import br.unb.cic.soot.svfa.CHA$;
+import br.unb.cic.soot.svfa.SPARK$;
 import scala.collection.JavaConverters;
 import soot.SootMethod;
 import soot.Unit;
@@ -20,6 +23,8 @@ public abstract class CDAnalysisSemanticConflicts extends JCD {
     private String cp;
 
     private StatementsUtil statementsUtils;
+    private CG callGraph = SPARK$.MODULE$;
+    private AbstractMergeConflictDefinition definition;
 
     /**
      * CDAnalysis constructor
@@ -84,21 +89,29 @@ public abstract class CDAnalysisSemanticConflicts extends JCD {
     }
 
     protected boolean isSource(Unit unit) {
-        return this.statementsUtils.getDefinition().getSourceStatements()
-                .stream()
-                .map(stmt -> stmt.getUnit())
-                .anyMatch(u -> u.equals(unit));
+        return this.statementsUtils.getDefinition().isSourceStatement(unit);
     }
 
     protected boolean isSink(Unit unit) {
-        return this.statementsUtils.getDefinition().getSinkStatements()
-                .stream()
-                .map(stmt -> stmt.getUnit())
-                .anyMatch(u -> u.equals(unit));
+        return this.statementsUtils.getDefinition().isSinkStatement(unit);
     }
 
     @Override
     public final boolean isFieldSensitiveAnalysis() {
         return true;
     }
+
+    @Override
+    public CG callGraph() {
+        return this.callGraph;
+    }
+
+    public void setCallGraph(String callGraph){
+        if (callGraph.toUpperCase().contains("SPARK")){
+            this.callGraph = SPARK$.MODULE$;
+        }else{
+            this.callGraph = CHA$.MODULE$;
+        }
+    }
+
 }

@@ -23,7 +23,7 @@
 		<dependency>
 			<groupId>org.soot-oss</groupId>
 			<artifactId>soot</artifactId>
-			<version>4.5.1</version>
+			<version>4.5.0</version>
 		</dependency>
 
 		<dependency>
@@ -35,13 +35,13 @@
 		<dependency>
 			<groupId>br.ufpe.cin</groupId>
 			<artifactId>pdg-sdg_2.12</artifactId>
-			<version>0.4.39</version>
+			<version>0.7.3</version>
 		</dependency>
 
 		<dependency>
 			<groupId>br.unb.cic</groupId>
 			<artifactId>svfa-scala_2.12</artifactId>
-            <version>0.5.11</version>
+            <version>0.5.16</version>
 		</dependency>
 
 		<dependency>
@@ -63,12 +63,17 @@
 		<dependency>
 			<groupId>org.eclipse.jgit</groupId>
 			<artifactId>org.eclipse.jgit</artifactId>
-			<version>5.13.3.202401111512-r</version>
+            <version>5.13.3.202401111512-r</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
 			<version>1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20240303</version>
 		</dependency>
 	</dependencies>
 	<build>

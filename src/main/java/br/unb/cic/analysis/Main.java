@@ -10,8 +10,11 @@ import br.unb.cic.analysis.df.pessimistic.PessimisticTaintedAnalysis;
 import br.unb.cic.analysis.dfp.DFPAnalysisSemanticConflicts;
 import br.unb.cic.analysis.dfp.DFPInterProcedural;
 import br.unb.cic.analysis.dfp.DFPIntraProcedural;
+import br.unb.cic.analysis.io.AnalysisCsvExporter;
 import br.unb.cic.analysis.io.DefaultReader;
 import br.unb.cic.analysis.io.MergeConflictReader;
+import br.unb.cic.analysis.io.PANotResolveCsvExporter;
+import br.unb.cic.analysis.model.AnalysisRecord;
 import br.unb.cic.analysis.model.Conflict;
 import br.unb.cic.analysis.model.Statement;
 import br.unb.cic.analysis.oa.OverrideAssignment;
@@ -29,11 +32,9 @@ import br.unb.cic.diffclass.DiffClass;
 import com.google.common.base.Stopwatch;
 import org.apache.commons.cli.*;
 import scala.collection.JavaConverters;
-import soot.Body;
-import soot.BodyTransformer;
-import soot.PackManager;
-import soot.Transform;
+import soot.*;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -57,6 +58,10 @@ public class Main {
     private List<String> JSONconflicts = new ArrayList<>();
     private ReachDefinitionAnalysis analysis;
 
+    // Guards against double-export when shutdown hook fires after normal completion
+    private static volatile boolean resultsExported = false;
+    private static final Object exportLock = new Object();
+
     public static void main(String args[]) {
         Main m = new Main();
         try {
@@ -69,6 +74,25 @@ public class Main {
             if (cmd.hasOption("mode")) {
                 mode = cmd.getOptionValue("mode");
             }
+
+            // Register a shutdown hook so that partial results are written to out.json even
+            // when
+            // the process is terminated early (e.g., by the mining framework timeout via
+            // SIGTERM on Unix).
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                synchronized (exportLock) {
+                    if (!resultsExported) {
+                        System.err.println("Shutdown detected. Exporting partial results to out.json...");
+                        try {
+                            m.exportResults();
+                        } catch (Exception e) {
+                            System.err.println("Error exporting partial results: " + e.getMessage());
+                        }
+                        resultsExported = true;
+                    }
+                }
+            }));
+
             if (cmd.hasOption("repo") && cmd.hasOption("commit")) {
                 DiffClass module = new DiffClass();
                 module.getGitRepository(cmd.getOptionValue("repo"));
@@ -77,9 +101,18 @@ public class Main {
             } else {
                 m.loadDefinition(cmd.getOptionValue("csv"));
             }
+            
+            int depthLimit = Integer.parseInt(cmd.getOptionValue("depthLimit", "5"));
+            m.definition.setDepthLimit(depthLimit);
+
             m.runAnalysis(mode, m.parseClassPath(cmd.getOptionValue("cp")));
 
-            m.exportResults();
+            synchronized (exportLock) {
+                if (!resultsExported) {
+                    m.exportResults();
+                    resultsExported = true;
+                }
+            }
 
         } catch (ParseException e) {
             System.out.println("Error: " + e.getMessage());
@@ -87,6 +120,19 @@ public class Main {
             formatter.printHelp("java Main", m.options);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void exportAnalysisRecord(long time) {
+        try {
+            AnalysisRecord record = AnalysisRecord.getInstance();
+            record.setAnalysisExecutionTimeMs(time);
+            new AnalysisCsvExporter().export(record, "AnalysisRecords.csv");
+            System.out.println("AnalysisRecords.csv generated successfully.");
+        } catch (IllegalStateException e) {
+            System.err.println("AnalysisRecord not initialized. CSV not generated.");
+        } catch (Exception e) {
+            System.err.println("Error generating AnalysisRecords.csv: " + e.getMessage());
         }
     }
 
@@ -131,44 +177,33 @@ public class Main {
         // write results to out.json
         final String outJSON = "out.json";
 
-        // get the previous content
-        String prevContent;
+        org.json.JSONArray allScenarios;
         try {
-            prevContent = new String(Files.readAllBytes(Paths.get(outJSON)));
+            String prevContent = new String(Files.readAllBytes(Paths.get(outJSON)));
+            allScenarios = new org.json.JSONArray(prevContent);
         } catch (Exception e) {
-            prevContent = "[\n";
+            allScenarios = new org.json.JSONArray();
             System.out.println("Error getting the previous content of the JSON file " + e.getMessage());
         }
-        StringBuilder results = new StringBuilder(prevContent);
 
         if (!JSONconflicts.isEmpty()) {
-            // remove the last character if it is a closing bracket
-            if (results.toString().trim().endsWith("]")) {
-                int idx = results.lastIndexOf("]");
-                results.replace(idx, idx + 1, ",\n");
-            }
-
-            // add the new content
-            JSONconflicts.forEach(c -> {
+            org.json.JSONArray scenarioConflicts = new org.json.JSONArray();
+            for (String c : JSONconflicts) {
                 try {
-                    results.append(c);
-                    results.append(JSONconflicts.indexOf(c) == JSONconflicts.size() - 1 ? "\n" : ",\n");
+                    scenarioConflicts.put(new org.json.JSONObject(c));
                 } catch (Exception e) {
                     System.out.println("error exporting the results " + e.getMessage());
                 }
-            });
-            results.append("\n]");
+            }
+            org.json.JSONObject scenario = new org.json.JSONObject();
+            scenario.put("conflicts", scenarioConflicts);
+            allScenarios.put(scenario);
         }
 
-        // write the new content
-        final FileWriter fwJSON = new FileWriter(outJSON);
-        String[] lines = results.toString().split("\n");
-        for (String line : lines) {
-            fwJSON.write(line + "\n");
+        try (FileWriter fwJSON = new FileWriter(outJSON)) {
+            fwJSON.write(allScenarios.toString(2));
         }
-        fwJSON.close();
         System.out.println(" JSON Results exported to " + outJSON);
-
         System.out.println("----------------------------");
     }
 
@@ -183,7 +218,8 @@ public class Main {
                 .build();
 
         Option analysisOption = Option.builder("mode").argName("mode")
-                .hasArg().desc("analysis mode [data-flow, tainted, reachability, svfa-{interprocedural | intraprocedural}" +
+                .hasArg()
+                .desc("analysis mode [data-flow, tainted, reachability, svfa-{interprocedural | intraprocedural}" +
                         ", svfa-confluence-{interprocedural | intraprocedural}, pessimistic-dataflow]")
                 .build();
 
@@ -195,7 +231,8 @@ public class Main {
                 .hasArg().desc("the commit merge to analysis")
                 .build();
 
-        Option verboseOption = Option.builder("verbose").argName("verbose").hasArg().desc("run in the verbose mode").build();
+        Option verboseOption = Option.builder("verbose").argName("verbose").hasArg().desc("run in the verbose mode")
+                .build();
 
         Option recursiveOption = Option.builder("recursive").argName("recursive").hasArg()
                 .desc("run using the recursive strategy for mapping sources and sinks")
@@ -213,8 +250,10 @@ public class Main {
         Option entrypointsOption = Option.builder("entrypoints").argName("entrypoints").hasArg()
                 .desc("entrypoints")
                 .build();
-        Option oaPointerAnalysisOption = Option.builder("oaPointerAnalysis").argName("oaPointerAnalysis").hasArg()
-                .desc("enable pointer analysis in overloading assignment")
+
+        Option callGraphOption = Option.builder("cg").argName("cg")
+                .hasArg()
+                .desc("call graph algorithm [CHA, RTA, VTA, SPARK]")
                 .build();
 
         options.addOption(classPathOption);
@@ -227,7 +266,7 @@ public class Main {
         options.addOption(depthLimitOption);
         options.addOption(depthMethodsVisitedSVFAOption);
         options.addOption(entrypointsOption);
-        options.addOption(oaPointerAnalysisOption);
+        options.addOption(callGraphOption);
     }
 
     private void runAnalysis(String mode, String classpath) {
@@ -285,6 +324,11 @@ public class Main {
         }
     }
 
+    private void addConflictText(String conflict) {
+        conflicts.add(conflict);
+        System.out.println("[CONFLICT_FOUND]");
+    }
+
     private void runPessimisticDataFlowAnalysis(String classpath) {
         PackManager.v().getPack("jtp").add(
                 new Transform("jtp.analysis", new BodyTransformer() {
@@ -292,22 +336,15 @@ public class Main {
                     protected void internalTransform(Body body, String s, Map<String, String> map) {
                         PessimisticTaintedAnalysis analysis = new PessimisticTaintedAnalysis(body, definition);
 
-                        conflicts.addAll(
-                                analysis
-                                        .getConflicts()
-                                        .stream()
-                                        .map(Conflict::toString)
-                                        .collect(Collectors.toList()));
+                        analysis.getConflicts().stream()
+                                .map(Conflict::toString)
+                                .forEach(Main.this::addConflictText);
 
-                        JSONconflicts.addAll(
-                                analysis
-                                        .getConflicts()
-                                        .stream()
-                                        .map(Conflict::toJSON)
-                                        .collect(Collectors.toList()));
+                        analysis.getConflicts().stream()
+                                .map(Conflict::toJSON)
+                                .forEach(JSONconflicts::add);
                     }
-                })
-        );
+                }));
         SootWrapper.builder()
                 .withClassPath(classpath)
                 .addClass(targetClasses.stream().collect(Collectors.joining(" ")))
@@ -346,8 +383,8 @@ public class Main {
                 .build()
                 .execute();
         if (analysis != null) {
-            conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
-            JSONconflicts.addAll(analysis.getConflicts().stream().map(c -> c.toJSON()).collect(Collectors.toList()));
+            analysis.getConflicts().stream().map(c -> c.toString()).forEach(this::addConflictText);
+            analysis.getConflicts().stream().map(c -> c.toJSON()).forEach(JSONconflicts::add);
         }
     }
 
@@ -358,7 +395,8 @@ public class Main {
         stopwatch = Stopwatch.createStarted();
         String modeLabel = interprocedural ? "Inter" : "Intra";
 
-        OverrideAssignment overrideAssignment = buildOverrideAssignment(analysisType, depthLimit, interprocedural, entrypoints, classpath);
+        OverrideAssignment overrideAssignment = buildOverrideAssignment(analysisType, depthLimit, interprocedural,
+                entrypoints, classpath);
 
         overrideAssignment.configureEntryPoints();
 
@@ -369,13 +407,13 @@ public class Main {
 
         SootWrapper.applyPackages();
 
-        conflicts.addAll(overrideAssignment.getConflicts().stream()
+        overrideAssignment.getConflicts().stream()
                 .map(Object::toString)
-                .collect(Collectors.toList()));
+                .forEach(this::addConflictText);
 
-        JSONconflicts.addAll(overrideAssignment.getFilteredConflicts().stream()
+        overrideAssignment.getFilteredConflicts().stream()
                 .map(c -> c.toJSON())
-                .collect(Collectors.toList()));
+                .forEach(JSONconflicts::add);
 
         saveExecutionTime("Time to perform OA " + modeLabel);
 
@@ -383,7 +421,13 @@ public class Main {
         System.out.println("OA " + modeLabel + " Visited methods: " + visitedMethods);
 
         saveVisitedMethods("OA " + modeLabel, String.valueOf(visitedMethods));
-        saveConflictsLog("OA " + modeLabel, conflicts.toString());
+        saveConflictsLog("OA " + modeLabel, conflicts);
+
+        long time = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        new PANotResolveCsvExporter().export(overrideAssignment.getPointerAnalysisMissingRefs(), "PANotResolve.csv");
+
+        AnalysisRecord.getInstance().setAnalysisExecutionTimeMs(time);
+        new AnalysisCsvExporter().export(AnalysisRecord.getInstance(), "AnalysisRecords.csv");
     }
 
     private OverrideAssignment buildOverrideAssignment(
@@ -391,17 +435,21 @@ public class Main {
             int depthLimit,
             boolean interprocedural,
             List<String> entrypoints,
-            String classpath
-    ) {
+            String classpath) {
+        String cg = cmd.getOptionValue(
+                "cg",
+                type.equals(AnalysisType.WITH_POINTER_ANALYSIS) ? "SPARK" : "CHA");
         OverrideAssignment overrideAssignment;
         switch (type) {
             case WITH_POINTER_ANALYSIS:
-                overrideAssignment = new OverrideAssignmentWithPointerAnalysis(definition, depthLimit, interprocedural, entrypoints);
-                SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath, true);
+                overrideAssignment = new OverrideAssignmentWithPointerAnalysis(definition, depthLimit, interprocedural,
+                        entrypoints, classpath);
+                SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath, cg);
                 return overrideAssignment;
             case WITHOUT_POINTER_ANALYSIS:
-                overrideAssignment = new OverrideAssignmentWithoutPointerAnalysis(definition, depthLimit, interprocedural, entrypoints);
-                SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath, false);
+                overrideAssignment = new OverrideAssignmentWithoutPointerAnalysis(definition, depthLimit,
+                        interprocedural, entrypoints, classpath);
+                SootWrapper.configureSootOptionsToRunInterproceduralOverrideAssignmentAnalysis(classpath, cg);
                 return overrideAssignment;
             default:
                 throw new IllegalArgumentException("Unknown analysis type: " + type);
@@ -427,8 +475,8 @@ public class Main {
                 .build()
                 .execute();
 
-        conflicts.addAll(analysis.getConflicts().stream().map(c -> c.toString()).collect(Collectors.toList()));
-        JSONconflicts.addAll(analysis.getConflicts().stream().map(c -> c.toJSON()).collect(Collectors.toList()));
+        analysis.getConflicts().stream().map(c -> c.toString()).forEach(this::addConflictText);
+        analysis.getConflicts().stream().map(c -> c.toJSON()).forEach(JSONconflicts::add);
     }
 
     private void runPDGAnalysis(String classpath, Boolean omitExceptingUnitEdges) {
@@ -448,29 +496,32 @@ public class Main {
 
         analysis.buildPDG(cd, dfp);
 
-        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsPDG())
+        JavaConverters.asJavaCollection(analysis.reportConflictsPDG())
                 .stream()
                 .map(p -> formatConflict(p.toString()))
-                .collect(Collectors.toList()));
+                .forEach(this::addConflictText);
 
         saveExecutionTime("Time to perform PDG" + type_analysis);
 
         System.out.println("CONFLICTS: " + conflicts.toString());
 
-        saveConflictsLog("PDG" + type_analysis, conflicts.toString());
+        saveConflictsLog("PDG" + type_analysis, conflicts);
     }
 
     private void runDFPAnalysis(String classpath, Boolean interprocedural) {
         int depthLimit = Integer.parseInt(cmd.getOptionValue("depthLimit", "5"));
         List<String> entrypoints = convertStringEntrypointsToList(cmd.getOptionValue("entrypoints"));
 
-        definition.setRecursiveMode(options.hasOption("recursive"));
+        definition.setRecursiveMode(cmd.hasOption("recursive"));
         DFPAnalysisSemanticConflicts analysis = interprocedural
                 ? new DFPInterProcedural(classpath, definition, depthLimit, entrypoints)
                 : new DFPIntraProcedural(classpath, definition, entrypoints);
 
-        boolean depthMethodsVisited = Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
-        analysis.setPrintDepthVisitedMethods(depthMethodsVisited);
+        // boolean depthMethodsVisited =
+        // Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
+        String cg = cmd.getOptionValue("cg", "SPARK");
+        analysis.setCallGraph(cg);
+        // analysis.setPrintDepthVisitedMethods(depthMethodsVisited);
         String type_analysis = interprocedural ? "Inter" : "Intra";
         stopwatch = Stopwatch.createStarted();
 
@@ -479,32 +530,46 @@ public class Main {
         saveExecutionTime("Configure Soot DFP " + type_analysis);
 
         stopwatch = Stopwatch.createStarted();
-
+        System.out.println("CallGraph: " + analysis.callGraph());
         analysis.buildDFP();
 
-        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
-                .stream()
-                .map(p -> formatConflict(p.toString()))
-                .collect(Collectors.toList()));
+        try {
+            JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
+                    .stream()
+                    .map(p -> formatConflict(p.toString()))
+                    .forEach(this::addConflictText);
 
-        JSONconflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVGJSON()));
+            JavaConverters.asJavaCollection(analysis.reportConflictsSVGJSON()).forEach(JSONconflicts::add);
+        } catch (Exception e) {
+            System.err.println("Error reporting conflicts: " + e.getMessage());
+        }
 
         saveExecutionTime("Time to perform DFP " + type_analysis);
         System.out.println("Depth limit: " + analysis.getDepthLimit());
 
-        System.out.print("CONFLICTS: ");
-
-        List<String> conflicts_report = analysis.reportDFConflicts();
-
-        conflicts_report.add(conflicts.toString());
-
-        System.out.println(conflicts.toString());
-
         System.out.println("Visited methods: " + analysis.getNumberVisitedMethods());
-        saveVisitedMethods("DFP " + type_analysis, (analysis.getNumberVisitedMethods() + "," + analysis.svg().graph().size() + "," + analysis.svg().edges().size()));
+        // System.out.print("CONFLICTS: ");
+        List<String> conflicts_report = new ArrayList<>();
+        try {
+            conflicts_report = analysis.reportDFConflicts();
+        } catch (Exception e) {
+            System.err.println("Error generating DFP conflicts report: " + e.getMessage());
+        }
 
-        saveConflictsLog("DFP " + type_analysis, conflicts_report.toString());
+        // conflicts_report.addAll(conflicts);
 
+        saveVisitedMethods("DFP " + type_analysis, (analysis.getNumberVisitedMethods() + ","
+                + analysis.svg().graph().size() + "," + analysis.svg().edges().size()));
+
+        saveConflictsLog("DFP " + type_analysis, conflicts_report);
+
+        long time = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        new PANotResolveCsvExporter().export(analysis.getPointerAnalysisMissingRefs(), "PANotResolve.csv");
+
+        analysis.createAnalysisReportLog(SootWrapper.countEdges(Scene.v().getCallGraph()),
+                scala.collection.JavaConverters.seqAsJavaList(analysis.getAnalysisEntryPoints()));
+
+        exportAnalysisRecord(time);
     }
 
     private void runCDAnalysis(String classpath, Boolean omitExceptingUnitEdges) {
@@ -521,16 +586,16 @@ public class Main {
 
         analysis.buildCD();
 
-        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsCD())
+        JavaConverters.asJavaCollection(analysis.reportConflictsCD())
                 .stream()
                 .map(p -> formatConflict(p.toString()))
-                .collect(Collectors.toList()));
+                .forEach(this::addConflictText);
 
         saveExecutionTime("Time to perform CD" + type_analysis);
 
         System.out.println("CONFLICTS: " + conflicts.toString());
 
-        saveConflictsLog("CD" + type_analysis, conflicts.toString());
+        saveConflictsLog("CD" + type_analysis, conflicts);
     }
 
     private void runSparseValueFlowAnalysis(String classpath, boolean interprocedural) {
@@ -554,18 +619,26 @@ public class Main {
 
         analysis.buildSparseValueFlowGraph();
 
-        conflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
-                .stream()
-                .map(p -> formatConflict(p.toString()))
-                .collect(Collectors.toList()));
+        try {
+            JavaConverters.asJavaCollection(analysis.reportConflictsSVG())
+                    .stream()
+                    .map(p -> formatConflict(p.toString()))
+                    .forEach(this::addConflictText);
 
-        JSONconflicts.addAll(JavaConverters.asJavaCollection(analysis.reportConflictsSVGJSON()));
+            JavaConverters.asJavaCollection(analysis.reportConflictsSVGJSON()).forEach(JSONconflicts::add);
+        } catch (Exception e) {
+            System.err.println("Error reporting SVFA conflicts: " + e.getMessage());
+        }
 
         saveExecutionTime("Time to perform DF " + type_analysis);
 
         System.out.println("CONFLICTS: " + conflicts.toString());
 
-        saveConflictsLog("DF " + type_analysis, conflicts.toString());
+        saveConflictsLog("DF " + type_analysis, conflicts);
+
+        long time = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+
+        exportAnalysisRecord(time);
     }
 
     private void runDFPConfluenceAnalysis(String classpath, boolean interprocedural) {
@@ -573,24 +646,43 @@ public class Main {
         List<String> entrypoints = convertStringEntrypointsToList(cmd.getOptionValue("entrypoints"));
         String type_analysis = interprocedural ? "Inter" : "Intra";
 
-        definition.setRecursiveMode(options.hasOption("recursive"));
-        DFPConfluenceAnalysis analysis = new DFPConfluenceAnalysis(classpath, this.definition, interprocedural, depthLimit, entrypoints);
+        definition.setRecursiveMode(cmd.hasOption("recursive"));
+        DFPConfluenceAnalysis analysis = new DFPConfluenceAnalysis(classpath, this.definition, interprocedural,
+                depthLimit, entrypoints);
         boolean depthMethodsVisited = Boolean.parseBoolean(cmd.getOptionValue("printDepthSVFA", "false"));
-
-        analysis.execute(false);
+        String cg = cmd.getOptionValue("cg", "SPARK");
         System.out.println("Depth limit: " + analysis.getDepthLimit());
-        conflicts.addAll(analysis.getConfluentConflicts(false)
-                .stream()
-                .map(p -> formatConflict(p.toString()))
-                .collect(Collectors.toList()));
-        JSONconflicts.addAll(analysis.getConfluentConflicts(true)
-                .stream()
-                .map(ConfluenceConflict::toJSON)
-                .collect(Collectors.toList()));
+        analysis.execute(depthMethodsVisited, cg);
 
-        System.out.println("CONFLICTS: " + conflicts.toString());
-        saveVisitedMethods("Confluence " + type_analysis, (analysis.getVisitedMethods() + "," + analysis.getGraphSize()));
-        saveConflictsLog("Confluence " + type_analysis, analysis.reportConflictsConfluence().toString().replace("\n", ""));
+        try {
+            analysis.getConfluentConflicts(false)
+                    .stream()
+                    .map(p -> formatConflict(p.toString()))
+                    .forEach(this::addConflictText);
+            analysis.getConfluentConflicts(true)
+                    .stream()
+                    .map(ConfluenceConflict::toJSON)
+                    .forEach(JSONconflicts::add);
+        } catch (Exception e) {
+            System.err.println("Error reporting confluence conflicts: " + e.getMessage());
+        }
+
+        // System.out.println("CONFLICTS: " + conflicts.toString());
+        List<String> conflicts_report = new ArrayList<>();
+        try {
+            conflicts_report = analysis.reportConflictsConfluence();
+        } catch (Exception e) {
+            System.err.println("Error generating confluence conflicts report: " + e.getMessage());
+        }
+
+        saveVisitedMethods("Confluence " + type_analysis,
+                (analysis.getVisitedMethods() + "," + analysis.getGraphSize()));
+        saveConflictsLog("Confluence " + type_analysis, conflicts_report);
+
+        long time = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        new PANotResolveCsvExporter().export(analysis.getPointerAnalysisMissingRefs(), "PANotResolve.csv");
+
+        exportAnalysisRecord(time);
     }
 
     private void loadDefinition(String filePath) throws Exception {
@@ -695,18 +787,52 @@ public class Main {
         }
     }
 
-    public void saveConflictsLog(String description, String log_message) {
-        try {
-            FileWriter myWriter = new FileWriter("conflicts_log.txt", true);
-            myWriter.write(description + " log => " + log_message + "\n");
-            myWriter.close();
+    public void saveConflictsLog(String description, List<String> logs) {
+        try (BufferedWriter writer = new BufferedWriter(
+                new FileWriter("conflicts_log.txt", true))) {
+
+            writer.write("==== " + description + " ====");
+            writer.newLine();
+
+            for (String log : logs) {
+                writer.write(log);
+                writer.newLine();
+            }
+
+            writer.newLine(); // separador
         } catch (IOException e) {
-            System.out.println("An error occurred.");
             e.printStackTrace();
         }
     }
 
     public String formatConflict(String p) {
+        if (p == null || p.isEmpty()) {
+            return p;
+        }
+
+        // Verificar se a substituição é necessária antes de executar
+        if (!p.contains("), Node")) {
+            return p;
+        }
+
+        // Para strings muito grandes, usar StringBuilder
+        // THRESHOLD: 2000 caracteres (conservador e seguro)
+        // - Abaixo disso: String.replace() é 3-4x mais rápido
+        // - Acima disso: StringBuilder previne OutOfMemoryError
+        if (p.length() > 2000) {
+            StringBuilder sb = new StringBuilder(p.length() + 100);
+            int index = 0;
+            int pos;
+
+            while ((pos = p.indexOf("), Node", index)) != -1) {
+                sb.append(p, index, pos);
+                sb.append(") => Node");
+                index = pos + 7; // length of "), Node"
+            }
+            sb.append(p, index, p.length());
+            return sb.toString();
+        }
+
         return p.replace("), Node", ") => Node");
     }
 
