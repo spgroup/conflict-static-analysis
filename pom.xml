@@ -41,7 +41,7 @@
 		<dependency>
 			<groupId>br.unb.cic</groupId>
 			<artifactId>svfa-scala_2.12</artifactId>
-            <version>0.5.12</version>
+            <version>0.5.16</version>
 		</dependency>
 
 		<dependency>
