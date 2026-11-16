@@ -7,6 +7,8 @@ import soot.jimple.AssignStmt;
 import soot.jimple.IdentityStmt;
 import soot.jimple.InvokeStmt;
 import soot.jimple.Stmt;
+import soot.jimple.toolkits.callgraph.CallGraph;
+import soot.jimple.toolkits.callgraph.Edge;
 
 import java.util.*;
 
@@ -19,9 +21,12 @@ import java.util.*;
 public abstract class AbstractMergeConflictDefinition {
     protected List<Statement> sourceStatements;
     protected List<Statement> sinkStatements;
+    private Set<Unit> sourceUnitsCache;
+    private Set<Unit> sinkUnitsCache;
     private Set<SootMethod> entryMethods;
     private boolean recursive;
     private int omitExceptingUnitEdges; //1 - true and 2-false
+    private int depthLimit = 5;
 
     public AbstractMergeConflictDefinition() {
         this(false);
@@ -44,11 +49,13 @@ public abstract class AbstractMergeConflictDefinition {
     public void loadSourceStatements() {
         Map<String, List<Integer>> sourceDefinitions = sourceDefinitions();
         sourceStatements = loadStatements(sourceDefinitions, Statement.Type.SOURCE);
+        sourceUnitsCache = null;
     }
 
     public void loadSinkStatements() {
         Map<String, List<Integer>> sinkDefinitions = sinkDefinitions();
         sinkStatements = loadStatements(sinkDefinitions, Statement.Type.SINK);
+        sinkUnitsCache = null;
     }
 
     public List<Statement> getSourceStatements() {
@@ -129,8 +136,31 @@ public abstract class AbstractMergeConflictDefinition {
 
                         SootMethod invoked_method = unit_from_stmt.getInvokeExpr().getMethod();
 
-                        //call traverse passing currently travesed line list
-                        recursiveStatements.addAll(traverse(invoked_method, traversedMethods, statement.getTraversedLine(), type, 1));
+                        if (!traversedMethods.contains(invoked_method)) {
+                            recursiveStatements.addAll(
+                                    traverse(invoked_method, traversedMethods, statement.getTraversedLine(), type, 1)
+                            );
+                        }
+
+                        if (Scene.v().hasCallGraph()){
+
+                            //get all edges from call graph
+                            Iterator<Edge> edges = Scene.v().getCallGraph().edgesOutOf(statement.getUnit());
+
+                            while (edges.hasNext()) {
+                                Edge edge = edges.next();
+                                SootMethod targetMethod = edge.getTgt().method();
+
+                                if (traversedMethods.contains(targetMethod)) {
+                                    continue;
+                                }
+
+                                recursiveStatements.addAll(
+                                        traverse(targetMethod, traversedMethods, statement.getTraversedLine(), type, 1)
+                                );
+                            }
+
+                        }
                     }
                 }
             }
@@ -151,7 +181,7 @@ public abstract class AbstractMergeConflictDefinition {
 
     public List<Statement> traverse(SootMethod sm, List<SootMethod> traversed, List<TraversedLine> traversedLine, Statement.Type type, int level) {
         Body body = retrieveActiveBodySafely(sm);
-        if(traversed.contains(sm) || level > 5 || (!sm.getDeclaringClass().isApplicationClass()) || (body == null)) {
+        if(traversed.contains(sm) || level > depthLimit || (!sm.getDeclaringClass().isApplicationClass()) || (body == null)) {
             return new ArrayList<>();
         }
         level++;
@@ -320,12 +350,32 @@ public abstract class AbstractMergeConflictDefinition {
         this.omitExceptingUnitEdges = value;
     }
 
+    public int getDepthLimit() {
+        return depthLimit;
+    }
+
+    public void setDepthLimit(int depthLimit) {
+        this.depthLimit = depthLimit;
+    }
+
     public boolean isSourceStatement(Unit u) {
-        return sourceStatements.stream().anyMatch(s -> s.getUnit().equals(u));
+        if (sourceUnitsCache == null) {
+            sourceUnitsCache = new HashSet<>();
+            for (Statement s : sourceStatements) {
+                sourceUnitsCache.add(s.getUnit());
+            }
+        }
+        return sourceUnitsCache.contains(u);
     }
 
     public boolean isSinkStatement(Unit u) {
-        return sinkStatements.stream().anyMatch(s -> s.getUnit().equals(u));
+        if (sinkUnitsCache == null) {
+            sinkUnitsCache = new HashSet<>();
+            for (Statement s : sinkStatements) {
+                sinkUnitsCache.add(s.getUnit());
+            }
+        }
+        return sinkUnitsCache.contains(u);
     }
 
     public Set<SootMethod> getEntryMethods() {
@@ -345,6 +395,7 @@ public abstract class AbstractMergeConflictDefinition {
     }
 
     /**
+
      * Auxiliary method to extract the SootClass from a method signature.
      *
      * @param fullMethodSignature the full method signature. E.g: <br.unb.cic.analysis.samples.ioa.ObjectFieldNotConflictSample: void m()>

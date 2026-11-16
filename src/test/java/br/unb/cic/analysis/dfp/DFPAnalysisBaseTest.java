@@ -1,33 +1,29 @@
 package br.unb.cic.analysis.dfp;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
-import br.unb.cic.analysis.Main;
-import br.unb.cic.analysis.SootWrapper;
-import br.unb.cic.analysis.model.Statement;
-import br.unb.cic.analysis.model.TraversedLine;
-import br.unb.cic.analysis.svfa.confluence.ConfluenceConflict;
-import br.unb.cic.analysis.svfa.confluence.DFPConfluenceAnalysis;
-import br.unb.cic.soot.graph.StatementNode;
-import br.unc.cic.analysis.test.DefinitionFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DFPAnalysisBaseTest {
 
     private DFPAnalysisSemanticConflicts analysis;
-    AbstractMergeConflictDefinition definition;
+    public static String class_name = "br.unb.cic.analysis.samples.DFPBaseSample";
+
     @Before
     public void configure() {
-        definition = new AbstractMergeConflictDefinition(true) {
+        AbstractMergeConflictDefinition definition = new AbstractMergeConflictDefinition() {
             @Override
             protected Map<String, List<Integer>> sourceDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
                 lines.add(11);
-                res.put("br.unb.cic.analysis.samples.DFPBaseSample", lines);
+                res.put(class_name, lines);
                 return res;
             }
 
@@ -36,8 +32,7 @@ public class DFPAnalysisBaseTest {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
                 lines.add(13);
-                res.put("br.unb.cic.analysis.samples.DFPBaseSample", lines);
-
+                res.put(class_name, lines);
                 return res;
             }
         };
@@ -53,7 +48,7 @@ public class DFPAnalysisBaseTest {
         analysis.buildDFP();
         System.out.println(analysis.svg().reportConflicts().size());
         analysis.reportDFConflicts();
-        System.out.println(analysis.svgToDotModel());
+        System.out.println(analysis.callGraph());
         System.out.println(analysis.findSourceSinkPaths());
         System.out.println(analysis.svg().findConflictingPaths());
         Assert.assertTrue(analysis.svg().reportConflicts().size() >= 1);

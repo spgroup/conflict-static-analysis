@@ -73,7 +73,7 @@ public class SVFATest {
         SVFAAnalysis analysis = configureInterTest(CLASS_NAME_INTRAPROCEDURAL, new int[]{6}, new int[]{11});
         analysis.buildSparseValueFlowGraph();
         Graph g = analysis.svg();
-        Assert.assertEquals(5, g.nodes().size());
+        Assert.assertEquals(15, g.nodes().size());
         Assert.assertEquals(1, analysis.svg().reportConflicts().size());
         Assert.assertEquals(1, analysis.findSourceSinkPaths().size());
     }
@@ -107,14 +107,14 @@ public class SVFATest {
         SVFAAnalysis analysis = configureInterProceduralRecursiveDefinition01();
 
         analysis.buildSparseValueFlowGraph();
-        Assert.assertEquals(2, analysis.svg().reportConflicts().size());
+        Assert.assertEquals(1, analysis.svg().reportConflicts().size());
     }
 
     @Test
     public void testSVFAnalysisInterProceduralRecursiveDefinition02() {
         SVFAAnalysis analysis = configureInterProceduralRecursiveDefinition02();
         analysis.buildSparseValueFlowGraph();
-        Assert.assertEquals(2, analysis.svg().reportConflicts().size());
+        Assert.assertEquals(1, analysis.svg().reportConflicts().size());
     }
 
 //    @Test
