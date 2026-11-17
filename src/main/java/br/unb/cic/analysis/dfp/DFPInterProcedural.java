@@ -1,8 +1,10 @@
 package br.unb.cic.analysis.dfp;
 
 import br.unb.cic.analysis.AbstractMergeConflictDefinition;
+import br.unb.cic.soot.svfa.CG;
+import br.unb.cic.soot.svfa.CHA$;
+import br.unb.cic.soot.svfa.SPARK$;
 import scala.collection.JavaConverters;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,4 +31,5 @@ public class DFPInterProcedural extends DFPAnalysisSemanticConflicts {
     public scala.collection.immutable.List<String> getIncludeList() {
         return JavaConverters.asScalaBuffer(Arrays.asList("")).toList();
     }
+
 }

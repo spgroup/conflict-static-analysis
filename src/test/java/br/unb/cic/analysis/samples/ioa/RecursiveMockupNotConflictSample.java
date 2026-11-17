@@ -4,7 +4,7 @@ public class RecursiveMockupNotConflictSample {
 
     private int x;
 
-    public static void main(String[] args) {
+    public void m() {
         RecursiveMockupNotConflictSample m = new RecursiveMockupNotConflictSample();
 
         m.foo(); // LEFT
@@ -13,6 +13,6 @@ public class RecursiveMockupNotConflictSample {
     }
 
     private void foo() {
-        this.x += 1;
+        x += 1;
     }
 }

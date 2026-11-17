@@ -1,6 +1,6 @@
 package br.unb.cic.analysis.samples.ioa;
 
-
+// PA não reconhece instancias e P1 e P2
 public class PointsToDifferentObjectFromParametersWithMainSample {
 
     public static void callRealisticRun() {

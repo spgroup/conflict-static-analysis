@@ -1,0 +1,80 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "develop" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Configure Maven settings
+        run: |
+          mkdir -p ~/.m2
+          echo '<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                                http://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <activeProfiles>
+              <activeProfile>github</activeProfile>
+            </activeProfiles>
+            <profiles>
+              <profile>
+                <id>github</id>
+                <repositories>
+                  <repository>
+                    <id>central</id>
+                    <url>https://repo1.maven.org/maven2</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>true</enabled></snapshots>
+                  </repository>
+                  <repository>
+                    <id>spg</id>
+                    <name>spgroup</name>
+                    <url>https://maven.pkg.github.com/spgroup/soot</url>
+                  </repository>
+                  <repository>
+                    <id>svfa</id>
+                    <name>svfa repository</name>
+                    <url>https://maven.pkg.github.com/spgroup/svfa-scala</url>
+                  </repository>
+                </repositories>
+              </profile>
+            </profiles>
+            <servers>
+              <server>
+                <id>spg</id>
+                <username>${{ secrets.GH_USERNAME }}</username>
+                <password>${{ secrets.GH_TOKEN }}</password>
+              </server>
+              <server>
+                <id>svfa</id>
+                <username>${{ secrets.GH_USERNAME }}</username>
+                <password>${{ secrets.GH_TOKEN }}</password>
+              </server>
+            </servers>
+          </settings>' > ~/.m2/settings.xml
+
+      - name: Build with Maven
+        run: mvn -B test --file pom.xml
+        continue-on-error: false

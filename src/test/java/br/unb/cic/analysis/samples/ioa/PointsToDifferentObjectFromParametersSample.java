@@ -1,5 +1,5 @@
 package br.unb.cic.analysis.samples.ioa;
-
+// Nesse caso, como p1 e p2 tem pointTo = vazio. A analise entao compara como se fosse sem PA.
 // Not conflict
 public class PointsToDifferentObjectFromParametersSample {
 

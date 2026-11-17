@@ -7,6 +7,8 @@ import soot.jimple.AssignStmt;
 import soot.jimple.IdentityStmt;
 import soot.jimple.InvokeStmt;
 import soot.jimple.Stmt;
+import soot.jimple.toolkits.callgraph.CallGraph;
+import soot.jimple.toolkits.callgraph.Edge;
 
 import java.util.*;
 
@@ -19,9 +21,12 @@ import java.util.*;
 public abstract class AbstractMergeConflictDefinition {
     protected List<Statement> sourceStatements;
     protected List<Statement> sinkStatements;
+    private Set<Unit> sourceUnitsCache;
+    private Set<Unit> sinkUnitsCache;
     private Set<SootMethod> entryMethods;
     private boolean recursive;
     private int omitExceptingUnitEdges; //1 - true and 2-false
+    private int depthLimit = 5;
 
     public AbstractMergeConflictDefinition() {
         this(false);
@@ -44,11 +49,13 @@ public abstract class AbstractMergeConflictDefinition {
     public void loadSourceStatements() {
         Map<String, List<Integer>> sourceDefinitions = sourceDefinitions();
         sourceStatements = loadStatements(sourceDefinitions, Statement.Type.SOURCE);
+        sourceUnitsCache = null;
     }
 
     public void loadSinkStatements() {
         Map<String, List<Integer>> sinkDefinitions = sinkDefinitions();
         sinkStatements = loadStatements(sinkDefinitions, Statement.Type.SINK);
+        sinkUnitsCache = null;
     }
 
     public List<Statement> getSourceStatements() {
@@ -129,8 +136,31 @@ public abstract class AbstractMergeConflictDefinition {
 
                         SootMethod invoked_method = unit_from_stmt.getInvokeExpr().getMethod();
 
-                        //call traverse passing currently travesed line list
-                        recursiveStatements.addAll(traverse(invoked_method, traversedMethods, statement.getTraversedLine(), type, 1));
+                        if (!traversedMethods.contains(invoked_method)) {
+                            recursiveStatements.addAll(
+                                    traverse(invoked_method, traversedMethods, statement.getTraversedLine(), type, 1)
+                            );
+                        }
+
+                        if (Scene.v().hasCallGraph()){
+
+                            //get all edges from call graph
+                            Iterator<Edge> edges = Scene.v().getCallGraph().edgesOutOf(statement.getUnit());
+
+                            while (edges.hasNext()) {
+                                Edge edge = edges.next();
+                                SootMethod targetMethod = edge.getTgt().method();
+
+                                if (traversedMethods.contains(targetMethod)) {
+                                    continue;
+                                }
+
+                                recursiveStatements.addAll(
+                                        traverse(targetMethod, traversedMethods, statement.getTraversedLine(), type, 1)
+                                );
+                            }
+
+                        }
                     }
                 }
             }
@@ -151,7 +181,7 @@ public abstract class AbstractMergeConflictDefinition {
 
     public List<Statement> traverse(SootMethod sm, List<SootMethod> traversed, List<TraversedLine> traversedLine, Statement.Type type, int level) {
         Body body = retrieveActiveBodySafely(sm);
-        if(traversed.contains(sm) || level > 5 || (!sm.getDeclaringClass().isApplicationClass()) || (body == null)) {
+        if(traversed.contains(sm) || level > depthLimit || (!sm.getDeclaringClass().isApplicationClass()) || (body == null)) {
             return new ArrayList<>();
         }
         level++;
@@ -320,12 +350,32 @@ public abstract class AbstractMergeConflictDefinition {
         this.omitExceptingUnitEdges = value;
     }
 
+    public int getDepthLimit() {
+        return depthLimit;
+    }
+
+    public void setDepthLimit(int depthLimit) {
+        this.depthLimit = depthLimit;
+    }
+
     public boolean isSourceStatement(Unit u) {
-        return sourceStatements.stream().anyMatch(s -> s.getUnit().equals(u));
+        if (sourceUnitsCache == null) {
+            sourceUnitsCache = new HashSet<>();
+            for (Statement s : sourceStatements) {
+                sourceUnitsCache.add(s.getUnit());
+            }
+        }
+        return sourceUnitsCache.contains(u);
     }
 
     public boolean isSinkStatement(Unit u) {
-        return sinkStatements.stream().anyMatch(s -> s.getUnit().equals(u));
+        if (sinkUnitsCache == null) {
+            sinkUnitsCache = new HashSet<>();
+            for (Statement s : sinkStatements) {
+                sinkUnitsCache.add(s.getUnit());
+            }
+        }
+        return sinkUnitsCache.contains(u);
     }
 
     public Set<SootMethod> getEntryMethods() {
@@ -336,34 +386,76 @@ public abstract class AbstractMergeConflictDefinition {
      * Configures the entry points for the application based on the provided entry method names and statements.
      *
      * @param entryMethodNames a list of method names to be considered as entry points
-     * @param allStatements    a list of all statements containing SootClass objects
      * @return a set of SootMethods representing the entry points
      */
-    public Set<SootMethod> configureEntryPoints(List<String> entryMethodNames, List<Statement> allStatements) throws NoSuchMethodException {
+    public Set<SootMethod> configureEntryPoints(List<String> entryMethodNames) throws NoSuchMethodException {
         Set<SootMethod> entryPoints = new HashSet<>();
+        addMethodsToEntryPoints(entryPoints, entryMethodNames);
+        return entryPoints;
+    }
 
-        for (Statement statement : allStatements) {
-            SootClass sootClass = statement.getSootClass();
-            addMethodsToEntryPoints(entryPoints, sootClass, entryMethodNames);
+    /**
+
+     * Auxiliary method to extract the SootClass from a method signature.
+     *
+     * @param fullMethodSignature the full method signature. E.g: <br.unb.cic.analysis.samples.ioa.ObjectFieldNotConflictSample: void m()>
+     * @return the SootClass extracted from the method signature
+     */
+    private SootClass extractSootClassFromMethodSignature(String fullMethodSignature) {
+        int lastColonIndex = fullMethodSignature.lastIndexOf(':');
+        if (lastColonIndex == -1) {
+            throw new RuntimeException("Method signature does not contain a colon: " + fullMethodSignature);
         }
 
-        return entryPoints;
+        String className = fullMethodSignature.substring(1, lastColonIndex).trim();
+        Scene.v().loadClass(className, SootClass.BODIES);
+        return Scene.v().getSootClass(className);
+    }
+
+    /**
+     * Auxiliary method to extract the method name from a method signature.
+     *
+     * @param fullMethodSignature the full method signature. E.g: <br.unb.cic.analysis.samples.ioa.ObjectFieldNotConflictSample: void m()>
+     * @return the method name extracted from the method signature
+     */
+    private String extractMethodName(String fullMethodSignature) {
+        int lastColonIndex = fullMethodSignature.lastIndexOf(':');
+        if (lastColonIndex != -1) {
+            String methodSignature = fullMethodSignature.substring(lastColonIndex + 1).trim();
+            if (methodSignature.endsWith(">")) {
+                methodSignature = methodSignature.substring(0, methodSignature.length() - 1);
+            }
+            return methodSignature;
+        } else {
+            return "";
+        }
     }
 
     /**
      * Adds methods to the entry points set based on the provided method names and SootClass.
      *
-     * @param entryPoints a set to which the methods will be added
-     * @param sootClass   the SootClass containing the methods
-     * @param methodNames a list of method names to be added as entry points
+     * @param entryPoints      a set to which the methods will be added
+     * @param methodSignatures a list of method names to be added as entry points
      */
-    private void addMethodsToEntryPoints(Set<SootMethod> entryPoints, SootClass sootClass, List<String> methodNames) throws NoSuchMethodException {
-        for (String methodName : methodNames) {
+    private void addMethodsToEntryPoints(Set<SootMethod> entryPoints, List<String> methodSignatures) throws NoSuchMethodException {
+        for (String methodSignature : methodSignatures) {
+            String methodName;
+            try {
+                methodName = extractMethodName(methodSignature);
+            } catch (RuntimeException e) {
+                throw new NoSuchMethodException("Method not found in method signature: " + methodSignature);
+            }
+
+            SootClass sootClass;
+            try {
+                sootClass = extractSootClassFromMethodSignature(methodSignature);
+            } catch (RuntimeException e) {
+                throw new NoSuchMethodException("Class not found in method signature: " + methodSignature);
+            }
+
             try {
                 SootMethod sootMethod = sootClass.getMethod(methodName);
-                if (!entryPoints.contains(sootMethod)) {
-                    entryPoints.add(sootMethod);
-                }
+                entryPoints.add(sootMethod);
             } catch (RuntimeException e) {
                 throw new NoSuchMethodException("Method not found: " + methodName + " in class " + sootClass.getName());
             }

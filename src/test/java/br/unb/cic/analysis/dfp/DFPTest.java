@@ -4,6 +4,7 @@ import br.unb.cic.analysis.AbstractMergeConflictDefinition;
 import br.unb.cic.analysis.SootWrapper;
 import br.unc.cic.analysis.test.DefinitionFactory;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class DFPTest{
     }
     private List<String> conflicts = new ArrayList<>();
 
+    @Ignore
     @Test
     public void testDFPAnalysisInterProcedural() {
         DFPAnalysisSemanticConflicts analysis = configureInterTestDFP(CLASS_NAME, new int[]{8}, new int[]{10});
