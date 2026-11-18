@@ -22,7 +22,7 @@ public class DFPAnalysisBaseTest {
             protected Map<String, List<Integer>> sourceDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(11);
+                lines.add(15);
                 res.put(class_name, lines);
                 return res;
             }
@@ -31,7 +31,7 @@ public class DFPAnalysisBaseTest {
             protected Map<String, List<Integer>> sinkDefinitions() {
                 Map<String, List<Integer>> res = new HashMap<>();
                 List<Integer> lines = new ArrayList<>();
-                lines.add(13);
+                lines.add(17);
                 res.put(class_name, lines);
                 return res;
             }
